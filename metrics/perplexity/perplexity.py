@@ -13,11 +13,10 @@
 # limitations under the License.
 """Perplexity Metric."""
 
-import torch
-from transformers import AutoModelForCausalLM, AutoTokenizer
-
 import datasets
+import torch
 from datasets import logging
+from transformers import AutoModelForCausalLM, AutoTokenizer
 
 
 _CITATION = """\

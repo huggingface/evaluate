@@ -13,9 +13,8 @@
 # limitations under the License.
 """Accuracy metric."""
 
-from sklearn.metrics import accuracy_score
-
 import datasets
+from sklearn.metrics import accuracy_score
 
 
 _DESCRIPTION = """

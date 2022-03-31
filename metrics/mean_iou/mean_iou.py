@@ -15,9 +15,8 @@
 
 from typing import Dict, Optional
 
-import numpy as np
-
 import datasets
+import numpy as np
 
 
 _DESCRIPTION = """

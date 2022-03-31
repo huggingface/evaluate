@@ -9,10 +9,9 @@ from pathlib import Path
 from unittest import TestCase
 from unittest.mock import patch
 
+import datasets
 import pytest
 import requests
-
-import datasets
 from datasets import SCRIPTS_VERSION, config, load_dataset, load_from_disk
 from datasets.arrow_dataset import Dataset
 from datasets.builder import DatasetBuilder

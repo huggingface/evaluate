@@ -13,9 +13,8 @@
 # limitations under the License.
 """Matthews Correlation metric."""
 
-from sklearn.metrics import matthews_corrcoef
-
 import datasets
+from sklearn.metrics import matthews_corrcoef
 
 
 _DESCRIPTION = """

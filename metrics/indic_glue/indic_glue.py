@@ -13,12 +13,11 @@
 # limitations under the License.
 """ IndicGLUE benchmark metric. """
 
+import datasets
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import f1_score
-
-import datasets
 
 
 _CITATION = """\

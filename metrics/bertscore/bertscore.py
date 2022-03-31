@@ -17,9 +17,8 @@ import functools
 from contextlib import contextmanager
 
 import bert_score
-from packaging import version
-
 import datasets
+from packaging import version
 
 
 @contextmanager

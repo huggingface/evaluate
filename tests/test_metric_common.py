@@ -22,11 +22,10 @@ from contextlib import contextmanager
 from functools import wraps
 from unittest.mock import patch
 
+import datasets
 import numpy as np
 import pytest
 from absl.testing import parameterized
-
-import datasets
 from datasets import load_metric
 
 from .utils import for_all_test_methods, local, slow

@@ -13,9 +13,8 @@
 # limitations under the License.
 """MAE - Mean Absolute Error Metric"""
 
-from sklearn.metrics import mean_absolute_error
-
 import datasets
+from sklearn.metrics import mean_absolute_error
 
 
 _CITATION = """\

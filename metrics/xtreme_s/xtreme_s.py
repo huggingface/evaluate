@@ -15,11 +15,10 @@
 
 from typing import List
 
-from packaging import version
-from sklearn.metrics import f1_score
-
 import datasets
 from datasets.config import PY_VERSION
+from packaging import version
+from sklearn.metrics import f1_score
 
 
 if PY_VERSION < version.parse("3.8"):

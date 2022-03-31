@@ -13,9 +13,8 @@
 # limitations under the License.
 """Mahalanobis metric."""
 
-import numpy as np
-
 import datasets
+import numpy as np
 
 
 _DESCRIPTION = """

@@ -13,11 +13,10 @@
 # limitations under the License.
 """ METEOR metric. """
 
-import numpy as np
-from nltk.translate import meteor_score
-
 import datasets
+import numpy as np
 from datasets.config import importlib_metadata, version
+from nltk.translate import meteor_score
 
 
 NLTK_VERSION = version.parse(importlib_metadata.version("nltk"))

@@ -13,9 +13,8 @@
 # limitations under the License.
 """Recall metric."""
 
-from sklearn.metrics import recall_score
-
 import datasets
+from sklearn.metrics import recall_score
 
 
 _DESCRIPTION = """

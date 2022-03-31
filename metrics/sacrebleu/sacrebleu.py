@@ -13,10 +13,9 @@
 # limitations under the License.
 """ SACREBLEU metric. """
 
+import datasets
 import sacrebleu as scb
 from packaging import version
-
-import datasets
 
 
 _CITATION = """\
