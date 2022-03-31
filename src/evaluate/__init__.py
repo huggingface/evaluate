@@ -34,13 +34,6 @@ SCRIPTS_VERSION = "master" if version.parse(__version__).is_devrelease else __ve
 del pyarrow
 del version
 
-from .arrow_dataset import Dataset, concatenate_datasets
-from .arrow_reader import ReadInstruction
-from .builder import ArrowBasedBuilder, BeamBasedBuilder, BuilderConfig, DatasetBuilder, GeneratorBasedBuilder
-from .combine import interleave_datasets
-from .dataset_dict import DatasetDict, IterableDatasetDict
-from .features import *
-from .fingerprint import disable_caching, enable_caching, is_caching_enabled, set_caching_enabled
 from .info import DatasetInfo, MetricInfo
 from .inspect import (
     get_dataset_config_info,
@@ -52,20 +45,7 @@ from .inspect import (
     list_datasets,
     list_metrics,
 )
-from .iterable_dataset import IterableDataset
 from .load import load_dataset, load_dataset_builder, load_from_disk, load_metric
 from .metric import Metric
-from .splits import (
-    NamedSplit,
-    NamedSplitAll,
-    Split,
-    SplitBase,
-    SplitDict,
-    SplitGenerator,
-    SplitInfo,
-    SubSplitInfo,
-    percent,
-)
-from .tasks import *
 from .utils import *
 from .utils import logging
