@@ -24,11 +24,11 @@ from typing import Dict, List, Optional, Type, TypeVar, Union
 from urllib.parse import urljoin, urlparse
 
 import requests
+from datasets.utils.extract import ExtractManager
+from datasets.utils.filelock import FileLock
 
 from .. import __version__, config
 from . import logging
-from .extract import ExtractManager
-from .filelock import FileLock
 
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name

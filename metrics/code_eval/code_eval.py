@@ -21,9 +21,8 @@ import os
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
-import numpy as np
-
 import datasets
+import numpy as np
 
 from .execute import check_correctness
 

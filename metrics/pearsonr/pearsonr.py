@@ -13,9 +13,8 @@
 # limitations under the License.
 """Pearson correlation coefficient metric."""
 
-from scipy.stats import pearsonr
-
 import datasets
+from scipy.stats import pearsonr
 
 
 _DESCRIPTION = """

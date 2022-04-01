@@ -35,13 +35,14 @@ import os
 from dataclasses import asdict, dataclass, field
 from typing import Dict, List, Optional, Union
 
+from datasets.features import Features, Value
+from datasets.splits import SplitDict
+from datasets.tasks import TaskTemplate, task_template_from_dict
+from datasets.utils import Version
+from datasets.utils.py_utils import unique_values
+
 from . import config
-from .features import Features, Value
-from .splits import SplitDict
-from .tasks import TaskTemplate, task_template_from_dict
-from .utils import Version
 from .utils.logging import get_logger
-from .utils.py_utils import unique_values
 
 
 logger = get_logger(__name__)

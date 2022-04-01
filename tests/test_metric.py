@@ -6,7 +6,6 @@ from multiprocessing import Pool
 from unittest import TestCase
 
 import pytest
-
 from datasets.features import Features, Sequence, Value
 from datasets.metric import Metric, MetricInfo
 

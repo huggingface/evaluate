@@ -30,29 +30,33 @@ from urllib.parse import urlparse
 
 import fsspec
 import requests
-from huggingface_hub import HfApi, HfFolder
-
-from . import config
-from .arrow_dataset import Dataset
-from .builder import DatasetBuilder
-from .data_files import (
+from datasets.arrow_dataset import Dataset
+from datasets.builder import DatasetBuilder
+from datasets.data_files import (
     DataFilesDict,
     DataFilesList,
     get_patterns_in_dataset_repository,
     get_patterns_locally,
     sanitize_patterns,
 )
-from .dataset_dict import DatasetDict, IterableDatasetDict
-from .features import Features
-from .filesystems import extract_path_from_uri, is_remote_filesystem
+from datasets.dataset_dict import DatasetDict, IterableDatasetDict
+from datasets.features import Features
+from datasets.filesystems import extract_path_from_uri, is_remote_filesystem
+from datasets.iterable_dataset import IterableDataset
+from datasets.packaged_modules import _EXTENSION_TO_MODULE, _PACKAGED_DATASETS_MODULES, _hash_python_lines
+from datasets.splits import Split
+from datasets.streaming import extend_module_for_streaming
+from datasets.tasks import TaskTemplate
+from datasets.utils.download_manager import DownloadMode
+from datasets.utils.filelock import FileLock
+from datasets.utils.info_utils import is_small_dataset
+from datasets.utils.streaming_download_manager import StreamingDownloadManager, xglob, xjoin
+from datasets.utils.version import Version
+from huggingface_hub import HfApi, HfFolder
+
+from . import config
 from .info import DatasetInfo, DatasetInfosDict
-from .iterable_dataset import IterableDataset
 from .metric import Metric
-from .packaged_modules import _EXTENSION_TO_MODULE, _PACKAGED_DATASETS_MODULES, _hash_python_lines
-from .splits import Split
-from .streaming import extend_module_for_streaming
-from .tasks import TaskTemplate
-from .utils.download_manager import DownloadMode
 from .utils.file_utils import (
     DownloadConfig,
     OfflineModeIsEnabled,
@@ -66,11 +70,7 @@ from .utils.file_utils import (
     relative_to_absolute_path,
     url_or_path_join,
 )
-from .utils.filelock import FileLock
-from .utils.info_utils import is_small_dataset
 from .utils.logging import get_logger
-from .utils.streaming_download_manager import StreamingDownloadManager, xglob, xjoin
-from .utils.version import Version
 
 
 logger = get_logger(__name__)

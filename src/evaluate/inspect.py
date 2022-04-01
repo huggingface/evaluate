@@ -18,6 +18,10 @@
 from typing import Dict, List, Mapping, Optional, Sequence, Union
 
 import huggingface_hub
+from datasets.utils import DownloadConfig
+from datasets.utils.download_manager import DownloadMode
+from datasets.utils.streaming_download_manager import StreamingDownloadManager
+from datasets.utils.version import Version
 
 from .info import DatasetInfo
 from .load import (
@@ -27,11 +31,7 @@ from .load import (
     load_dataset_builder,
     metric_module_factory,
 )
-from .utils import DownloadConfig
-from .utils.download_manager import DownloadMode
 from .utils.logging import get_logger
-from .utils.streaming_download_manager import StreamingDownloadManager
-from .utils.version import Version
 
 
 logger = get_logger(__name__)

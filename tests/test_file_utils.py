@@ -4,7 +4,6 @@ from unittest.mock import patch
 
 import pytest
 import zstandard as zstd
-
 from datasets.utils.file_utils import (
     DownloadConfig,
     OfflineModeIsEnabled,

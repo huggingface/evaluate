@@ -15,10 +15,9 @@
 
 from typing import Dict, List
 
-from nltk.translate import gleu_score
-
 import datasets
 from datasets import MetricInfo
+from nltk.translate import gleu_score
 
 
 _CITATION = """\

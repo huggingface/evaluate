@@ -13,9 +13,8 @@
 # limitations under the License.
 """MSE - Mean Squared Error Metric"""
 
-from sklearn.metrics import mean_squared_error
-
 import datasets
+from sklearn.metrics import mean_squared_error
 
 
 _CITATION = """\

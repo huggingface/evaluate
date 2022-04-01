@@ -15,9 +15,8 @@
 
 import os
 
-from bleurt import score  # From: git+https://github.com/google-research/bleurt.git
-
 import datasets
+from bleurt import score  # From: git+https://github.com/google-research/bleurt.git
 
 
 logger = datasets.logging.get_logger(__name__)

@@ -13,9 +13,8 @@
 # limitations under the License.
 """F1 metric."""
 
-from sklearn.metrics import f1_score
-
 import datasets
+from sklearn.metrics import f1_score
 
 
 _DESCRIPTION = """
