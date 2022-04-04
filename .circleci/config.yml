@@ -36,7 +36,6 @@ jobs:
                 pip install -r additional-tests-requirements.txt --no-deps
             - run: |
                 conda activate py37
-                $env:HF_SCRIPTS_VERSION="main"
                 python -m pytest -n 2 --dist loadfile -sv ./tests/
 
     check_code_quality:
