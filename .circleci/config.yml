@@ -11,13 +11,13 @@ jobs:
         resource_class: medium
         steps:
             - checkout
-            - run: sudo apt-get -y update && sudo apt-get install -y libsndfile1-dev
+            - run: sudo apt-get -y update
             - run: pip install --upgrade pip
             - run: python -m venv venv
             - run: source venv/bin/activate
             - run: pip install .[tests]
             - run: pip install -r additional-tests-requirements.txt --no-deps
-            - run: HF_SCRIPTS_VERSION=master HF_ALLOW_CODE_EVAL=1 python -m pytest -d --tx 2*popen//python=python3.6 --dist loadfile -sv ./tests/
+            - run: HF_ALLOW_CODE_EVAL=1 python -m pytest -d --tx 2*popen//python=python3.6 --dist loadfile -sv ./tests/
 
     run_evaluate_tests_WIN:
         working_directory: ~/evaluate
