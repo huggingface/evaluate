@@ -1,0 +1,60 @@
+version: 2.1
+
+orbs:
+    win: circleci/windows@2.2.0
+
+jobs:
+    run_evaluate_tests:
+        working_directory: ~/evaluate
+        docker:
+            - image: cimg/python:3.6
+        resource_class: medium
+        steps:
+            - checkout
+            - run: sudo apt-get -y update
+            - run: pip install --upgrade pip
+            - run: python -m venv venv
+            - run: source venv/bin/activate
+            - run: pip install .[tests]
+            - run: pip install -r additional-tests-requirements.txt --no-deps
+            - run: HF_ALLOW_CODE_EVAL=1 python -m pytest -d --tx 2*popen//python=python3.6 --dist loadfile -sv ./tests/
+
+    run_evaluate_tests_WIN:
+        working_directory: ~/evaluate
+        executor:
+            name: win/default
+            shell: powershell
+        steps:
+            - checkout
+            - run: |
+                conda init powershell
+                conda update conda
+                conda create -n py37 python=3.7 pytorch --yes
+            - run: |
+                conda activate py37
+                pip install .[tests]
+                pip install -r additional-tests-requirements.txt --no-deps
+            - run: |
+                conda activate py37
+                python -m pytest -n 2 --dist loadfile -sv ./tests/
+
+    check_code_quality:
+        working_directory: ~/evaluate
+        docker:
+            - image: circleci/python:3.6
+        resource_class: medium
+        parallelism: 1
+        steps:
+            - checkout
+            - run: sudo pip install .[quality]
+            - run: black --check --line-length 119 --target-version py36 tests src metrics
+            - run: isort --check-only tests src metrics
+            - run: flake8 tests src metrics
+
+workflows:
+    version: 2
+    build_and_test:
+        jobs:
+            - check_code_quality
+            - run_evaluate_tests
+            - run_evaluate_tests_WIN
