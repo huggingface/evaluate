@@ -61,6 +61,8 @@ from setuptools import find_packages, setup
 
 
 REQUIRED_PKGS = [
+    # We need datasets as a backend
+    "datasets",
     # We use numpy>=1.17 to have np.random.Generator (Dataset shuffling)
     "numpy>=1.17",
     # Backend and serialization.
