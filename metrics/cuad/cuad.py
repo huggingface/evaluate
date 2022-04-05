@@ -14,6 +14,7 @@
 """ CUAD metric. """
 
 import datasets
+import evaluate
 
 from .evaluate import evaluate
 
@@ -59,17 +60,17 @@ Returns:
 Examples:
     >>> predictions = [{'prediction_text': ['The seller:', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.'], 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
     >>> references = [{'answers': {'answer_start': [143, 49], 'text': ['The seller:', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.']}, 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
-    >>> cuad_metric = datasets.load_metric("cuad")
+    >>> cuad_metric = evaluate.load_metric("cuad")
     >>> results = cuad_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'exact_match': 100.0, 'f1': 100.0, 'aupr': 0.0, 'prec_at_80_recall': 1.0, 'prec_at_90_recall': 1.0}
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class CUAD(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class CUAD(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
@@ -111,5 +112,5 @@ class CUAD(datasets.Metric):
                 ]
             }
         ]
-        score = evaluate(dataset=dataset, predictions=pred_dict)
+        score = compute_score(dataset=dataset, predictions=pred_dict)
         return score

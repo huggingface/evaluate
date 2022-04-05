@@ -16,6 +16,7 @@ import re
 import string
 
 import datasets
+import evaluate
 import numpy as np
 
 
@@ -40,14 +41,14 @@ Args:
 Returns:
     exact_match: Dictionary containing exact_match rate. Possible values are between 0.0 and 100.0, inclusive.
 Examples:
-    >>> exact_match = datasets.load_metric("exact_match")
+    >>> exact_match = evaluate.load_metric("exact_match")
     >>> refs = ["the cat", "theater", "YELLING", "agent007"]
     >>> preds = ["cat?", "theater", "yelling", "agent"]
     >>> results = exact_match.compute(references=refs, predictions=preds)
     >>> round(results["exact_match"], 1)
     25.0
 
-    >>> exact_match = datasets.load_metric("exact_match")
+    >>> exact_match = evaluate.load_metric("exact_match")
     >>> refs = ["the cat", "theater", "YELLING", "agent007"]
     >>> preds = ["cat?", "theater", "yelling", "agent"]
     >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell"], ignore_case=True, ignore_punctuation=True)
@@ -55,14 +56,14 @@ Examples:
     50.0
 
 
-    >>> exact_match = datasets.load_metric("exact_match")
+    >>> exact_match = evaluate.load_metric("exact_match")
     >>> refs = ["the cat", "theater", "YELLING", "agent007"]
     >>> preds = ["cat?", "theater", "yelling", "agent"]
     >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell", "YELL"], ignore_case=True, ignore_punctuation=True)
     >>> round(results["exact_match"], 1)
     75.0
 
-    >>> exact_match = datasets.load_metric("exact_match")
+    >>> exact_match = evaluate.load_metric("exact_match")
     >>> refs = ["the cat", "theater", "YELLING", "agent007"]
     >>> preds = ["cat?", "theater", "yelling", "agent"]
     >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell", "YELL"], ignore_case=True, ignore_punctuation=True, ignore_numbers=True)
@@ -75,10 +76,10 @@ _CITATION = """
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class ExactMatch(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class ExactMatch(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

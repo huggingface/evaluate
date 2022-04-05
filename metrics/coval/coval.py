@@ -14,6 +14,7 @@
 """ CoVal metric. """
 import coval  # From: git+https://github.com/ns-moosavi/coval.git noqa: F401
 import datasets
+import evaluate
 from coval.conll import reader, util
 from coval.eval import evaluator
 
@@ -148,7 +149,7 @@ Returns:
 
 Examples:
 
-    >>> coval = datasets.load_metric('coval')
+    >>> coval = evaluate.load_metric('coval')
     >>> words = ['bc/cctv/00/cctv_0005   0   0       Thank   VBP  (TOP(S(VP*    thank  01   1    Xu_li  *           (V*)        *       -',
     ... 'bc/cctv/00/cctv_0005   0   1         you   PRP        (NP*)      -    -   -    Xu_li  *        (ARG1*)   (ARG0*)   (116)',
     ... 'bc/cctv/00/cctv_0005   0   2    everyone    NN        (NP*)      -    -   -    Xu_li  *    (ARGM-DIS*)        *    (116)',
@@ -267,10 +268,10 @@ def check_gold_parse_annotation(key_lines):
     return has_gold_parse
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Coval(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Coval(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

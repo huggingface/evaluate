@@ -14,6 +14,7 @@
 """Matthews Correlation metric."""
 
 import datasets
+import evaluate
 from sklearn.metrics import matthews_corrcoef
 
 
@@ -39,7 +40,7 @@ Returns:
     matthews_correlation: Matthews correlation.
 Examples:
 
-    >>> matthews_metric = datasets.load_metric("matthews_correlation")
+    >>> matthews_metric = evaluate.load_metric("matthews_correlation")
     >>> results = matthews_metric.compute(references=[0, 1], predictions=[0, 1])
     >>> print(results)
     {'matthews_correlation': 1.0}
@@ -60,10 +61,10 @@ _CITATION = """\
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class MatthewsCorrelation(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class MatthewsCorrelation(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

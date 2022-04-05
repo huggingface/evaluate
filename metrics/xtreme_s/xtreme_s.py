@@ -16,6 +16,7 @@
 from typing import List
 
 import datasets
+import evaluate
 from datasets.config import PY_VERSION
 from packaging import version
 from sklearn.metrics import f1_score
@@ -56,28 +57,28 @@ Returns: depending on the XTREME-S task, one or several of:
     "bleu": BLEU score according to the `sacrebleu` metric - for 'covost2'
 Examples:
 
-    >>> xtreme_s_metric = datasets.load_metric('xtreme_s', 'mls')  # 'mls', 'voxpopuli', 'fleurs-asr' or 'babel'
+    >>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'mls')  # 'mls', 'voxpopuli', 'fleurs-asr' or 'babel'
     >>> references = ["it is sunny here", "paper and pen are essentials"]
     >>> predictions = ["it's sunny", "paper pen are essential"]
     >>> results = xtreme_s_metric.compute(predictions=predictions, references=references)
     >>> print({k: round(v, 2) for k, v in results.items()})
     {'wer': 0.56, 'cer': 0.27}
 
-    >>> xtreme_s_metric = datasets.load_metric('xtreme_s', 'covost2')
+    >>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'covost2')
     >>> references = ["bonjour paris", "il est necessaire de faire du sport de temps en temp"]
     >>> predictions = ["bonjour paris", "il est important de faire du sport souvent"]
     >>> results = xtreme_s_metric.compute(predictions=predictions, references=references)
     >>> print({k: round(v, 2) for k, v in results.items()})
     {'bleu': 31.65}
 
-    >>> xtreme_s_metric = datasets.load_metric('xtreme_s', 'fleurs-lang_id')
+    >>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'fleurs-lang_id')
     >>> references = [0, 1, 0, 0, 1]
     >>> predictions = [0, 1, 1, 0, 0]
     >>> results = xtreme_s_metric.compute(predictions=predictions, references=references)
     >>> print({k: round(v, 2) for k, v in results.items()})
     {'accuracy': 0.6}
 
-    >>> xtreme_s_metric = datasets.load_metric('xtreme_s', 'minds14')
+    >>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'minds14')
     >>> references = [0, 1, 0, 0, 1]
     >>> predictions = [0, 1, 1, 0, 0]
     >>> results = xtreme_s_metric.compute(predictions=predictions, references=references)
@@ -216,15 +217,15 @@ def wer_and_cer(preds, labels, concatenate_texts, config_name):
         return {"wer": compute_score(preds, labels, "wer"), "cer": compute_score(preds, labels, "cer")}
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class XtremeS(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class XtremeS(evaluate.Metric):
     def _info(self):
         if self.config_name not in _CONFIG_NAMES:
             raise KeyError(f"You should supply a configuration name selected in {_CONFIG_NAMES}")
 
         pred_type = "int64" if self.config_name in ["fleurs-lang_id", "minds14"] else "string"
 
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

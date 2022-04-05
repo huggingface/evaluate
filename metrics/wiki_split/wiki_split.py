@@ -18,6 +18,7 @@ import string
 from collections import Counter
 
 import datasets
+import evaluate
 import sacrebleu
 import sacremoses
 from packaging import version
@@ -68,7 +69,7 @@ Examples:
     >>> sources=["About 95 species are currently accepted ."]
     >>> predictions=["About 95 you now get in ."]
     >>> references=[["About 95 species are currently known ."]]
-    >>> wiki_split = datasets.load_metric("wiki_split")
+    >>> wiki_split = evaluate.load_metric("wiki_split")
     >>> results = wiki_split.compute(sources=sources, predictions=predictions, references=references)
     >>> print(results)
     {'sari': 21.805555555555557, 'sacrebleu': 14.535768424205482, 'exact': 0.0}
@@ -318,10 +319,10 @@ def compute_sacrebleu(
     return output.score
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class WikiSplit(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class WikiSplit(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

@@ -36,6 +36,7 @@ predictions['scores']
 
 import comet  # From: unbabel-comet
 import datasets
+import evaluate
 import torch
 
 
@@ -93,7 +94,7 @@ Returns:
 
 Examples:
 
-    >>> comet_metric = datasets.load_metric('comet')
+    >>> comet_metric = evaluate.load_metric('comet')
     >>> # comet_metric = load_metric('comet', 'wmt20-comet-da')  # you can also choose which model to use
     >>> source = ["Dem Feuer konnte Einhalt geboten werden", "Schulen und Kindergärten wurden eröffnet."]
     >>> hypothesis = ["The fire could be stopped", "Schools and kindergartens were open"]
@@ -104,11 +105,11 @@ Examples:
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class COMET(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class COMET(evaluate.Metric):
     def _info(self):
 
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="https://unbabel.github.io/COMET/html/index.html",

@@ -16,6 +16,7 @@
 from typing import List
 
 import datasets
+import evaluate
 import jiwer
 import jiwer.transforms as tr
 from datasets.config import PY_VERSION
@@ -106,17 +107,17 @@ Examples:
 
     >>> predictions = ["this is the prediction", "there is an other sample"]
     >>> references = ["this is the reference", "there is another one"]
-    >>> cer = datasets.load_metric("cer")
+    >>> cer = evaluate.load_metric("cer")
     >>> cer_score = cer.compute(predictions=predictions, references=references)
     >>> print(cer_score)
     0.34146341463414637
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class CER(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class CER(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

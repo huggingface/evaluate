@@ -14,6 +14,7 @@
 """Perplexity Metric."""
 
 import datasets
+import evaluate
 import torch
 from datasets import logging
 from transformers import AutoModelForCausalLM, AutoTokenizer
@@ -49,7 +50,7 @@ Returns:
         in the input list.
 Examples:
     Example 1:
-        >>> perplexity = datasets.load_metric("perplexity")
+        >>> perplexity = evaluate.load_metric("perplexity")
         >>> input_texts = ["lorem ipsum", "Happy Birthday!", "Bienvenue"]
         >>> results = perplexity.compute(model_id='gpt2',
         ...                              input_texts=input_texts,
@@ -58,7 +59,7 @@ Examples:
         78.2
 
     Example 2:
-        >>> perplexity = datasets.load_metric("perplexity")
+        >>> perplexity = evaluate.load_metric("perplexity")
         >>> input_texts = datasets.load_dataset("wikitext",
         ...                                     "wikitext-2-raw-v1",
         ...                                     split="test")["text"][:10] # doctest:+ELLIPSIS
@@ -72,10 +73,10 @@ Examples:
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Perplexity(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Perplexity(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

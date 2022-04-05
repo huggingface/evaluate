@@ -14,6 +14,7 @@
 """Pearson correlation coefficient metric."""
 
 import datasets
+import evaluate
 from scipy.stats import pearsonr
 
 
@@ -41,7 +42,7 @@ Returns:
     pearsonr: Pearson correlation coefficient.
 Examples:
 
-    >>> pearsonr_metric = datasets.load_metric("pearsonr")
+    >>> pearsonr_metric = evaluate.load_metric("pearsonr")
     >>> results = pearsonr_metric.compute(references=[1, 2, 3, 4, 5], predictions=[10, 9, 2.5, 6, 4])
     >>> print(results)  # doctest: +ELLIPSIS
     {'pearsonr': -0.74261[...]}
@@ -74,10 +75,10 @@ _CITATION = r"""\
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Pearsonr(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Pearsonr(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

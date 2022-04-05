@@ -14,6 +14,7 @@
 """The SuperGLUE benchmark metric."""
 
 import datasets
+import evaluate
 from sklearn.metrics import f1_score, matthews_corrcoef
 
 from .record_evaluation import evaluate as evaluate_record
@@ -67,35 +68,35 @@ Returns: depending on the SuperGLUE subset:
         - 'accuracy': Accuracy
 Examples:
 
-    >>> super_glue_metric = datasets.load_metric('super_glue', 'copa')  # any of ["copa", "rte", "wic", "wsc", "wsc.fixed", "boolq", "axg"]
+    >>> super_glue_metric = evaluate.load_metric('super_glue', 'copa')  # any of ["copa", "rte", "wic", "wsc", "wsc.fixed", "boolq", "axg"]
     >>> predictions = [0, 1]
     >>> references = [0, 1]
     >>> results = super_glue_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'accuracy': 1.0}
 
-    >>> super_glue_metric = datasets.load_metric('super_glue', 'cb')
+    >>> super_glue_metric = evaluate.load_metric('super_glue', 'cb')
     >>> predictions = [0, 1]
     >>> references = [0, 1]
     >>> results = super_glue_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'accuracy': 1.0, 'f1': 1.0}
 
-    >>> super_glue_metric = datasets.load_metric('super_glue', 'record')
+    >>> super_glue_metric = evaluate.load_metric('super_glue', 'record')
     >>> predictions = [{'idx': {'passage': 0, 'query': 0}, 'prediction_text': 'answer'}]
     >>> references = [{'idx': {'passage': 0, 'query': 0}, 'answers': ['answer', 'another_answer']}]
     >>> results = super_glue_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'exact_match': 1.0, 'f1': 1.0}
 
-    >>> super_glue_metric = datasets.load_metric('super_glue', 'multirc')
+    >>> super_glue_metric = evaluate.load_metric('super_glue', 'multirc')
     >>> predictions = [{'idx': {'answer': 0, 'paragraph': 0, 'question': 0}, 'prediction': 0}, {'idx': {'answer': 1, 'paragraph': 2, 'question': 3}, 'prediction': 1}]
     >>> references = [0, 1]
     >>> results = super_glue_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'exact_match': 1.0, 'f1_m': 1.0, 'f1_a': 1.0}
 
-    >>> super_glue_metric = datasets.load_metric('super_glue', 'axb')
+    >>> super_glue_metric = evaluate.load_metric('super_glue', 'axb')
     >>> references = [0, 1]
     >>> predictions = [0, 1]
     >>> results = super_glue_metric.compute(predictions=predictions, references=references)
@@ -142,8 +143,8 @@ def evaluate_multirc(ids_preds, labels):
     return {"exact_match": em, "f1_m": f1_m, "f1_a": f1_a}
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class SuperGlue(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class SuperGlue(evaluate.Metric):
     def _info(self):
         if self.config_name not in [
             "boolq",
@@ -162,7 +163,7 @@ class SuperGlue(datasets.Metric):
                 "You should supply a configuration name selected in "
                 '["boolq", "cb", "copa", "multirc", "record", "rte", "wic", "wsc", "wsc.fixed", "axb", "axg",]'
             )
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

@@ -14,6 +14,7 @@
 """Recall metric."""
 
 import datasets
+import evaluate
 from sklearn.metrics import recall_score
 
 
@@ -59,7 +60,7 @@ Returns:
 
 Examples:
 
-    >>> recall_metric = datasets.load_metric("recall")
+    >>> recall_metric = evaluate.load_metric("recall")
     >>> results = recall_metric.compute(references=[0, 1], predictions=[0, 1])
     >>> print(results)
     {'recall': 1.0}
@@ -95,10 +96,10 @@ _CITATION = """\
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Recall(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Recall(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

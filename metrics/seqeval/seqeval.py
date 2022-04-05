@@ -17,6 +17,7 @@ import importlib
 from typing import List, Optional, Union
 
 import datasets
+import evaluate
 from seqeval.metrics import accuracy_score, classification_report
 
 
@@ -86,7 +87,7 @@ Examples:
 
     >>> predictions = [['O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
     >>> references = [['O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
-    >>> seqeval = datasets.load_metric("seqeval")
+    >>> seqeval = evaluate.load_metric("seqeval")
     >>> results = seqeval.compute(predictions=predictions, references=references)
     >>> print(list(results.keys()))
     ['MISC', 'PER', 'overall_precision', 'overall_recall', 'overall_f1', 'overall_accuracy']
@@ -97,10 +98,10 @@ Examples:
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Seqeval(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Seqeval(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="https://github.com/chakki-works/seqeval",

@@ -14,6 +14,7 @@
 """ XNLI benchmark metric. """
 
 import datasets
+import evaluate
 
 
 _CITATION = """\
@@ -53,7 +54,7 @@ Examples:
 
     >>> predictions = [0, 1]
     >>> references = [0, 1]
-    >>> xnli_metric = datasets.load_metric("xnli")
+    >>> xnli_metric = evaluate.load_metric("xnli")
     >>> results = xnli_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'accuracy': 1.0}
@@ -64,10 +65,10 @@ def simple_accuracy(preds, labels):
     return (preds == labels).mean()
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Xnli(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Xnli(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

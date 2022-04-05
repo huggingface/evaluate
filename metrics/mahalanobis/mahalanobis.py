@@ -14,6 +14,7 @@
 """Mahalanobis metric."""
 
 import datasets
+import evaluate
 import numpy as np
 
 
@@ -48,17 +49,17 @@ Returns:
     mahalanobis: The Mahalonobis distance for each datapoint in `X`.
 Examples:
 
-    >>> mahalanobis_metric = datasets.load_metric("mahalanobis")
+    >>> mahalanobis_metric = evaluate.load_metric("mahalanobis")
     >>> results = mahalanobis_metric.compute(reference_distribution=[[0, 1], [1, 0]], X=[[0, 1]])
     >>> print(results)
     {'mahalanobis': array([0.5])}
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Mahalanobis(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Mahalanobis(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

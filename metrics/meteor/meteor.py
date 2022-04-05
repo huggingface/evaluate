@@ -14,6 +14,7 @@
 """ METEOR metric. """
 
 import datasets
+import evaluate
 import numpy as np
 from datasets.config import importlib_metadata, version
 from nltk.translate import meteor_score
@@ -71,7 +72,7 @@ Returns:
     'meteor': meteor score.
 Examples:
 
-    >>> meteor = datasets.load_metric('meteor')
+    >>> meteor = evaluate.load_metric('meteor')
     >>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
     >>> references = ["It is a guide to action that ensures that the military will forever heed Party commands"]
     >>> results = meteor.compute(predictions=predictions, references=references)
@@ -80,10 +81,10 @@ Examples:
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Meteor(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Meteor(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

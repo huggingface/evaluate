@@ -14,6 +14,7 @@
 """Accuracy metric."""
 
 import datasets
+import evaluate
 from sklearn.metrics import accuracy_score
 
 
@@ -37,7 +38,7 @@ Returns:
     accuracy: Accuracy score.
 Examples:
 
-    >>> accuracy_metric = datasets.load_metric("accuracy")
+    >>> accuracy_metric = evaluate.load_metric("accuracy")
     >>> results = accuracy_metric.compute(references=[0, 1], predictions=[0, 1])
     >>> print(results)
     {'accuracy': 1.0}
@@ -58,10 +59,10 @@ _CITATION = """\
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Accuracy(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Accuracy(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

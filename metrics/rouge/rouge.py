@@ -16,6 +16,7 @@
 # The dependencies in https://github.com/google-research/google-research/blob/master/rouge/requirements.txt
 import absl  # Here to have a nice missing dependency error message early on
 import datasets
+import evaluate
 import nltk  # Here to have a nice missing dependency error message early on
 import numpy  # Here to have a nice missing dependency error message early on
 import six  # Here to have a nice missing dependency error message early on
@@ -69,7 +70,7 @@ Returns:
     rougeLsum: rouge_lsum (precision, recall, f1)
 Examples:
 
-    >>> rouge = datasets.load_metric('rouge')
+    >>> rouge = evaluate.load_metric('rouge')
     >>> predictions = ["hello there", "general kenobi"]
     >>> references = ["hello there", "general kenobi"]
     >>> results = rouge.compute(predictions=predictions, references=references)
@@ -82,10 +83,10 @@ Examples:
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Rouge(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Rouge(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

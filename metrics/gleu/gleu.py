@@ -16,6 +16,7 @@
 import random
 
 import datasets
+import evaluate
 import numpy as np
 import scipy.stats
 
@@ -78,12 +79,12 @@ def get_gleu_stats(scores):
     return {"mean": mean, "std": std, "ci": ci}
 
 
-class Gleu(datasets.Metric):
+class Gleu(evaluate.Metric):
     def __init__(self, **kwargs):
         raise NotImplementedError("Gleu is currently under construction.")
 
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

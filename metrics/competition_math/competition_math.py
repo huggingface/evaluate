@@ -14,6 +14,7 @@
 """Accuracy metric for the Mathematics Aptitude Test of Heuristics (MATH) dataset."""
 
 import datasets
+import evaluate
 import math_equivalence  # From: git+https://github.com/hendrycks/math.git
 
 
@@ -54,7 +55,7 @@ Returns:
         (e.g., converting "1/2" to "\\frac{1}{2}")
 
 Examples:
-    >>> metric = datasets.load_metric("competition_math")
+    >>> metric = evaluate.load_metric("competition_math")
     >>> results = metric.compute(references=["\\frac{1}{2}"], predictions=["1/2"])
     >>> print(results)
     {'accuracy': 1.0}
@@ -62,11 +63,11 @@ Examples:
 
 
 @datasets.utils.file_utils.add_end_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class CompetitionMathMetric(datasets.Metric):
+class CompetitionMathMetric(evaluate.Metric):
     """Accuracy metric for the MATH dataset."""
 
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
