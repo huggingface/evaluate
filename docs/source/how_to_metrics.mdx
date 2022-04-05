@@ -20,7 +20,7 @@ Use [`Metric.add_batch`] by passing it your model predictions, and the reference
 
 ```py
 >>> import datasets
->>> metric = datasets.load_metric('my_metric')
+>>> metric = evaluate.load_metric('my_metric')
 >>> for model_input, gold_references in evaluation_dataset:
 ...     model_predictions = model(model_inputs)
 ...     metric.add_batch(predictions=model_predictions, references=gold_references)
@@ -43,7 +43,7 @@ Let's load the [SacreBLEU](https://huggingface.co/metrics/sacrebleu) metric, and
 
 ```py
 >>> import datasets
->>> metric = datasets.load_metric('sacrebleu')
+>>> metric = evaluate.load_metric('sacrebleu')
 ```
 
 2. Inspect the different argument methods for computing the metric:
@@ -99,9 +99,9 @@ Start by adding some information about your metric in [`Metric._info`]. The most
 After you've filled out all these fields in the template, it should look like the following example from the SQuAD metric script:
 
 ```py
-class Squad(datasets.Metric):
+class Squad(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
@@ -156,7 +156,7 @@ def _download_and_prepare(self, dl_manager):
     if self.config_name == "default":
         logger.warning(
             "Using default BLEURT-Base checkpoint for sequence maximum length 128. "
-            "You can use a bigger model for better results with e.g.: datasets.load_metric('bleurt', 'bleurt-large-512')."
+            "You can use a bigger model for better results with e.g.: evaluate.load_metric('bleurt', 'bleurt-large-512')."
         )
         self.config_name = "bleurt-base-128"
     if self.config_name not in CHECKPOINT_URLS.keys():
