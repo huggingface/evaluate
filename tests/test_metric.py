@@ -7,7 +7,7 @@ from unittest import TestCase
 
 import pytest
 from datasets.features import Features, Sequence, Value
-from datasets.metric import Metric, MetricInfo
+from evaluate.metric import Metric, MetricInfo
 
 from .utils import require_tf, require_torch
 

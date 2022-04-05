@@ -22,11 +22,11 @@ from contextlib import contextmanager
 from functools import wraps
 from unittest.mock import patch
 
-import datasets
+import evaluate
 import numpy as np
 import pytest
 from absl.testing import parameterized
-from datasets import load_metric
+from evaluate import load_metric
 
 from .utils import for_all_test_methods, local, slow
 
@@ -75,9 +75,9 @@ class LocalMetricTest(parameterized.TestCase):
     def test_load_metric(self, metric_name):
         doctest.ELLIPSIS_MARKER = "[...]"
         metric_module = importlib.import_module(
-            datasets.load.metric_module_factory(os.path.join("metrics", metric_name)).module_path
+            evaluate.load.metric_module_factory(os.path.join("metrics", metric_name)).module_path
         )
-        metric = datasets.load.import_main_class(metric_module.__name__, dataset=False)
+        metric = evaluate.load.import_main_class(metric_module.__name__, dataset=False)
         # check parameters
         parameters = inspect.signature(metric._compute).parameters
         self.assertTrue(all([p.kind != p.VAR_KEYWORD for p in parameters.values()]))  # no **kwargs
@@ -95,7 +95,7 @@ class LocalMetricTest(parameterized.TestCase):
     def test_load_real_metric(self, metric_name):
         doctest.ELLIPSIS_MARKER = "[...]"
         metric_module = importlib.import_module(
-            datasets.load.metric_module_factory(os.path.join("metrics", metric_name)).module_path
+            evaluate.load.metric_module_factory(os.path.join("metrics", metric_name)).module_path
         )
         # run doctest
         with self.use_local_metrics():
@@ -116,7 +116,7 @@ class LocalMetricTest(parameterized.TestCase):
         def load_local_metric(metric_name, *args, **kwargs):
             return load_metric(os.path.join("metrics", metric_name), *args, **kwargs)
 
-        with patch("datasets.load_metric") as mock_load_metric:
+        with patch("evaluate.load_metric") as mock_load_metric:
             mock_load_metric.side_effect = load_local_metric
             yield
 

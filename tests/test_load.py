@@ -4,6 +4,7 @@ import tempfile
 from unittest import TestCase
 
 import datasets
+import evaluate
 import pytest
 from evaluate.load import (
     CachedMetricModuleFactory,
@@ -21,11 +22,11 @@ from .utils import (
 METRIC_LOADING_SCRIPT_NAME = "__dummy_metric1__"
 
 METRIC_LOADING_SCRIPT_CODE = """
-import datasets
-from datasets import MetricInfo, Features, Value
+import evaluate
+from evaluate import MetricInfo
+from datasets import Features, Value
 
-
-class __DummyMetric1__(datasets.Metric):
+class __DummyMetric1__(evaluate.Metric):
 
     def _info(self):
         return MetricInfo(features=Features({"predictions": Value("int"), "references": Value("int")}))
@@ -55,7 +56,7 @@ class ModuleFactoryTest(TestCase):
         self.hf_modules_cache = tempfile.mkdtemp()
         self.cache_dir = tempfile.mkdtemp()
         self.download_config = DownloadConfig(cache_dir=self.cache_dir)
-        self.dynamic_modules_path = datasets.load.init_dynamic_modules(
+        self.dynamic_modules_path = evaluate.load.init_dynamic_modules(
             name="test_datasets_modules_" + os.path.basename(self.hf_modules_cache),
             hf_modules_cache=self.hf_modules_cache,
         )
