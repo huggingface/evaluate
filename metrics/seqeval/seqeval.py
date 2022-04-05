@@ -17,8 +17,9 @@ import importlib
 from typing import List, Optional, Union
 
 import datasets
-import evaluate
 from seqeval.metrics import accuracy_score, classification_report
+
+import evaluate
 
 
 _CITATION = """\

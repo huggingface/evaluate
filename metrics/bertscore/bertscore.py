@@ -18,8 +18,9 @@ from contextlib import contextmanager
 
 import bert_score
 import datasets
-import evaluate
 from packaging import version
+
+import evaluate
 
 
 @contextmanager

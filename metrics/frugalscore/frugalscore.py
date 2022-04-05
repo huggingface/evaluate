@@ -14,9 +14,10 @@
 """FrugalScore metric."""
 
 import datasets
-import evaluate
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trainer, TrainingArguments
+
+import evaluate
 
 
 _CITATION = """\

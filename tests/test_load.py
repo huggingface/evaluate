@@ -3,20 +3,13 @@ import os
 import tempfile
 from unittest import TestCase
 
-import datasets
-import evaluate
 import pytest
-from evaluate.load import (
-    CachedMetricModuleFactory,
-    GithubMetricModuleFactory,
-    LocalMetricModuleFactory,
-)
+
+import evaluate
+from evaluate.load import CachedMetricModuleFactory, GithubMetricModuleFactory, LocalMetricModuleFactory
 from evaluate.utils.file_utils import DownloadConfig
 
-from .utils import (
-    OfflineSimulationMode,
-    offline,
-)
+from .utils import OfflineSimulationMode, offline
 
 
 METRIC_LOADING_SCRIPT_NAME = "__dummy_metric1__"

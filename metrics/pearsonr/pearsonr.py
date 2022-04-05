@@ -14,8 +14,9 @@
 """Pearson correlation coefficient metric."""
 
 import datasets
-import evaluate
 from scipy.stats import pearsonr
+
+import evaluate
 
 
 _DESCRIPTION = """

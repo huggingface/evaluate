@@ -14,6 +14,7 @@
 """ SQuAD v2 metric. """
 
 import datasets
+
 import evaluate
 
 from .compute_score import (

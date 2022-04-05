@@ -14,8 +14,9 @@
 """MAE - Mean Absolute Error Metric"""
 
 import datasets
-import evaluate
 from sklearn.metrics import mean_absolute_error
+
+import evaluate
 
 
 _CITATION = """\

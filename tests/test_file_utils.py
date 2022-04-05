@@ -3,14 +3,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from datasets.utils.file_utils import (
-    OfflineModeIsEnabled,
-    cached_path,
-    ftp_get,
-    ftp_head,
-    http_get,
-    http_head,
-)
+from datasets.utils.file_utils import OfflineModeIsEnabled, cached_path, ftp_get, ftp_head, http_get, http_head
 
 
 FILE_CONTENT = """\

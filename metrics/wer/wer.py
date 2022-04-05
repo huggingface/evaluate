@@ -14,8 +14,9 @@
 """ Word Error Ratio (WER) metric. """
 
 import datasets
-import evaluate
 from jiwer import compute_measures
+
+import evaluate
 
 
 _CITATION = """\

@@ -14,8 +14,9 @@
 """Matthews Correlation metric."""
 
 import datasets
-import evaluate
 from sklearn.metrics import matthews_corrcoef
+
+import evaluate
 
 
 _DESCRIPTION = """

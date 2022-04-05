@@ -14,9 +14,10 @@
 """ SACREBLEU metric. """
 
 import datasets
-import evaluate
 import sacrebleu as scb
 from packaging import version
+
+import evaluate
 
 
 _CITATION = """\

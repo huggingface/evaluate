@@ -14,9 +14,10 @@
 """ GLUE benchmark metric. """
 
 import datasets
-import evaluate
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import f1_score, matthews_corrcoef
+
+import evaluate
 
 
 _CITATION = """\

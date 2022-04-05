@@ -14,8 +14,9 @@
 """Mahalanobis metric."""
 
 import datasets
-import evaluate
 import numpy as np
+
+import evaluate
 
 
 _DESCRIPTION = """

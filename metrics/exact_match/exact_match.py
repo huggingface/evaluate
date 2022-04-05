@@ -16,8 +16,9 @@ import re
 import string
 
 import datasets
-import evaluate
 import numpy as np
+
+import evaluate
 
 
 _DESCRIPTION = """

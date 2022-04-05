@@ -14,11 +14,12 @@
 """ IndicGLUE benchmark metric. """
 
 import datasets
-import evaluate
 import numpy as np
 from scipy.spatial.distance import cdist
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import f1_score
+
+import evaluate
 
 
 _CITATION = """\

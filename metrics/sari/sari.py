@@ -16,10 +16,11 @@
 from collections import Counter
 
 import datasets
-import evaluate
 import sacrebleu
 import sacremoses
 from packaging import version
+
+import evaluate
 
 
 _CITATION = """\

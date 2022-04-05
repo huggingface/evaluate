@@ -14,8 +14,9 @@
 """Spearman correlation coefficient metric."""
 
 import datasets
-import evaluate
 from scipy.stats import spearmanr
+
+import evaluate
 
 
 _DESCRIPTION = """

@@ -14,8 +14,9 @@
 """F1 metric."""
 
 import datasets
-import evaluate
 from sklearn.metrics import f1_score
+
+import evaluate
 
 
 _DESCRIPTION = """

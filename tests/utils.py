@@ -1,18 +1,12 @@
 import os
-import sys
 import tempfile
 import unittest
 from contextlib import contextmanager
 from copy import deepcopy
-from ctypes.util import find_library
 from distutils.util import strtobool
 from enum import Enum
-from importlib.util import find_spec
 from pathlib import Path
 from unittest.mock import patch
-
-import pyarrow as pa
-from packaging import version
 
 from evaluate import config
 

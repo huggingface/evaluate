@@ -14,10 +14,11 @@
 """Perplexity Metric."""
 
 import datasets
-import evaluate
 import torch
 from datasets import logging
 from transformers import AutoModelForCausalLM, AutoTokenizer
+
+import evaluate
 
 
 _CITATION = """\

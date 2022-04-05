@@ -16,11 +16,12 @@
 from typing import List
 
 import datasets
-import evaluate
 import jiwer
 import jiwer.transforms as tr
 from datasets.config import PY_VERSION
 from packaging import version
+
+import evaluate
 
 
 if PY_VERSION < version.parse("3.8"):

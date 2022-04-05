@@ -36,8 +36,9 @@ predictions['scores']
 
 import comet  # From: unbabel-comet
 import datasets
-import evaluate
 import torch
+
+import evaluate
 
 
 logger = datasets.logging.get_logger(__name__)

@@ -13,10 +13,11 @@
 # limitations under the License.
 """ TER metric as available in sacrebleu. """
 import datasets
-import evaluate
 import sacrebleu as scb
 from packaging import version
 from sacrebleu import TER
+
+import evaluate
 
 
 _CITATION = """\

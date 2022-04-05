@@ -14,9 +14,10 @@
 """ CoVal metric. """
 import coval  # From: git+https://github.com/ns-moosavi/coval.git noqa: F401
 import datasets
-import evaluate
 from coval.conll import reader, util
 from coval.eval import evaluator
+
+import evaluate
 
 
 logger = datasets.logging.get_logger(__name__)

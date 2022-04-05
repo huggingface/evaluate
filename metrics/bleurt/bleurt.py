@@ -16,8 +16,9 @@
 import os
 
 import datasets
-import evaluate
 from bleurt import score  # From: git+https://github.com/google-research/bleurt.git
+
+import evaluate
 
 
 logger = datasets.logging.get_logger(__name__)

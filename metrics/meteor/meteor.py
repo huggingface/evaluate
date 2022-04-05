@@ -14,10 +14,11 @@
 """ METEOR metric. """
 
 import datasets
-import evaluate
 import numpy as np
 from datasets.config import importlib_metadata, version
 from nltk.translate import meteor_score
+
+import evaluate
 
 
 NLTK_VERSION = version.parse(importlib_metadata.version("nltk"))

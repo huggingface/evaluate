@@ -14,8 +14,9 @@
 """Recall metric."""
 
 import datasets
-import evaluate
 from sklearn.metrics import recall_score
+
+import evaluate
 
 
 _DESCRIPTION = """

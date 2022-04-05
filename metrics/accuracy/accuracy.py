@@ -14,8 +14,9 @@
 """Accuracy metric."""
 
 import datasets
-import evaluate
 from sklearn.metrics import accuracy_score
+
+import evaluate
 
 
 _DESCRIPTION = """
