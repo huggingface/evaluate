@@ -16,7 +16,7 @@
 import datasets
 import evaluate
 
-from .evaluate import evaluate
+from .compute_score import compute_score 
 
 
 _CITATION = """\

@@ -225,7 +225,7 @@ def get_coref_infos(
     return doc_coref_infos
 
 
-def evaluate(key_lines, sys_lines, metrics, NP_only, remove_nested, keep_singletons, min_span):
+def compute_score(key_lines, sys_lines, metrics, NP_only, remove_nested, keep_singletons, min_span):
     doc_coref_infos = get_coref_infos(key_lines, sys_lines, NP_only, remove_nested, keep_singletons, min_span)
 
     output_scores = {}
@@ -307,7 +307,7 @@ class Coval(evaluate.Metric):
                 # util.parse_key_file(key_file)
                 # key_file = key_file + ".parsed"
 
-        score = evaluate(
+        score = compute_score(
             key_lines=references,
             sys_lines=predictions,
             metrics=allmetrics,

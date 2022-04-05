@@ -16,7 +16,7 @@
 import datasets
 import evaluate
 
-from .evaluate import evaluate
+from .compute_score import compute_score
 
 
 _CITATION = """\
@@ -106,5 +106,5 @@ class Squad(evaluate.Metric):
                 ]
             }
         ]
-        score = evaluate(dataset=dataset, predictions=pred_dict)
+        score = compute_score(dataset=dataset, predictions=pred_dict)
         return score

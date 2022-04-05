@@ -147,7 +147,7 @@ def metric_max_over_ground_truths(metric_fn, predictions, ground_truths):
     return score
 
 
-def evaluate(dataset, predictions):
+def compute_score(dataset, predictions):
     f1 = exact_match = total = 0
     precisions = []
     recalls = []

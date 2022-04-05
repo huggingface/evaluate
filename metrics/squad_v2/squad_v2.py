@@ -16,7 +16,7 @@
 import datasets
 import evaluate
 
-from .evaluate import (
+from .compute_score import (
     apply_no_ans_threshold,
     find_all_best_thresh,
     get_raw_scores,
