@@ -1362,7 +1362,7 @@ def load_metric(
     revision: Optional[Union[str, Version]] = None,
     **metric_init_kwargs,
 ) -> Metric:
-    """Load a `datasets.Metric`.
+    """Load a `evaluate.Metric`.
 
     Args:
 
@@ -1386,7 +1386,7 @@ def load_metric(
             your local version of the lib might cause compatibility issues.
 
     Returns:
-        `datasets.Metric`
+        `evaluate.Metric`
     """
     download_mode = DownloadMode(download_mode or DownloadMode.REUSE_DATASET_IF_EXISTS)
     metric_module = metric_module_factory(
