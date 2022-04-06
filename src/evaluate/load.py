@@ -535,7 +535,7 @@ class GithubDatasetModuleFactory(_DatasetModuleFactory):
             if revision is not None or os.getenv("HF_SCRIPTS_VERSION", None) is not None:
                 raise
             else:
-                revision = "master"
+                revision = "main"
                 local_path = self.download_loading_script(revision)
                 logger.warning(
                     f"Couldn't find a directory or a dataset named '{self.name}' in this version. "
@@ -603,7 +603,7 @@ class GithubMetricModuleFactory(_MetricModuleFactory):
             if revision is not None or os.getenv("HF_SCRIPTS_VERSION", None) is not None:
                 raise
             else:
-                revision = "master"
+                revision = "main"
                 local_path = self.download_loading_script(revision)
                 logger.warning(
                     f"Couldn't find a directory or a metric named '{self.name}' in this version. "
