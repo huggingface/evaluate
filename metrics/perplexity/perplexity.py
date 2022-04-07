@@ -63,6 +63,7 @@ Examples:
         >>> from datasets import load_dataset
         >>> perplexity = evaluate.load_metric("perplexity")
         >>> input_texts = load_dataset("wikitext", "wikitext-2-raw-v1", split="test")["text"][:10] # doctest:+ELLIPSIS
+        [...]
         >>> results = perplexity.compute(model_id='gpt2',
         ...                              input_texts=input_texts,
         ...                              stride=256)
