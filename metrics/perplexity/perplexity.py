@@ -51,7 +51,6 @@ Returns:
         in the input list.
 Examples:
     Example 1:
-        >>> import datasets
         >>> perplexity = evaluate.load_metric("perplexity")
         >>> input_texts = ["lorem ipsum", "Happy Birthday!", "Bienvenue"]
         >>> results = perplexity.compute(model_id='gpt2',
@@ -61,11 +60,11 @@ Examples:
         78.2
 
     Example 2:
-        >>> import datasets
+        >>> from datasets import load_dataset
         >>> perplexity = evaluate.load_metric("perplexity")
-        >>> input_texts = datasets.load_dataset("wikitext",
-        ...                                     "wikitext-2-raw-v1",
-        ...                                     split="test")["text"][:10] # doctest:+ELLIPSIS
+        >>> input_texts = load_dataset("wikitext",
+        ...                            "wikitext-2-raw-v1",
+        ...                            split="test")["text"][:10] # doctest:+ELLIPSIS
         [...]
         >>> results = perplexity.compute(model_id='gpt2',
         ...                              input_texts=input_texts,
