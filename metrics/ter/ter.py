@@ -17,6 +17,8 @@ import sacrebleu as scb
 from packaging import version
 from sacrebleu import TER
 
+import evaluate
+
 
 _CITATION = """\
 @inproceedings{snover-etal-2006-study,
@@ -86,7 +88,7 @@ Examples:
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"],
         ...             ["Your jokes are...", "...TERrible"]]
-        >>> ter = datasets.load_metric("ter")
+        >>> ter = evaluate.load_metric("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         case_sensitive=True)
@@ -98,7 +100,7 @@ Examples:
         ...                     "what about this sentence?"]
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"]]
-        >>> ter = datasets.load_metric("ter")
+        >>> ter = evaluate.load_metric("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         case_sensitive=True)
@@ -110,7 +112,7 @@ Examples:
         ...                     "what about this sentence?"]
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"]]
-        >>> ter = datasets.load_metric("ter")
+        >>> ter = evaluate.load_metric("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         normalized=True,
@@ -123,7 +125,7 @@ Examples:
         ...                     "what about this sentence?"]
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"]]
-        >>> ter = datasets.load_metric("ter")
+        >>> ter = evaluate.load_metric("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         ignore_punct=True,
@@ -138,7 +140,7 @@ Examples:
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"],
         ...             ["Your jokes are...", "...TERrible"]]
-        >>> ter = datasets.load_metric("ter")
+        >>> ter = evaluate.load_metric("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         ignore_punct=True,
@@ -148,15 +150,15 @@ Examples:
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Ter(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Ter(evaluate.Metric):
     def _info(self):
         if version.parse(scb.__version__) < version.parse("1.4.12"):
             raise ImportWarning(
                 "To use `sacrebleu`, the module `sacrebleu>=1.4.12` is required, and the current version of `sacrebleu` doesn't match this condition.\n"
                 'You can install it with `pip install "sacrebleu>=1.4.12"`.'
             )
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="http://www.cs.umd.edu/~snover/tercom/",

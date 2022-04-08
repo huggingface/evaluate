@@ -17,7 +17,7 @@ This metric takes, at minimum, predicted sentences and reference sentences:
 >>> references = [["does this sentence match", "does this sentence match!?!"],
 ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"],
 ...             ["Your jokes are...", "...TERrible"]]
->>> ter = datasets.load_metric("ter")
+>>> ter = evaluate.load_metric("ter")
 >>> results = ter.compute(predictions=predictions,
 ...                         references=references,
 ...                         case_sensitive=True)
@@ -57,7 +57,7 @@ Basic example with only predictions and references as inputs:
 ...                     "what about this sentence?"]
 >>> references = [["does this sentence match", "does this sentence match!?!"],
 ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"]]
->>> ter = datasets.load_metric("ter")
+>>> ter = evaluate.load_metric("ter")
 >>> results = ter.compute(predictions=predictions, 
 ...                         references=references,
 ...                         case_sensitive=True)
@@ -71,7 +71,7 @@ Example with `normalization = True`:
 ...                     "what about this sentence?"]
 >>> references = [["does this sentence match", "does this sentence match!?!"],
 ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"]]
->>> ter = datasets.load_metric("ter")
+>>> ter = evaluate.load_metric("ter")
 >>> results = ter.compute(predictions=predictions, 
 ...                         references=references, 
 ...                         normalized=True,
@@ -86,7 +86,7 @@ Example ignoring punctuation and capitalization, and everything matches:
 ...                     "what about this sentence?"]
 >>> references = [["does this sentence match", "does this sentence match!?!"],
 ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"]]
->>> ter = datasets.load_metric("ter")
+>>> ter = evaluate.load_metric("ter")
 >>> results = ter.compute(predictions=predictions, 
 ...                         references=references, 
 ...                         ignore_punct=True,
@@ -103,7 +103,7 @@ Example ignoring punctuation and capitalization, but with an extra (incorrect) s
 >>> references = [["does this sentence match", "does this sentence match!?!"],
 ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"],
 ...             ["Your jokes are...", "...TERrible"]]
->>> ter = datasets.load_metric("ter")
+>>> ter = evaluate.load_metric("ter")
 >>> results = ter.compute(predictions=predictions, 
 ...                         references=references,
 ...                         ignore_punct=True,

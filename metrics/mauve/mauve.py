@@ -22,6 +22,8 @@ import sklearn  # Here to have a nice missing dependency error message early on
 import tqdm  # Here to have a nice missing dependency error message early on
 from mauve import compute_mauve  # From: mauve-text
 
+import evaluate
+
 
 _CITATION = """\
 @inproceedings{pillutla-etal:mauve:neurips2021,
@@ -73,8 +75,8 @@ Returns:
 Examples:
 
     >>> # faiss segfaults in doctest for some reason, so the .compute call is not tested with doctest
-    >>> import datasets
-    >>> mauve = datasets.load_metric('mauve')
+    >>> import evaluate
+    >>> mauve = evaluate.load_metric('mauve')
     >>> predictions = ["hello there", "general kenobi"]
     >>> references = ["hello there", "general kenobi"]
     >>> out = mauve.compute(predictions=predictions, references=references) # doctest: +SKIP
@@ -83,10 +85,10 @@ Examples:
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Mauve(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Mauve(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="https://github.com/krishnap25/mauve",

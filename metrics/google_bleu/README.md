@@ -24,7 +24,7 @@ This metric takes a list of predicted sentences, as well as a list of references
 ```python
 sentence1 = "the cat sat on the mat"
 sentence2 = "the cat ate the mat"
-google_bleu = datasets.load_metric("google_bleu")
+google_bleu = evaluate.load_metric("google_bleu")
 result = google_bleu.compute(predictions=[sentence1], references=[sentence2])
 print(result)
 >>> True
@@ -52,7 +52,7 @@ Note that this score is symmetrical when switching output and target. This means
 ```python
 sentence1 = "the cat sat on the mat".split()
 sentence2 = "the cat ate the mat".split()
-google_bleu = datasets.load_metric("google_bleu")
+google_bleu = evaluate.load_metric("google_bleu")
 result_a = google_bleu.compute(predictions=[sentence1], references=[[sentence2]])
 result_b = google_bleu.compute(predictions=[sentence2], references=[[sentence1]])
 print(result_a == result_b)
@@ -79,7 +79,7 @@ ref2a = ['he', 'was', 'interested', 'in', 'world', 'history',
 
 list_of_references = [[ref1a], [ref2a]]
 hypotheses = [hyp1, hyp2]
-google_bleu = datasets.load_metric("google_bleu")
+google_bleu = evaluate.load_metric("google_bleu")
 results = google_bleu.compute(predictions=hypotheses, references=list_of_references)
 print(round(results["google_bleu"], 2))
 >>> 0.44
@@ -107,7 +107,7 @@ ref2a = ['he', 'was', 'interested', 'in', 'world', 'history',
 
 list_of_references = [[ref1a, ref1b, ref1c], [ref2a]]
 hypotheses = [hyp1, hyp2]
-google_bleu = datasets.load_metric("google_bleu")
+google_bleu = evaluate.load_metric("google_bleu")
 results = google_bleu.compute(predictions=hypotheses, references=list_of_references)
 print(round(results["google_bleu"], 2))
 >>> 0.61
@@ -135,7 +135,7 @@ ref2a = ['he', 'was', 'interested', 'in', 'world', 'history',
 
 list_of_references = [[ref1a, ref1b, ref1c], [ref2a]]
 hypotheses = [hyp1, hyp2]
-google_bleu = datasets.load_metric("google_bleu")
+google_bleu = evaluate.load_metric("google_bleu")
 results = google_bleu.compute(predictions=hypotheses, references=list_of_references, min_len=2)
 print(results["google_bleu"])
 >>> 0.53
@@ -163,7 +163,7 @@ ref2a = ['he', 'was', 'interested', 'in', 'world', 'history',
 
 list_of_references = [[ref1a, ref1b, ref1c], [ref2a]]
 hypotheses = [hyp1, hyp2]
-google_bleu = datasets.load_metric("google_bleu")
+google_bleu = evaluate.load_metric("google_bleu")
 results = google_bleu.compute(predictions=hypotheses, references=list_of_references, min_len=2, max_len=6)
 print(results["google_bleu"])
 >>> 0.4

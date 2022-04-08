@@ -65,9 +65,6 @@ REQUIRED_PKGS = [
     "datasets",
     # We use numpy>=1.17 to have np.random.Generator (Dataset shuffling)
     "numpy>=1.17",
-    # Backend and serialization.
-    # Minimum 5.0.0 to support mix of struct and list types in parquet, and batch iterators of parquet data, masks in StructArray
-    "pyarrow>=5.0.0",
     # For smart caching dataset processing
     "dill",
     # For performance gains with apache arrow
@@ -87,8 +84,6 @@ REQUIRED_PKGS = [
     # to save datasets locally or on any filesystem
     # minimum 2021.05.0 to have the AbstractArchiveFileSystem
     "fsspec[http]>=2021.05.0",
-    # for data streaming via http
-    "aiohttp",
     # To get datasets from the Datasets Hub on huggingface.co
     "huggingface_hub>=0.1.0,<1.0.0",
     # Utilities from PyPA to e.g., compare versions
@@ -96,20 +91,6 @@ REQUIRED_PKGS = [
     "responses<0.19",
 ]
 
-AUDIO_REQUIRE = [
-    "librosa",
-]
-
-VISION_REQURE = [
-    "Pillow>=6.2.1",
-]
-
-BENCHMARKS_REQUIRE = [
-    "numpy==1.18.5",
-    "tensorflow==2.3.0",
-    "torch==1.6.0",
-    "transformers==3.0.2",
-]
 
 TESTS_REQUIRE = [
     # test dependencies
@@ -118,33 +99,8 @@ TESTS_REQUIRE = [
     "pytest-datadir",
     "pytest-xdist",
     # optional dependencies
-    "apache-beam>=2.26.0",
-    "elasticsearch<8.0.0",  # 8.0 asks users to provide hosts or cloud_id when instantiating ElastictSearch()
-    "aiobotocore",
-    "boto3",
-    "botocore",
-    "faiss-cpu>=1.6.4",
-    "fsspec[s3]",
-    "moto[s3,server]==2.0.4",
-    "rarfile>=4.0",
-    "s3fs==2021.08.1",
     "tensorflow>=2.3,!=2.6.0,!=2.6.1",
     "torch",
-    "torchaudio",
-    "soundfile",
-    "transformers",
-    # datasets dependencies
-    "bs4",
-    "conllu",
-    "h5py",
-    "langdetect",
-    "lxml",
-    "mwparserfromhell",
-    "nltk",
-    "openpyxl",
-    "py7zr",
-    "tldextract",
-    "zstandard",
     # metrics dependencies
     "bert_score>=0.3.6",
     "rouge_score",
@@ -166,30 +122,16 @@ TESTS_REQUIRE = [
     "importlib_resources;python_version<'3.7'",
 ]
 
-TESTS_REQUIRE.extend(VISION_REQURE)
-TESTS_REQUIRE.extend(AUDIO_REQUIRE)
-
 QUALITY_REQUIRE = ["black~=22.0", "flake8>=3.8.3", "isort>=5.0.0", "pyyaml>=5.3.1"]
 
 
 EXTRAS_REQUIRE = {
-    "audio": AUDIO_REQUIRE,
-    "vision": VISION_REQURE,
-    "apache-beam": ["apache-beam>=2.26.0"],
     "tensorflow": ["tensorflow>=2.2.0,!=2.6.0,!=2.6.1"],
     "tensorflow_gpu": ["tensorflow-gpu>=2.2.0,!=2.6.0,!=2.6.1"],
     "torch": ["torch"],
-    "s3": [
-        "fsspec",
-        "boto3",
-        "botocore",
-        "s3fs",
-    ],
-    "streaming": [],  # for backward compatibility
     "dev": TESTS_REQUIRE + QUALITY_REQUIRE,
     "tests": TESTS_REQUIRE,
     "quality": QUALITY_REQUIRE,
-    "benchmarks": BENCHMARKS_REQUIRE,
     "docs": [
         # Might need to add doc-builder and some specific deps in the future
         "s3fs",
@@ -203,14 +145,12 @@ setup(
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="HuggingFace Inc.",
-    author_email="thomas@huggingface.co",
-    url="https://github.com/huggingface/datasets",
-    download_url="https://github.com/huggingface/datasets/tags",
+    author_email="leandro@huggingface.co",
+    url="https://github.com/huggingface/evaluate",
+    download_url="https://github.com/huggingface/evaluate/tags",
     license="Apache 2.0",
     package_dir={"": "src"},
     packages=find_packages("src"),
-    package_data={"datasets": ["py.typed", "scripts/templates/*"], "datasets.utils.resources": ["*.json", "*.yaml"]},
-    entry_points={"console_scripts": ["datasets-cli=datasets.commands.datasets_cli:main"]},
     install_requires=REQUIRED_PKGS,
     extras_require=EXTRAS_REQUIRE,
     classifiers=[
@@ -228,6 +168,6 @@ setup(
         "Programming Language :: Python :: 3.10",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
-    keywords="datasets machine learning datasets metrics",
+    keywords="metrics machine learning evaluate",
     zip_safe=False,  # Required for mypy to find the py.typed file
 )

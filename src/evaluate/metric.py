@@ -83,7 +83,7 @@ class MetricInfoMixin:
 
     @property
     def info(self):
-        """:class:`datasets.MetricInfo` object containing all the metadata in the metric."""
+        """:class:`evaluate.MetricInfo` object containing all the metadata in the metric."""
         return self._metric_info
 
     @property
@@ -148,7 +148,7 @@ class Metric(MetricInfoMixin):
             This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
         process_id (``int``): specify the id of the current process in a distributed setup (between 0 and num_process-1)
             This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
-        seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`datasets.Metric.compute` is run.
+        seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`evaluate.Metric.compute` is run.
         experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
             This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
         max_concurrent_cache_files (``int``): Max number of concurrent metrics cache files (default 10000).

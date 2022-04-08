@@ -15,6 +15,8 @@
 
 import datasets
 
+import evaluate
+
 from .nmt_bleu import compute_bleu  # From: https://github.com/tensorflow/nmt/blob/master/nmt/scripts/bleu.py
 
 
@@ -82,17 +84,17 @@ Examples:
     ...     [["hello", "there", "general", "kenobi"], ["hello", "there", "!"]],  # tokenized references for the first sample (2 references)
     ...     [["foo", "bar", "foobar"]]                                           # tokenized references for the second sample (1 reference)
     ... ]
-    >>> bleu = datasets.load_metric("bleu")
+    >>> bleu = evaluate.load_metric("bleu")
     >>> results = bleu.compute(predictions=predictions, references=references)
     >>> print(results["bleu"])
     1.0
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Bleu(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Bleu(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

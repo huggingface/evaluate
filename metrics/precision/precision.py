@@ -16,6 +16,8 @@
 import datasets
 from sklearn.metrics import precision_score
 
+import evaluate
+
 
 _DESCRIPTION = """
 Precision is the fraction of the true examples among the predicted examples. It can be computed with:
@@ -59,7 +61,7 @@ Returns:
 
 Examples:
 
-    >>> precision_metric = datasets.load_metric("precision")
+    >>> precision_metric = evaluate.load_metric("precision")
     >>> results = precision_metric.compute(references=[0, 1], predictions=[0, 1])
     >>> print(results)
     {'precision': 1.0}
@@ -95,10 +97,10 @@ _CITATION = """\
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Precision(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Precision(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

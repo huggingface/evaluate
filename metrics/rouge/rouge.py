@@ -21,6 +21,8 @@ import numpy  # Here to have a nice missing dependency error message early on
 import six  # Here to have a nice missing dependency error message early on
 from rouge_score import rouge_scorer, scoring
 
+import evaluate
+
 
 _CITATION = """\
 @inproceedings{lin-2004-rouge,
@@ -69,7 +71,7 @@ Returns:
     rougeLsum: rouge_lsum (precision, recall, f1)
 Examples:
 
-    >>> rouge = datasets.load_metric('rouge')
+    >>> rouge = evaluate.load_metric('rouge')
     >>> predictions = ["hello there", "general kenobi"]
     >>> references = ["hello there", "general kenobi"]
     >>> results = rouge.compute(predictions=predictions, references=references)
@@ -82,10 +84,10 @@ Examples:
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Rouge(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Rouge(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

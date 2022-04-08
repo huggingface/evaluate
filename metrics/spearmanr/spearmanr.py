@@ -16,6 +16,8 @@
 import datasets
 from scipy.stats import spearmanr
 
+import evaluate
+
 
 _DESCRIPTION = """
 Calculate a Spearman correlation coefficient with associated p-value.
@@ -43,7 +45,7 @@ Returns:
     spearmanr: Spearman correlation coefficient.
 Examples:
 
-    >>> spearmanr_metric = datasets.load_metric("spearmanr")
+    >>> spearmanr_metric = evaluate.load_metric("spearmanr")
     >>> results = spearmanr_metric.compute(references=[1, 2, 3, 4, 5], predictions=[10, 9, 2.5, 6, 4])
     >>> print(results)
     {'spearmanr': -0.7}
@@ -76,10 +78,10 @@ _CITATION = r"""\
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Spearmanr(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Spearmanr(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

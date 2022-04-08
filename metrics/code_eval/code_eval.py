@@ -24,6 +24,8 @@ from concurrent.futures import ThreadPoolExecutor, as_completed
 import datasets
 import numpy as np
 
+import evaluate
+
 from .execute import check_correctness
 
 
@@ -74,7 +76,7 @@ Returns:
     pass_at_k: dict with pass rates for each k
     results: dict with granular results of each unittest
 Examples:
-    >>> code_eval = datasets.load_metric("code_eval")
+    >>> code_eval = evaluate.load_metric("code_eval")
     >>> test_cases = ["assert add(2,3)==5"]
     >>> candidates = [["def add(a,b): return a*b", "def add(a, b): return a+b"]]
     >>> pass_at_k, results = code_eval.compute(references=test_cases, predictions=candidates, k=[1, 2])
@@ -129,10 +131,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE."""
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class CodeEval(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class CodeEval(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             # This is the description that will appear on the metrics page.
             description=_DESCRIPTION,
             citation=_CITATION,

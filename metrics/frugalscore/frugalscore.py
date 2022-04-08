@@ -17,6 +17,8 @@ import datasets
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trainer, TrainingArguments
 
+import evaluate
+
 
 _CITATION = """\
 @article{eddine2021frugalscore,
@@ -45,17 +47,17 @@ Args:
 Returns:
     scores (list of int): list of scores.
 Examples:
-    >>> frugalscore = datasets.load_metric("frugalscore")
+    >>> frugalscore = evaluate.load_metric("frugalscore")
     >>> results = frugalscore.compute(predictions=['hello there', 'huggingface'], references=['hello world', 'hugging face'])
     >>> print([round(s, 3) for s in results["scores"]])
     [0.631, 0.645]
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class FRUGALSCORE(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class FRUGALSCORE(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

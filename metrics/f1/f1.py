@@ -16,6 +16,8 @@
 import datasets
 from sklearn.metrics import f1_score
 
+import evaluate
+
 
 _DESCRIPTION = """
 The F1 score is the harmonic mean of the precision and recall. It can be computed with:
@@ -53,7 +55,7 @@ Returns:
     f1: F1 score.
 Examples:
 
-    >>> f1_metric = datasets.load_metric("f1")
+    >>> f1_metric = evaluate.load_metric("f1")
     >>> results = f1_metric.compute(predictions=[0, 1], references=[0, 1])
     >>> print(results)
     {'f1': 1.0}
@@ -89,10 +91,10 @@ _CITATION = """\
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class F1(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class F1(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

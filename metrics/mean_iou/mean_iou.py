@@ -18,6 +18,8 @@ from typing import Dict, Optional
 import datasets
 import numpy as np
 
+import evaluate
+
 
 _DESCRIPTION = """
 IoU is the area of overlap between the predicted segmentation and the ground truth divided by the area of union
@@ -60,7 +62,7 @@ Examples:
 
     >>> import numpy as np
 
-    >>> mean_iou = datasets.load_metric("mean_iou")
+    >>> mean_iou = evaluate.load_metric("mean_iou")
 
     >>> # suppose one has 3 different segmentation maps predicted
     >>> predicted_1 = np.array([[1, 2], [3, 4], [5, 255]])
@@ -271,10 +273,10 @@ def mean_iou(
     return metrics
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class MeanIoU(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class MeanIoU(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

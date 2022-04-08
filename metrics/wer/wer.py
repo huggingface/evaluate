@@ -16,6 +16,8 @@
 import datasets
 from jiwer import compute_measures
 
+import evaluate
+
 
 _CITATION = """\
 @inproceedings{inproceedings,
@@ -65,17 +67,17 @@ Examples:
 
     >>> predictions = ["this is the prediction", "there is an other sample"]
     >>> references = ["this is the reference", "there is another one"]
-    >>> wer = datasets.load_metric("wer")
+    >>> wer = evaluate.load_metric("wer")
     >>> wer_score = wer.compute(predictions=predictions, references=references)
     >>> print(wer_score)
     0.5
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class WER(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class WER(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

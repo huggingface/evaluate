@@ -20,6 +20,8 @@ import sacrebleu
 import sacremoses
 from packaging import version
 
+import evaluate
+
 
 _CITATION = """\
 @inproceedings{xu-etal-2016-optimizing,
@@ -70,7 +72,7 @@ Examples:
     >>> sources=["About 95 species are currently accepted ."]
     >>> predictions=["About 95 you now get in ."]
     >>> references=[["About 95 species are currently known .","About 95 species are now accepted .","95 species are now accepted ."]]
-    >>> sari = datasets.load_metric("sari")
+    >>> sari = evaluate.load_metric("sari")
     >>> results = sari.compute(sources=sources, predictions=predictions, references=references)
     >>> print(results)
     {'sari': 26.953601953601954}
@@ -255,10 +257,10 @@ def normalize(sentence, lowercase: bool = True, tokenizer: str = "13a", return_s
     return normalized_sent
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Sari(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Sari(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

@@ -17,6 +17,8 @@ import sacrebleu as scb
 from packaging import version
 from sacrebleu import CHRF
 
+import evaluate
+
 
 _CITATION = """\
 @inproceedings{popovic-2015-chrf,
@@ -93,22 +95,22 @@ Examples:
 
     >>> prediction = ["The relationship between Obama and Netanyahu is not exactly friendly."]
     >>> reference = [["The ties between Obama and Netanyahu are not particularly friendly."]]
-    >>> chrf = datasets.load_metric("chrf")
+    >>> chrf = evaluate.load_metric("chrf")
     >>> results = chrf.compute(predictions=prediction, references=reference)
     >>> print(results)
     {'score': 61.576379378113785, 'char_order': 6, 'word_order': 0, 'beta': 2}
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class ChrF(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class ChrF(evaluate.Metric):
     def _info(self):
         if version.parse(scb.__version__) < version.parse("1.4.12"):
             raise ImportWarning(
                 "To use `sacrebleu`, the module `sacrebleu>=1.4.12` is required, and the current version of `sacrebleu` doesn't match this condition.\n"
                 'You can install it with `pip install "sacrebleu>=1.4.12"`.'
             )
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="https://github.com/mjpost/sacreBLEU#chrf--chrf",

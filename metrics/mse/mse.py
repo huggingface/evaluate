@@ -16,6 +16,8 @@
 import datasets
 from sklearn.metrics import mean_squared_error
 
+import evaluate
+
 
 _CITATION = """\
 @article{scikit-learn,
@@ -59,7 +61,7 @@ Returns:
     mse : mean squared error.
 Examples:
 
-    >>> mse_metric = datasets.load_metric("mse")
+    >>> mse_metric = evaluate.load_metric("mse")
     >>> predictions = [2.5, 0.0, 2, 8]
     >>> references = [3, -0.5, 2, 7]
     >>> results = mse_metric.compute(predictions=predictions, references=references)
@@ -71,7 +73,7 @@ Examples:
 
     If you're using multi-dimensional lists, then set the config as follows :
 
-    >>> mse_metric = datasets.load_metric("mse", "multilist")
+    >>> mse_metric = evaluate.load_metric("mse", "multilist")
     >>> predictions = [[0.5, 1], [-1, 1], [7, -6]]
     >>> references = [[0, 2], [-1, 2], [8, -5]]
     >>> results = mse_metric.compute(predictions=predictions, references=references)
@@ -83,10 +85,10 @@ Examples:
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Mse(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Mse(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

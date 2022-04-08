@@ -15,7 +15,9 @@
 
 import datasets
 
-from .evaluate import evaluate
+import evaluate
+
+from .compute_score import compute_score
 
 
 _CITATION = """\
@@ -56,17 +58,17 @@ Examples:
 
     >>> predictions = [{'prediction_text': '1976', 'id': '56e10a3be3433e1400422b22'}]
     >>> references = [{'answers': {'answer_start': [97], 'text': ['1976']}, 'id': '56e10a3be3433e1400422b22'}]
-    >>> squad_metric = datasets.load_metric("squad")
+    >>> squad_metric = evaluate.load_metric("squad")
     >>> results = squad_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'exact_match': 100.0, 'f1': 100.0}
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Squad(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Squad(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
@@ -105,5 +107,5 @@ class Squad(datasets.Metric):
                 ]
             }
         ]
-        score = evaluate(dataset=dataset, predictions=pred_dict)
+        score = compute_score(dataset=dataset, predictions=pred_dict)
         return score

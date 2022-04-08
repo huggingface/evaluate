@@ -147,7 +147,7 @@ def metric_max_over_ground_truths(metric_fn, predictions, ground_truths):
     return score
 
 
-def evaluate(dataset, predictions):
+def compute_score(dataset, predictions):
     f1 = exact_match = total = 0
     precisions = []
     recalls = []
@@ -202,4 +202,4 @@ if __name__ == "__main__":
         dataset = dataset_json["data"]
     with open(args.prediction_file) as prediction_file:
         predictions = json.load(prediction_file)
-    print(json.dumps(evaluate(dataset, predictions)))
+    print(json.dumps(compute_score(dataset, predictions)))

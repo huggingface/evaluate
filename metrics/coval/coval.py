@@ -17,6 +17,8 @@ import datasets
 from coval.conll import reader, util
 from coval.eval import evaluator
 
+import evaluate
+
 
 logger = datasets.logging.get_logger(__name__)
 
@@ -148,7 +150,7 @@ Returns:
 
 Examples:
 
-    >>> coval = datasets.load_metric('coval')
+    >>> coval = evaluate.load_metric('coval')
     >>> words = ['bc/cctv/00/cctv_0005   0   0       Thank   VBP  (TOP(S(VP*    thank  01   1    Xu_li  *           (V*)        *       -',
     ... 'bc/cctv/00/cctv_0005   0   1         you   PRP        (NP*)      -    -   -    Xu_li  *        (ARG1*)   (ARG0*)   (116)',
     ... 'bc/cctv/00/cctv_0005   0   2    everyone    NN        (NP*)      -    -   -    Xu_li  *    (ARGM-DIS*)        *    (116)',
@@ -224,7 +226,7 @@ def get_coref_infos(
     return doc_coref_infos
 
 
-def evaluate(key_lines, sys_lines, metrics, NP_only, remove_nested, keep_singletons, min_span):
+def compute_score(key_lines, sys_lines, metrics, NP_only, remove_nested, keep_singletons, min_span):
     doc_coref_infos = get_coref_infos(key_lines, sys_lines, NP_only, remove_nested, keep_singletons, min_span)
 
     output_scores = {}
@@ -267,10 +269,10 @@ def check_gold_parse_annotation(key_lines):
     return has_gold_parse
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Coval(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class Coval(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
@@ -306,7 +308,7 @@ class Coval(datasets.Metric):
                 # util.parse_key_file(key_file)
                 # key_file = key_file + ".parsed"
 
-        score = evaluate(
+        score = compute_score(
             key_lines=references,
             sys_lines=predictions,
             metrics=allmetrics,

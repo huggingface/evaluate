@@ -19,6 +19,8 @@ import datasets
 from datasets import MetricInfo
 from nltk.translate import gleu_score
 
+import evaluate
+
 
 _CITATION = """\
 @misc{wu2016googles,
@@ -86,7 +88,7 @@ Examples:
 
         >>> list_of_references = [[ref1a], [ref2a]]
         >>> hypotheses = [hyp1, hyp2]
-        >>> google_bleu = datasets.load_metric("google_bleu")
+        >>> google_bleu = evaluate.load_metric("google_bleu")
         >>> results = google_bleu.compute(predictions=hypotheses, references=list_of_references)
         >>> print(round(results["google_bleu"], 2))
         0.44
@@ -112,7 +114,7 @@ Examples:
 
         >>> list_of_references = [[ref1a, ref1b, ref1c], [ref2a]]
         >>> hypotheses = [hyp1, hyp2]
-        >>> google_bleu = datasets.load_metric("google_bleu")
+        >>> google_bleu = evaluate.load_metric("google_bleu")
         >>> results = google_bleu.compute(predictions=hypotheses, references=list_of_references)
         >>> print(round(results["google_bleu"], 2))
         0.61
@@ -138,7 +140,7 @@ Examples:
 
         >>> list_of_references = [[ref1a, ref1b, ref1c], [ref2a]]
         >>> hypotheses = [hyp1, hyp2]
-        >>> google_bleu = datasets.load_metric("google_bleu")
+        >>> google_bleu = evaluate.load_metric("google_bleu")
         >>> results = google_bleu.compute(predictions=hypotheses, references=list_of_references, min_len=2)
         >>> print(round(results["google_bleu"], 2))
         0.53
@@ -164,17 +166,17 @@ Examples:
 
         >>> list_of_references = [[ref1a, ref1b, ref1c], [ref2a]]
         >>> hypotheses = [hyp1, hyp2]
-        >>> google_bleu = datasets.load_metric("google_bleu")
+        >>> google_bleu = evaluate.load_metric("google_bleu")
         >>> results = google_bleu.compute(predictions=hypotheses,references=list_of_references, min_len=2, max_len=6)
         >>> print(round(results["google_bleu"], 2))
         0.4
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class GoogleBleu(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class GoogleBleu(evaluate.Metric):
     def _info(self) -> MetricInfo:
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

@@ -42,7 +42,7 @@ This metric's range is 0 and up. A lower score is better.
 ### Examples
 Calculating perplexity on input_texts defined here:
 ```python
-perplexity = datasets.load_metric("perplexity")
+perplexity = evaluate.load_metric("perplexity")
 input_texts = ["lorem ipsum", "Happy Birthday!", "Bienvenue"]
 results = perplexity.compute(model_id='gpt2',
                               input_texts=input_texts,
@@ -52,7 +52,7 @@ round(results["perplexity"], 1)
 ```
 Calculating perplexity on input_texts loaded in from a dataset:
 ```python
-perplexity = datasets.load_metric("perplexity")
+perplexity = evaluate.load_metric("perplexity")
 input_texts = datasets.load_dataset("wikitext",
                                      "wikitext-2-raw-v1",
                                      split="test")["text"][:10]

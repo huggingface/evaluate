@@ -17,7 +17,7 @@
 # pylint: enable=line-too-long
 # pylint: disable=g-import-not-at-top,g-bad-import-order,wrong-import-position
 
-__version__ = "2.0.1.dev0"
+__version__ = "0.0.1.dev0"
 
 import pyarrow
 from packaging import version
@@ -29,7 +29,7 @@ if version.parse(pyarrow.__version__).major < 5:
         "If you are running this in a Google Colab, you should probably just restart the runtime to use the right version of `pyarrow`."
     )
 
-SCRIPTS_VERSION = "master" if version.parse(__version__).is_devrelease else __version__
+SCRIPTS_VERSION = "main" if version.parse(__version__).is_devrelease else __version__
 
 del pyarrow
 del version
