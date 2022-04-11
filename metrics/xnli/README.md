@@ -11,7 +11,7 @@ As with MNLI, the task is to predict textual entailment (does sentence A imply/c
 The XNLI metric is computed based on the `predictions` (a list of predicted labels) and the `references` (a list of ground truth labels).
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 xnli_metric = load_metric("xnli")
 predictions = [0, 1]
 references = [0, 1]
@@ -32,7 +32,7 @@ For more recent model performance, see the [dataset leaderboard](https://papersw
 Maximal values:
 
 ```python
->>> from datasets import load_metric
+>>> from evaluate import load_metric
 >>> xnli_metric = load_metric("xnli")
 >>> predictions = [0, 1]
 >>> references = [0, 1]
@@ -44,7 +44,7 @@ Maximal values:
 Minimal values:
 
 ```python
->>> from datasets import load_metric
+>>> from evaluate import load_metric
 >>> xnli_metric = load_metric("xnli")
 >>> predictions = [1, 0]
 >>> references = [0, 1]
@@ -56,7 +56,7 @@ Minimal values:
 Partial match:
 
 ```python
->>> from datasets import load_metric
+>>> from evaluate import load_metric
 >>> xnli_metric = load_metric("xnli")
 >>> predictions = [1, 0, 1]
 >>> references = [1, 0, 0]

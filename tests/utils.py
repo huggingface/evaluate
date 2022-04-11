@@ -218,7 +218,7 @@ class RequestWouldHangIndefinitelyError(Exception):
 class OfflineSimulationMode(Enum):
     CONNECTION_FAILS = 0
     CONNECTION_TIMES_OUT = 1
-    HF_DATASETS_OFFLINE_SET_TO_1 = 2
+    HF_EVALUATE_OFFLINE_SET_TO_1 = 2
 
 
 @contextmanager
@@ -233,7 +233,7 @@ def offline(mode=OfflineSimulationMode.CONNECTION_FAILS, timeout=1e-16):
     CONNECTION_TIMES_OUT: the connection hangs until it times out.
         The default timeout value is low (1e-16) to speed up the tests.
         Timeout errors are created by mocking requests.request
-    HF_DATASETS_OFFLINE_SET_TO_1: the HF_DATASETS_OFFLINE environment variable is set to 1.
+    HF_EVALUATE_OFFLINE_SET_TO_1: the HF_EVALUATE_OFFLINE environment variable is set to 1.
         This makes the http/ftp calls of the library instantly fail and raise an OfflineModeEmabled error.
     """
     from requests import request as online_request
@@ -268,8 +268,8 @@ def offline(mode=OfflineSimulationMode.CONNECTION_FAILS, timeout=1e-16):
         with patch("requests.request", timeout_request):
             with patch("requests.api.request", timeout_request):
                 yield
-    elif mode is OfflineSimulationMode.HF_DATASETS_OFFLINE_SET_TO_1:
-        with patch("datasets.config.HF_DATASETS_OFFLINE", True):
+    elif mode is OfflineSimulationMode.HF_EVALUATE_OFFLINE_SET_TO_1:
+        with patch("evaluate.config.HF_EVALUATE_OFFLINE", True):
             yield
     else:
         raise ValueError("Please use a value from the OfflineSimulationMode enum.")

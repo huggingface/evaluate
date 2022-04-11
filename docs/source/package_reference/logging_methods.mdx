@@ -6,7 +6,7 @@ To change the level of verbosity, use one of the direct setters. For instance, h
 
 ```py
 import datasets
-datasets.logging.set_verbosity_info()
+evaluate.logging.set_verbosity_info()
 ```
 
 You can also use the environment variable `DATASETS_VERBOSITY` to override the default verbosity, and set it to one of the following: `debug`, `info`, `warning`, `error`, `critical`:
@@ -32,58 +32,35 @@ By default, `tqdm` progress bars will be displayed during dataset download and p
 
 ## Functions
 
-[[autodoc]] datasets.logging.get_verbosity
+[[autodoc]] evaluate.logging.get_verbosity
 
-[[autodoc]] datasets.logging.set_verbosity
+[[autodoc]] evaluate.logging.set_verbosity
 
-[[autodoc]] datasets.logging.set_verbosity_info
+[[autodoc]] evaluate.logging.set_verbosity_info
 
-[[autodoc]] datasets.logging.set_verbosity_warning
+[[autodoc]] evaluate.logging.set_verbosity_warning
 
-[[autodoc]] datasets.logging.set_verbosity_debug
+[[autodoc]] evaluate.logging.set_verbosity_debug
 
-[[autodoc]] datasets.logging.set_verbosity_error
+[[autodoc]] evaluate.logging.set_verbosity_error
 
-[[autodoc]] datasets.logging.disable_propagation
+[[autodoc]] evaluate.logging.disable_propagation
 
-[[autodoc]] datasets.logging.enable_propagation
+[[autodoc]] evaluate.logging.enable_propagation
 
-[[autodoc]] datasets.logging.get_logger
+[[autodoc]] evaluate.logging.get_logger
 
-[[autodoc]] datasets.logging.enable_progress_bar
+[[autodoc]] evaluate.logging.enable_progress_bar
 
-[[autodoc]] datasets.logging.disable_progress_bar
+[[autodoc]] evaluate.logging.disable_progress_bar
 
 [[autodoc]] datasets.is_progress_bar_enabled
 
 ## Levels
 
-### datasets.logging.CRITICAL
+### evaluate.logging.CRITICAL
 
-datasets.logging.CRITICAL = 50
-
-int([x]) -> integer
-
-int(x, base=10) -> integer
-
-Convert a number or string to an integer, or return 0 if no arguments
-are given.  If x is a number, return x.__int__().  For floating point
-numbers, this truncates towards zero.
-
-If x is not a number or if base is given, then x must be a string,
-bytes, or bytearray instance representing an integer literal in the
-given base.  The literal can be preceded by '+' or '-' and be surrounded
-by whitespace.  The base defaults to 10.  Valid bases are 0 and 2-36.
-Base 0 means to interpret the base from the string as an integer literal.
-
-```py
->>> int('0b100', base=0)
-4
-```
-
-### datasets.logging.DEBUG
-
-datasets.logging.DEBUG = 10
+evaluate.logging.CRITICAL = 50
 
 int([x]) -> integer
 
@@ -104,32 +81,9 @@ Base 0 means to interpret the base from the string as an integer literal.
 4
 ```
 
-### datasets.logging.ERROR
+### evaluate.logging.DEBUG
 
-datasets.logging.ERROR = 40
-
-int([x]) -> integer
-
-int(x, base=10) -> integer
-
-Convert a number or string to an integer, or return 0 if no arguments
-are given.  If x is a number, return x.__int__().  For floating point
-numbers, this truncates towards zero.
-
-If x is not a number or if base is given, then x must be a string,
-bytes, or bytearray instance representing an integer literal in the
-given base.  The literal can be preceded by '+' or '-' and be surrounded
-by whitespace.  The base defaults to 10.  Valid bases are 0 and 2-36.
-Base 0 means to interpret the base from the string as an integer literal.
-
-```py
->>> int('0b100', base=0)
-4
-```
-
-### datasets.logging.FATAL
-
-datasets.logging.FATAL = 50
+evaluate.logging.DEBUG = 10
 
 int([x]) -> integer
 
@@ -150,32 +104,9 @@ Base 0 means to interpret the base from the string as an integer literal.
 4
 ```
 
-### datasets.logging.INFO
+### evaluate.logging.ERROR
 
-datasets.logging.INFO = 20
-
-int([x]) -> integer
-
-int(x, base=10) -> integer
-
-Convert a number or string to an integer, or return 0 if no arguments
-are given.  If x is a number, return x.__int__().  For floating point
-numbers, this truncates towards zero.
-
-If x is not a number or if base is given, then x must be a string,
-bytes, or bytearray instance representing an integer literal in the
-given base.  The literal can be preceded by '+' or '-' and be surrounded
-by whitespace.  The base defaults to 10.  Valid bases are 0 and 2-36.
-Base 0 means to interpret the base from the string as an integer literal.
-
-```py
->>> int('0b100', base=0)
-4
-```
-
-### datasets.logging.NOTSET
-
-datasets.logging.NOTSET = 0
+evaluate.logging.ERROR = 40
 
 int([x]) -> integer
 
@@ -196,9 +127,9 @@ Base 0 means to interpret the base from the string as an integer literal.
 4
 ```
 
-### datasets.logging.WARN
+### evaluate.logging.FATAL
 
-datasets.logging.WARN = 30
+evaluate.logging.FATAL = 50
 
 int([x]) -> integer
 
@@ -219,9 +150,78 @@ Base 0 means to interpret the base from the string as an integer literal.
 4
 ```
 
-### datasets.logging.WARNING
+### evaluate.logging.INFO
 
-datasets.logging.WARNING = 30
+evaluate.logging.INFO = 20
+
+int([x]) -> integer
+
+int(x, base=10) -> integer
+
+Convert a number or string to an integer, or return 0 if no arguments
+are given.  If x is a number, return x.__int__().  For floating point
+numbers, this truncates towards zero.
+
+If x is not a number or if base is given, then x must be a string,
+bytes, or bytearray instance representing an integer literal in the
+given base.  The literal can be preceded by '+' or '-' and be surrounded
+by whitespace.  The base defaults to 10.  Valid bases are 0 and 2-36.
+Base 0 means to interpret the base from the string as an integer literal.
+
+```py
+>>> int('0b100', base=0)
+4
+```
+
+### evaluate.logging.NOTSET
+
+evaluate.logging.NOTSET = 0
+
+int([x]) -> integer
+
+int(x, base=10) -> integer
+
+Convert a number or string to an integer, or return 0 if no arguments
+are given.  If x is a number, return x.__int__().  For floating point
+numbers, this truncates towards zero.
+
+If x is not a number or if base is given, then x must be a string,
+bytes, or bytearray instance representing an integer literal in the
+given base.  The literal can be preceded by '+' or '-' and be surrounded
+by whitespace.  The base defaults to 10.  Valid bases are 0 and 2-36.
+Base 0 means to interpret the base from the string as an integer literal.
+
+```py
+>>> int('0b100', base=0)
+4
+```
+
+### evaluate.logging.WARN
+
+evaluate.logging.WARN = 30
+
+int([x]) -> integer
+
+int(x, base=10) -> integer
+
+Convert a number or string to an integer, or return 0 if no arguments
+are given.  If x is a number, return x.__int__().  For floating point
+numbers, this truncates towards zero.
+
+If x is not a number or if base is given, then x must be a string,
+bytes, or bytearray instance representing an integer literal in the
+given base.  The literal can be preceded by '+' or '-' and be surrounded
+by whitespace.  The base defaults to 10.  Valid bases are 0 and 2-36.
+Base 0 means to interpret the base from the string as an integer literal.
+
+```py
+>>> int('0b100', base=0)
+4
+```
+
+### evaluate.logging.WARNING
+
+evaluate.logging.WARNING = 30
 
 int([x]) -> integer
 

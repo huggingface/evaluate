@@ -16,7 +16,7 @@ More information about the different subsets of the GLUE dataset can be found on
 2. **Calculating the metric**: the metric takes two inputs : one list with the predictions of the model to score and one lists of references for each translation.
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 glue_metric = load_metric('glue', 'sst2')
 references = [0, 1]
 predictions = [0, 1]
@@ -48,7 +48,7 @@ For more recent model performance, see the [dataset leaderboard](https://papersw
 Maximal values for the MRPC subset (which outputs `accuracy` and `f1`):
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 glue_metric = load_metric('glue', 'mrpc')  # 'mrpc' or 'qqp'
 references = [0, 1]
 predictions = [0, 1]
@@ -60,7 +60,7 @@ print(results)
 Minimal values for the STSB subset (which outputs `pearson` and `spearmanr`):
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 glue_metric = load_metric('glue', 'stsb')
 references = [0., 1., 2., 3., 4., 5.]
 predictions = [-10., -11., -12., -13., -14., -15.]
@@ -72,7 +72,7 @@ print(results)
 Partial match for the COLA subset (which outputs `matthews_correlation`) 
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 glue_metric = load_metric('glue', 'cola')
 references = [0, 1]
 predictions = [1, 1]

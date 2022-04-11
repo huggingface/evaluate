@@ -15,7 +15,7 @@ Any language generation task.
 The metric takes a list of text as input, as well as the name of the model used to compute the metric:
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 perplexity = load_metric("perplexity")
 results = perplexity.compute(input_texts=input_texts, model_id='gpt2')
 ```

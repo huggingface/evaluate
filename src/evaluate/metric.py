@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pyarrow as pa
+from datasets import DatasetInfo
 from datasets.arrow_dataset import Dataset
 from datasets.arrow_reader import ArrowReader
 from datasets.arrow_writer import ArrowWriter
@@ -30,7 +31,7 @@ from datasets.utils.filelock import BaseFileLock, FileLock, Timeout
 from datasets.utils.py_utils import copyfunc, temp_seed
 
 from . import config
-from .info import DatasetInfo, MetricInfo
+from .info import MetricInfo
 from .naming import camelcase_to_snakecase
 from .utils.file_utils import DownloadConfig
 from .utils.logging import get_logger

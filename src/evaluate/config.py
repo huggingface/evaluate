@@ -10,10 +10,6 @@ from .utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-# Datasets
-S3_DATASETS_BUCKET_PREFIX = "https://s3.amazonaws.com/datasets.huggingface.co/datasets/datasets"
-CLOUDFRONT_DATASETS_DISTRIB_PREFIX = "https://cdn-datasets.huggingface.co/datasets/datasets"
-REPO_DATASETS_URL = "https://raw.githubusercontent.com/huggingface/datasets/{revision}/datasets/{path}/{name}"
 
 # Metrics
 S3_METRICS_BUCKET_PREFIX = "https://s3.amazonaws.com/datasets.huggingface.co/datasets/metrics"
@@ -110,38 +106,14 @@ else:
     logger.info("Disabling JAX because USE_JAX is set to False")
 
 
-USE_BEAM = os.environ.get("USE_BEAM", "AUTO").upper()
-BEAM_VERSION = "N/A"
-BEAM_AVAILABLE = False
-if USE_BEAM in ENV_VARS_TRUE_AND_AUTO_VALUES:
-    try:
-        BEAM_VERSION = version.parse(importlib_metadata.version("apache_beam"))
-        BEAM_AVAILABLE = True
-        logger.info(f"Apache Beam version {BEAM_VERSION} available.")
-    except importlib_metadata.PackageNotFoundError:
-        pass
-else:
-    logger.info("Disabling Apache Beam because USE_BEAM is set to False")
-
-
-# Optional tools for feature decoding
-PIL_AVAILABLE = importlib.util.find_spec("PIL") is not None
-
-
-# Optional compression tools
-RARFILE_AVAILABLE = importlib.util.find_spec("rarfile") is not None
-ZSTANDARD_AVAILABLE = importlib.util.find_spec("zstandard") is not None
-LZ4_AVAILABLE = importlib.util.find_spec("lz4") is not None
-
-
 # Cache location
 DEFAULT_XDG_CACHE_HOME = "~/.cache"
 XDG_CACHE_HOME = os.getenv("XDG_CACHE_HOME", DEFAULT_XDG_CACHE_HOME)
 DEFAULT_HF_CACHE_HOME = os.path.join(XDG_CACHE_HOME, "huggingface")
 HF_CACHE_HOME = os.path.expanduser(os.getenv("HF_HOME", DEFAULT_HF_CACHE_HOME))
 
-DEFAULT_HF_DATASETS_CACHE = os.path.join(HF_CACHE_HOME, "datasets")
-HF_DATASETS_CACHE = Path(os.getenv("HF_DATASETS_CACHE", DEFAULT_HF_DATASETS_CACHE))
+DEFAULT_HF_EVALUATE_CACHE = os.path.join(HF_CACHE_HOME, "evaluate")
+HF_EVALUATE_CACHE = Path(os.getenv("HF_EVALUATE_CACHE", DEFAULT_HF_EVALUATE_CACHE))
 
 DEFAULT_HF_METRICS_CACHE = os.path.join(HF_CACHE_HOME, "metrics")
 HF_METRICS_CACHE = Path(os.getenv("HF_METRICS_CACHE", DEFAULT_HF_METRICS_CACHE))
@@ -150,52 +122,25 @@ DEFAULT_HF_MODULES_CACHE = os.path.join(HF_CACHE_HOME, "modules")
 HF_MODULES_CACHE = Path(os.getenv("HF_MODULES_CACHE", DEFAULT_HF_MODULES_CACHE))
 
 DOWNLOADED_DATASETS_DIR = "downloads"
-DEFAULT_DOWNLOADED_DATASETS_PATH = os.path.join(HF_DATASETS_CACHE, DOWNLOADED_DATASETS_DIR)
-DOWNLOADED_DATASETS_PATH = Path(os.getenv("HF_DATASETS_DOWNLOADED_DATASETS_PATH", DEFAULT_DOWNLOADED_DATASETS_PATH))
+DEFAULT_DOWNLOADED_EVALUATE_PATH = os.path.join(HF_EVALUATE_CACHE, DOWNLOADED_DATASETS_DIR)
+DOWNLOADED_EVALUATE_PATH = Path(os.getenv("HF_DATASETS_DOWNLOADED_EVALUATE_PATH", DEFAULT_DOWNLOADED_EVALUATE_PATH))
 
-EXTRACTED_DATASETS_DIR = "extracted"
-DEFAULT_EXTRACTED_DATASETS_PATH = os.path.join(DEFAULT_DOWNLOADED_DATASETS_PATH, EXTRACTED_DATASETS_DIR)
-EXTRACTED_DATASETS_PATH = Path(os.getenv("HF_DATASETS_EXTRACTED_DATASETS_PATH", DEFAULT_EXTRACTED_DATASETS_PATH))
+EXTRACTED_EVALUATE_DIR = "extracted"
+DEFAULT_EXTRACTED_EVALUATE_PATH = os.path.join(DEFAULT_DOWNLOADED_EVALUATE_PATH, EXTRACTED_EVALUATE_DIR)
+EXTRACTED_EVALUATE_PATH = Path(os.getenv("HF_DATASETS_EXTRACTED_EVALUATE_PATH", DEFAULT_EXTRACTED_EVALUATE_PATH))
 
 # Download count for the website
 HF_UPDATE_DOWNLOAD_COUNTS = (
     os.environ.get("HF_UPDATE_DOWNLOAD_COUNTS", "AUTO").upper() in ENV_VARS_TRUE_AND_AUTO_VALUES
 )
 
-# Batch size constants. For more info, see:
-# https://github.com/apache/arrow/blob/master/docs/source/cpp/arrays.rst#size-limitations-and-recommendations)
-DEFAULT_MAX_BATCH_SIZE = 10_000
-
-# Pickling tables works only for small tables (<4GiB)
-# For big tables, we write them on disk instead
-MAX_TABLE_NBYTES_FOR_PICKLING = 4 << 30
-
 # Offline mode
-HF_DATASETS_OFFLINE = os.environ.get("HF_DATASETS_OFFLINE", "AUTO").upper() in ENV_VARS_TRUE_VALUES
+HF_EVALUATE_OFFLINE = os.environ.get("HF_EVALUATE_OFFLINE", "AUTO").upper() in ENV_VARS_TRUE_VALUES
 
-# In-memory
-DEFAULT_IN_MEMORY_MAX_SIZE = 0  # Disabled
-IN_MEMORY_MAX_SIZE = float(os.environ.get("HF_DATASETS_IN_MEMORY_MAX_SIZE", DEFAULT_IN_MEMORY_MAX_SIZE))
 
 # File names
-DATASET_ARROW_FILENAME = "dataset.arrow"
-DATASET_INDICES_FILENAME = "indices.arrow"
-DATASET_STATE_JSON_FILENAME = "state.json"
-DATASET_INFO_FILENAME = "dataset_info.json"
-DATASETDICT_INFOS_FILENAME = "dataset_infos.json"
 LICENSE_FILENAME = "LICENSE"
 METRIC_INFO_FILENAME = "metric_info.json"
 DATASETDICT_JSON_FILENAME = "dataset_dict.json"
 
 MODULE_NAME_FOR_DYNAMIC_MODULES = "evaluate_modules"
-
-MAX_DATASET_CONFIG_ID_READABLE_LENGTH = 255
-
-# Streaming
-STREAMING_READ_MAX_RETRIES = 20
-STREAMING_READ_RETRY_INTERVAL = 5
-
-# Datasets without script
-DATA_FILES_MAX_NUMBER_FOR_MODULE_INFERENCE = 200
-GLOBBED_DATA_FILES_MAX_NUMBER_FOR_MODULE_INFERENCE = 10
-ARCHIVED_DATA_FILES_MAX_NUMBER_FOR_MODULE_INFERENCE = 200

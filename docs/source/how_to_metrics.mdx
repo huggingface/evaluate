@@ -221,6 +221,6 @@ def _compute(self, predictions, references):
 Once you're finished writing your metric loading script, try to load it locally:
 
 ```py
->>> from datasets import load_metric
+>>> from evaluate import load_metric
 >>> metric = load_metric('PATH/TO/MY/SCRIPT.py')
 ```

@@ -21,16 +21,16 @@ from .s3_fixtures import *  # noqa: load s3 fixtures
 def set_test_cache_config(tmp_path_factory, monkeypatch):
     # test_hf_cache_home = tmp_path_factory.mktemp("cache")  # TODO: why a cache dir per test function does not work?
     test_hf_cache_home = tmp_path_factory.getbasetemp() / "cache"
-    test_hf_datasets_cache = test_hf_cache_home / "datasets"
+    test_hf_evaluate_cache = test_hf_cache_home / "datasets"
     test_hf_metrics_cache = test_hf_cache_home / "metrics"
     test_hf_modules_cache = test_hf_cache_home / "modules"
-    monkeypatch.setattr("evaluate.config.HF_DATASETS_CACHE", str(test_hf_datasets_cache))
+    monkeypatch.setattr("evaluate.config.HF_EVALUATE_CACHE", str(test_hf_evaluate_cache))
     monkeypatch.setattr("evaluate.config.HF_METRICS_CACHE", str(test_hf_metrics_cache))
     monkeypatch.setattr("evaluate.config.HF_MODULES_CACHE", str(test_hf_modules_cache))
-    test_downloaded_datasets_path = test_hf_datasets_cache / "downloads"
-    monkeypatch.setattr("evaluate.config.DOWNLOADED_DATASETS_PATH", str(test_downloaded_datasets_path))
-    test_extracted_datasets_path = test_hf_datasets_cache / "downloads" / "extracted"
-    monkeypatch.setattr("evaluate.config.EXTRACTED_DATASETS_PATH", str(test_extracted_datasets_path))
+    test_DOWNLOADED_EVALUATE_PATH = test_hf_evaluate_cache / "downloads"
+    monkeypatch.setattr("evaluate.config.DOWNLOADED_EVALUATE_PATH", str(test_DOWNLOADED_EVALUATE_PATH))
+    test_EXTRACTED_EVALUATE_PATH = test_hf_evaluate_cache / "downloads" / "extracted"
+    monkeypatch.setattr("evaluate.config.EXTRACTED_EVALUATE_PATH", str(test_EXTRACTED_EVALUATE_PATH))
 
 
 @pytest.fixture(autouse=True, scope="session")
@@ -41,7 +41,7 @@ def disable_tqdm_output():
 @pytest.fixture(autouse=True)
 def set_update_download_counts_to_false(monkeypatch):
     # don't take tests into account when counting downloads
-    monkeypatch.setattr("datasets.config.HF_UPDATE_DOWNLOAD_COUNTS", False)
+    monkeypatch.setattr("evaluate.config.HF_UPDATE_DOWNLOAD_COUNTS", False)
 
 
 FILE_CONTENT = """\

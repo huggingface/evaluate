@@ -50,8 +50,8 @@ def hf_private_dataset_repo_txt_data_(hf_api: HfApi, hf_token, text_file):
 
 @pytest.fixture()
 def hf_private_dataset_repo_txt_data(hf_private_dataset_repo_txt_data_):
-    with patch("datasets.config.HF_ENDPOINT", ENDPOINT_STAGING):
-        with patch("datasets.config.HUB_DATASETS_URL", ENDPOINT_STAGING_DATASETS_URL):
+    with patch("evaluate.config.HF_ENDPOINT", ENDPOINT_STAGING):
+        with patch("evaluate.config.HUB_DATASETS_URL", ENDPOINT_STAGING_DATASETS_URL):
             yield hf_private_dataset_repo_txt_data_
 
 
@@ -76,6 +76,6 @@ def hf_private_dataset_repo_zipped_txt_data_(hf_api: HfApi, hf_token, zip_csv_pa
 
 @pytest.fixture()
 def hf_private_dataset_repo_zipped_txt_data(hf_private_dataset_repo_zipped_txt_data_):
-    with patch("datasets.config.HF_ENDPOINT", ENDPOINT_STAGING):
-        with patch("datasets.config.HUB_DATASETS_URL", ENDPOINT_STAGING_DATASETS_URL):
+    with patch("evaluate.config.HF_ENDPOINT", ENDPOINT_STAGING):
+        with patch("evaluate.config.HUB_DATASETS_URL", ENDPOINT_STAGING_DATASETS_URL):
             yield hf_private_dataset_repo_zipped_txt_data_

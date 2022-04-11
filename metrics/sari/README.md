@@ -33,7 +33,7 @@ It has two differences with the [original GitHub implementation](https://github.
 The metric takes 3 inputs: sources (a list of source sentence strings), predictions (a list of predicted sentence strings) and references (a list of lists of reference sentence strings)
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 sari = load_metric("sari")
 sources=["About 95 species are currently accepted."]
 predictions=["About 95 you now get in."]
@@ -62,7 +62,7 @@ More recent SARI scores for text simplification can be found on leaderboards for
 Perfect match between prediction and reference:
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 sari = load_metric("sari")
 sources=["About 95 species are currently accepted ."]
 predictions=["About 95 species are currently accepted ."]
@@ -75,7 +75,7 @@ print(sari_score)
 Partial match between prediction and reference:
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 sari = load_metric("sari")
 sources=["About 95 species are currently accepted ."]
 predictions=["About 95 you now get in ."]

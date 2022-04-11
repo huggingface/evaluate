@@ -87,16 +87,16 @@ def get_logger(name: Optional[str] = None) -> logging.Logger:
 def get_verbosity() -> int:
     """Return the current level for the HuggingFace datasets library's root logger.
     Returns:
-        Logging level, e.g., ``datasets.logging.DEBUG`` and ``datasets.logging.INFO``.
+        Logging level, e.g., ``evaluate.logging.DEBUG`` and ``evaluate.logging.INFO``.
 
     <Tip>
 
         HuggingFace datasets library has following logging levels:
-        - `datasets.logging.CRITICAL`, `datasets.logging.FATAL`
-        - `datasets.logging.ERROR`
-        - `datasets.logging.WARNING`, `datasets.logging.WARN`
-        - `datasets.logging.INFO`
-        - `datasets.logging.DEBUG`
+        - `evaluate.logging.CRITICAL`, `evaluate.logging.FATAL`
+        - `evaluate.logging.ERROR`
+        - `evaluate.logging.WARNING`, `evaluate.logging.WARN`
+        - `evaluate.logging.INFO`
+        - `evaluate.logging.DEBUG`
 
     </Tip>
     """
@@ -107,7 +107,7 @@ def set_verbosity(verbosity: int) -> None:
     """Set the level for the HuggingFace datasets library's root logger.
     Args:
         verbosity:
-            Logging level, e.g., ``datasets.logging.DEBUG`` and ``datasets.logging.INFO``.
+            Logging level, e.g., ``evaluate.logging.DEBUG`` and ``evaluate.logging.INFO``.
     """
     _get_library_root_logger().setLevel(verbosity)
 
@@ -117,7 +117,7 @@ def set_verbosity_info():
 
     This will display most of the logging information and tqdm bars.
 
-    Shortcut to ``datasets.logging.set_verbosity(datasets.logging.INFO)``
+    Shortcut to ``evaluate.logging.set_verbosity(evaluate.logging.INFO)``
     """
     return set_verbosity(INFO)
 
@@ -127,7 +127,7 @@ def set_verbosity_warning():
 
     This will display only the warning and errors logging information and tqdm bars.
 
-    Shortcut to ``datasets.logging.set_verbosity(datasets.logging.WARNING)``
+    Shortcut to ``evaluate.logging.set_verbosity(evaluate.logging.WARNING)``
     """
     return set_verbosity(WARNING)
 
@@ -137,7 +137,7 @@ def set_verbosity_debug():
 
     This will display all the logging information and tqdm bars.
 
-    Shortcut to ``datasets.logging.set_verbosity(datasets.logging.DEBUG)``
+    Shortcut to ``evaluate.logging.set_verbosity(evaluate.logging.DEBUG)``
     """
     return set_verbosity(DEBUG)
 
@@ -147,7 +147,7 @@ def set_verbosity_error():
 
     This will display only the errors logging information and tqdm bars.
 
-    Shortcut to ``datasets.logging.set_verbosity(datasets.logging.ERROR)``
+    Shortcut to ``evaluate.logging.set_verbosity(evaluate.logging.ERROR)``
     """
     return set_verbosity(ERROR)
 

@@ -10,7 +10,7 @@ SQuAD is a reading comprehension dataset, consisting of questions posed by crowd
 The metric takes two files or two lists of question-answers dictionaries as inputs : one with the predictions of the model and the other with the references to be compared to:
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 squad_metric = load_metric("squad")
 results = squad_metric.compute(predictions=predictions, references=references)
 ```
@@ -36,7 +36,7 @@ For more recent model performance, see the [dataset leaderboard](https://papersw
 Maximal values for both exact match and F1 (perfect match):
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 squad_metric = load_metric("squad")
 predictions = [{'prediction_text': '1976', 'id': '56e10a3be3433e1400422b22'}]
 references = [{'answers': {'answer_start': [97], 'text': ['1976']}, 'id': '56e10a3be3433e1400422b22'}]
@@ -48,7 +48,7 @@ results
 Minimal values for both exact match and F1 (no match):
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 squad_metric = load_metric("squad")
 predictions = [{'prediction_text': '1999', 'id': '56e10a3be3433e1400422b22'}]
 references = [{'answers': {'answer_start': [97], 'text': ['1976']}, 'id': '56e10a3be3433e1400422b22'}]
@@ -60,7 +60,7 @@ results
 Partial match (2 out of 3 answers correct) : 
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 squad_metric = load_metric("squad")
 predictions = [{'prediction_text': '1976', 'id': '56e10a3be3433e1400422b22'}, {'prediction_text': 'Beyonce', 'id': '56d2051ce7d4791d0090260b'},  {'prediction_text': 'climate change', 'id': '5733b5344776f419006610e1'}]
 references = [{'answers': {'answer_start': [97], 'text': ['1976']}, 'id': '56e10a3be3433e1400422b22'}, {'answers': {'answer_start': [233], 'text': ['Beyoncé and Bruno Mars']}, 'id': '56d2051ce7d4791d0090260b'}, {'answers': {'answer_start': [891], 'text': ['climate change']}, 'id': '5733b5344776f419006610e1'}]

@@ -1,4 +1,4 @@
-# Copyright 2020 The HuggingFace Datasets Authors.
+# Copyright 2020 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -20,7 +20,7 @@ from coval.eval import evaluator
 import evaluate
 
 
-logger = datasets.logging.get_logger(__name__)
+logger = evaluate.logging.get_logger(__name__)
 
 
 _CITATION = """\

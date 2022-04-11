@@ -22,7 +22,7 @@ The Code Eval metric calculates how good are predictions given a set of referenc
 `timeout`: The maximum time taken to produce a prediction before it is considered a "timeout". The default value is `3.0` (i.e. 3 seconds).
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 code_eval = load_metric("code_eval")
 test_cases = ["assert add(2,3)==5"]
 candidates = [["def add(a,b): return a*b", "def add(a, b): return a+b"]]
@@ -54,7 +54,7 @@ The [original CODEX paper](https://arxiv.org/pdf/2107.03374.pdf) reported that t
 Full match at `k=1`:
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 code_eval = load_metric("code_eval")
 test_cases = ["assert add(2,3)==5"]
 candidates = [["def add(a, b): return a+b"]]
@@ -66,7 +66,7 @@ print(pass_at_k)
 No match for k = 1:
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 code_eval = load_metric("code_eval")
 test_cases = ["assert add(2,3)==5"]
 candidates = [["def add(a,b): return a*b"]]
@@ -78,7 +78,7 @@ print(pass_at_k)
 Partial match at k=1, full match at k=2:
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 code_eval = load_metric("code_eval")
 test_cases = ["assert add(2,3)==5"]
 candidates = [["def add(a, b): return a+b", "def add(a,b): return a*b"]]

@@ -223,7 +223,7 @@ def cached_path(
     if download_config is None:
         download_config = DownloadConfig(**download_kwargs)
 
-    cache_dir = download_config.cache_dir or config.DOWNLOADED_DATASETS_PATH
+    cache_dir = download_config.cache_dir or config.DOWNLOADED_EVALUATE_PATH
     if isinstance(cache_dir, Path):
         cache_dir = str(cache_dir)
     if isinstance(url_or_filename, Path):
@@ -275,8 +275,6 @@ def get_datasets_user_agent(user_agent: Optional[Union[str, dict]] = None) -> st
         ua += f"; tensorflow/{config.TF_VERSION}"
     if config.JAX_AVAILABLE:
         ua += f"; jax/{config.JAX_VERSION}"
-    if config.BEAM_AVAILABLE:
-        ua += f"; apache_beam/{config.BEAM_VERSION}"
     if isinstance(user_agent, dict):
         ua += f"; {'; '.join(f'{k}/{v}' for k, v in user_agent.items())}"
     elif isinstance(user_agent, str):
@@ -305,8 +303,8 @@ class OfflineModeIsEnabled(ConnectionError):
 
 
 def _raise_if_offline_mode_is_enabled(msg: Optional[str] = None):
-    """Raise an OfflineModeIsEnabled error (subclass of ConnectionError) if HF_DATASETS_OFFLINE is True."""
-    if config.HF_DATASETS_OFFLINE:
+    """Raise an OfflineModeIsEnabled error (subclass of ConnectionError) if HF_EVALUATE_OFFLINE is True."""
+    if config.HF_EVALUATE_OFFLINE:
         raise OfflineModeIsEnabled(
             "Offline mode is enabled." if msg is None else "Offline mode is enabled. " + str(msg)
         )
@@ -349,7 +347,7 @@ def _request_with_retry(
 ) -> requests.Response:
     """Wrapper around requests to retry in case it fails with a ConnectTimeout, with exponential backoff.
 
-    Note that if the environment variable HF_DATASETS_OFFLINE is set to 1, then a OfflineModeIsEnabled error is raised.
+    Note that if the environment variable HF_EVALUATE_OFFLINE is set to 1, then a OfflineModeIsEnabled error is raised.
 
     Args:
         method (str): HTTP method, such as 'GET' or 'HEAD'.
@@ -486,7 +484,7 @@ def get_from_cache(
             and no cache on disk
     """
     if cache_dir is None:
-        cache_dir = config.HF_DATASETS_CACHE
+        cache_dir = config.HF_EVALUATE_CACHE
     if isinstance(cache_dir, Path):
         cache_dir = str(cache_dir)
 
