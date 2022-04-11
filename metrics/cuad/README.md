@@ -25,7 +25,7 @@ The CUAD metric takes two inputs :
  Note that `answer_start` values are not taken into account to compute the metric.
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 cuad_metric = load_metric("cuad")
 predictions = [{'prediction_text': ['The seller:', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.'], 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
 references = [{'answers': {'answer_start': [143, 49], 'text': ['The seller:', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.']}, 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
@@ -57,7 +57,7 @@ For more recent model performance, see the [dataset leaderboard](https://papersw
 Maximal values :
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 cuad_metric = load_metric("cuad")
 predictions = [{'prediction_text': ['The seller:', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.'], 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
 references = [{'answers': {'answer_start': [143, 49], 'text': ['The seller:', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.']}, 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
@@ -69,7 +69,7 @@ print(results)
 Minimal values:
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 cuad_metric = load_metric("cuad")
 predictions = [{'prediction_text': ['The Company appoints the Distributor as an exclusive distributor of Products in the Market, subject to the terms and conditions of this Agreement.'], 'id': 'LIMEENERGYCO_09_09_1999-EX-10-DISTRIBUTOR AGREEMENT__Exclusivity_0'}]
 references = [{'answers': {'answer_start': [143], 'text': 'The seller'}, 'id': 'LIMEENERGYCO_09_09_1999-EX-10-DISTRIBUTOR AGREEMENT__Exclusivity_0'}]
@@ -81,7 +81,7 @@ print(results)
 Partial match: 
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 cuad_metric = load_metric("cuad")
 predictions = [{'prediction_text': ['The seller:', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.'], 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
 predictions = [{'prediction_text': ['The Company appoints the Distributor as an exclusive distributor of Products in the Market, subject to the terms and conditions of this Agreement.', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.'], 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]

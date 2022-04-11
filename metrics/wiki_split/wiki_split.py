@@ -17,11 +17,11 @@ import re
 import string
 from collections import Counter
 
-import datasets
 import sacrebleu
 import sacremoses
 from packaging import version
 
+import datasets
 import evaluate
 
 

@@ -13,9 +13,9 @@
 # limitations under the License.
 """Recall metric."""
 
-import datasets
 from sklearn.metrics import recall_score
 
+import datasets
 import evaluate
 
 

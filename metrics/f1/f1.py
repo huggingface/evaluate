@@ -13,9 +13,9 @@
 # limitations under the License.
 """F1 metric."""
 
-import datasets
 from sklearn.metrics import f1_score
 
+import datasets
 import evaluate
 
 

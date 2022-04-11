@@ -1,4 +1,4 @@
-# Copyright 2020 The HuggingFace Datasets Authors.
+# Copyright 2020 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,11 +13,11 @@
 # limitations under the License.
 """ METEOR metric. """
 
-import datasets
 import numpy as np
 from datasets.config import importlib_metadata, version
 from nltk.translate import meteor_score
 
+import datasets
 import evaluate
 
 

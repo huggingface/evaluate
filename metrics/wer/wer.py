@@ -1,4 +1,4 @@
-# Copyright 2021 The HuggingFace Datasets Authors.
+# Copyright 2021 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
 # limitations under the License.
 """ Word Error Ratio (WER) metric. """
 
-import datasets
 from jiwer import compute_measures
 
+import datasets
 import evaluate
 
 

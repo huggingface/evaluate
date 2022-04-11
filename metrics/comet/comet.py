@@ -1,4 +1,4 @@
-# Copyright 2020 The HuggingFace Datasets Authors.
+# Copyright 2020 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,7 +19,7 @@ pip install unbabel-comet
 Usage:
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 comet_metric = load_metric('metrics/comet/comet.py')
 #comet_metric = load_metric('comet')
 #comet_metric = load_metric('comet', 'wmt-large-hter-estimator')
@@ -35,13 +35,13 @@ predictions['scores']
 """
 
 import comet  # From: unbabel-comet
-import datasets
 import torch
 
+import datasets
 import evaluate
 
 
-logger = datasets.logging.get_logger(__name__)
+logger = evaluate.logging.get_logger(__name__)
 
 _CITATION = """\
 @inproceedings{rei-EtAl:2020:WMT,

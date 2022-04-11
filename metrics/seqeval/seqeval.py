@@ -1,4 +1,4 @@
-# Copyright 2020 The HuggingFace Datasets Authors.
+# Copyright 2020 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,9 +16,9 @@
 import importlib
 from typing import List, Optional, Union
 
-import datasets
 from seqeval.metrics import accuracy_score, classification_report
 
+import datasets
 import evaluate
 
 

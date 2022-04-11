@@ -1,5 +1,5 @@
 # coding=utf-8
-# Copyright 2020 The HuggingFace Datasets Authors.
+# Copyright 2020 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -14,7 +14,6 @@
 # limitations under the License.
 """ MAUVE metric from https://github.com/krishnap25/mauve. """
 
-import datasets
 import faiss  # Here to have a nice missing dependency error message early on
 import numpy  # Here to have a nice missing dependency error message early on
 import requests  # Here to have a nice missing dependency error message early on
@@ -22,6 +21,7 @@ import sklearn  # Here to have a nice missing dependency error message early on
 import tqdm  # Here to have a nice missing dependency error message early on
 from mauve import compute_mauve  # From: mauve-text
 
+import datasets
 import evaluate
 
 

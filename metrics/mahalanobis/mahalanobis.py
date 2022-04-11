@@ -13,9 +13,9 @@
 # limitations under the License.
 """Mahalanobis metric."""
 
-import datasets
 import numpy as np
 
+import datasets
 import evaluate
 
 

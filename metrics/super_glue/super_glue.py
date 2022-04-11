@@ -1,4 +1,4 @@
-# Copyright 2020 The HuggingFace Datasets Authors.
+# Copyright 2020 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,9 +13,9 @@
 # limitations under the License.
 """The SuperGLUE benchmark metric."""
 
-import datasets
 from sklearn.metrics import f1_score, matthews_corrcoef
 
+import datasets
 import evaluate
 
 from .record_evaluation import evaluate as evaluate_record

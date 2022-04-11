@@ -13,9 +13,9 @@
 # limitations under the License.
 """MSE - Mean Squared Error Metric"""
 
-import datasets
 from sklearn.metrics import mean_squared_error
 
+import datasets
 import evaluate
 
 

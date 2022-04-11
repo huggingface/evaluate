@@ -15,7 +15,7 @@ The exact match score of a set of predictions is the sum of all of the individua
 ## How to Use
 
 ```python
-from datasets import load_metric
+from evaluate import load_metric
 exact_match_metric = load_metric("exact_match")
 results = exact_match_metric.compute(predictions=predictions, references=references)
 ```

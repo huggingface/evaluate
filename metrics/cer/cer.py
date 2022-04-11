@@ -1,4 +1,4 @@
-# Copyright 2021 The HuggingFace Datasets Authors.
+# Copyright 2021 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -15,12 +15,12 @@
 
 from typing import List
 
-import datasets
 import jiwer
 import jiwer.transforms as tr
 from datasets.config import PY_VERSION
 from packaging import version
 
+import datasets
 import evaluate
 
 

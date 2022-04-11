@@ -13,9 +13,9 @@
 # limitations under the License.
 """Accuracy metric."""
 
-import datasets
 from sklearn.metrics import accuracy_score
 
+import datasets
 import evaluate
 
 

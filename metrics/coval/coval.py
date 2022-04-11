@@ -1,4 +1,4 @@
-# Copyright 2020 The HuggingFace Datasets Authors.
+# Copyright 2020 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,14 +13,14 @@
 # limitations under the License.
 """ CoVal metric. """
 import coval  # From: git+https://github.com/ns-moosavi/coval.git noqa: F401
-import datasets
 from coval.conll import reader, util
 from coval.eval import evaluator
 
+import datasets
 import evaluate
 
 
-logger = datasets.logging.get_logger(__name__)
+logger = evaluate.logging.get_logger(__name__)
 
 
 _CITATION = """\
