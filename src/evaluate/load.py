@@ -22,18 +22,15 @@ import os
 import re
 import shutil
 import time
-from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Optional, Tuple, Type, Union
 from urllib.parse import urlparse
 
 from datasets.builder import DatasetBuilder
-from datasets.data_files import DataFilesList
 from datasets.packaged_modules import _EXTENSION_TO_MODULE, _hash_python_lines
 from datasets.utils.download_manager import DownloadMode
 from datasets.utils.filelock import FileLock
-from datasets.utils.streaming_download_manager import StreamingDownloadManager, xglob, xjoin
 from datasets.utils.version import Version
 
 from . import config
@@ -394,46 +391,6 @@ def _create_importable_file(
         [os.path.basename(dynamic_modules_path), module_namespace, name.replace("/", "--"), hash, name.split("/")[-1]]
     )
     return module_path, hash
-
-
-def infer_module_for_data_files(
-    data_files_list: DataFilesList, use_auth_token: Optional[Union[bool, str]] = None
-) -> Optional[str]:
-    extensions_counter = Counter(
-        suffix[1:]
-        for filepath in data_files_list[: config.DATA_FILES_MAX_NUMBER_FOR_MODULE_INFERENCE]
-        for suffix in Path(filepath).suffixes
-    )
-    if extensions_counter:
-        for ext, _ in extensions_counter.most_common():
-            if ext in _EXTENSION_TO_MODULE:
-                return _EXTENSION_TO_MODULE[ext]
-            elif ext == "zip":
-                return infer_module_for_data_files_in_archives(data_files_list, use_auth_token=use_auth_token)
-
-
-def infer_module_for_data_files_in_archives(
-    data_files_list: DataFilesList, use_auth_token: Optional[Union[bool, str]]
-) -> Optional[str]:
-    archived_files = []
-    archive_files_counter = 0
-    for filepath in data_files_list:
-        if str(filepath).endswith(".zip"):
-            archive_files_counter += 1
-            if archive_files_counter > config.GLOBBED_DATA_FILES_MAX_NUMBER_FOR_MODULE_INFERENCE:
-                break
-            extracted = xjoin(StreamingDownloadManager().extract(filepath), "**")
-            archived_files += [
-                f.split("::")[0]
-                for f in xglob(extracted, recursive=True, use_auth_token=use_auth_token)[
-                    : config.ARCHIVED_DATA_FILES_MAX_NUMBER_FOR_MODULE_INFERENCE
-                ]
-            ]
-    extensions_counter = Counter(suffix[1:] for filepath in archived_files for suffix in Path(filepath).suffixes)
-    if extensions_counter:
-        most_common = extensions_counter.most_common(1)[0][0]
-        if most_common in _EXTENSION_TO_MODULE:
-            return _EXTENSION_TO_MODULE[most_common]
 
 
 @dataclass
