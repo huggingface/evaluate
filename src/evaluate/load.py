@@ -55,7 +55,6 @@ from datasets.utils.version import Version
 from huggingface_hub import HfApi, HfFolder
 
 from . import config
-from .info import DatasetInfo, DatasetInfosDict
 from .metric import Metric
 from .utils.file_utils import (
     DownloadConfig,

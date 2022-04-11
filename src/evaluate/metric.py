@@ -28,9 +28,10 @@ from datasets.features import Features
 from datasets.utils.download_manager import DownloadManager
 from datasets.utils.filelock import BaseFileLock, FileLock, Timeout
 from datasets.utils.py_utils import copyfunc, temp_seed
+from datasets import DatasetInfo
 
 from . import config
-from .info import DatasetInfo, MetricInfo
+from .info import MetricInfo
 from .naming import camelcase_to_snakecase
 from .utils.file_utils import DownloadConfig
 from .utils.logging import get_logger

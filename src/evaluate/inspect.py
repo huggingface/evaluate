@@ -22,8 +22,8 @@ from datasets.utils import DownloadConfig
 from datasets.utils.download_manager import DownloadMode
 from datasets.utils.streaming_download_manager import StreamingDownloadManager
 from datasets.utils.version import Version
+from datasets import DatasetInfo
 
-from .info import DatasetInfo
 from .load import (
     dataset_module_factory,
     extend_dataset_builder_for_streaming,

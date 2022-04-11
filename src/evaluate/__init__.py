@@ -34,7 +34,7 @@ SCRIPTS_VERSION = "main" if version.parse(__version__).is_devrelease else __vers
 del pyarrow
 del version
 
-from .info import DatasetInfo, MetricInfo
+from .info import MetricInfo
 from .inspect import (
     get_dataset_config_info,
     get_dataset_config_names,
