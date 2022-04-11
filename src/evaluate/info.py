@@ -44,26 +44,6 @@ logger = get_logger(__name__)
 
 
 @dataclass
-class SupervisedKeysData:
-    input: str = ""
-    output: str = ""
-
-
-@dataclass
-class DownloadChecksumsEntryData:
-    key: str = ""
-    value: str = ""
-
-
-class MissingCachedSizesConfigError(Exception):
-    """The expected cached sizes of the download file are missing."""
-
-
-class NonMatchingCachedSizesError(Exception):
-    """The prepared split doesn't have expected sizes."""
-
-
-@dataclass
 class MetricInfo:
     """Information about a metric.
 
