@@ -13,9 +13,9 @@
 # limitations under the License.
 """Accuracy metric for the Mathematics Aptitude Test of Heuristics (MATH) dataset."""
 
+import datasets
 import math_equivalence  # From: git+https://github.com/hendrycks/math.git
 
-import datasets
 import evaluate
 
 

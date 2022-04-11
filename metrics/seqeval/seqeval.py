@@ -16,9 +16,9 @@
 import importlib
 from typing import List, Optional, Union
 
+import datasets
 from seqeval.metrics import accuracy_score, classification_report
 
-import datasets
 import evaluate
 
 

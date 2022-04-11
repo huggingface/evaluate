@@ -13,9 +13,9 @@
 # limitations under the License.
 """Precision metric."""
 
+import datasets
 from sklearn.metrics import precision_score
 
-import datasets
 import evaluate
 
 

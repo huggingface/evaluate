@@ -21,6 +21,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pyarrow as pa
+from datasets import DatasetInfo
 from datasets.arrow_dataset import Dataset
 from datasets.arrow_reader import ArrowReader
 from datasets.arrow_writer import ArrowWriter
@@ -28,8 +29,6 @@ from datasets.features import Features
 from datasets.utils.download_manager import DownloadManager
 from datasets.utils.filelock import BaseFileLock, FileLock, Timeout
 from datasets.utils.py_utils import copyfunc, temp_seed
-
-from datasets import DatasetInfo
 
 from . import config
 from .info import MetricInfo

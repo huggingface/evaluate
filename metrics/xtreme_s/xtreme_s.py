@@ -15,11 +15,11 @@
 
 from typing import List
 
+import datasets
 from datasets.config import PY_VERSION
 from packaging import version
 from sklearn.metrics import f1_score
 
-import datasets
 import evaluate
 
 

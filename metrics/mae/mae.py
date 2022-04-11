@@ -13,9 +13,9 @@
 # limitations under the License.
 """MAE - Mean Absolute Error Metric"""
 
+import datasets
 from sklearn.metrics import mean_absolute_error
 
-import datasets
 import evaluate
 
 

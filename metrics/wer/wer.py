@@ -13,9 +13,9 @@
 # limitations under the License.
 """ Word Error Ratio (WER) metric. """
 
+import datasets
 from jiwer import compute_measures
 
-import datasets
 import evaluate
 
 

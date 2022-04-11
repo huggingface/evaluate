@@ -13,9 +13,9 @@
 # limitations under the License.
 """Spearman correlation coefficient metric."""
 
+import datasets
 from scipy.stats import spearmanr
 
-import datasets
 import evaluate
 
 

@@ -15,10 +15,10 @@
 
 import random
 
+import datasets
 import numpy as np
 import scipy.stats
 
-import datasets
 import evaluate
 
 from .gec_gleu import GLEU  # From: https://github.com/cnap/gec-ranking/blob/master/scripts/gleu.py

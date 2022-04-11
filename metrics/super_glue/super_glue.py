@@ -13,9 +13,9 @@
 # limitations under the License.
 """The SuperGLUE benchmark metric."""
 
+import datasets
 from sklearn.metrics import f1_score, matthews_corrcoef
 
-import datasets
 import evaluate
 
 from .record_evaluation import evaluate as evaluate_record

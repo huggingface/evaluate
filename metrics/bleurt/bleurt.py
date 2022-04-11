@@ -15,9 +15,9 @@
 
 import os
 
+import datasets
 from bleurt import score  # From: git+https://github.com/google-research/bleurt.git
 
-import datasets
 import evaluate
 
 

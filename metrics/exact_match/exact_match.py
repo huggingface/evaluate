@@ -15,9 +15,9 @@
 import re
 import string
 
+import datasets
 import numpy as np
 
-import datasets
 import evaluate
 
 

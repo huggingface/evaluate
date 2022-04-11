@@ -14,6 +14,7 @@
 """ CUAD metric. """
 
 import datasets
+
 import evaluate
 
 from .compute_score import compute_score

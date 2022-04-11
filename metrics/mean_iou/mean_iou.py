@@ -15,9 +15,9 @@
 
 from typing import Dict, Optional
 
+import datasets
 import numpy as np
 
-import datasets
 import evaluate
 
 

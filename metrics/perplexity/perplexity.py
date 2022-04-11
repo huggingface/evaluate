@@ -13,10 +13,10 @@
 # limitations under the License.
 """Perplexity Metric."""
 
+import datasets
 import torch
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
-import datasets
 import evaluate
 from evaluate import logging
 

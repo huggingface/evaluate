@@ -13,10 +13,10 @@
 # limitations under the License.
 """FrugalScore metric."""
 
+import datasets
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trainer, TrainingArguments
 
-import datasets
 import evaluate
 
 

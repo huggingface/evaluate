@@ -5,14 +5,13 @@ import os
 import tarfile
 import textwrap
 
+import datasets
 import pyarrow as pa
 import pyarrow.parquet as pq
 import pytest
+from datasets import config
 from datasets.arrow_dataset import Dataset
 from datasets.features import ClassLabel, Features, Sequence, Value
-
-import datasets
-from datasets import config
 
 from .hub_fixtures import *  # noqa: load hub fixtures
 from .s3_fixtures import *  # noqa: load s3 fixtures

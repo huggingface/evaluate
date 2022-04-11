@@ -35,9 +35,9 @@ predictions['scores']
 """
 
 import comet  # From: unbabel-comet
+import datasets
 import torch
 
-import datasets
 import evaluate
 
 

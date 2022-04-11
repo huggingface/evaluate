@@ -13,10 +13,10 @@
 # limitations under the License.
 """ CoVal metric. """
 import coval  # From: git+https://github.com/ns-moosavi/coval.git noqa: F401
+import datasets
 from coval.conll import reader, util
 from coval.eval import evaluator
 
-import datasets
 import evaluate
 
 

@@ -15,12 +15,12 @@
 
 from typing import List
 
+import datasets
 import jiwer
 import jiwer.transforms as tr
 from datasets.config import PY_VERSION
 from packaging import version
 
-import datasets
 import evaluate
 
 

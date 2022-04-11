@@ -15,12 +15,12 @@
 
 # The dependencies in https://github.com/google-research/google-research/blob/master/rouge/requirements.txt
 import absl  # Here to have a nice missing dependency error message early on
+import datasets
 import nltk  # Here to have a nice missing dependency error message early on
 import numpy  # Here to have a nice missing dependency error message early on
 import six  # Here to have a nice missing dependency error message early on
 from rouge_score import rouge_scorer, scoring
 
-import datasets
 import evaluate
 
 

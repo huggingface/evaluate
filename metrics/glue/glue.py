@@ -13,10 +13,10 @@
 # limitations under the License.
 """ GLUE benchmark metric. """
 
+import datasets
 from scipy.stats import pearsonr, spearmanr
 from sklearn.metrics import f1_score, matthews_corrcoef
 
-import datasets
 import evaluate
 
 
