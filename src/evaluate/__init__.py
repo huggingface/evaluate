@@ -45,7 +45,7 @@ from .inspect import (
     list_datasets,
     list_metrics,
 )
-from .load import load_dataset, load_dataset_builder, load_from_disk, load_metric
+from .load import load_metric
 from .metric import Metric
 from .utils import *
 from .utils import logging
