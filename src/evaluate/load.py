@@ -161,7 +161,7 @@ def convert_github_url(url_path: str) -> Tuple[str, Optional[str]]:
 
 def increase_load_count(name: str, resource_type: str):
     """Update the download count of a dataset or metric."""
-    if not config.HF_DATASETS_OFFLINE and config.HF_UPDATE_DOWNLOAD_COUNTS:
+    if not config.HF_EVALUATE_OFFLINE and config.HF_UPDATE_DOWNLOAD_COUNTS:
         try:
             head_hf_s3(name, filename=name + ".py", dataset=(resource_type == "dataset"))
         except Exception:
