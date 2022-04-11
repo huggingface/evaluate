@@ -25,45 +25,24 @@ import time
 from collections import Counter
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Dict, List, Mapping, Optional, Sequence, Tuple, Type, Union
+from typing import List, Optional, Tuple, Type, Union
 from urllib.parse import urlparse
 
-import fsspec
-import requests
-from datasets.arrow_dataset import Dataset
 from datasets.builder import DatasetBuilder
-from datasets.data_files import (
-    DataFilesDict,
-    DataFilesList,
-    get_patterns_in_dataset_repository,
-    get_patterns_locally,
-    sanitize_patterns,
-)
-from datasets.dataset_dict import DatasetDict, IterableDatasetDict
-from datasets.features import Features
-from datasets.filesystems import extract_path_from_uri, is_remote_filesystem
-from datasets.iterable_dataset import IterableDataset
-from datasets.packaged_modules import _EXTENSION_TO_MODULE, _PACKAGED_DATASETS_MODULES, _hash_python_lines
-from datasets.splits import Split
-from datasets.streaming import extend_module_for_streaming
-from datasets.tasks import TaskTemplate
+from datasets.data_files import DataFilesList
+from datasets.packaged_modules import _EXTENSION_TO_MODULE, _hash_python_lines
 from datasets.utils.download_manager import DownloadMode
 from datasets.utils.filelock import FileLock
-from datasets.utils.info_utils import is_small_dataset
 from datasets.utils.streaming_download_manager import StreamingDownloadManager, xglob, xjoin
 from datasets.utils.version import Version
-from huggingface_hub import HfApi, HfFolder
 
 from . import config
 from .metric import Metric
 from .utils.file_utils import (
     DownloadConfig,
-    OfflineModeIsEnabled,
-    _raise_if_offline_mode_is_enabled,
     cached_path,
     head_hf_s3,
     hf_github_url,
-    hf_hub_url,
     init_hf_modules,
     is_relative_path,
     relative_to_absolute_path,
@@ -455,7 +434,6 @@ def infer_module_for_data_files_in_archives(
         most_common = extensions_counter.most_common(1)[0][0]
         if most_common in _EXTENSION_TO_MODULE:
             return _EXTENSION_TO_MODULE[most_common]
-
 
 
 @dataclass

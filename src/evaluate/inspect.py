@@ -15,22 +15,12 @@
 # Lint as: python3
 """ List and inspect datasets and metrics."""
 
-from typing import Dict, List, Mapping, Optional, Sequence, Union
+from typing import Optional
 
 import huggingface_hub
 from datasets.utils import DownloadConfig
-from datasets.utils.download_manager import DownloadMode
-from datasets.utils.streaming_download_manager import StreamingDownloadManager
-from datasets.utils.version import Version
-from datasets import DatasetInfo
 
-from .load import (
-    dataset_module_factory,
-    extend_dataset_builder_for_streaming,
-    import_main_class,
-    load_dataset_builder,
-    metric_module_factory,
-)
+from .load import metric_module_factory
 from .utils.logging import get_logger
 
 

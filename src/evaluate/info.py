@@ -28,18 +28,13 @@ processed the dataset as well:
  - etc.
 """
 
-import copy
 import dataclasses
 import json
 import os
 from dataclasses import asdict, dataclass, field
-from typing import Dict, List, Optional, Union
+from typing import List, Optional
 
 from datasets.features import Features, Value
-from datasets.splits import SplitDict
-from datasets.tasks import TaskTemplate, task_template_from_dict
-from datasets.utils import Version
-from datasets.utils.py_utils import unique_values
 
 from . import config
 from .utils.logging import get_logger
