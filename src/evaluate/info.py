@@ -13,19 +13,7 @@
 # limitations under the License.
 
 # Lint as: python3
-""" DatasetInfo and MetricInfo record information we know about a dataset and a metric.
-
-This includes things that we know about the dataset statically, i.e.:
- - description
- - canonical location
- - does it have validation and tests splits
- - size
- - etc.
-
-This also includes the things that can and should be computed once we've
-processed the dataset as well:
- - number of examples (in each split)
- - etc.
+""" MetricInfo records information we know about a dataset and a metric.
 """
 
 import dataclasses

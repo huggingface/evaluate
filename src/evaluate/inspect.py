@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Lint as: python3
-""" List and inspect datasets and metrics."""
+""" List and inspect metrics."""
 
 from typing import Optional
 
