@@ -13,6 +13,7 @@
 # limitations under the License.
 """TODO: Add a description here."""
 
+import evaluate
 import datasets
 
 
