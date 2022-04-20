@@ -70,8 +70,8 @@ class NewMetric(evaluate.Metric):
             inputs_description=_KWARGS_DESCRIPTION,
             # This defines the format of each prediction and reference
             features=datasets.Features({
-                'predictions': datasets.Value('string'),
-                'references': datasets.Value('string'),
+                'predictions': datasets.Value('int64'),
+                'references': datasets.Value('int64'),
             }),
             # Homepage of the metric for documentation
             homepage="http://metric.homepage",
@@ -83,23 +83,49 @@ class NewMetric(evaluate.Metric):
     def _download_and_prepare(self, dl_manager):
         """Optional: download external resources useful to compute the scores"""
         # TODO: Download external resources if needed
-        bad_words_path = dl_manager.download_and_extract(BAD_WORDS_URL)
-        self.bad_words = {w.strip() for w in open(bad_words_path, encoding="utf-8")}
+        pass
 
     def _compute(self, predictions, references):
         """Returns the scores"""
         # TODO: Compute the different scores of the metric
         accuracy = sum(i == j for i, j in zip(predictions, references)) / len(predictions)
-
-        if self.config_name == "max":
-            second_score = max(abs(len(i) - len(j)) for i, j in zip(predictions, references) if i not in self.bad_words)
-        elif self.config_name == "mean":
-            second_score = sum(abs(len(i) - len(j)) for i, j in zip(predictions, references) if i not in self.bad_words)
-            second_score /= sum(i not in self.bad_words for i in predictions)
-        else:
-            raise ValueError(f"Invalid config name for NewMetric: {self.config_name}. Please use 'max' or 'mean'.")
-
         return {
             "accuracy": accuracy,
-            "second_score": second_score,
+        }
+
+
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class NewMetricEM(evaluate.Metric):
+    """TODO: Short description of my metric."""
+
+    def _info(self):
+        # TODO: Specifies the evaluate.MetricInfo object
+        return evaluate.MetricInfo(
+            # This is the description that will appear on the metrics page.
+            description=_DESCRIPTION,
+            citation=_CITATION,
+            inputs_description=_KWARGS_DESCRIPTION,
+            # This defines the format of each prediction and reference
+            features=datasets.Features({
+                'predictions': datasets.Value("string"),
+                'references': datasets.Sequence(datasets.Value('string')),
+            }),
+            # Homepage of the metric for documentation
+            homepage="http://metric.homepage",
+            # Additional links to the codebase or references
+            codebase_urls=["http://github.com/path/to/codebase/of/new_metric"],
+            reference_urls=["http://path.to.reference.url/new_metric"]
+        )
+
+    def _download_and_prepare(self, dl_manager):
+        """Optional: download external resources useful to compute the scores"""
+        # TODO: Download external resources if needed
+        pass
+
+    def _compute(self, predictions, references):
+        """Returns the scores"""
+        # TODO: Compute the different scores of the metric
+        em = sum([max([int(pred==ref) for ref in refs]) for pred, refs in zip(predictions, references)])/len(predictions)
+        return {
+            "exact_match": em,
         }
