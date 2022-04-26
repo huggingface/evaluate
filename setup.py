@@ -151,6 +151,7 @@ setup(
     license="Apache 2.0",
     package_dir={"": "src"},
     packages=find_packages("src"),
+    entry_points={"console_scripts": ["evaluate-cli=evaluate.commands.evaluate_cli:main"]},
     install_requires=REQUIRED_PKGS,
     extras_require=EXTRAS_REQUIRE,
     classifiers=[
