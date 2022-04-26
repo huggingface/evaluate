@@ -12,6 +12,14 @@ REGEX_YAML_BLOCK = re.compile(r"---[\n\r]+([\S\s]*?)[\n\r]+---[\n\r]")
 
 
 def infer_gradio_input_types(feature_types):
+    """
+    Maps metric feature types to input types for gradio Dataframes:
+        - float/int -> numbers
+        - string -> strings
+        - any other -> json
+    Note that json is not a native gradio type but will be treated as string that
+    is then parsed as a json.
+    """
     input_types = []
     for feature_type in feature_types:
         input_type = "json"
@@ -25,10 +33,12 @@ def infer_gradio_input_types(feature_types):
 
 
 def json_to_string_type(input_types):
+    """Maps json input type to str."""
     return ["str" if i == "json" else i for i in input_types]
 
 
 def parse_readme(filepath):
+    """Parses a repositories README and removes"""
     if not os.path.exists(filepath):
         return "No README.md found."
     with open(filepath, "r") as f:
@@ -40,6 +50,7 @@ def parse_readme(filepath):
 
 
 def parse_gradio_data(data, input_types):
+    """Parses data from gradio Dataframe for use in metric."""
     metric_inputs = {}
     data.dropna(inplace=True)
     for feature_name, input_type in zip(data, input_types):
@@ -53,9 +64,13 @@ def parse_gradio_data(data, input_types):
 
 
 def parse_test_cases(test_cases, feature_names, input_types):
+    """
+    Parses test cases to be used in gradio Dataframe. Note that an apostrophe is added
+    to strings to follow the format in json.
+    """
     if len(test_cases) == 0:
         return None
-    example_dataframes = []
+    examples = []
     for test_case in test_cases:
         parsed_cases = []
         for feat, input_type in zip(feature_names, input_types):
@@ -65,8 +80,8 @@ def parse_test_cases(test_cases, feature_names, input_types):
                 parsed_cases.append(['"' + element + '"' for element in test_case[feat]])
             else:
                 parsed_cases.append(test_case[feat])
-        example_dataframes.append([list(i) for i in zip(*parsed_cases)])
-    return example_dataframes
+        examples.append([list(i) for i in zip(*parsed_cases)])
+    return examples
 
 
 def launch_gradio_widget(metric):
