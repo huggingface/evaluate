@@ -4,9 +4,12 @@ import re
 import sys
 from pathlib import Path
 
-import gradio as gr
 from datasets import Value
 
+from .logging import get_logger
+
+
+logger = get_logger(__name__)
 
 REGEX_YAML_BLOCK = re.compile(r"---[\n\r]+([\S\s]*?)[\n\r]+---[\n\r]")
 
@@ -86,6 +89,13 @@ def parse_test_cases(test_cases, feature_names, input_types):
 
 def launch_gradio_widget(metric):
     """Launches `metric` widget with Gradio."""
+
+    try:
+        import gradio as gr
+    except ImportError as error:
+        logger.error("To create a metric widget with Gradio make sure gradio is installed.")
+        raise error
+
     local_path = Path(sys.path[0])
 
     (feature_names, feature_types) = zip(*metric.features.items())
