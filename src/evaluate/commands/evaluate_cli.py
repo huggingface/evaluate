@@ -1,11 +1,10 @@
 import argparse
 import os
-import shutil
 import subprocess
 from pathlib import Path
 
 from cookiecutter.main import cookiecutter
-from huggingface_hub import HfApi, Repository, create_repo, delete_repo
+from huggingface_hub import HfApi, Repository, create_repo
 
 
 INSTRUCTIONS = """\
