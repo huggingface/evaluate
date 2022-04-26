@@ -58,7 +58,7 @@ BAD_WORDS_URL = "http://url/to/external/resource/bad_words.txt"
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class NewMetric(evaluate.Metric):
+class {{ cookiecutter.metric_class_name }}(evaluate.Metric):
     """TODO: Short description of my metric."""
 
     def _info(self):
@@ -91,41 +91,4 @@ class NewMetric(evaluate.Metric):
         accuracy = sum(i == j for i, j in zip(predictions, references)) / len(predictions)
         return {
             "accuracy": accuracy,
-        }
-
-
-@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class NewMetricEM(evaluate.Metric):
-    """TODO: Short description of my metric."""
-
-    def _info(self):
-        # TODO: Specifies the evaluate.MetricInfo object
-        return evaluate.MetricInfo(
-            # This is the description that will appear on the metrics page.
-            description=_DESCRIPTION,
-            citation=_CITATION,
-            inputs_description=_KWARGS_DESCRIPTION,
-            # This defines the format of each prediction and reference
-            features=datasets.Features({
-                'predictions': datasets.Value("string"),
-                'references': datasets.Sequence(datasets.Value('string')),
-            }),
-            # Homepage of the metric for documentation
-            homepage="http://metric.homepage",
-            # Additional links to the codebase or references
-            codebase_urls=["http://github.com/path/to/codebase/of/new_metric"],
-            reference_urls=["http://path.to.reference.url/new_metric"]
-        )
-
-    def _download_and_prepare(self, dl_manager):
-        """Optional: download external resources useful to compute the scores"""
-        # TODO: Download external resources if needed
-        pass
-
-    def _compute(self, predictions, references):
-        """Returns the scores"""
-        # TODO: Compute the different scores of the metric
-        em = sum([max([int(pred==ref) for ref in refs]) for pred, refs in zip(predictions, references)])/len(predictions)
-        return {
-            "exact_match": em,
         }

@@ -1,7 +1,7 @@
 ---
-title: Accuracy_metric
+title: {{ cookiecutter.metric_name }}
 datasets:
-- some_dataset
+- {{ cookiecutter.dataset_name }} 
 tags:
 - metric
 sdk: gradio
@@ -10,9 +10,9 @@ app_file: app.py
 pinned: false
 ---
 
-# Metric
+# Metric card
 
-## Metric description
+## Description
 
 ## How to use
 
