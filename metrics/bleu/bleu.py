@@ -62,9 +62,11 @@ _KWARGS_DESCRIPTION = """
 Computes BLEU score of translated segments against one or more references.
 Args:
     predictions: list of translations to score.
-        Each translation should be tokenized into a list of tokens.
     references: list of lists of references for each translation.
-        Each reference should be tokenized into a list of tokens.
+    tokenizer : approach used for tokenizing `predictions` and `references`.
+        The default tokenizer is based on whitespace (using the `string.split()` function).
+        This can be replaced by any function that takes a string as input and returns a list of tokens as output.
+        E.g. `word_tokenize()` from NLTK or pretrained tokenizers from the Tokenizers library
     max_order: Maximum n-gram order to use when computing BLEU score.
     smooth: Whether or not to apply Lin et al. 2004 smoothing.
 Returns:
@@ -100,10 +102,8 @@ class Bleu(evaluate.Metric):
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
                 {
-                    "predictions": datasets.Sequence(datasets.Value("string", id="token"), id="sequence"),
-                    "references": datasets.Sequence(
-                        datasets.Sequence(datasets.Value("string", id="token"), id="sequence"), id="references"
-                    ),
+                "predictions" : datasets.Value("string", id="sequence"),
+                "references" : datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
                 }
             ),
             codebase_urls=["https://github.com/tensorflow/nmt/blob/master/nmt/scripts/bleu.py"],
@@ -113,7 +113,12 @@ class Bleu(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references, max_order=4, smooth=False):
+    def tokenizer(string):
+        return string.split()
+
+    def _compute(self, predictions, references, tokenizer=tokenizer, max_order=4, smooth=False):
+        references = [[tokenizer(r) for r in ref] for ref in references]
+        predictions = [tokenizer(p) for p in predictions]
         score = compute_bleu(
             reference_corpus=references, translation_corpus=predictions, max_order=max_order, smooth=smooth
         )
