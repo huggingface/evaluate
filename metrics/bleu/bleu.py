@@ -19,6 +19,7 @@ import evaluate
 
 from .nmt_bleu import compute_bleu  # From: https://github.com/tensorflow/nmt/blob/master/nmt/scripts/bleu.py
 
+from .tokenizer_13a import Tokenizer13a
 
 _CITATION = """\
 @INPROCEEDINGS{Papineni02bleu:a,
@@ -43,19 +44,13 @@ _CITATION = """\
 """
 
 _DESCRIPTION = """\
-BLEU (bilingual evaluation understudy) is an algorithm for evaluating the quality of text which has been machine-translated from one natural language to another.
-Quality is considered to be the correspondence between a machine's output and that of a human: "the closer a machine translation is to a professional human translation,
-the better it is" – this is the central idea behind BLEU. BLEU was one of the first metrics to claim a high correlation with human judgements of quality, and
-remains one of the most popular automated and inexpensive metrics.
+BLEU (Bilingual Evaluation Understudy) is an algorithm for evaluating the quality of text which has been machine-translated from one natural language to another.
+Quality is considered to be the correspondence between a machine's output and that of a human: "the closer a machine translation is to a professional human translation, the better it is"
+– this is the central idea behind BLEU. BLEU was one of the first metrics to claim a high correlation with human judgements of quality, and remains one of the most popular automated and inexpensive metrics.
 
 Scores are calculated for individual translated segments—generally sentences—by comparing them with a set of good quality reference translations.
-Those scores are then averaged over the whole corpus to reach an estimate of the translation's overall quality. Intelligibility or grammatical correctness
-are not taken into account[citation needed].
-
-BLEU's output is always a number between 0 and 1. This value indicates how similar the candidate text is to the reference texts, with values closer to 1
-representing more similar texts. Few human translations will attain a score of 1, since this would indicate that the candidate is identical to one of the
-reference translations. For this reason, it is not necessary to attain a score of 1. Because there are more opportunities to match, adding additional
-reference translations will increase the BLEU score.
+Those scores are then averaged over the whole corpus to reach an estimate of the translation's overall quality.
+Neither intelligibility nor grammatical correctness are not taken into account.
 """
 
 _KWARGS_DESCRIPTION = """
@@ -64,9 +59,8 @@ Args:
     predictions: list of translations to score.
     references: list of lists of references for each translation.
     tokenizer : approach used for tokenizing `predictions` and `references`.
-        The default tokenizer is based on whitespace (using the `string.split()` function).
+        The default tokenizer is `tokenizer_13a`, a minimal tokenization approach that is equivalent to `mteval-v13a`, used by WMT.
         This can be replaced by any function that takes a string as input and returns a list of tokens as output.
-        E.g. `word_tokenize()` from NLTK or pretrained tokenizers from the Tokenizers library
     max_order: Maximum n-gram order to use when computing BLEU score.
     smooth: Whether or not to apply Lin et al. 2004 smoothing.
 Returns:
@@ -78,13 +72,10 @@ Returns:
     'reference_length': reference_length
 Examples:
 
-    >>> predictions = [
-    ...     ["hello", "there", "general", "kenobi"],                             # tokenized prediction of the first sample
-    ...     ["foo", "bar", "foobar"]                                             # tokenized prediction of the second sample
-    ... ]
+    >>> predictions = ["hello there general kenobi", "foo bar foobar"]
     >>> references = [
-    ...     [["hello", "there", "general", "kenobi"], ["hello", "there", "!"]],  # tokenized references for the first sample (2 references)
-    ...     [["foo", "bar", "foobar"]]                                           # tokenized references for the second sample (1 reference)
+    ...     ["hello there general kenobi", "hello there!"],
+    ...     ["foo bar foobar"]
     ... ]
     >>> bleu = evaluate.load_metric("bleu")
     >>> results = bleu.compute(predictions=predictions, references=references)
@@ -113,10 +104,7 @@ class Bleu(evaluate.Metric):
             ],
         )
 
-    def tokenizer(string):
-        return string.split()
-
-    def _compute(self, predictions, references, tokenizer=tokenizer, max_order=4, smooth=False):
+    def _compute(self, predictions, references, tokenizer=Tokenizer13a(), max_order=4, smooth=False):
         references = [[tokenizer(r) for r in ref] for ref in references]
         predictions = [tokenizer(p) for p in predictions]
         score = compute_bleu(
