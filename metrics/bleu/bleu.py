@@ -18,8 +18,8 @@ import datasets
 import evaluate
 
 from .nmt_bleu import compute_bleu  # From: https://github.com/tensorflow/nmt/blob/master/nmt/scripts/bleu.py
-
 from .tokenizer_13a import Tokenizer13a
+
 
 _CITATION = """\
 @INPROCEEDINGS{Papineni02bleu:a,
@@ -93,8 +93,8 @@ class Bleu(evaluate.Metric):
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
                 {
-                "predictions" : datasets.Value("string", id="sequence"),
-                "references" : datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
+                    "predictions": datasets.Value("string", id="sequence"),
+                    "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
                 }
             ),
             codebase_urls=["https://github.com/tensorflow/nmt/blob/master/nmt/scripts/bleu.py"],
