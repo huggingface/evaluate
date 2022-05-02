@@ -32,7 +32,7 @@ This metric takes as input a list of predicted sentences and a list of lists of 
     The default tokenizer is `tokenizer_13a`, a relatively minimal tokenization approach that is however equivalent to `mteval-v13a`, used by WMT.
     This can be replaced by another tokenizer from a source such as [SacreBLEU](https://github.com/mjpost/sacrebleu/tree/master/sacrebleu/tokenizers).
 
-The default tokenizer is based on whitespace (using the `string.split()` function). It can be replaced by any function that takes a string as input and returns a list of tokens as output. E.g. `word_tokenize()` from [NLTK](https://www.nltk.org/api/nltk.tokenize.html) or pretrained tokenizers from the [Tokenizers library](https://huggingface.co/docs/tokenizers/index).
+The default tokenizer is based on whitespace and regexes. It can be replaced by any function that takes a string as input and returns a list of tokens as output. E.g. `word_tokenize()` from [NLTK](https://www.nltk.org/api/nltk.tokenize.html) or pretrained tokenizers from the [Tokenizers library](https://huggingface.co/docs/tokenizers/index).
 - **max_order** (`int`): Maximum n-gram order to use when computing BLEU score. Defaults to `4`.
 - **smooth** (`boolean`): Whether or not to apply Lin et al. 2004 smoothing. Defaults to `False`.
 
