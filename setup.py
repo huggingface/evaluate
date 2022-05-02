@@ -89,10 +89,12 @@ REQUIRED_PKGS = [
     # Utilities from PyPA to e.g., compare versions
     "packaging",
     "responses<0.19",
+]
+
+TEMPLATE_REQUIRE = [
     # to populate metric template
     "cookiecutter"
 ]
-
 
 TESTS_REQUIRE = [
     # test dependencies
@@ -138,6 +140,7 @@ EXTRAS_REQUIRE = {
         # Might need to add doc-builder and some specific deps in the future
         "s3fs",
     ],
+    "template": TEMPLATE_REQUIRE,
 }
 
 setup(
