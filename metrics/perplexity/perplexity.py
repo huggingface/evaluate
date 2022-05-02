@@ -43,13 +43,16 @@ Args:
                     https://huggingface.co/docs/transformers/master/en/model_doc/auto#transformers.AutoModelForCausalLM )
 
     input_texts (list of str): input text, each separate text snippet
-        is one list entry. Perplexity returned will be an average of
-        the perplexity for each list entry.
-    stride (int): stride size, defaults to 512
+        is one list entry.
+    batch_size (int): the batch size to run texts through the model. Defaults to 16.
+    add_start_token (bool): whether to add the start token to the texts,
+        so the perplexity can include the probability of the first word. Defaults to True.
     device (str): device to run on, defaults to 'cuda' when available
 Returns:
-    perplexity: dictionary containing the average perplexity score for the text
-        in the input list.
+    perplexity: dictionary containing the perplexity scores for the texts
+        in the input list, as well as the mean perplexity. If one of the input texts is
+        longer than the max input length of the model, then it is truncated to the
+        max length for the perplexity computation.
 Examples:
     Example 1:
         >>> perplexity = evaluate.load_metric("perplexity")
@@ -160,7 +163,7 @@ class Perplexity(evaluate.Metric):
                 bos_tokens_tensor = torch.tensor([[tokenizer.bos_token_id]] * encoded_batch.size(dim=0)).to(device)
                 encoded_batch = torch.cat([bos_tokens_tensor, encoded_batch], dim=1)
                 attn_mask = torch.cat(
-                    [torch.zeros(bos_tokens_tensor.size(), dtype=torch.int64).to(device), attn_mask], dim=1
+                    [torch.ones(bos_tokens_tensor.size(), dtype=torch.int64).to(device), attn_mask], dim=1
                 )
 
             labels = encoded_batch
