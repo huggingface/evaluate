@@ -91,6 +91,10 @@ REQUIRED_PKGS = [
     "responses<0.19",
 ]
 
+TEMPLATE_REQUIRE = [
+    # to populate metric template
+    "cookiecutter"
+]
 
 TESTS_REQUIRE = [
     # test dependencies
@@ -136,6 +140,7 @@ EXTRAS_REQUIRE = {
         # Might need to add doc-builder and some specific deps in the future
         "s3fs",
     ],
+    "template": TEMPLATE_REQUIRE,
 }
 
 setup(
@@ -151,6 +156,7 @@ setup(
     license="Apache 2.0",
     package_dir={"": "src"},
     packages=find_packages("src"),
+    entry_points={"console_scripts": ["evaluate-cli=evaluate.commands.evaluate_cli:main"]},
     install_requires=REQUIRED_PKGS,
     extras_require=EXTRAS_REQUIRE,
     classifiers=[

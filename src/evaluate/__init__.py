@@ -31,4 +31,4 @@ from .inspect import inspect_metric, list_metrics
 from .load import load_metric
 from .metric import Metric
 from .utils import *
-from .utils import logging
+from .utils import gradio, logging
