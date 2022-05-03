@@ -106,7 +106,7 @@ Example with multiple references for the first sample, with `min_len` adjusted t
 
 ## Limitations and Bias
 
-The GoogleBLEU metric does not come with a predefined tokenization function; previous versions simply used `split()` to split the input strings into tokens. Using a tokenizer such as the default one, `tokenizer_13a`, makes results more standardized and reproducible. 
+The GoogleBLEU metric does not come with a predefined tokenization function; previous versions simply used `split()` to split the input strings into tokens. Using a tokenizer such as the default one, `tokenizer_13a`, makes results more standardized and reproducible. The BLEU and sacreBLEU metrics also use this default tokenizer.
 
 ## Citation
 ```bibtex
