@@ -3,7 +3,8 @@ from pathlib import Path
 from unittest.mock import patch
 
 import pytest
-from datasets.utils.file_utils import OfflineModeIsEnabled, cached_path, ftp_get, ftp_head, http_get, http_head
+
+from evaluate.utils.file_utils import OfflineModeIsEnabled, cached_path, ftp_get, ftp_head, http_get, http_head
 
 
 FILE_CONTENT = """\
@@ -31,13 +32,13 @@ def test_cached_path_missing_local(tmp_path):
         cached_path(missing_file)
 
 
-@patch("datasets.config.HF_DATASETS_OFFLINE", True)
+@patch("evaluate.config.HF_EVALUATE_OFFLINE", True)
 def test_cached_path_offline():
     with pytest.raises(OfflineModeIsEnabled):
         cached_path("https://huggingface.co")
 
 
-@patch("datasets.config.HF_DATASETS_OFFLINE", True)
+@patch("evaluate.config.HF_EVALUATE_OFFLINE", True)
 def test_http_offline(tmp_path_factory):
     filename = tmp_path_factory.mktemp("data") / "file.html"
     with pytest.raises(OfflineModeIsEnabled):
@@ -46,7 +47,7 @@ def test_http_offline(tmp_path_factory):
         http_head("https://huggingface.co")
 
 
-@patch("datasets.config.HF_DATASETS_OFFLINE", True)
+@patch("evaluate.config.HF_EVALUATE_OFFLINE", True)
 def test_ftp_offline(tmp_path_factory):
     filename = tmp_path_factory.mktemp("data") / "file.html"
     with pytest.raises(OfflineModeIsEnabled):
