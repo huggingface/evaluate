@@ -21,6 +21,8 @@ from nltk.translate import gleu_score
 
 import evaluate
 
+from .tokenizer_13a import Tokenizer13a
+
 
 _CITATION = """\
 @misc{wu2016googles,
@@ -63,9 +65,10 @@ tokens and the max of hypothesis and reference tokens for each sentence, then co
 
 Args:
     predictions (list of str): list of translations to score.
-        Each translation should be tokenized into a list of tokens.
     references (list of list of str): list of lists of references for each translation.
-        Each reference should be tokenized into a list of tokens.
+    tokenizer : approach used for tokenizing `predictions` and `references`.
+        The default tokenizer is `tokenizer_13a`, a minimal tokenization approach that is equivalent to `mteval-v13a`, used by WMT.
+        This can be replaced by any function that takes a string as input and returns a list of tokens as output.
     min_len (int): The minimum order of n-gram this function should extract. Defaults to 1.
     max_len (int): The maximum order of n-gram this function should extract. Defaults to 4.
 
@@ -74,98 +77,46 @@ Returns:
 
 Examples:
     Example 1:
-        >>> hyp1 = ['It', 'is', 'a', 'guide', 'to', 'action', 'which',
-        ...         'ensures', 'that', 'the', 'rubber', 'duck', 'always',
-        ...         'disobeys', 'the', 'commands', 'of', 'the', 'cat']
-        >>> ref1a = ['It', 'is', 'the', 'guiding', 'principle', 'which',
-        ...          'guarantees', 'the', 'rubber', 'duck', 'forces', 'never',
-        ...          'being', 'under', 'the', 'command', 'of', 'the', 'cat']
-
-        >>> hyp2 = ['he', 'read', 'the', 'book', 'because', 'he', 'was',
-        ...         'interested', 'in', 'world', 'history']
-        >>> ref2a = ['he', 'was', 'interested', 'in', 'world', 'history',
-        ...          'because', 'he', 'read', 'the', 'book']
-
-        >>> list_of_references = [[ref1a], [ref2a]]
-        >>> hypotheses = [hyp1, hyp2]
+        >>> predictions = ['It is a guide to action which ensures that the rubber duck always disobeys the commands of the cat', \
+        'he read the book because he was interested in world history']
+        >>> references = [['It is the guiding principle which guarantees the rubber duck forces never being under the command of the cat'], \
+        ['he was interested in world history because he read the book']]
         >>> google_bleu = evaluate.load_metric("google_bleu")
-        >>> results = google_bleu.compute(predictions=hypotheses, references=list_of_references)
+        >>> results = google_bleu.compute(predictions=predictions, references=references)
         >>> print(round(results["google_bleu"], 2))
         0.44
 
     Example 2:
-        >>> hyp1 = ['It', 'is', 'a', 'guide', 'to', 'action', 'which',
-        ...         'ensures', 'that', 'the', 'rubber', 'duck', 'always',
-        ...         'disobeys', 'the', 'commands', 'of', 'the', 'cat']
-        >>> ref1a = ['It', 'is', 'the', 'guiding', 'principle', 'which',
-        ...          'guarantees', 'the', 'rubber', 'duck', 'forces', 'never',
-        ...          'being', 'under', 'the', 'command', 'of', 'the', 'cat']
-        >>> ref1b = ['It', 'is', 'a', 'guide', 'to', 'action', 'that',
-        ...          'ensures', 'that', 'the', 'rubber', 'duck', 'will', 'never',
-        ...          'heed', 'the', 'cat', 'commands']
-        >>> ref1c = ['It', 'is', 'the', 'practical', 'guide', 'for', 'the',
-        ...          'rubber', 'duck', 'army', 'never', 'to', 'heed', 'the', 'directions',
-        ...          'of', 'the', 'cat']
-
-        >>> hyp2 = ['he', 'read', 'the', 'book', 'because', 'he', 'was',
-        ...         'interested', 'in', 'world', 'history']
-        >>> ref2a = ['he', 'was', 'interested', 'in', 'world', 'history',
-        ...          'because', 'he', 'read', 'the', 'book']
-
-        >>> list_of_references = [[ref1a, ref1b, ref1c], [ref2a]]
-        >>> hypotheses = [hyp1, hyp2]
+        >>> predictions = ['It is a guide to action which ensures that the rubber duck always disobeys the commands of the cat', \
+        'he read the book because he was interested in world history']
+        >>> references  = [['It is the guiding principle which guarantees the rubber duck forces never being under the command of the cat', \
+        'It is a guide to action that ensures that the rubber duck will never heed the cat commands', \
+        'It is the practical guide for the rubber duck army never to heed the directions of the cat'], \
+        ['he was interested in world history because he read the book']]
         >>> google_bleu = evaluate.load_metric("google_bleu")
         >>> results = google_bleu.compute(predictions=hypotheses, references=list_of_references)
         >>> print(round(results["google_bleu"], 2))
         0.61
 
     Example 3:
-        >>> hyp1 = ['It', 'is', 'a', 'guide', 'to', 'action', 'which',
-        ...         'ensures', 'that', 'the', 'rubber', 'duck', 'always',
-        ...         'disobeys', 'the', 'commands', 'of', 'the', 'cat']
-        >>> ref1a = ['It', 'is', 'the', 'guiding', 'principle', 'which',
-        ...          'guarantees', 'the', 'rubber', 'duck', 'forces', 'never',
-        ...          'being', 'under', 'the', 'command', 'of', 'the', 'cat']
-        >>> ref1b = ['It', 'is', 'a', 'guide', 'to', 'action', 'that',
-        ...          'ensures', 'that', 'the', 'rubber', 'duck', 'will', 'never',
-        ...          'heed', 'the', 'cat', 'commands']
-        >>> ref1c = ['It', 'is', 'the', 'practical', 'guide', 'for', 'the',
-        ...          'rubber', 'duck', 'army', 'never', 'to', 'heed', 'the', 'directions',
-        ...          'of', 'the', 'cat']
-
-        >>> hyp2 = ['he', 'read', 'the', 'book', 'because', 'he', 'was',
-        ...         'interested', 'in', 'world', 'history']
-        >>> ref2a = ['he', 'was', 'interested', 'in', 'world', 'history',
-        ...          'because', 'he', 'read', 'the', 'book']
-
-        >>> list_of_references = [[ref1a, ref1b, ref1c], [ref2a]]
-        >>> hypotheses = [hyp1, hyp2]
+        >>> predictions = ['It is a guide to action which ensures that the rubber duck always disobeys the commands of the cat', \
+        'he read the book because he was interested in world history']
+        >>> references = [['It is the guiding principle which guarantees the rubber duck forces never being under the command of the cat', \
+        'It is a guide to action that ensures that the rubber duck will never heed the cat commands', \
+        'It is the practical guide for the rubber duck army never to heed the directions of the cat'], \
+        ['he was interested in world history because he read the book']]
         >>> google_bleu = evaluate.load_metric("google_bleu")
         >>> results = google_bleu.compute(predictions=hypotheses, references=list_of_references, min_len=2)
         >>> print(round(results["google_bleu"], 2))
         0.53
 
     Example 4:
-        >>> hyp1 = ['It', 'is', 'a', 'guide', 'to', 'action', 'which',
-        ...         'ensures', 'that', 'the', 'rubber', 'duck', 'always',
-        ...         'disobeys', 'the', 'commands', 'of', 'the', 'cat']
-        >>> ref1a = ['It', 'is', 'the', 'guiding', 'principle', 'which',
-        ...          'guarantees', 'the', 'rubber', 'duck', 'forces', 'never',
-        ...          'being', 'under', 'the', 'command', 'of', 'the', 'cat']
-        >>> ref1b = ['It', 'is', 'a', 'guide', 'to', 'action', 'that',
-        ...          'ensures', 'that', 'the', 'rubber', 'duck', 'will', 'never',
-        ...          'heed', 'the', 'cat', 'commands']
-        >>> ref1c = ['It', 'is', 'the', 'practical', 'guide', 'for', 'the',
-        ...          'rubber', 'duck', 'army', 'never', 'to', 'heed', 'the', 'directions',
-        ...          'of', 'the', 'cat']
-
-        >>> hyp2 = ['he', 'read', 'the', 'book', 'because', 'he', 'was',
-        ...         'interested', 'in', 'world', 'history']
-        >>> ref2a = ['he', 'was', 'interested', 'in', 'world', 'history',
-        ...          'because', 'he', 'read', 'the', 'book']
-
-        >>> list_of_references = [[ref1a, ref1b, ref1c], [ref2a]]
-        >>> hypotheses = [hyp1, hyp2]
+        >>> predictions = ['It is a guide to action which ensures that the rubber duck always disobeys the commands of the cat', \
+        'he read the book because he was interested in world history']
+        >>> references = [['It is the guiding principle which guarantees the rubber duck forces never being under the command of the cat', \
+        'It is a guide to action that ensures that the rubber duck will never heed the cat commands', \
+        'It is the practical guide for the rubber duck army never to heed the directions of the cat'], \
+        ['he was interested in world history because he read the book']]
         >>> google_bleu = evaluate.load_metric("google_bleu")
         >>> results = google_bleu.compute(predictions=hypotheses,references=list_of_references, min_len=2, max_len=6)
         >>> print(round(results["google_bleu"], 2))
@@ -182,21 +133,22 @@ class GoogleBleu(evaluate.Metric):
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
                 {
-                    "predictions": datasets.Sequence(datasets.Value("string", id="token"), id="sequence"),
-                    "references": datasets.Sequence(
-                        datasets.Sequence(datasets.Value("string", id="token"), id="sequence"), id="references"
-                    ),
+                    "predictions": datasets.Value("string", id="sequence"),
+                    "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
                 }
             ),
         )
 
     def _compute(
         self,
-        predictions: List[List[List[str]]],
+        predictions: List[str],
         references: List[List[str]],
+        tokenizer=Tokenizer13a(),
         min_len: int = 1,
         max_len: int = 4,
     ) -> Dict[str, float]:
+        references = [[tokenizer(r) for r in ref] for ref in references]
+        predictions = [tokenizer(p) for p in predictions]
         return {
             "google_bleu": gleu_score.corpus_gleu(
                 list_of_references=references, hypotheses=predictions, min_len=min_len, max_len=max_len
