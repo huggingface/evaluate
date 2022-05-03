@@ -51,11 +51,11 @@ This metric can take on values from 0 to 1, inclusive. Higher scores are better,
 Note that this score is symmetrical when switching output and target. This means that, given two sentences, `sentence1` and `sentence2`, whatever score is output when `sentence1` is the predicted sentence and  `sencence2` is the reference sentence will be the same as when the sentences are swapped and `sentence2` is the predicted sentence while `sentence1` is the reference sentence. In code, this looks like:
 
 ```python
-sentence1 = "the cat sat on the mat"
-sentence2 = "the cat ate the mat"
+predictions = "the cat sat on the mat"
+references = "the cat ate the mat"
 google_bleu = evaluate.load_metric("google_bleu")
-result_a = google_bleu.compute(predictions=[sentence1], references=[[sentence2]])
-result_b = google_bleu.compute(predictions=[sentence2], references=[[sentence1]])
+result_a = google_bleu.compute(predictions=[predictions], references=[[references]])
+result_b = google_bleu.compute(predictions=[predictions], references=[[references]])
 print(result_a == result_b)
 >>> True
 ```
@@ -79,7 +79,7 @@ Example with multiple references for the first sample:
 >>> predictions = ['It is a guide to action which ensures that the rubber duck always disobeys the commands of the cat', 'he read the book because he was interested in world history']
 >>> references  = [['It is the guiding principle which guarantees the rubber duck forces never being under the command of the cat', 'It is a guide to action that ensures that the rubber duck will never heed the cat commands', 'It is the practical guide for the rubber duck army never to heed the directions of the cat'], ['he was interested in world history because he read the book']]
 >>> google_bleu = evaluate.load_metric("google_bleu")
->>> results = google_bleu.compute(predictions=hypotheses, references=list_of_references)
+>>> results = google_bleu.compute(predictions=predictions, references=references)
 >>> print(round(results["google_bleu"], 2))
 0.61
 ```
@@ -89,7 +89,7 @@ Example with multiple references for the first sample, and with `min_len` adjust
 >>> predictions = ['It is a guide to action which ensures that the rubber duck always disobeys the commands of the cat', 'he read the book because he was interested in world history']
 >>> references = [['It is the guiding principle which guarantees the rubber duck forces never being under the command of the cat', 'It is a guide to action that ensures that the rubber duck will never heed the cat commands', 'It is the practical guide for the rubber duck army never to heed the directions of the cat'], ['he was interested in world history because he read the book']]
 >>> google_bleu = evaluate.load_metric("google_bleu")
->>> results = google_bleu.compute(predictions=hypotheses, references=list_of_references, min_len=2)
+>>> results = google_bleu.compute(predictions=predictions, references=references, min_len=2)
 >>> print(round(results["google_bleu"], 2))
 0.53
 ```
@@ -99,7 +99,7 @@ Example with multiple references for the first sample, with `min_len` adjusted t
 >>> predictions = ['It is a guide to action which ensures that the rubber duck always disobeys the commands of the cat', 'he read the book because he was interested in world history']
 >>> references = [['It is the guiding principle which guarantees the rubber duck forces never being under the command of the cat', 'It is a guide to action that ensures that the rubber duck will never heed the cat commands', 'It is the practical guide for the rubber duck army never to heed the directions of the cat'], ['he was interested in world history because he read the book']]
 >>> google_bleu = evaluate.load_metric("google_bleu")
->>> results = google_bleu.compute(predictions=hypotheses,references=list_of_references, min_len=2, max_len=6)
+>>> results = google_bleu.compute(predictions=predictions,references=references, min_len=2, max_len=6)
 >>> print(round(results["google_bleu"], 2))
 0.4
 ```
