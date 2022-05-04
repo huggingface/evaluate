@@ -40,6 +40,7 @@ from .utils.file_utils import (
     cached_path,
     head_hf_s3,
     hf_github_url,
+    hf_hub_url,
     init_hf_modules,
     is_relative_path,
     relative_to_absolute_path,
@@ -510,6 +511,58 @@ class LocalMetricModuleFactory(_MetricModuleFactory):
         return MetricModule(module_path, hash)
 
 
+class HubMetricModuleFactory(_MetricModuleFactory):
+    """Get the module of a metric from a metric repository on the Hub."""
+
+    def __init__(
+        self,
+        name: str,
+        revision: Optional[Union[str, Version]] = None,
+        download_config: Optional[DownloadConfig] = None,
+        download_mode: Optional[DownloadMode] = None,
+        dynamic_modules_path: Optional[str] = None,
+    ):
+        self.name = name
+        self.revision = revision
+        self.download_config = download_config or DownloadConfig()
+        self.download_mode = download_mode
+        self.dynamic_modules_path = dynamic_modules_path
+        assert self.name.count("/") == 1
+        increase_load_count(name, resource_type="metric")
+
+    def download_loading_script(self) -> str:
+        file_path = hf_hub_url(path=self.name, name=self.name.split("/")[1] + ".py", revision=self.revision)
+        download_config = self.download_config.copy()
+        if download_config.download_desc is None:
+            download_config.download_desc = "Downloading builder script"
+        return cached_path(file_path, download_config=download_config)
+
+    def get_module(self) -> MetricModule:
+        # get script and other files
+        local_path = self.download_loading_script()
+        imports = get_imports(local_path)
+        local_imports = _download_additional_modules(
+            name=self.name,
+            base_path=hf_hub_url(path=self.name, name="", revision=self.revision),
+            imports=imports,
+            download_config=self.download_config,
+        )
+        # copy the script and the files in an importable directory
+        dynamic_modules_path = self.dynamic_modules_path if self.dynamic_modules_path else init_dynamic_modules()
+        module_path, hash = _create_importable_file(
+            local_path=local_path,
+            local_imports=local_imports,
+            additional_files=[],
+            dynamic_modules_path=dynamic_modules_path,
+            module_namespace="metrics",
+            name=self.name,
+            download_mode=self.download_mode,
+        )
+        # make the new module to be noticed by the import system
+        importlib.invalidate_caches()
+        return MetricModule(module_path, hash)
+
+
 class CachedMetricModuleFactory(_MetricModuleFactory):
     """
     Get the module of a metric that has been loaded once already and cached.
@@ -617,15 +670,24 @@ def metric_module_factory(
         return LocalMetricModuleFactory(
             combined_path, download_mode=download_mode, dynamic_modules_path=dynamic_modules_path
         ).get_module()
-    elif is_relative_path(path) and path.count("/") == 0 and not force_local_path:
+    elif is_relative_path(path) and path.count("/") <= 1 and not force_local_path:
         try:
-            return GithubMetricModuleFactory(
-                path,
-                revision=revision,
-                download_config=download_config,
-                download_mode=download_mode,
-                dynamic_modules_path=dynamic_modules_path,
-            ).get_module()
+            if path.count("/") == 0:
+                return GithubMetricModuleFactory(
+                    path,
+                    revision=revision,
+                    download_config=download_config,
+                    download_mode=download_mode,
+                    dynamic_modules_path=dynamic_modules_path,
+                ).get_module()
+            elif path.count("/") == 1:
+                return HubMetricModuleFactory(
+                    path,
+                    revision=revision,
+                    download_config=download_config,
+                    download_mode=download_mode,
+                    dynamic_modules_path=dynamic_modules_path,
+                ).get_module()
         except Exception as e1:  # noqa: all the attempts failed, before raising the error we should check if the module is already cached.
             try:
                 return CachedMetricModuleFactory(path, dynamic_modules_path=dynamic_modules_path).get_module()

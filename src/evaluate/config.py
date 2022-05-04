@@ -18,7 +18,7 @@ REPO_METRICS_URL = "https://raw.githubusercontent.com/huggingface/evaluate/{revi
 
 # Hub
 HF_ENDPOINT = os.environ.get("HF_ENDPOINT", "https://huggingface.co")
-HUB_DATASETS_URL = HF_ENDPOINT + "/datasets/{path}/resolve/{revision}/{name}"
+HUB_EVALUATE_URL = HF_ENDPOINT + "/spaces/{path}/resolve/{revision}/{name}"
 HUB_DEFAULT_VERSION = "main"
 
 PY_VERSION = version.parse(platform.python_version())
