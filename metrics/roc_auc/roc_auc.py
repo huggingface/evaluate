@@ -16,6 +16,7 @@
 from sklearn.metrics import roc_auc_score
 
 import datasets
+import evaluate
 
 
 _DESCRIPTION = """
@@ -141,10 +142,10 @@ year={2011}
 """
 
 
-@datasets.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class ROCAUC(datasets.Metric):
+@evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
+class ROCAUC(evaluate.Metric):
     def _info(self):
-        return datasets.MetricInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
