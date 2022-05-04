@@ -108,7 +108,7 @@ def hf_github_url(path: str, name: str, dataset=True, revision: Optional[str] = 
 
 def hf_hub_url(path: str, name: str, revision: Optional[str] = None) -> str:
     revision = revision or config.HUB_DEFAULT_VERSION
-    return config.HUB_DATASETS_URL.format(path=path, name=name, revision=revision)
+    return config.HUB_EVALUATE_URL.format(path=path, name=name, revision=revision)
 
 
 def url_or_path_join(base_name: str, *pathnames: str) -> str:
