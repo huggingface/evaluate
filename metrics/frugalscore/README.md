@@ -11,8 +11,7 @@ The FrugalScore models are obtained by continuing the pretraining of small model
 When loading FrugalScore, you can indicate the model you wish to use to compute the score. The default model is `moussaKam/frugalscore_tiny_bert-base_bert-score`, and a full list of models can be found in the [Limitations and bias](#Limitations-and-bias) section.
 
 ```python
->>> from datasets import load_metric
->>> frugalscore = load_metric("frugalscore", "moussaKam/frugalscore_medium_bert-base_mover-score")
+>>> frugalscore = evaluate.load_metric("frugalscore", "moussaKam/frugalscore_medium_bert-base_mover-score")
 ```
 
 FrugalScore calculates how good are the predictions given some references, based on a set of scores.
@@ -50,8 +49,7 @@ The [original FrugalScore paper](https://arxiv.org/abs/2110.08559) reported that
 Maximal values (exact match between `references` and `predictions`): 
 
 ```python
->>> from datasets import load_metric
->>> frugalscore = load_metric("frugalscore")
+>>> frugalscore = evaluate.load_metric("frugalscore")
 >>> results = frugalscore.compute(predictions=['hello world'], references=['hello world'])
 >>> print(results)
 {'scores': [0.9891098]}
@@ -60,8 +58,7 @@ Maximal values (exact match between `references` and `predictions`):
 Partial values: 
 
 ```python
->>> from datasets import load_metric
->>> frugalscore = load_metric("frugalscore")
+>>> frugalscore = evaluate.load_metric("frugalscore")
 >>> results = frugalscore.compute(predictions=['hello world'], references=['hugging face'])
 >>> print(results)
 {'scores': [0.42482382]}
