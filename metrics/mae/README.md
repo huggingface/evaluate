@@ -55,8 +55,7 @@ If `multioutput="raw_values"`:
 
 Example with the `uniform_average` config:
 ```python
->>> from datasets import load_metric
->>> mae_metric = load_metric("mae")
+>>> mae_metric = evaluate.load_metric("mae")
 >>> predictions = [2.5, 0.0, 2, 8]
 >>> references = [3, -0.5, 2, 7]
 >>> results = mae_metric.compute(predictions=predictions, references=references)
@@ -66,7 +65,6 @@ Example with the `uniform_average` config:
 
 Example with multi-dimensional lists, and the `raw_values` config:
 ```python
->>> from datasets import load_metric
 >>> mae_metric = evaluate.load_metric("mae", "multilist")
 >>> predictions = [[0.5, 1], [-1, 1], [7, -6]]
 >>> references = [[0, 2], [-1, 2], [8, -5]]
