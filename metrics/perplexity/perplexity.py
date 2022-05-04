@@ -17,6 +17,7 @@ import datasets
 import torch
 from torch.nn import CrossEntropyLoss
 from transformers import AutoModelForCausalLM, AutoTokenizer
+import numpy as np
 
 import evaluate
 from evaluate import logging
@@ -71,12 +72,15 @@ Examples:
         >>> from datasets import load_dataset
         >>> perplexity = evaluate.load_metric("perplexity")
         >>> input_texts = load_dataset("wikitext", "wikitext-2-raw-v1", split="test")["text"][:10] # doctest: +SKIP
+        >>> input_texts = [s for s in input_texts if s!='']
         >>> results = perplexity.compute(model_id='gpt2',
-        ...                              input_texts=input_texts,
-        ...                              stride=256)
-        >>> round(results["perplexity"], 1) # doctest: +SKIP
-        117.9
-
+        ...                              input_texts=input_texts)
+        >>> print(list(results.keys()))
+        ['perplexities', 'mean_perplexity']
+        >>> print(round(results["mean_perplexity"], 2)) # doctest: +SKIP
+        60.35
+        >>> print(round(results["perplexities"][0], 2)) # doctest: +SKIP
+        81.12
 """
 
 
