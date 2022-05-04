@@ -16,8 +16,7 @@ More information about the different subsets of the Indic GLUE dataset can be fo
 2. **Calculating the metric**: the metric takes two inputs : one list with the predictions of the model to score and one lists of references for each translation for all subsets of the dataset except for `cvit-mkb-clsr`, where each prediction and reference is a vector of floats.
 
 ```python
-from datasets import load_metric
-indic_glue_metric = load_metric('indic_glue', 'wnli')  
+indic_glue_metric = evaluate.load_metric('indic_glue', 'wnli')  
 references = [0, 1]
 predictions = [0, 1]
 results = indic_glue_metric.compute(predictions=predictions, references=references)
@@ -44,8 +43,7 @@ The [original IndicGlue paper](https://aclanthology.org/2020.findings-emnlp.445.
 Maximal values for the WNLI subset (which outputs `accuracy`):
 
 ```python
-from datasets import load_metric
-indic_glue_metric = load_metric('indic_glue', 'wnli') 
+indic_glue_metric = evaluate.load_metric('indic_glue', 'wnli') 
 references = [0, 1]
 predictions = [0, 1]
 results = indic_glue_metric.compute(predictions=predictions, references=references)
@@ -56,8 +54,7 @@ print(results)
 Minimal values for the Wiki-NER subset (which outputs `accuracy` and `f1`):
 
 ```python
->>> from datasets import load_metric
->>> indic_glue_metric = load_metric('indic_glue', 'wiki-ner')
+>>> indic_glue_metric = evaluate.load_metric('indic_glue', 'wiki-ner')
 >>> references = [0, 1]
 >>> predictions = [1,0]
 >>> results = indic_glue_metric.compute(predictions=predictions, references=references)
@@ -68,8 +65,7 @@ Minimal values for the Wiki-NER subset (which outputs `accuracy` and `f1`):
 Partial match for the CVIT-Mann Ki Baat subset (which outputs `precision@10`) 
 
 ```python
->>> from datasets import load_metric
->>> indic_glue_metric = load_metric('indic_glue', 'cvit-mkb-clsr')
+>>> indic_glue_metric = evaluate.load_metric('indic_glue', 'cvit-mkb-clsr')
 >>> references = [[0.5, 0.5, 0.5], [0.1, 0.2, 0.3]]
 >>> predictions = [[0.5, 0.5, 0.5], [0.1, 0.2, 0.3]]
 >>> results = indic_glue_metric.compute(predictions=predictions, references=references)
@@ -93,4 +89,3 @@ This metric works only with datasets that have the same format as the [IndicGLUE
     
 ## Further References 
 - [IndicNLP website](https://indicnlp.ai4bharat.org/home/)
-- 
