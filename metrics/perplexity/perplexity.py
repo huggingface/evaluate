@@ -14,10 +14,10 @@
 """Perplexity Metric."""
 
 import datasets
+import numpy as np
 import torch
 from torch.nn import CrossEntropyLoss
 from transformers import AutoModelForCausalLM, AutoTokenizer
-import numpy as np
 
 import evaluate
 from evaluate import logging

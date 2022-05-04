@@ -13,9 +13,9 @@
 # limitations under the License.
 """Accuracy metric."""
 
+import datasets
 from sklearn.metrics import roc_auc_score
 
-import datasets
 import evaluate
 
 
