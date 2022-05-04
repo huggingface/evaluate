@@ -53,9 +53,8 @@ The [leaderboard for the CityScapes dataset](https://paperswithcode.com/sota/sem
 ### Examples
 
 ```python
->>> from datasets import load_metric
 >>> import numpy as np
->>> mean_iou = load_metric("mean_iou")
+>>> mean_iou = evaluate.load_metric("mean_iou")
 >>> # suppose one has 3 different segmentation maps predicted
 >>> predicted_1 = np.array([[1, 2], [3, 4], [5, 255]])
 >>> actual_1 = np.array([[0, 3], [5, 4], [6, 255]])
