@@ -6,11 +6,18 @@ from unittest import TestCase
 import pytest
 
 import evaluate
-from evaluate.load import CachedMetricModuleFactory, GithubMetricModuleFactory, LocalMetricModuleFactory
+from evaluate.load import (
+    CachedMetricModuleFactory,
+    GithubMetricModuleFactory,
+    HubMetricModuleFactory,
+    LocalMetricModuleFactory,
+)
 from evaluate.utils.file_utils import DownloadConfig
 
 from .utils import OfflineSimulationMode, offline
 
+
+SAMPLE_METRIC_IDENTIFIER = "lvwerra/test"
 
 METRIC_LOADING_SCRIPT_NAME = "__dummy_metric1__"
 
@@ -66,6 +73,15 @@ class ModuleFactoryTest(TestCase):
         # "bleu" requires additional imports (external from github)
         factory = GithubMetricModuleFactory(
             "bleu", download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
+        )
+        module_factory_result = factory.get_module()
+        assert importlib.import_module(module_factory_result.module_path) is not None
+
+    def test_HubDatasetModuleFactoryWithScript(self):
+        factory = HubMetricModuleFactory(
+            SAMPLE_METRIC_IDENTIFIER,
+            download_config=self.download_config,
+            dynamic_modules_path=self.dynamic_modules_path,
         )
         module_factory_result = factory.get_module()
         assert importlib.import_module(module_factory_result.module_path) is not None
