@@ -17,8 +17,7 @@ The WIKI_SPLIT metric takes three inputs:
 `references`: a list of lists of reference sentences, where each sentence should be a string.
 
 ```python
->>> from datasets import load_metric
->>> wiki_split = load_metric("wiki_split")
+>>> wiki_split = evaluate.load_metric("wiki_split")
 >>> sources = ["About 95 species are currently accepted ."]
 >>> predictions = ["About 95 you now get in ."]
 >>> references= [["About 95 species are currently known ."]]
@@ -48,8 +47,7 @@ This metric was initially used by [Rothe et al.(2020)](https://arxiv.org/pdf/190
 Perfect match between prediction and reference:
 
 ```python
->>> from datasets import load_metric
->>> wiki_split = load_metric("wiki_split")
+>>> wiki_split = evaluate.load_metric("wiki_split")
 >>> sources = ["About 95 species are currently accepted ."]
 >>> predictions = ["About 95 species are currently accepted ."]
 >>> references= [["About 95 species are currently accepted ."]]
@@ -61,8 +59,7 @@ Perfect match between prediction and reference:
 Partial match between prediction and reference:
 
 ```python
->>> from datasets import load_metric
->>> wiki_split = load_metric("wiki_split")
+>>> wiki_split = evaluate.load_metric("wiki_split")
 >>> sources = ["About 95 species are currently accepted ."]
 >>> predictions = ["About 95 you now get in ."]
 >>> references= [["About 95 species are currently known ."]]
@@ -74,8 +71,7 @@ Partial match between prediction and reference:
 No match between prediction and reference:
 
 ```python
->>> from datasets import load_metric
->>> wiki_split = load_metric("wiki_split")
+>>> wiki_split = evaluate.load_metric("wiki_split")
 >>> sources = ["About 95 species are currently accepted ."]
 >>> predictions = ["Hello world ."]
 >>> references= [["About 95 species are currently known ."]]
