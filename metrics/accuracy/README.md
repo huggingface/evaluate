@@ -17,7 +17,7 @@ FN: False negative
 At minimum, this metric requires predictions and references as inputs.
 
 ```python
->>> accuracy_metric = datasets.load_metric("accuracy")
+>>> accuracy_metric = evaluate.load_metric("accuracy")
 >>> results = accuracy_metric.compute(references=[0, 1], predictions=[0, 1])
 >>> print(results)
 {'accuracy': 1.0}
@@ -51,7 +51,7 @@ Top-1 or top-5 accuracy is often used to report performance on supervised classi
 
 Example 1-A simple example
 ```python
->>> accuracy_metric = datasets.load_metric("accuracy")
+>>> accuracy_metric = evaluate.load_metric("accuracy")
 >>> results = accuracy_metric.compute(references=[0, 1, 2, 0, 1, 2], predictions=[0, 1, 1, 2, 1, 0])
 >>> print(results)
 {'accuracy': 0.5}
@@ -59,7 +59,7 @@ Example 1-A simple example
 
 Example 2-The same as Example 1, except with `normalize` set to `False`.
 ```python
->>> accuracy_metric = datasets.load_metric("accuracy")
+>>> accuracy_metric = evaluate.load_metric("accuracy")
 >>> results = accuracy_metric.compute(references=[0, 1, 2, 0, 1, 2], predictions=[0, 1, 1, 2, 1, 0], normalize=False)
 >>> print(results)
 {'accuracy': 3.0}
@@ -67,7 +67,7 @@ Example 2-The same as Example 1, except with `normalize` set to `False`.
 
 Example 3-The same as Example 1, except with `sample_weight` set.
 ```python
->>> accuracy_metric = datasets.load_metric("accuracy")
+>>> accuracy_metric = evaluate.load_metric("accuracy")
 >>> results = accuracy_metric.compute(references=[0, 1, 2, 0, 1, 2], predictions=[0, 1, 1, 2, 1, 0], sample_weight=[0.5, 2, 0.7, 0.5, 9, 0.4])
 >>> print(results)
 {'accuracy': 0.8778625954198473}

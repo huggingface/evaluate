@@ -71,7 +71,7 @@ Examples:
     >>> print(round(results["exact_match"], 1))
     100.0
 
-    >>> exact_match = datasets.load_metric("exact_match")
+    >>> exact_match = evaluate.load_metric("exact_match")
     >>> refs = ["The cat sat on the mat.", "Theaters are great.", "It's like comparing oranges and apples."]
     >>> preds = ["The cat sat on the mat?", "Theaters are great.", "It's like comparing apples and oranges."]
     >>> results = exact_match.compute(references=refs, predictions=preds)

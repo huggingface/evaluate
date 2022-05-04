@@ -39,13 +39,13 @@ Returns:
 Examples:
 
     Example 1-A simple example using only predictions and references.
-        >>> pearsonr_metric = datasets.load_metric("pearsonr")
+        >>> pearsonr_metric = evaluate.load_metric("pearsonr")
         >>> results = pearsonr_metric.compute(predictions=[10, 9, 2.5, 6, 4], references=[1, 2, 3, 4, 5])
         >>> print(round(results['pearsonr'], 2))
         -0.74
 
     Example 2-The same as Example 1, but that also returns the `p-value`.
-        >>> pearsonr_metric = datasets.load_metric("pearsonr")
+        >>> pearsonr_metric = evaluate.load_metric("pearsonr")
         >>> results = pearsonr_metric.compute(predictions=[10, 9, 2.5, 6, 4], references=[1, 2, 3, 4, 5], return_pvalue=True)
         >>> print(sorted(list(results.keys())))
         ['p-value', 'pearsonr']

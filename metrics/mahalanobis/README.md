@@ -9,7 +9,7 @@ It is often used in multivariate anomaly detection, classification on highly imb
 At minimum, this metric requires two `list`s of datapoints: 
 
 ```python
->>> mahalanobis_metric = datasets.load_metric("mahalanobis")
+>>> mahalanobis_metric = evaluate.load_metric("mahalanobis")
 >>> results = mahalanobis_metric.compute(reference_distribution=[[0, 1], [1, 0]], X=[[0, 1]])
 ```
 
@@ -31,7 +31,7 @@ At minimum, this metric requires two `list`s of datapoints:
 ### Example
 
 ```python
->>> mahalanobis_metric = datasets.load_metric("mahalanobis")
+>>> mahalanobis_metric = evaluate.load_metric("mahalanobis")
 >>> results = mahalanobis_metric.compute(reference_distribution=[[0, 1], [1, 0]], X=[[0, 1]])
 >>> print(results)
 {'mahalanobis': array([0.5])}

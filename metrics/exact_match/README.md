@@ -44,7 +44,7 @@ The exact match metric is often included in other metrics, such as SQuAD. For ex
 ### Examples
 Without including any regexes to ignore:
 ```python
->>> exact_match = datasets.load_metric("exact_match")
+>>> exact_match = evaluate.load_metric("exact_match")
 >>> refs = ["the cat", "theater", "YELLING", "agent007"]
 >>> preds = ["cat?", "theater", "yelling", "agent"]
 >>> results = exact_match.compute(references=refs, predictions=preds)
@@ -54,7 +54,7 @@ Without including any regexes to ignore:
 
 Ignoring regexes "the" and "yell", as well as ignoring case and punctuation:
 ```python
->>> exact_match = datasets.load_metric("exact_match")
+>>> exact_match = evaluate.load_metric("exact_match")
 >>> refs = ["the cat", "theater", "YELLING", "agent007"]
 >>> preds = ["cat?", "theater", "yelling", "agent"]
 >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell"], ignore_case=True, ignore_punctuation=True)
@@ -65,7 +65,7 @@ Note that in the example above, because the regexes are ignored before the case 
 
 Ignoring "the", "yell", and "YELL", as well as ignoring case and punctuation:
 ```python
->>> exact_match = datasets.load_metric("exact_match")
+>>> exact_match = evaluate.load_metric("exact_match")
 >>> refs = ["the cat", "theater", "YELLING", "agent007"]
 >>> preds = ["cat?", "theater", "yelling", "agent"]
 >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell", "YELL"], ignore_case=True, ignore_punctuation=True)
@@ -75,7 +75,7 @@ Ignoring "the", "yell", and "YELL", as well as ignoring case and punctuation:
 
 Ignoring "the", "yell", and "YELL", as well as ignoring case, punctuation, and numbers:
 ```python
->>> exact_match = datasets.load_metric("exact_match")
+>>> exact_match = evaluate.load_metric("exact_match")
 >>> refs = ["the cat", "theater", "YELLING", "agent007"]
 >>> preds = ["cat?", "theater", "yelling", "agent"]
 >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell", "YELL"], ignore_case=True, ignore_punctuation=True, ignore_numbers=True)
@@ -85,7 +85,7 @@ Ignoring "the", "yell", and "YELL", as well as ignoring case, punctuation, and n
 
 An example that includes sentences:
 ```python
->>> exact_match = datasets.load_metric("exact_match")
+>>> exact_match = evaluate.load_metric("exact_match")
 >>> refs = ["The cat sat on the mat.", "Theaters are great.", "It's like comparing oranges and apples."]
 >>> preds = ["The cat sat on the mat?", "Theaters are great.", "It's like comparing apples and oranges."]
 >>> results = exact_match.compute(references=refs, predictions=preds)

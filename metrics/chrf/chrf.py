@@ -95,7 +95,7 @@ Examples:
     Example 1--a simple example of calculating chrF:
         >>> prediction = ["The relationship between cats and dogs is not exactly friendly.", "a good bookshop is just a genteel black hole that knows how to read."]
         >>> reference = [["The relationship between dogs and cats is not exactly friendly."], ["A good bookshop is just a genteel Black Hole that knows how to read."]]
-        >>> chrf = datasets.load_metric("chrf")
+        >>> chrf = evaluate.load_metric("chrf")
         >>> results = chrf.compute(predictions=prediction, references=reference)
         >>> print(results)
         {'score': 84.64214891738334, 'char_order': 6, 'word_order': 0, 'beta': 2}
@@ -103,7 +103,7 @@ Examples:
     Example 2--the same example, but with the argument word_order=2, to calculate chrF++ instead of chrF:
         >>> prediction = ["The relationship between cats and dogs is not exactly friendly.", "a good bookshop is just a genteel black hole that knows how to read."]
         >>> reference = [["The relationship between dogs and cats is not exactly friendly."], ["A good bookshop is just a genteel Black Hole that knows how to read."]]
-        >>> chrf = datasets.load_metric("chrf")
+        >>> chrf = evaluate.load_metric("chrf")
         >>> results = chrf.compute(predictions=prediction,
         ...                         references=reference,
         ...                         word_order=2)
@@ -113,7 +113,7 @@ Examples:
     Example 3--the same chrF++ example as above, but with `lowercase=True` to normalize all case:
         >>> prediction = ["The relationship between cats and dogs is not exactly friendly.", "a good bookshop is just a genteel black hole that knows how to read."]
         >>> reference = [["The relationship between dogs and cats is not exactly friendly."], ["A good bookshop is just a genteel Black Hole that knows how to read."]]
-        >>> chrf = datasets.load_metric("chrf")
+        >>> chrf = evaluate.load_metric("chrf")
         >>> results = chrf.compute(predictions=prediction,
         ...                         references=reference,
         ...                         word_order=2,
