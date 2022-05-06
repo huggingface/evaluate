@@ -22,7 +22,8 @@ import os
 from dataclasses import asdict, dataclass, field
 from typing import List, Optional
 
-from datasets.features import Features, Value
+import pyarrow as pa
+from datasets.features import Features, Sequence, Value
 
 from . import config
 from .utils.logging import get_logger
@@ -66,6 +67,7 @@ class MetricInfo:
                         f"When using 'numpy' format, all features should be a `datasets.Value` feature. "
                         f"Here {key} is an instance of {value.__class__.__name__}"
                     )
+        self.features = Features(self._patch_nested_features(self.features))
 
     def write_to_directory(self, metric_info_dir):
         """Write `MetricInfo` as JSON to `metric_info_dir`.
@@ -97,3 +99,37 @@ class MetricInfo:
     def from_dict(cls, metric_info_dict: dict) -> "MetricInfo":
         field_names = {f.name for f in dataclasses.fields(cls)}
         return cls(**{k: v for k, v in metric_info_dict.items() if k in field_names})
+
+    def _patch_nested_features(self, schema):
+        """Patches feature types of nested Features. This overwrites the default `encode_example` method of `Value` to not cast to string."""
+        # Nested structures: we allow dict, list, tuples, sequences
+        if isinstance(schema, dict):
+            return {k: self._patch_nested_features(sub_schema) for k, sub_schema in schema.items()}
+        elif isinstance(schema, list):
+            return [self._patch_nested_features(sub_schema) for sub_schema in schema]
+        elif isinstance(schema, tuple):
+            return tuple(self._patch_nested_features(sub_schema) for sub_schema in schema)
+        elif isinstance(schema, Sequence):
+            return Sequence(self._patch_nested_features(schema.feature))
+        # patch Value `encode_example` method with function that does not cast to string
+        elif isinstance(schema, Value):
+            schema.encode_example = _encode_example.__get__(schema, Value)
+        # Other object should be directly convertible to a native Arrow type (like Translation and Translation)
+        return schema
+
+
+def _encode_example(self, value):
+    if pa.types.is_boolean(self.pa_type):
+        return bool(value)
+    elif pa.types.is_integer(self.pa_type):
+        return int(value)
+    elif pa.types.is_floating(self.pa_type):
+        return float(value)
+    elif pa.types.is_string(self.pa_type):
+        # patched case:
+        if isinstance(value, str):
+            return value
+        else:
+            raise TypeError(f"Expected type str but got {type(value)}.")
+    else:
+        return value

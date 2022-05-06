@@ -461,12 +461,12 @@ class Metric(MetricInfoMixin):
             raise ValueError(f"Bad inputs for metric: {bad_inputs}. All required inputs are {list(self.features)}")
         batch = {"predictions": predictions, "references": references, **kwargs}
         batch = {intput_name: batch[intput_name] for intput_name in self.features}
-        batch = self.info.features.encode_batch(batch)
         if self.writer is None:
             self._init_writer()
         try:
+            batch = self.info.features.encode_batch(batch)
             self.writer.write_batch(batch)
-        except pa.ArrowInvalid:
+        except (pa.ArrowInvalid, TypeError):
             if any(len(batch[c]) != len(next(iter(batch.values()))) for c in batch):
                 col0 = next(iter(batch))
                 bad_col = [c for c in batch if len(batch[c]) != len(batch[col0])][0]
@@ -500,12 +500,12 @@ class Metric(MetricInfoMixin):
             raise ValueError(f"Bad inputs for metric: {bad_inputs}. All required inputs are {list(self.features)}")
         example = {"predictions": prediction, "references": reference, **kwargs}
         example = {intput_name: example[intput_name] for intput_name in self.features}
-        example = self.info.features.encode_example(example)
         if self.writer is None:
             self._init_writer()
         try:
+            example = self.info.features.encode_example(example)
             self.writer.write(example)
-        except pa.ArrowInvalid:
+        except (pa.ArrowInvalid, TypeError):
             error_msg = f"Metric inputs don't match the expected format.\n" f"Expected format: {self.features},\n"
             error_msg_inputs = ",\n".join(
                 f"Input {input_name}: {summarize_if_long_list(example[input_name])}" for input_name in self.features
