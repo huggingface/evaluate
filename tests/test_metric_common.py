@@ -76,7 +76,9 @@ class LocalMetricTest(parameterized.TestCase):
     def test_load_metric(self, metric_name):
         doctest.ELLIPSIS_MARKER = "[...]"
         metric_module = importlib.import_module(
-            evaluate.load.metric_module_factory(os.path.join("metrics", metric_name)).module_path
+            evaluate.load.evaluate_module_factory(
+                os.path.join("metrics", metric_name), module_namespace="metrics"
+            ).module_path
         )
         metric = evaluate.load.import_main_class(metric_module.__name__, dataset=False)
         # check parameters
@@ -96,7 +98,9 @@ class LocalMetricTest(parameterized.TestCase):
     def test_load_real_metric(self, metric_name):
         doctest.ELLIPSIS_MARKER = "[...]"
         metric_module = importlib.import_module(
-            evaluate.load.metric_module_factory(os.path.join("metrics", metric_name)).module_path
+            evaluate.load.evaluate_module_factory(
+                os.path.join("metrics", metric_name), module_namespace="metrics"
+            ).module_path
         )
         # run doctest
         with self.use_local_metrics():

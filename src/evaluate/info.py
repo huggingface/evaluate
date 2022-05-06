@@ -97,3 +97,23 @@ class MetricInfo:
     def from_dict(cls, metric_info_dict: dict) -> "MetricInfo":
         field_names = {f.name for f in dataclasses.fields(cls)}
         return cls(**{k: v for k, v in metric_info_dict.items() if k in field_names})
+
+
+@dataclass
+class ComparisonInfo:
+    """Information about a comparison.
+
+    `ComparisonInfo` documents a comparison, including its name and inputs.
+    See the constructor arguments and properties for a full list.
+
+    Note: Not all fields are known on construction and may be updated later.
+    """
+
+    # Set in the comparison scripts
+    description: str
+    citation: str
+    inputs_description: str = field(default_factory=str)
+
+    # Set later by the builder
+    comparison_name: Optional[str] = None
+    config_name: Optional[str] = None

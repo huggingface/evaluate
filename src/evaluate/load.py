@@ -34,6 +34,7 @@ from datasets.utils.filelock import FileLock
 from datasets.utils.version import Version
 
 from . import config
+from .comparison import Comparison
 from .metric import Metric
 from .utils.file_utils import (
     DownloadConfig,
@@ -73,7 +74,9 @@ def init_dynamic_modules(
     return dynamic_modules_path
 
 
-def import_main_class(module_path, dataset=True) -> Optional[Union[Type[DatasetBuilder], Type[Metric]]]:
+def import_main_class(
+    module_path, dataset=True, comparison=False
+) -> Optional[Union[Type[DatasetBuilder], Type[Metric]]]:
     """Import a module at module_path and return its main class:
     - a DatasetBuilder if dataset is True
     - a Metric if dataset is False
@@ -82,6 +85,8 @@ def import_main_class(module_path, dataset=True) -> Optional[Union[Type[DatasetB
 
     if dataset:
         main_cls_type = DatasetBuilder
+    elif comparison:
+        main_cls_type = Comparison
     else:
         main_cls_type = Metric
 
@@ -415,12 +420,14 @@ class GithubMetricModuleFactory(_MetricModuleFactory):
         download_config: Optional[DownloadConfig] = None,
         download_mode: Optional[DownloadMode] = None,
         dynamic_modules_path: Optional[str] = None,
+        module_namespace: Optional[str] = None,
     ):
         self.name = name
         self.revision = revision
         self.download_config = download_config or DownloadConfig()
         self.download_mode = download_mode
         self.dynamic_modules_path = dynamic_modules_path
+        self.module_namespace = module_namespace
         assert self.name.count("/") == 0
         increase_load_count(name, resource_type="metric")
 
@@ -456,12 +463,13 @@ class GithubMetricModuleFactory(_MetricModuleFactory):
         )
         # copy the script and the files in an importable directory
         dynamic_modules_path = self.dynamic_modules_path if self.dynamic_modules_path else init_dynamic_modules()
+        module_namespace = self.module_namespace if self.module_namespace else "metrics"
         module_path, hash = _create_importable_file(
             local_path=local_path,
             local_imports=local_imports,
             additional_files=[],
             dynamic_modules_path=dynamic_modules_path,
-            module_namespace="metrics",
+            module_namespace=module_namespace,
             name=self.name,
             download_mode=self.download_mode,
         )
@@ -479,12 +487,14 @@ class LocalMetricModuleFactory(_MetricModuleFactory):
         download_config: Optional[DownloadConfig] = None,
         download_mode: Optional[DownloadMode] = None,
         dynamic_modules_path: Optional[str] = None,
+        module_namespace: Optional[str] = None,
     ):
         self.path = path
         self.name = Path(path).stem
         self.download_config = download_config or DownloadConfig()
         self.download_mode = download_mode
         self.dynamic_modules_path = dynamic_modules_path
+        self.module_namespace = module_namespace
 
     def get_module(self) -> MetricModule:
         # get script and other files
@@ -497,12 +507,13 @@ class LocalMetricModuleFactory(_MetricModuleFactory):
         )
         # copy the script and the files in an importable directory
         dynamic_modules_path = self.dynamic_modules_path if self.dynamic_modules_path else init_dynamic_modules()
+        module_namespace = self.module_namespace if self.module_namespace else "metrics"
         module_path, hash = _create_importable_file(
             local_path=self.path,
             local_imports=local_imports,
             additional_files=[],
             dynamic_modules_path=dynamic_modules_path,
-            module_namespace="metrics",
+            module_namespace=module_namespace,
             name=self.name,
             download_mode=self.download_mode,
         )
@@ -521,12 +532,14 @@ class HubMetricModuleFactory(_MetricModuleFactory):
         download_config: Optional[DownloadConfig] = None,
         download_mode: Optional[DownloadMode] = None,
         dynamic_modules_path: Optional[str] = None,
+        module_namespace: Optional[str] = None,
     ):
         self.name = name
         self.revision = revision
         self.download_config = download_config or DownloadConfig()
         self.download_mode = download_mode
         self.dynamic_modules_path = dynamic_modules_path
+        self.module_namespace = module_namespace
         assert self.name.count("/") == 1
         increase_load_count(name, resource_type="metric")
 
@@ -549,12 +562,13 @@ class HubMetricModuleFactory(_MetricModuleFactory):
         )
         # copy the script and the files in an importable directory
         dynamic_modules_path = self.dynamic_modules_path if self.dynamic_modules_path else init_dynamic_modules()
+        module_namespace = self.module_namespace if self.module_namespace else "metrics"
         module_path, hash = _create_importable_file(
             local_path=local_path,
             local_imports=local_imports,
             additional_files=[],
             dynamic_modules_path=dynamic_modules_path,
-            module_namespace="metrics",
+            module_namespace=module_namespace,
             name=self.name,
             download_mode=self.download_mode,
         )
@@ -573,14 +587,17 @@ class CachedMetricModuleFactory(_MetricModuleFactory):
         self,
         name: str,
         dynamic_modules_path: Optional[str] = None,
+        module_namespace: Optional[str] = None,
     ):
         self.name = name
         self.dynamic_modules_path = dynamic_modules_path
+        self.module_namespace = module_namespace
         assert self.name.count("/") == 0
 
     def get_module(self) -> MetricModule:
         dynamic_modules_path = self.dynamic_modules_path if self.dynamic_modules_path else init_dynamic_modules()
-        importable_directory_path = os.path.join(dynamic_modules_path, "metrics", self.name)
+        module_namespace = self.module_namespace if self.module_namespace else "metrics"
+        importable_directory_path = os.path.join(dynamic_modules_path, module_namespace, self.name)
         hashes = (
             [h for h in os.listdir(importable_directory_path) if len(h) == 64]
             if os.path.isdir(importable_directory_path)
@@ -600,22 +617,23 @@ class CachedMetricModuleFactory(_MetricModuleFactory):
             f"couldn't be found locally at {self.name}, or remotely on the Hugging Face Hub."
         )
         # make the new module to be noticed by the import system
-        module_path = ".".join([os.path.basename(dynamic_modules_path), "metrics", self.name, hash, self.name])
+        module_path = ".".join([os.path.basename(dynamic_modules_path), module_namespace, self.name, hash, self.name])
         importlib.invalidate_caches()
         return MetricModule(module_path, hash)
 
 
-def metric_module_factory(
+def evaluate_module_factory(
     path: str,
     revision: Optional[Union[str, Version]] = None,
     download_config: Optional[DownloadConfig] = None,
     download_mode: Optional[DownloadMode] = None,
     force_local_path: Optional[str] = None,
     dynamic_modules_path: Optional[str] = None,
+    module_namespace: Optional[str] = None,
     **download_kwargs,
 ) -> MetricModule:
     """
-    Download/extract/cache a metric module.
+    Download/extract/cache a metric/comparison module.
 
     Metrics codes are cached inside the the dynamic modules cache to allow easy import (avoid ugly sys.path tweaks).
 
@@ -623,11 +641,11 @@ def metric_module_factory(
 
         path (str): Path or name of the metric script.
 
-            - if ``path`` is a local metric script or a directory containing a local metric script (if the script has the same name as the directory):
-              -> load the module from the metric script
-              e.g. ``'./metrics/accuracy'`` or ``'./metrics/accuracy/accuracy.py'``.
+            - if ``path`` is a local metric/comparison script or a directory containing such a script (if the script has the same name as the directory):
+              -> load the module from the script
+              e.g. ``'./{module_namespace}/accuracy'`` or ``'./{module_namespace}/accuracy/accuracy.py'``.
             - if ``path`` is a metric on the Hugging Face Hub (ex: `glue`, `squad`)
-              -> load the module from the metric script in the github repository at huggingface/datasets
+              -> load the module from the script in the github repository at huggingface/datasets
               e.g. ``'accuracy'`` or ``'rouge'``.
 
         revision (Optional ``Union[str, datasets.Version]``):
@@ -662,13 +680,19 @@ def metric_module_factory(
     if path.endswith(filename):
         if os.path.isfile(path):
             return LocalMetricModuleFactory(
-                path, download_mode=download_mode, dynamic_modules_path=dynamic_modules_path
+                path,
+                download_mode=download_mode,
+                dynamic_modules_path=dynamic_modules_path,
+                module_namespace=module_namespace,
             ).get_module()
         else:
             raise FileNotFoundError(f"Couldn't find a metric script at {relative_to_absolute_path(path)}")
     elif os.path.isfile(combined_path):
         return LocalMetricModuleFactory(
-            combined_path, download_mode=download_mode, dynamic_modules_path=dynamic_modules_path
+            combined_path,
+            download_mode=download_mode,
+            dynamic_modules_path=dynamic_modules_path,
+            module_namespace=module_namespace,
         ).get_module()
     elif is_relative_path(path) and path.count("/") <= 1 and not force_local_path:
         try:
@@ -679,6 +703,7 @@ def metric_module_factory(
                     download_config=download_config,
                     download_mode=download_mode,
                     dynamic_modules_path=dynamic_modules_path,
+                    module_namespace=module_namespace,
                 ).get_module()
             elif path.count("/") == 1:
                 return HubMetricModuleFactory(
@@ -687,10 +712,13 @@ def metric_module_factory(
                     download_config=download_config,
                     download_mode=download_mode,
                     dynamic_modules_path=dynamic_modules_path,
+                    module_namespace=module_namespace,
                 ).get_module()
         except Exception as e1:  # noqa: all the attempts failed, before raising the error we should check if the module is already cached.
             try:
-                return CachedMetricModuleFactory(path, dynamic_modules_path=dynamic_modules_path).get_module()
+                return CachedMetricModuleFactory(
+                    path, dynamic_modules_path=dynamic_modules_path, module_namespace=module_namespace
+                ).get_module()
             except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
                 if not isinstance(e1, FileNotFoundError):
                     raise e1 from None
@@ -742,8 +770,12 @@ def load_metric(
         `evaluate.Metric`
     """
     download_mode = DownloadMode(download_mode or DownloadMode.REUSE_DATASET_IF_EXISTS)
-    metric_module = metric_module_factory(
-        path, revision=revision, download_config=download_config, download_mode=download_mode
+    metric_module = evaluate_module_factory(
+        path,
+        module_namespace="metrics",
+        revision=revision,
+        download_config=download_config,
+        download_mode=download_mode,
     ).module_path
     metric_cls = import_main_class(metric_module, dataset=False)
     metric = metric_cls(
@@ -760,3 +792,27 @@ def load_metric(
     metric.download_and_prepare(download_config=download_config)
 
     return metric
+
+
+def load_comparison(
+    path: str,
+    config_name: Optional[str] = None,
+    **comparison_init_kwargs,
+) -> Comparison:
+    """Load a `evaluate.Comparison`.
+
+    Args:
+
+        path (``str``):
+            name of comparison method
+    Returns:
+        `evaluate.Comparison`
+    """
+    comparison_module = evaluate_module_factory(path, module_namespace="comparisons").module_path
+    comparison_cls = import_main_class(comparison_module, dataset=False, comparison=True)
+    comparison = comparison_cls(
+        config_name=config_name,
+        **comparison_init_kwargs,
+    )
+
+    return comparison
