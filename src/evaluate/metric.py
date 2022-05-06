@@ -25,10 +25,11 @@ from datasets import DatasetInfo
 from datasets.arrow_dataset import Dataset
 from datasets.arrow_reader import ArrowReader
 from datasets.arrow_writer import ArrowWriter
-from datasets.features import Features
+from datasets.features import Features, Sequence, Value
+from datasets.features.features import _check_non_null_non_empty_recursive
 from datasets.utils.download_manager import DownloadManager
 from datasets.utils.filelock import BaseFileLock, FileLock, Timeout
-from datasets.utils.py_utils import copyfunc, temp_seed
+from datasets.utils.py_utils import copyfunc, temp_seed, zip_dict
 
 from . import config
 from .info import MetricInfo
@@ -464,6 +465,8 @@ class Metric(MetricInfoMixin):
         if self.writer is None:
             self._init_writer()
         try:
+            for key, column in batch.items():
+                [self._enforce_nested_string_type(self.info.features[key], obj) for obj in column]
             batch = self.info.features.encode_batch(batch)
             self.writer.write_batch(batch)
         except (pa.ArrowInvalid, TypeError):
@@ -503,6 +506,7 @@ class Metric(MetricInfoMixin):
         if self.writer is None:
             self._init_writer()
         try:
+            self._enforce_nested_string_type(self.info.features, example)
             example = self.info.features.encode_example(example)
             self.writer.write(example)
         except (pa.ArrowInvalid, TypeError):
@@ -610,3 +614,44 @@ class Metric(MetricInfoMixin):
             del self.writer
         if hasattr(self, "data"):  # in case it was already deleted
             del self.data
+
+    def _enforce_nested_string_type(self, schema, obj):
+        """
+        Recursively checks if there is any Value feature of type string and throws TypeError if corresponding object is not a string.
+        Since any Python object can be cast to string this avoids implicitly casting wrong input types (e.g. lists) to string without error.
+        """
+        # Nested structures: we allow dict, list, tuples, sequences
+        if isinstance(schema, dict):
+            return [self._enforce_nested_string_type(sub_schema, o) for k, (sub_schema, o) in zip_dict(schema, obj)]
+
+        elif isinstance(schema, (list, tuple)):
+            sub_schema = schema[0]
+            return [self._enforce_nested_string_type(sub_schema, o) for o in obj]
+        elif isinstance(schema, Sequence):
+            # We allow to reverse list of dict => dict of list for compatiblity with tfds
+            if isinstance(schema.feature, dict):
+                if isinstance(obj, (list, tuple)):
+                    # obj is a list of dict
+                    for k, dict_tuples in zip_dict(schema.feature, *obj):
+                        return [self._enforce_nested_string_type(dict_tuples[0], o) for o in dict_tuples[1:]]
+                else:
+                    # obj is a single dict
+                    for k, (sub_schema, sub_objs) in zip_dict(schema.feature, obj):
+                        return [self._enforce_nested_string_type(sub_schema, o) for o in sub_objs]
+            # schema.feature is not a dict
+            if isinstance(obj, str):  # don't interpret a string as a list
+                raise ValueError(f"Got a string but expected a list instead: '{obj}'")
+            if obj is None:
+                return None
+            else:
+                if len(obj) > 0:
+                    for first_elmt in obj:
+                        if _check_non_null_non_empty_recursive(first_elmt, schema.feature):
+                            break
+                    if not isinstance(first_elmt, list):
+                        return [self._enforce_nested_string_type(schema.feature, o) for o in obj]
+
+        # patch Value `encode_example` method with function that does not cast to string
+        elif isinstance(schema, Value):
+            if pa.types.is_string(schema.pa_type) and not isinstance(obj, str):
+                raise TypeError(f"Expected type str but got {type(obj)}.")
