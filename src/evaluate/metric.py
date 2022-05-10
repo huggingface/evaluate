@@ -651,7 +651,6 @@ class Metric(MetricInfoMixin):
                     if not isinstance(first_elmt, list):
                         return [self._enforce_nested_string_type(schema.feature, o) for o in obj]
 
-        # patch Value `encode_example` method with function that does not cast to string
         elif isinstance(schema, Value):
             if pa.types.is_string(schema.pa_type) and not isinstance(obj, str):
                 raise TypeError(f"Expected type str but got {type(obj)}.")
