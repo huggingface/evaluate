@@ -1,4 +1,7 @@
+🤗 Evaluate is a library that aims to make evaluating and comparing machine learning models and reporting their performance easier and more standardized. 
+```suggestion
 🤗 Evaluate is a library that aims to make evaluating and comparing models and reporting their performance easier and more standardized. 
+
 
 It currently contains:
 
