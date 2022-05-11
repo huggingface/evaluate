@@ -14,9 +14,11 @@ It currently contains:
 
 🤗 Evaluate also has lots of useful features like:
 
-- Type checking to make sure that you are using the right input formats, depending on the metric structure and arguments.
-- Metric cards that describe the values, limitations and ranges of metrics, providing examples of their usage and usefulness.
-- [*Something else here*]
+- **Type checking**: the input types are checked to make sure that you are using the right input formats for each metric
+- **Metric cards**: each metrics comes with a card that describes the values, limitations and their ranges, as well as providing examples of their usage and usefulness.
+- **Community metrics:** Metrics live on the Hugging Face Hub and you can easily add your own metrics for your project or to collaborate with others.
+
+
 
 # Installation
 
