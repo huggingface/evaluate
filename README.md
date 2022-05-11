@@ -57,7 +57,17 @@ For more details on using the library with NumPy, pandas, PyTorch or TensorFlow,
 
 # Adding a new metric
 
+First install the necessary dependancies to create a new metric with the following command:
+```
+pip install evaluate[template]
+```
+Then you can get started with the following command which will create a new folder for your metric and display the necessary steps:
+```batch
+evaluate-cli create "Awesome Metric"
+```
+For detailed documentation see ...
 TODO : make step-by-step guide similar to the one for [datasets](https://huggingface.co/docs/datasets/share.html).
+
 
 # Disclaimers
 
