@@ -210,6 +210,7 @@ class Metric(MetricInfoMixin):
         self.add.__func__.__doc__ += self.info.inputs_description
 
         # self.arrow_schema = pa.schema(field for field in self.info.features.type)
+        self.current_features = None
         self.buf_writer = None
         self.writer = None
         self.writer_batch_size = None
@@ -366,7 +367,7 @@ class Metric(MetricInfoMixin):
 
         if self.keep_in_memory:
             # Read the predictions and references
-            reader = ArrowReader(path=self.data_dir, info=DatasetInfo(features=self.features))
+            reader = ArrowReader(path=self.data_dir, info=DatasetInfo(features=self.current_features))
             self.data = Dataset.from_buffer(self.buf_writer.getvalue())
 
         elif self.process_id == 0:
@@ -375,7 +376,7 @@ class Metric(MetricInfoMixin):
 
             # Read the predictions and references
             try:
-                reader = ArrowReader(path="", info=DatasetInfo(features=self.features))
+                reader = ArrowReader(path="", info=DatasetInfo(features=self.current_features))
                 self.data = Dataset(**reader.read_files([{"filename": f} for f in file_paths]))
             except FileNotFoundError:
                 raise ValueError(
@@ -406,16 +407,16 @@ class Metric(MetricInfoMixin):
         """
         all_kwargs = {"predictions": predictions, "references": references, **kwargs}
         if predictions is None and references is None:
-            missing_kwargs = {k: None for k in self.features if k not in all_kwargs}
+            missing_kwargs = {k: None for k in self._feature_names() if k not in all_kwargs}
             all_kwargs.update(missing_kwargs)
         else:
-            missing_inputs = [k for k in self.features if k not in all_kwargs]
+            missing_inputs = [k for k in self._feature_names() if k not in all_kwargs]
             if missing_inputs:
                 raise ValueError(
-                    f"Metric inputs are missing: {missing_inputs}. All required inputs are {list(self.features)}"
+                    f"Metric inputs are missing: {missing_inputs}. All required inputs are {list(self._feature_names())}"
                 )
-        inputs = {input_name: all_kwargs[input_name] for input_name in self.features}
-        compute_kwargs = {k: kwargs[k] for k in kwargs if k not in self.features}
+        inputs = {input_name: all_kwargs[input_name] for input_name in self._feature_names()}
+        compute_kwargs = {k: kwargs[k] for k in kwargs if k not in self._feature_names()}
 
         if any(v is not None for v in inputs.values()):
             self.add_batch(**inputs)
@@ -423,11 +424,12 @@ class Metric(MetricInfoMixin):
 
         self.cache_file_name = None
         self.filelock = None
+        self.current_features = None
 
         if self.process_id == 0:
             self.data.set_format(type=self.info.format)
 
-            inputs = {input_name: self.data[input_name] for input_name in self.features}
+            inputs = {input_name: self.data[input_name] for input_name in self._feature_names()}
             with temp_seed(self.seed):
                 output = self._compute(**inputs, **compute_kwargs)
 
@@ -457,17 +459,20 @@ class Metric(MetricInfoMixin):
             predictions (list/array/tensor, optional): Predictions.
             references (list/array/tensor, optional): References.
         """
-        bad_inputs = [input_name for input_name in kwargs if input_name not in self.features]
+        bad_inputs = [input_name for input_name in kwargs if input_name not in self._feature_names()]
         if bad_inputs:
-            raise ValueError(f"Bad inputs for metric: {bad_inputs}. All required inputs are {list(self.features)}")
+            raise ValueError(
+                f"Bad inputs for metric: {bad_inputs}. All required inputs are {list(self._feature_names())}"
+            )
         batch = {"predictions": predictions, "references": references, **kwargs}
-        batch = {intput_name: batch[intput_name] for intput_name in self.features}
+        batch = {intput_name: batch[intput_name] for intput_name in self._feature_names()}
         if self.writer is None:
+            self.current_features = self._infer_feature_from_batch(batch)
             self._init_writer()
         try:
             for key, column in batch.items():
-                [self._enforce_nested_string_type(self.info.features[key], obj) for obj in column]
-            batch = self.info.features.encode_batch(batch)
+                [self._enforce_nested_string_type(self.current_features[key], obj) for obj in column]
+            batch = self.current_features.encode_batch(batch)
             self.writer.write_batch(batch)
         except (pa.ArrowInvalid, TypeError):
             if any(len(batch[c]) != len(next(iter(batch.values()))) for c in batch):
@@ -476,16 +481,19 @@ class Metric(MetricInfoMixin):
                 error_msg = (
                     f"Mismatch in the number of {col0} ({len(batch[col0])}) and {bad_col} ({len(batch[bad_col])})"
                 )
-            elif sorted(self.features) != ["references", "predictions"]:
-                error_msg = f"Metric inputs don't match the expected format.\n" f"Expected format: {self.features},\n"
+            elif sorted(self.current_features) != ["references", "predictions"]:
+                error_msg = (
+                    f"Metric inputs don't match the expected format.\n" f"Expected format: {self.current_features },\n"
+                )
                 error_msg_inputs = ",\n".join(
-                    f"Input {input_name}: {summarize_if_long_list(batch[input_name])}" for input_name in self.features
+                    f"Input {input_name}: {summarize_if_long_list(batch[input_name])}"
+                    for input_name in self.current_features
                 )
                 error_msg += error_msg_inputs
             else:
                 error_msg = (
                     f"Predictions and/or references don't match the expected format.\n"
-                    f"Expected format: {self.features},\n"
+                    f"Expected format: {self.current_features },\n"
                     f"Input predictions: {summarize_if_long_list(predictions)},\n"
                     f"Input references: {summarize_if_long_list(references)}"
                 )
@@ -498,24 +506,64 @@ class Metric(MetricInfoMixin):
             prediction (list/array/tensor, optional): Predictions.
             reference (list/array/tensor, optional): References.
         """
-        bad_inputs = [input_name for input_name in kwargs if input_name not in self.features]
+        bad_inputs = [input_name for input_name in kwargs if input_name not in self._feature_names()]
         if bad_inputs:
-            raise ValueError(f"Bad inputs for metric: {bad_inputs}. All required inputs are {list(self.features)}")
+            raise ValueError(
+                f"Bad inputs for metric: {bad_inputs}. All required inputs are {list(self._feature_names())}"
+            )
         example = {"predictions": prediction, "references": reference, **kwargs}
-        example = {intput_name: example[intput_name] for intput_name in self.features}
+        example = {intput_name: example[intput_name] for intput_name in self._feature_names()}
         if self.writer is None:
+            self.current_features = self._infer_feature_from_example(example)
             self._init_writer()
         try:
             self._enforce_nested_string_type(self.info.features, example)
             example = self.info.features.encode_example(example)
             self.writer.write(example)
         except (pa.ArrowInvalid, TypeError):
-            error_msg = f"Metric inputs don't match the expected format.\n" f"Expected format: {self.features},\n"
+            error_msg = (
+                f"Metric inputs don't match the expected format.\n" f"Expected format: {self.current_features},\n"
+            )
             error_msg_inputs = ",\n".join(
-                f"Input {input_name}: {summarize_if_long_list(example[input_name])}" for input_name in self.features
+                f"Input {input_name}: {summarize_if_long_list(example[input_name])}"
+                for input_name in self.current_features
             )
             error_msg += error_msg_inputs
             raise ValueError(error_msg) from None
+
+    def _infer_feature_from_batch(self, batch):
+        if isinstance(self.features, Features):
+            return self.features
+        else:
+            example = dict([(k, v[0]) for k, v in batch.items()])
+            return self._infer_feature_from_example(example)
+
+    def _infer_feature_from_example(self, example):
+        if isinstance(self.features, Features):
+            return self.features
+        else:
+            for features in self.features:
+                try:
+                    self._enforce_nested_string_type(features, example)
+                    features.encode_example(example)
+                    return features
+                except ValueError:
+                    continue
+        feature_strings = "\n".join([f"Feature option {i}: {feature}" for i, feature in enumerate(self.features)])
+        error_msg = (
+            f"Predictions and/or references don't match the expected format.\n"
+            f"Expected format:\n{feature_strings},\n"
+            f"Input predictions: {summarize_if_long_list(example['predictions'])},\n"
+            f"Input references: {summarize_if_long_list(example['references'])}"
+        )
+        raise ValueError(error_msg) from None
+
+    def _feature_names(self):
+        if isinstance(self.features, list):
+            feature_names = list(self.features[0].keys())
+        else:
+            feature_names = list(self.features.keys())
+        return feature_names
 
     def _init_writer(self, timeout=1):
         if self.num_process > 1:
@@ -534,7 +582,7 @@ class Metric(MetricInfoMixin):
         if self.keep_in_memory:
             self.buf_writer = pa.BufferOutputStream()
             self.writer = ArrowWriter(
-                features=self.info.features, stream=self.buf_writer, writer_batch_size=self.writer_batch_size
+                features=self.current_features, stream=self.buf_writer, writer_batch_size=self.writer_batch_size
             )
         else:
             self.buf_writer = None
@@ -546,7 +594,7 @@ class Metric(MetricInfoMixin):
                 self.filelock = filelock
 
             self.writer = ArrowWriter(
-                features=self.info.features, path=self.cache_file_name, writer_batch_size=self.writer_batch_size
+                features=self.current_features, path=self.cache_file_name, writer_batch_size=self.writer_batch_size
             )
         # Setup rendez-vous here if
         if self.num_process > 1:
