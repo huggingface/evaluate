@@ -53,7 +53,7 @@ For more details on using the library with NumPy, pandas, PyTorch or TensorFlow,
 
 - `evaluate.list_metrics()` to list the available metrics
 - `evaluate.load_metric(metric_name, **kwargs)` to instantiate a metric
-
+- `results = metric.compute(*kwargs)` to compute a metric on a set of predictions and/or references
 
 # Adding a new metric
 
