@@ -478,6 +478,13 @@ class TestMetric(TestCase):
         self.assertDictEqual(expected_results, metric.compute())
         del metric
 
+    def test_string_casting(self):
+        metric = DummyMetric(experiment_id="test_string_casting")
+        metric.info.features = Features({"predictions": Value("string"), "references": Value("string")})
+        metric.compute(predictions=["a"], references=["a"])
+        with self.assertRaises(ValueError):
+            metric.compute(predictions=[1], references=[1])
+
 
 class MetricWithMultiLabel(Metric):
     def _info(self):
