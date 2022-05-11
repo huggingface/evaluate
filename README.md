@@ -32,7 +32,8 @@ pip install evaluate
 
 ## With conda
 
-🤗 Datasets can be installed using conda as follows:
+🤗 Evaluate can be installed using conda as follows:
+
 
 ```bash
 conda install -c huggingface -c conda-forge evaluate
