@@ -109,6 +109,7 @@ TESTS_REQUIRE = [
     "bert_score>=0.3.6",
     "rouge_score",
     "sacrebleu",
+    "sacremoses",
     "scipy",
     "seqeval",
     "scikit-learn",
