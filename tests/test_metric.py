@@ -22,14 +22,16 @@ class DummyMetric(Metric):
         )
 
     def _compute(self, predictions, references):
-        return (
-            {
-                "accuracy": sum(i == j for i, j in zip(predictions, references)) / len(predictions),
-                "set_equality": set(predictions) == set(references),
-            }
-            if predictions
-            else {}
-        )
+        result = {}
+        if not predictions:
+            return result
+        else:
+            result["accuracy"] = sum(i == j for i, j in zip(predictions, references)) / len(predictions)
+            try:
+                result["set_equality"] = set(predictions) == set(references)
+            except TypeError:
+                result["set_equality"] = None
+        return result
 
     @classmethod
     def predictions_and_references(cls):
