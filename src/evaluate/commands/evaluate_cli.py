@@ -35,8 +35,8 @@ You should then see the update widget on the Hugging Face Hub: {repo_url}
 And you can load your metric in Python with the following code:
 
 ```
-from evaluate import load_metric
-metric = load_metric("{namespace}/{metric_slug}")
+from evaluate import load
+metric = load("{namespace}/{metric_slug}")
 ```
 """
 

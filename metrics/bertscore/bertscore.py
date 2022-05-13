@@ -90,7 +90,7 @@ Examples:
 
     >>> predictions = ["hello there", "general kenobi"]
     >>> references = ["hello there", "general kenobi"]
-    >>> bertscore = evaluate.load_metric("bertscore")
+    >>> bertscore = evaluate.load("bertscore")
     >>> results = bertscore.compute(predictions=predictions, references=references, lang="en")
     >>> print([round(v, 2) for v in results["f1"]])
     [1.0, 1.0]

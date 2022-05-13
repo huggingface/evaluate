@@ -50,7 +50,7 @@ Returns:
     mahalanobis: The Mahalonobis distance for each datapoint in `X`.
 Examples:
 
-    >>> mahalanobis_metric = evaluate.load_metric("mahalanobis")
+    >>> mahalanobis_metric = evaluate.load("mahalanobis")
     >>> results = mahalanobis_metric.compute(reference_distribution=[[0, 1], [1, 0]], X=[[0, 1]])
     >>> print(results)
     {'mahalanobis': array([0.5])}

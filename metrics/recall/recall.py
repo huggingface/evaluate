@@ -50,26 +50,26 @@ Returns:
 Examples:
 
     Example 1-A simple example with some errors
-        >>> recall_metric = evaluate.load_metric('recall')
+        >>> recall_metric = evaluate.load('recall')
         >>> results = recall_metric.compute(references=[0, 0, 1, 1, 1], predictions=[0, 1, 0, 1, 1])
         >>> print(results)
         {'recall': 0.6666666666666666}
 
     Example 2-The same example as Example 1, but with `pos_label=0` instead of the default `pos_label=1`.
-        >>> recall_metric = evaluate.load_metric('recall')
+        >>> recall_metric = evaluate.load('recall')
         >>> results = recall_metric.compute(references=[0, 0, 1, 1, 1], predictions=[0, 1, 0, 1, 1], pos_label=0)
         >>> print(results)
         {'recall': 0.5}
 
     Example 3-The same example as Example 1, but with `sample_weight` included.
-        >>> recall_metric = evaluate.load_metric('recall')
+        >>> recall_metric = evaluate.load('recall')
         >>> sample_weight = [0.9, 0.2, 0.9, 0.3, 0.8]
         >>> results = recall_metric.compute(references=[0, 0, 1, 1, 1], predictions=[0, 1, 0, 1, 1], sample_weight=sample_weight)
         >>> print(results)
         {'recall': 0.55}
 
     Example 4-A multiclass example, using different averages.
-        >>> recall_metric = evaluate.load_metric('recall')
+        >>> recall_metric = evaluate.load('recall')
         >>> predictions = [0, 2, 1, 0, 0, 1]
         >>> references = [0, 1, 2, 0, 1, 2]
         >>> results = recall_metric.compute(predictions=predictions, references=references, average='macro')

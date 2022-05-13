@@ -69,35 +69,35 @@ Returns: depending on the SuperGLUE subset:
         - 'accuracy': Accuracy
 Examples:
 
-    >>> super_glue_metric = evaluate.load_metric('super_glue', 'copa')  # any of ["copa", "rte", "wic", "wsc", "wsc.fixed", "boolq", "axg"]
+    >>> super_glue_metric = evaluate.load('super_glue', 'copa')  # any of ["copa", "rte", "wic", "wsc", "wsc.fixed", "boolq", "axg"]
     >>> predictions = [0, 1]
     >>> references = [0, 1]
     >>> results = super_glue_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'accuracy': 1.0}
 
-    >>> super_glue_metric = evaluate.load_metric('super_glue', 'cb')
+    >>> super_glue_metric = evaluate.load('super_glue', 'cb')
     >>> predictions = [0, 1]
     >>> references = [0, 1]
     >>> results = super_glue_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'accuracy': 1.0, 'f1': 1.0}
 
-    >>> super_glue_metric = evaluate.load_metric('super_glue', 'record')
+    >>> super_glue_metric = evaluate.load('super_glue', 'record')
     >>> predictions = [{'idx': {'passage': 0, 'query': 0}, 'prediction_text': 'answer'}]
     >>> references = [{'idx': {'passage': 0, 'query': 0}, 'answers': ['answer', 'another_answer']}]
     >>> results = super_glue_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'exact_match': 1.0, 'f1': 1.0}
 
-    >>> super_glue_metric = evaluate.load_metric('super_glue', 'multirc')
+    >>> super_glue_metric = evaluate.load('super_glue', 'multirc')
     >>> predictions = [{'idx': {'answer': 0, 'paragraph': 0, 'question': 0}, 'prediction': 0}, {'idx': {'answer': 1, 'paragraph': 2, 'question': 3}, 'prediction': 1}]
     >>> references = [0, 1]
     >>> results = super_glue_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'exact_match': 1.0, 'f1_m': 1.0, 'f1_a': 1.0}
 
-    >>> super_glue_metric = evaluate.load_metric('super_glue', 'axb')
+    >>> super_glue_metric = evaluate.load('super_glue', 'axb')
     >>> references = [0, 1]
     >>> predictions = [0, 1]
     >>> results = super_glue_metric.compute(predictions=predictions, references=references)

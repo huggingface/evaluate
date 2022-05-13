@@ -88,7 +88,7 @@ Examples:
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"],
         ...             ["Your jokes are...", "...TERrible"]]
-        >>> ter = evaluate.load_metric("ter")
+        >>> ter = evaluate.load("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         case_sensitive=True)
@@ -100,7 +100,7 @@ Examples:
         ...                     "what about this sentence?"]
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"]]
-        >>> ter = evaluate.load_metric("ter")
+        >>> ter = evaluate.load("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         case_sensitive=True)
@@ -112,7 +112,7 @@ Examples:
         ...                     "what about this sentence?"]
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"]]
-        >>> ter = evaluate.load_metric("ter")
+        >>> ter = evaluate.load("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         normalized=True,
@@ -125,7 +125,7 @@ Examples:
         ...                     "what about this sentence?"]
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"]]
-        >>> ter = evaluate.load_metric("ter")
+        >>> ter = evaluate.load("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         ignore_punct=True,
@@ -140,7 +140,7 @@ Examples:
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"],
         ...             ["Your jokes are...", "...TERrible"]]
-        >>> ter = evaluate.load_metric("ter")
+        >>> ter = evaluate.load("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         ignore_punct=True,

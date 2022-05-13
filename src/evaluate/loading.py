@@ -702,7 +702,7 @@ def metric_module_factory(
         raise FileNotFoundError(f"Couldn't find a metric script at {relative_to_absolute_path(combined_path)}.")
 
 
-def load_metric(
+def load(
     path: str,
     config_name: Optional[str] = None,
     process_id: int = 0,

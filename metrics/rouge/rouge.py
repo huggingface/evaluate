@@ -71,7 +71,7 @@ Returns:
     rougeLsum: rouge_lsum (precision, recall, f1)
 Examples:
 
-    >>> rouge = evaluate.load_metric('rouge')
+    >>> rouge = evaluate.load('rouge')
     >>> predictions = ["hello there", "general kenobi"]
     >>> references = ["hello there", "general kenobi"]
     >>> results = rouge.compute(predictions=predictions, references=references)

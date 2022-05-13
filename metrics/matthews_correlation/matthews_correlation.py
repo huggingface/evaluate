@@ -41,14 +41,14 @@ Returns:
     matthews_correlation (dict containing float): Matthews correlation.
 Examples:
     Example 1, a basic example with only predictions and references as inputs:
-        >>> matthews_metric = evaluate.load_metric("matthews_correlation")
+        >>> matthews_metric = evaluate.load("matthews_correlation")
         >>> results = matthews_metric.compute(references=[1, 3, 2, 0, 3, 2],
         ...                                     predictions=[1, 2, 2, 0, 3, 3])
         >>> print(round(results['matthews_correlation'], 2))
         0.54
 
     Example 2, the same example as above, but also including sample weights:
-        >>> matthews_metric = evaluate.load_metric("matthews_correlation")
+        >>> matthews_metric = evaluate.load("matthews_correlation")
         >>> results = matthews_metric.compute(references=[1, 3, 2, 0, 3, 2],
         ...                                     predictions=[1, 2, 2, 0, 3, 3],
         ...                                     sample_weight=[0.5, 3, 1, 1, 1, 2])
@@ -56,7 +56,7 @@ Examples:
         0.1
 
     Example 3, the same example as above, but with sample weights that cause a negative correlation:
-        >>> matthews_metric = evaluate.load_metric("matthews_correlation")
+        >>> matthews_metric = evaluate.load("matthews_correlation")
         >>> results = matthews_metric.compute(references=[1, 3, 2, 0, 3, 2],
         ...                                     predictions=[1, 2, 2, 0, 3, 3],
         ...                                     sample_weight=[0.5, 1, 0, 0, 0, 1])

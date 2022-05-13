@@ -77,7 +77,7 @@ Examples:
     ...     ["hello there general kenobi", "hello there!"],
     ...     ["foo bar foobar"]
     ... ]
-    >>> bleu = evaluate.load_metric("bleu")
+    >>> bleu = evaluate.load("bleu")
     >>> results = bleu.compute(predictions=predictions, references=references)
     >>> print(results["bleu"])
     1.0

@@ -10,7 +10,7 @@ This metrics is a wrapper around the [Google Research reimplementation of ROUGE]
 ## How to Use
 At minimum, this metric takes as input a list of predictions and a list of references:
 ```python
->>> rouge = evaluate.load_metric('rouge')
+>>> rouge = evaluate.load('rouge')
 >>> predictions = ["hello there", "general kenobi"]
 >>> references = ["hello there", "general kenobi"]
 >>> results = rouge.compute(predictions=predictions,
@@ -59,7 +59,7 @@ The `precision`, `recall`, and `fmeasure` values all have a range of 0 to 1.
 ### Examples
 An example without aggregation:
 ```python
->>> rouge = evaluate.load_metric('rouge')
+>>> rouge = evaluate.load('rouge')
 >>> predictions = ["hello goodbye", "ankh morpork"]
 >>> references = ["goodbye", "general kenobi"]
 >>> results = rouge.compute(predictions=predictions,
@@ -72,7 +72,7 @@ An example without aggregation:
 
 The same example, but with aggregation:
 ```python
->>> rouge = evaluate.load_metric('rouge')
+>>> rouge = evaluate.load('rouge')
 >>> predictions = ["hello goodbye", "ankh morpork"]
 >>> references = ["goodbye", "general kenobi"]
 >>> results = rouge.compute(predictions=predictions,
@@ -86,7 +86,7 @@ AggregateScore(low=Score(precision=0.0, recall=0.0, fmeasure=0.0), mid=Score(pre
 
 The same example, but only calculating `rouge_1`:
 ```python
->>> rouge = evaluate.load_metric('rouge')
+>>> rouge = evaluate.load('rouge')
 >>> predictions = ["hello goodbye", "ankh morpork"]
 >>> references = ["goodbye", "general kenobi"]
 >>> results = rouge.compute(predictions=predictions,

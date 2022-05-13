@@ -28,7 +28,7 @@ del version
 
 from .info import MetricInfo
 from .inspect import inspect_metric, list_metrics
-from .load import load_metric
+from .loading import load
 from .metric import Metric
 from .utils import *
 from .utils import gradio, logging

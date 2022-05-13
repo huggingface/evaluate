@@ -13,7 +13,7 @@ is also known as the phi coefficient. [source: Wikipedia]
 ## How to Use
 At minimum, this metric requires a list of predictions and a list of references:
 ```python
->>> matthews_metric = evaluate.load_metric("matthews_correlation")
+>>> matthews_metric = evaluate.load("matthews_correlation")
 >>> results = matthews_metric.compute(references=[0, 1], predictions=[0, 1])
 >>> print(results)
 {'matthews_correlation': 1.0}
@@ -40,7 +40,7 @@ This metric can be any value from -1 to +1, inclusive.
 ### Examples
 A basic example with only predictions and references as inputs:
 ```python
->>> matthews_metric = evaluate.load_metric("matthews_correlation")
+>>> matthews_metric = evaluate.load("matthews_correlation")
 >>> results = matthews_metric.compute(references=[1, 3, 2, 0, 3, 2],
 ...                                     predictions=[1, 2, 2, 0, 3, 3])
 >>> print(results)
@@ -49,7 +49,7 @@ A basic example with only predictions and references as inputs:
 
 The same example as above, but also including sample weights:
 ```python
->>> matthews_metric = evaluate.load_metric("matthews_correlation")
+>>> matthews_metric = evaluate.load("matthews_correlation")
 >>> results = matthews_metric.compute(references=[1, 3, 2, 0, 3, 2],
 ...                                     predictions=[1, 2, 2, 0, 3, 3],
 ...                                     sample_weight=[0.5, 3, 1, 1, 1, 2])
@@ -59,7 +59,7 @@ The same example as above, but also including sample weights:
 
 The same example as above, with sample weights that cause a negative correlation:
 ```python
->>> matthews_metric = evaluate.load_metric("matthews_correlation")
+>>> matthews_metric = evaluate.load("matthews_correlation")
 >>> results = matthews_metric.compute(references=[1, 3, 2, 0, 3, 2],
 ...                                     predictions=[1, 2, 2, 0, 3, 3],
 ...                                     sample_weight=[0.5, 1, 0, 0, 0, 1])

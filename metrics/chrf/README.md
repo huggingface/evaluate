@@ -14,7 +14,7 @@ At minimum, this metric requires a `list` of predictions and a `list` of `list`s
 ```python
 >>> prediction = ["The relationship between cats and dogs is not exactly friendly.", "a good bookshop is just a genteel black hole that knows how to read."]
 >>> reference = [["The relationship between dogs and cats is not exactly friendly.", ], ["A good bookshop is just a genteel Black Hole that knows how to read."]]
->>> chrf = evaluate.load_metric("chrf")
+>>> chrf = evaluate.load("chrf")
 >>> results = chrf.compute(predictions=prediction, references=reference)
 >>> print(results)
 {'score': 84.64214891738334, 'char_order': 6, 'word_order': 0, 'beta': 2}
@@ -55,7 +55,7 @@ A simple example of calculating chrF:
 ```python
 >>> prediction = ["The relationship between cats and dogs is not exactly friendly.", "a good bookshop is just a genteel black hole that knows how to read."]
 >>> reference = [["The relationship between dogs and cats is not exactly friendly.", ], ["A good bookshop is just a genteel Black Hole that knows how to read."]]
->>> chrf = evaluate.load_metric("chrf")
+>>> chrf = evaluate.load("chrf")
 >>> results = chrf.compute(predictions=prediction, references=reference)
 >>> print(results)
 {'score': 84.64214891738334, 'char_order': 6, 'word_order': 0, 'beta': 2}
@@ -65,7 +65,7 @@ The same example, but with the argument `word_order=2`, to calculate chrF++ inst
 ```python
 >>> prediction = ["The relationship between cats and dogs is not exactly friendly.", "a good bookshop is just a genteel black hole that knows how to read."]
 >>> reference = [["The relationship between dogs and cats is not exactly friendly.", ], ["A good bookshop is just a genteel Black Hole that knows how to read."]]
->>> chrf = evaluate.load_metric("chrf")
+>>> chrf = evaluate.load("chrf")
 >>> results = chrf.compute(predictions=prediction,
 ...                         references=reference,
 ...                         word_order=2)
@@ -77,7 +77,7 @@ The same chrF++ example as above, but with `lowercase=True` to normalize all cas
 ```python
 >>> prediction = ["The relationship between cats and dogs is not exactly friendly.", "a good bookshop is just a genteel black hole that knows how to read."]
 >>> reference = [["The relationship between dogs and cats is not exactly friendly.", ], ["A good bookshop is just a genteel Black Hole that knows how to read."]]
->>> chrf = evaluate.load_metric("chrf")
+>>> chrf = evaluate.load("chrf")
 >>> results = chrf.compute(predictions=prediction,
 ...                         references=reference,
 ...                         word_order=2,

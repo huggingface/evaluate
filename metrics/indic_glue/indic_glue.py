@@ -49,21 +49,21 @@ Returns: depending on the IndicGLUE subset, one or several of:
     "precision": Precision@10
 Examples:
 
-    >>> indic_glue_metric = evaluate.load_metric('indic_glue', 'wnli')  # 'wnli' or any of ["copa", "sna", "csqa", "wstp", "inltkh", "bbca", "iitp-mr", "iitp-pr", "actsa-sc", "md"]
+    >>> indic_glue_metric = evaluate.load('indic_glue', 'wnli')  # 'wnli' or any of ["copa", "sna", "csqa", "wstp", "inltkh", "bbca", "iitp-mr", "iitp-pr", "actsa-sc", "md"]
     >>> references = [0, 1]
     >>> predictions = [0, 1]
     >>> results = indic_glue_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'accuracy': 1.0}
 
-    >>> indic_glue_metric = evaluate.load_metric('indic_glue', 'wiki-ner')
+    >>> indic_glue_metric = evaluate.load('indic_glue', 'wiki-ner')
     >>> references = [0, 1]
     >>> predictions = [0, 1]
     >>> results = indic_glue_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'accuracy': 1.0, 'f1': 1.0}
 
-    >>> indic_glue_metric = evaluate.load_metric('indic_glue', 'cvit-mkb-clsr')
+    >>> indic_glue_metric = evaluate.load('indic_glue', 'cvit-mkb-clsr')
     >>> references = [[0.5, 0.5, 0.5], [0.1, 0.2, 0.3]]
     >>> predictions = [[0.5, 0.5, 0.5], [0.1, 0.2, 0.3]]
     >>> results = indic_glue_metric.compute(predictions=predictions, references=references)

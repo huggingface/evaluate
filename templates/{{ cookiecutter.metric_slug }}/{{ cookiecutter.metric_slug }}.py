@@ -47,7 +47,7 @@ Examples:
     Examples should be written in doctest format, and should illustrate how
     to use the function.
 
-    >>> my_new_metric = evaluate.load_metric("my_new_metric")
+    >>> my_new_metric = evaluate.load("my_new_metric")
     >>> results = my_new_metric.compute(references=[0, 1], predictions=[0, 1])
     >>> print(results)
     {'accuracy': 1.0}

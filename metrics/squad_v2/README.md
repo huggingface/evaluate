@@ -22,8 +22,8 @@ The metric takes two files or two lists - one representing model predictions and
 *  `'no_answer_threshold'`: the probability threshold to decide that a question has no answer.
 
 ```python
-from evaluate import load_metric
-squad_metric = load_metric("squad_v2")
+from evaluate import load
+squad_metric = load("squad_v2")
 results = squad_metric.compute(predictions=predictions, references=references)
 ```
 ## Output values
@@ -61,8 +61,8 @@ For more recent model performance, see the [dataset leaderboard](https://papersw
 Maximal values for both exact match and F1 (perfect match):
 
 ```python
-from evaluate import load_metric
-squad_v2_ metric = load_metric("squad_v2")
+from evaluate import load
+squad_v2_ metric = load("squad_v2")
 predictions = [{'prediction_text': '1976', 'id': '56e10a3be3433e1400422b22', 'no_answer_probability': 0.}]
 references = [{'answers': {'answer_start': [97], 'text': ['1976']}, 'id': '56e10a3be3433e1400422b22'}]
 results = squad_v2_metric.compute(predictions=predictions, references=references)
@@ -73,8 +73,8 @@ results
 Minimal values for both exact match and F1 (no match):
 
 ```python
-from evaluate import load_metric
-squad_metric = load_metric("squad_v2")
+from evaluate import load
+squad_metric = load("squad_v2")
 predictions = [{'prediction_text': '1999', 'id': '56e10a3be3433e1400422b22', 'no_answer_probability': 0.}]
 references = [{'answers': {'answer_start': [97], 'text': ['1976']}, 'id': '56e10a3be3433e1400422b22'}]
 results = squad_v2_metric.compute(predictions=predictions, references=references)
@@ -85,8 +85,8 @@ results
 Partial match (2 out of 3 answers correct) : 
 
 ```python
-from evaluate import load_metric
-squad_metric = load_metric("squad_v2")
+from evaluate import load
+squad_metric = load("squad_v2")
 predictions = [{'prediction_text': '1976', 'id': '56e10a3be3433e1400422b22', 'no_answer_probability': 0.}, {'prediction_text': 'Beyonce', 'id': '56d2051ce7d4791d0090260b', 'no_answer_probability': 0.},  {'prediction_text': 'climate change', 'id': '5733b5344776f419006610e1', 'no_answer_probability': 0.}]
 references = [{'answers': {'answer_start': [97], 'text': ['1976']}, 'id': '56e10a3be3433e1400422b22'}, {'answers': {'answer_start': [233], 'text': ['Beyoncé and Bruno Mars']}, 'id': '56d2051ce7d4791d0090260b'}, {'answers': {'answer_start': [891], 'text': ['climate change']}, 'id': '5733b5344776f419006610e1'}]
 results = squad_v2_metric.compute(predictions=predictions, references=references)
