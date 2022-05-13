@@ -73,17 +73,13 @@ def init_dynamic_modules(
     return dynamic_modules_path
 
 
-def import_main_class(module_path, dataset=True) -> Optional[Union[Type[DatasetBuilder], Type[Metric]]]:
+def import_main_class(module_path) -> Optional[Union[Type[DatasetBuilder], Type[Metric]]]:
     """Import a module at module_path and return its main class:
     - a DatasetBuilder if dataset is True
     - a Metric if dataset is False
     """
     module = importlib.import_module(module_path)
-
-    if dataset:
-        main_cls_type = DatasetBuilder
-    else:
-        main_cls_type = Metric
+    main_cls_type = Metric
 
     # Find the main class in our imported module
     module_main_cls = None
@@ -411,12 +407,14 @@ class GithubMetricModuleFactory(_MetricModuleFactory):
     def __init__(
         self,
         name: str,
+        type: str,
         revision: Optional[Union[str, Version]] = None,
         download_config: Optional[DownloadConfig] = None,
         download_mode: Optional[DownloadMode] = None,
         dynamic_modules_path: Optional[str] = None,
     ):
         self.name = name
+        self.type = type
         self.revision = revision
         self.download_config = download_config or DownloadConfig()
         self.download_mode = download_mode
@@ -425,7 +423,7 @@ class GithubMetricModuleFactory(_MetricModuleFactory):
         increase_load_count(name, resource_type="metric")
 
     def download_loading_script(self, revision: Optional[str]) -> str:
-        file_path = hf_github_url(path=self.name, name=self.name + ".py", revision=revision, dataset=False)
+        file_path = hf_github_url(path=self.name, name=self.name + ".py", type=self.type, revision=revision)
         download_config = self.download_config.copy()
         if download_config.download_desc is None:
             download_config.download_desc = "Downloading builder script"
@@ -450,7 +448,7 @@ class GithubMetricModuleFactory(_MetricModuleFactory):
         imports = get_imports(local_path)
         local_imports = _download_additional_modules(
             name=self.name,
-            base_path=hf_github_url(path=self.name, name="", revision=revision, dataset=False),
+            base_path=hf_github_url(path=self.name, name="", type=self.type, revision=revision),
             imports=imports,
             download_config=self.download_config,
         )
@@ -607,6 +605,7 @@ class CachedMetricModuleFactory(_MetricModuleFactory):
 
 def metric_module_factory(
     path: str,
+    type: Optional[str] = None,
     revision: Optional[Union[str, Version]] = None,
     download_config: Optional[DownloadConfig] = None,
     download_mode: Optional[DownloadMode] = None,
@@ -672,14 +671,34 @@ def metric_module_factory(
         ).get_module()
     elif is_relative_path(path) and path.count("/") <= 1 and not force_local_path:
         try:
+            # load a canonical dataset from hub
             if path.count("/") == 0:
-                return GithubMetricModuleFactory(
-                    path,
-                    revision=revision,
-                    download_config=download_config,
-                    download_mode=download_mode,
-                    dynamic_modules_path=dynamic_modules_path,
-                ).get_module()
+                # if no type provided look through all possible modules
+                if type is None:
+                    for current_type in ["metric", "comparison", "measurement"]:
+                        try:
+                            return GithubMetricModuleFactory(
+                                path,
+                                current_type,
+                                revision=revision,
+                                download_config=download_config,
+                                download_mode=download_mode,
+                                dynamic_modules_path=dynamic_modules_path,
+                            ).get_module()
+                        except FileNotFoundError:
+                            pass
+                    raise FileNotFoundError
+                # if type rpovided load specific type
+                else:
+                    return GithubMetricModuleFactory(
+                        path,
+                        type,
+                        revision=revision,
+                        download_config=download_config,
+                        download_mode=download_mode,
+                        dynamic_modules_path=dynamic_modules_path,
+                    ).get_module()
+            # load community dataset from hub
             elif path.count("/") == 1:
                 return HubMetricModuleFactory(
                     path,
@@ -705,6 +724,7 @@ def metric_module_factory(
 def load(
     path: str,
     config_name: Optional[str] = None,
+    type: Optional[str] = None,
     process_id: int = 0,
     num_process: int = 1,
     cache_dir: Optional[str] = None,
@@ -743,9 +763,9 @@ def load(
     """
     download_mode = DownloadMode(download_mode or DownloadMode.REUSE_DATASET_IF_EXISTS)
     metric_module = metric_module_factory(
-        path, revision=revision, download_config=download_config, download_mode=download_mode
+        path, type=type, revision=revision, download_config=download_config, download_mode=download_mode
     ).module_path
-    metric_cls = import_main_class(metric_module, dataset=False)
+    metric_cls = import_main_class(metric_module)
     metric = metric_cls(
         config_name=config_name,
         process_id=process_id,
@@ -755,6 +775,11 @@ def load(
         experiment_id=experiment_id,
         **metric_init_kwargs,
     )
+
+    if type and type != metric.type:
+        raise TypeError(
+            f"No module of type '{type}' not found for '{path}' locally, or on the Hugging Face Hub. Found module of type '{metric.type}' instead."
+        )
 
     # Download and prepare resources for the metric
     metric.download_and_prepare(download_config=download_config)

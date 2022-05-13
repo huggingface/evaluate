@@ -78,7 +78,7 @@ class LocalMetricTest(parameterized.TestCase):
         metric_module = importlib.import_module(
             evaluate.loading.metric_module_factory(os.path.join("metrics", metric_name)).module_path
         )
-        metric = evaluate.loading.import_main_class(metric_module.__name__, dataset=False)
+        metric = evaluate.loading.import_main_class(metric_module.__name__)
         # check parameters
         parameters = inspect.signature(metric._compute).parameters
         self.assertTrue(all([p.kind != p.VAR_KEYWORD for p in parameters.values()]))  # no **kwargs
