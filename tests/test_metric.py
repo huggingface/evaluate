@@ -38,6 +38,10 @@ class DummyMetric(Metric):
         return ([1, 2, 3, 4], [1, 2, 4, 3])
 
     @classmethod
+    def predictions_and_references_strings(cls):
+        return (["a", "b", "c", "d"], ["a", "b", "d", "c"])
+
+    @classmethod
     def expected_results(cls):
         return {"accuracy": 0.5, "set_equality": True}
 
@@ -494,6 +498,18 @@ class TestMetric(TestCase):
         metric.compute(predictions=[["a"]], references=[["a"]])
         with self.assertRaises(ValueError):
             metric.compute(predictions=["a"], references=["a"])
+
+    def test_multiple_features(self):
+        metric = DummyMetric()
+        metric.info.features = [
+            Features({"predictions": Value("int64"), "references": Value("int64")}),
+            Features({"predictions": Value("string"), "references": Value("string")}),
+        ]
+
+        preds, refs = DummyMetric.predictions_and_references()
+        expected_results = DummyMetric.expected_results()
+        self.assertDictEqual(expected_results, metric.compute(predictions=preds, references=refs))
+        del metric
 
 
 class MetricWithMultiLabel(Metric):

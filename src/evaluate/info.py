@@ -20,7 +20,7 @@ import dataclasses
 import json
 import os
 from dataclasses import asdict, dataclass, field
-from typing import List, Optional
+from typing import List, Optional, Union
 
 from datasets.features import Features, Value
 
@@ -44,7 +44,7 @@ class MetricInfo:
     # Set in the dataset scripts
     description: str
     citation: str
-    features: Features
+    features: Union[Features, List[Features]]
     inputs_description: str = field(default_factory=str)
     homepage: str = field(default_factory=str)
     license: str = field(default_factory=str)
