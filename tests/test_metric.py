@@ -485,6 +485,12 @@ class TestMetric(TestCase):
         with self.assertRaises(ValueError):
             metric.compute(predictions=[1], references=[1])
 
+        metric = DummyMetric(experiment_id="test_string_casting_2")
+        metric.info.features = Features({"predictions": [Value("string")], "references": [Value("string")]})
+        metric.compute(predictions=[["a"]], references=[["a"]])
+        with self.assertRaises(ValueError):
+            metric.compute(predictions=["a"], references=["a"])
+
 
 class MetricWithMultiLabel(Metric):
     def _info(self):
