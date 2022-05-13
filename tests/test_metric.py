@@ -22,14 +22,16 @@ class DummyMetric(Metric):
         )
 
     def _compute(self, predictions, references):
-        return (
-            {
-                "accuracy": sum(i == j for i, j in zip(predictions, references)) / len(predictions),
-                "set_equality": set(predictions) == set(references),
-            }
-            if predictions
-            else {}
-        )
+        result = {}
+        if not predictions:
+            return result
+        else:
+            result["accuracy"] = sum(i == j for i, j in zip(predictions, references)) / len(predictions)
+            try:
+                result["set_equality"] = set(predictions) == set(references)
+            except TypeError:
+                result["set_equality"] = None
+        return result
 
     @classmethod
     def predictions_and_references(cls):
@@ -481,6 +483,21 @@ class TestMetric(TestCase):
             metric.add(prediction=pred, reference=ref)
         self.assertDictEqual(expected_results, metric.compute())
         del metric
+
+    def test_string_casting(self):
+        metric = DummyMetric(experiment_id="test_string_casting")
+        metric.info.features = Features({"predictions": Value("string"), "references": Value("string")})
+        metric.compute(predictions=["a"], references=["a"])
+        with self.assertRaises(ValueError):
+            metric.compute(predictions=[1], references=[1])
+
+        metric = DummyMetric(experiment_id="test_string_casting_2")
+        metric.info.features = Features(
+            {"predictions": Sequence(Value("string")), "references": Sequence(Value("string"))}
+        )
+        metric.compute(predictions=[["a"]], references=[["a"]])
+        with self.assertRaises(ValueError):
+            metric.compute(predictions=["a"], references=["a"])
 
     def test_multiple_features(self):
         metric = DummyMetric()
