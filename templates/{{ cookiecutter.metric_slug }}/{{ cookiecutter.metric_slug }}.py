@@ -65,6 +65,7 @@ class {{ cookiecutter.metric_class_name }}(evaluate.Metric):
         # TODO: Specifies the evaluate.MetricInfo object
         return evaluate.MetricInfo(
             # This is the description that will appear on the metrics page.
+            type={{ cookiecutter.metric_type }}
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
