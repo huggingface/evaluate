@@ -671,7 +671,7 @@ def metric_module_factory(
         ).get_module()
     elif is_relative_path(path) and path.count("/") <= 1 and not force_local_path:
         try:
-            # load a canonical dataset from hub
+            # load a canonical evaluation module from hub
             if path.count("/") == 0:
                 # if no type provided look through all possible modules
                 if type is None:
@@ -688,7 +688,7 @@ def metric_module_factory(
                         except FileNotFoundError:
                             pass
                     raise FileNotFoundError
-                # if type rpovided load specific type
+                # if type provided load specific type
                 else:
                     return GithubMetricModuleFactory(
                         path,
@@ -698,7 +698,7 @@ def metric_module_factory(
                         download_mode=download_mode,
                         dynamic_modules_path=dynamic_modules_path,
                     ).get_module()
-            # load community dataset from hub
+            # load community evaluation module from hub
             elif path.count("/") == 1:
                 return HubMetricModuleFactory(
                     path,
