@@ -49,7 +49,10 @@ def main():
         "metric_name", type=str, help='Pretty name of new metric, e.g. "Recall" or "Exact Match".'
     )
     parser_create.add_argument(
-        "metric_type", default="metric", type=str, help='Type of metric, has to be one of [metric|comparison|measurement].'
+        "metric_type",
+        default="metric",
+        type=str,
+        help="Type of metric, has to be one of [metric|comparison|measurement].",
     )
     parser_create.add_argument(
         "--dataset_name", default="", type=str, help="Name of dataset if metric is dataest specific."
