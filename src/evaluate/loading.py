@@ -740,21 +740,22 @@ def load(
     Args:
 
         path (``str``):
-            path to the metric processing script with the metric builder. Can be either:
+            path to the evaluation processing script with the evaluation builder. Can be either:
                 - a local path to processing script or the directory containing the script (if the script has the same name as the directory),
                     e.g. ``'./metrics/rouge'`` or ``'./metrics/rogue/rouge.py'``
-                - a metric identifier on the HuggingFace datasets repo (list all available metrics with ``datasets.list_metrics()``)
-                    e.g. ``'rouge'`` or ``'bleu'``
+                - a evaluation module identifier on the HuggingFace evaluate repo e.g. ``'rouge'`` or ``'bleu'`` that are in either ``'metrics/'``,
+                    ``'comparisons/'``, or ``'measurements/'`` depending on the provided ``type``.
         config_name (:obj:`str`, optional): selecting a configuration for the metric (e.g. the GLUE metric has a configuration for each subset)
+        type (:obj:`str`, default ``'metric'``): type of evaluation module, can be one of ``'metric'``, ``'comparison'``, or ``'measurement'``.
         process_id (:obj:`int`, optional): for distributed evaluation: id of the process
         num_process (:obj:`int`, optional): for distributed evaluation: total number of processes
-        cache_dir (Optional str): path to store the temporary predictions and references (default to `~/.cache/huggingface/metrics/`)
+        cache_dir (Optional str): path to store the temporary predictions and references (default to `~/.cache/huggingface/evaluate/`)
         experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
             This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
         keep_in_memory (bool): Whether to store the temporary results in memory (defaults to False)
-        download_config (Optional ``datasets.DownloadConfig``: specific download configuration parameters.
+        download_config (Optional ``evaluate.DownloadConfig``: specific download configuration parameters.
         download_mode (:class:`DownloadMode`, default ``REUSE_DATASET_IF_EXISTS``): Download/generate mode.
-        revision (Optional ``Union[str, datasets.Version]``): if specified, the module will be loaded from the datasets repository
+        revision (Optional ``Union[str, evaluate.Version]``): if specified, the module will be loaded from the datasets repository
             at this version. By default it is set to the local version of the lib. Specifying a version that is different from
             your local version of the lib might cause compatibility issues.
 
