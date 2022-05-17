@@ -13,7 +13,7 @@
 # limitations under the License.
 
 # Lint as: python3
-""" Metrics base class."""
+""" EvaluationModule base class."""
 import os
 import types
 import uuid
@@ -32,7 +32,7 @@ from datasets.utils.filelock import BaseFileLock, FileLock, Timeout
 from datasets.utils.py_utils import copyfunc, temp_seed, zip_dict
 
 from . import config
-from .info import MetricInfo
+from .info import EvaluationModuleInfo
 from .naming import camelcase_to_snakecase
 from .utils.file_utils import DownloadConfig
 from .utils.logging import get_logger
@@ -75,89 +75,89 @@ def summarize_if_long_list(obj):
     return f"[{format_chunk(obj[:3])}, ..., {format_chunk(obj[-3:])}]"
 
 
-class MetricInfoMixin:
-    """This base class exposes some attributes of MetricInfo
-    at the base level of the Metric for easy access.
+class EvaluationModuleInfoMixin:
+    """This base class exposes some attributes of EvaluationModuleInfo
+    at the base level of the EvaluationModule for easy access.
     """
 
-    def __init__(self, info: MetricInfo):
-        self._metric_info = info
+    def __init__(self, info: EvaluationModuleInfo):
+        self._module_info = info
 
     @property
     def info(self):
-        """:class:`evaluate.MetricInfo` object containing all the metadata in the metric."""
-        return self._metric_info
+        """:class:`evaluate.EvaluationModuleInfo` object containing all the metadata in the evaluation module."""
+        return self._module_info
 
     @property
     def name(self) -> str:
-        return self._metric_info.metric_name
+        return self._module_info.module_name
 
     @property
     def experiment_id(self) -> Optional[str]:
-        return self._metric_info.experiment_id
+        return self._module_info.experiment_id
 
     @property
     def description(self) -> str:
-        return self._metric_info.description
+        return self._module_info.description
 
     @property
     def citation(self) -> str:
-        return self._metric_info.citation
+        return self._module_info.citation
 
     @property
     def features(self) -> Features:
-        return self._metric_info.features
+        return self._module_info.features
 
     @property
     def inputs_description(self) -> str:
-        return self._metric_info.inputs_description
+        return self._module_info.inputs_description
 
     @property
     def homepage(self) -> Optional[str]:
-        return self._metric_info.homepage
+        return self._module_info.homepage
 
     @property
     def license(self) -> str:
-        return self._metric_info.license
+        return self._module_info.license
 
     @property
     def codebase_urls(self) -> Optional[List[str]]:
-        return self._metric_info.codebase_urls
+        return self._module_info.codebase_urls
 
     @property
     def reference_urls(self) -> Optional[List[str]]:
-        return self._metric_info.reference_urls
+        return self._module_info.reference_urls
 
     @property
     def streamable(self) -> bool:
-        return self._metric_info.streamable
+        return self._module_info.streamable
 
     @property
     def format(self) -> Optional[str]:
-        return self._metric_info.format
+        return self._module_info.format
 
     @property
     def type(self) -> str:
-        return self._metric_info.type
+        return self._module_info.type
 
 
-class Metric(MetricInfoMixin):
-    """A Metric is the base class and common API for all metrics.
+class EvaluationModule(EvaluationModuleInfoMixin):
+    """A EvaluationModule is the base class and common API for metrics, comparisons, and measurements.
 
     Args:
-        config_name (``str``): This is used to define a hash specific to a metrics computation script and prevents the metric's data
-            to be overridden when the metric loading script is modified.
+        config_name (``str``): This is used to define a hash specific to a module computation script and prevents the module's data
+            to be overridden when the module loading script is modified.
         keep_in_memory (:obj:`bool`): keep all predictions and references in memory. Not possible in distributed settings.
         cache_dir (``str``): Path to a directory in which temporary prediction/references data will be stored.
             The data directory should be located on a shared file-system in distributed setups.
         num_process (``int``): specify the total number of nodes in a distributed settings.
-            This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
+            This is useful to compute module in distributed setups (in particular non-additive modules like F1).
         process_id (``int``): specify the id of the current process in a distributed setup (between 0 and num_process-1)
-            This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
-        seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`evaluate.Metric.compute` is run.
+            This is useful to compute module in distributed setups (in particular non-additive metrics like F1).
+        seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`evaluate.EvaluationModule.compute` is run.
         experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
-            This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
-        max_concurrent_cache_files (``int``): Max number of concurrent metrics cache files (default 10000).
+            This is useful to compute module in distributed setups (in particular non-additive metrics like F1).
+        max_concurrent_cache_files (``int``): Max number of concurrent module cache files (default 10000).
         timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
     """
 
@@ -177,10 +177,10 @@ class Metric(MetricInfoMixin):
         # prepare info
         self.config_name = config_name or "default"
         info = self._info()
-        info.metric_name = camelcase_to_snakecase(self.__class__.__name__)
+        info.module_name = camelcase_to_snakecase(self.__class__.__name__)
         info.config_name = self.config_name
         info.experiment_id = experiment_id or "default_experiment"
-        MetricInfoMixin.__init__(self, info)  # For easy access on low level
+        EvaluationModuleInfoMixin.__init__(self, info)  # For easy access on low level
 
         # Safety checks on num_process and process_id
         if not isinstance(process_id, int) or process_id < 0:
@@ -232,19 +232,19 @@ class Metric(MetricInfoMixin):
 
     def __len__(self):
         """Return the number of examples (predictions or predictions/references pair)
-        currently stored in the metric's cache.
+        currently stored in the evaluation module's cache.
         """
         return 0 if self.writer is None else len(self.writer)
 
     def __repr__(self):
         return (
-            f'Metric(name: "{self.name}", features: {self.features}, '
-            f'usage: """{self.inputs_description}""", '
+            f'EvaluationModule(name: "{self.name}", type: "{self.type}", '
+            f'features: {self.features}, usage: """{self.inputs_description}""", '
             f"stored examples: {len(self)})"
         )
 
     def _build_data_dir(self):
-        """Path of this metric in cache_dir:
+        """Path of this evaluation module in cache_dir:
         Will be:
             self._data_dir_root/self.name/self.config_name/self.hash (if not none)/
         If any of these element is missing or if ``with_version=False`` the corresponding subfolders are dropped.
@@ -267,14 +267,14 @@ class Metric(MetricInfoMixin):
                 # We raise an error
                 if self.num_process != 1:
                     raise ValueError(
-                        f"Error in _create_cache_file: another metric instance is already using the local cache file at {file_path}. "
+                        f"Error in _create_cache_file: another evaluation module instance is already using the local cache file at {file_path}. "
                         f"Please specify an experiment_id (currently: {self.experiment_id}) to avoid collision "
-                        f"between distributed metric instances."
+                        f"between distributed evaluation module instances."
                     ) from None
                 if i == self.max_concurrent_cache_files - 1:
                     raise ValueError(
-                        f"Cannot acquire lock, too many metric instance are operating concurrently on this file system."
-                        f"You should set a larger value of max_concurrent_cache_files when creating the metric "
+                        f"Cannot acquire lock, too many evaluation module instance are operating concurrently on this file system."
+                        f"You should set a larger value of max_concurrent_cache_files when creating the evaluation module "
                         f"(current value is {self.max_concurrent_cache_files})."
                     ) from None
                 # In other cases (allow to find new file name + not yet at max num of attempts) we can try to sample a new hashing name.
@@ -294,7 +294,7 @@ class Metric(MetricInfoMixin):
         if self.num_process == 1:
             if self.cache_file_name is None:
                 raise ValueError(
-                    "Metric cache file doesn't exist. Please make sure that you call `add` or `add_batch` "
+                    "Evaluation module cache file doesn't exist. Please make sure that you call `add` or `add_batch` "
                     "at least once before calling `compute`."
                 )
             file_paths = [self.cache_file_name]
@@ -384,8 +384,8 @@ class Metric(MetricInfoMixin):
                 self.data = Dataset(**reader.read_files([{"filename": f} for f in file_paths]))
             except FileNotFoundError:
                 raise ValueError(
-                    "Error in finalize: another metric instance is already using the local cache file. "
-                    "Please specify an experiment_id to avoid collision between distributed metric instances."
+                    "Error in finalize: another evaluation module instance is already using the local cache file. "
+                    "Please specify an experiment_id to avoid collision between distributed evaluation module instances."
                 ) from None
 
             # Store file paths and locks and we will release/delete them after the computation.
@@ -393,21 +393,21 @@ class Metric(MetricInfoMixin):
             self.filelocks = filelocks
 
     def compute(self, *, predictions=None, references=None, **kwargs) -> Optional[dict]:
-        """Compute the metrics.
+        """Compute the evaluation module.
 
         Usage of positional arguments is not allowed to prevent mistakes.
 
         Args:
             predictions (list/array/tensor, optional): Predictions.
             references (list/array/tensor, optional): References.
-            **kwargs (optional): Keyword arguments that will be forwarded to the metrics :meth:`_compute`
+            **kwargs (optional): Keyword arguments that will be forwarded to the evaluation module :meth:`_compute`
                 method (see details in the docstring).
 
         Return:
             dict or None
 
-            - Dictionary with the metrics if this metric is run on the main process (``process_id == 0``).
-            - None if the metric is not run on the main process (``process_id != 0``).
+            - Dictionary with the results if this evaluation module is run on the main process (``process_id == 0``).
+            - None if the evaluation module is not run on the main process (``process_id != 0``).
         """
         all_kwargs = {"predictions": predictions, "references": references, **kwargs}
         if predictions is None and references is None:
@@ -417,7 +417,7 @@ class Metric(MetricInfoMixin):
             missing_inputs = [k for k in self._feature_names() if k not in all_kwargs]
             if missing_inputs:
                 raise ValueError(
-                    f"Metric inputs are missing: {missing_inputs}. All required inputs are {list(self._feature_names())}"
+                    f"Evaluation module inputs are missing: {missing_inputs}. All required inputs are {list(self._feature_names())}"
                 )
         inputs = {input_name: all_kwargs[input_name] for input_name in self._feature_names()}
         compute_kwargs = {k: kwargs[k] for k in kwargs if k not in self._feature_names()}
@@ -457,7 +457,7 @@ class Metric(MetricInfoMixin):
             return None
 
     def add_batch(self, *, predictions=None, references=None, **kwargs):
-        """Add a batch of predictions and references for the metric's stack.
+        """Add a batch of predictions and references for the evaluation module's stack.
 
         Args:
             predictions (list/array/tensor, optional): Predictions.
@@ -466,7 +466,7 @@ class Metric(MetricInfoMixin):
         bad_inputs = [input_name for input_name in kwargs if input_name not in self._feature_names()]
         if bad_inputs:
             raise ValueError(
-                f"Bad inputs for metric: {bad_inputs}. All required inputs are {list(self._feature_names())}"
+                f"Bad inputs for evaluation module: {bad_inputs}. All required inputs are {list(self._feature_names())}"
             )
         batch = {"predictions": predictions, "references": references, **kwargs}
         batch = {intput_name: batch[intput_name] for intput_name in self._feature_names()}
@@ -487,7 +487,7 @@ class Metric(MetricInfoMixin):
                 )
             elif sorted(self.current_features) != ["references", "predictions"]:
                 error_msg = (
-                    f"Metric inputs don't match the expected format.\n" f"Expected format: {self.current_features },\n"
+                    f"Module inputs don't match the expected format.\n" f"Expected format: {self.current_features },\n"
                 )
                 error_msg_inputs = ",\n".join(
                     f"Input {input_name}: {summarize_if_long_list(batch[input_name])}"
@@ -504,7 +504,7 @@ class Metric(MetricInfoMixin):
             raise ValueError(error_msg) from None
 
     def add(self, *, prediction=None, reference=None, **kwargs):
-        """Add one prediction and reference for the metric's stack.
+        """Add one prediction and reference for the evaluation module's stack.
 
         Args:
             prediction (list/array/tensor, optional): Predictions.
@@ -513,7 +513,7 @@ class Metric(MetricInfoMixin):
         bad_inputs = [input_name for input_name in kwargs if input_name not in self._feature_names()]
         if bad_inputs:
             raise ValueError(
-                f"Bad inputs for metric: {bad_inputs}. All required inputs are {list(self._feature_names())}"
+                f"Bad inputs for evaluation module: {bad_inputs}. All required inputs are {list(self._feature_names())}"
             )
         example = {"predictions": prediction, "references": reference, **kwargs}
         example = {intput_name: example[intput_name] for intput_name in self._feature_names()}
@@ -526,7 +526,8 @@ class Metric(MetricInfoMixin):
             self.writer.write(example)
         except (pa.ArrowInvalid, TypeError):
             error_msg = (
-                f"Metric inputs don't match the expected format.\n" f"Expected format: {self.current_features},\n"
+                f"Evaluation module inputs don't match the expected format.\n"
+                f"Expected format: {self.current_features},\n"
             )
             error_msg_inputs = ",\n".join(
                 f"Input {input_name}: {summarize_if_long_list(example[input_name])}"
@@ -578,9 +579,9 @@ class Metric(MetricInfoMixin):
                     self.rendez_vous_lock.acquire(timeout=timeout)
                 except TimeoutError:
                     raise ValueError(
-                        f"Error in _init_writer: another metric instance is already using the local cache file at {file_path}. "
+                        f"Error in _init_writer: another evalution module instance is already using the local cache file at {file_path}. "
                         f"Please specify an experiment_id (currently: {self.experiment_id}) to avoid collision "
-                        f"between distributed metric instances."
+                        f"between distributed evaluation module instances."
                     ) from None
 
         if self.keep_in_memory:
@@ -608,14 +609,14 @@ class Metric(MetricInfoMixin):
             else:
                 self._check_rendez_vous()  # wait for master to be ready and to let everyone go
 
-    def _info(self) -> MetricInfo:
-        """Construct the MetricInfo object. See `MetricInfo` for details.
+    def _info(self) -> EvaluationModuleInfo:
+        """Construct the EvaluationModuleInfo object. See `EvaluationModuleInfo` for details.
 
         Warning: This function is only called once and the result is cached for all
         following .info() calls.
 
         Returns:
-            info: (MetricInfo) The metrics information
+            info: (EvaluationModuleInfo) The EvaluationModule information
         """
         raise NotImplementedError
 
@@ -643,10 +644,10 @@ class Metric(MetricInfoMixin):
         self._download_and_prepare(dl_manager)
 
     def _download_and_prepare(self, dl_manager):
-        """Downloads and prepares resources for the metric.
+        """Downloads and prepares resources for the evaluation module.
 
         This is the internal implementation to overwrite called when user calls
-        `download_and_prepare`. It should download all required resources for the metric.
+        `download_and_prepare`. It should download all required resources for the evaluation module.
 
         Args:
             dl_manager (:class:`DownloadManager`): `DownloadManager` used to download and cache data.
@@ -654,7 +655,7 @@ class Metric(MetricInfoMixin):
         return None
 
     def _compute(self, *, predictions=None, references=None, **kwargs) -> Dict[str, Any]:
-        """This method defines the common API for all the metrics in the library"""
+        """This method defines the common API for all the evaluation module in the library"""
         raise NotImplementedError
 
     def __del__(self):

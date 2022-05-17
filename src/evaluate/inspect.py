@@ -20,7 +20,7 @@ from typing import Optional
 import huggingface_hub
 from datasets.utils import DownloadConfig
 
-from .loading import metric_module_factory
+from .loading import evaluation_module_factory
 from .utils.logging import get_logger
 
 
@@ -61,7 +61,7 @@ def inspect_metric(path: str, local_path: str, download_config: Optional[Downloa
         download_config (Optional ``datasets.DownloadConfig``: specific download configuration parameters.
         **download_kwargs: optional attributes for DownloadConfig() which will override the attributes in download_config if supplied.
     """
-    metric_module = metric_module_factory(
+    metric_module = evaluation_module_factory(
         path, download_config=download_config, force_local_path=local_path, **download_kwargs
     )
     print(

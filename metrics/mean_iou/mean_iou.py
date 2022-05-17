@@ -274,9 +274,9 @@ def mean_iou(
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class MeanIoU(evaluate.Metric):
+class MeanIoU(evaluate.EvaluationModule):
     def _info(self):
-        return evaluate.MetricInfo(
+        return evaluate.EvaluationModuleInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

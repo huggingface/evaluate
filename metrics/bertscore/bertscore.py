@@ -98,9 +98,9 @@ Examples:
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class BERTScore(evaluate.Metric):
+class BERTScore(evaluate.EvaluationModule):
     def _info(self):
-        return evaluate.MetricInfo(
+        return evaluate.EvaluationModuleInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="https://github.com/Tiiiger/bert_score",

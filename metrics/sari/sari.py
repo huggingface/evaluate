@@ -258,9 +258,9 @@ def normalize(sentence, lowercase: bool = True, tokenizer: str = "13a", return_s
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Sari(evaluate.Metric):
+class Sari(evaluate.EvaluationModule):
     def _info(self):
-        return evaluate.MetricInfo(
+        return evaluate.EvaluationModuleInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

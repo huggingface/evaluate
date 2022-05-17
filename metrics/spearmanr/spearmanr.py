@@ -97,9 +97,9 @@ _CITATION = r"""\
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Spearmanr(evaluate.Metric):
+class Spearmanr(evaluate.EvaluationModule):
     def _info(self):
-        return evaluate.MetricInfo(
+        return evaluate.EvaluationModuleInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
