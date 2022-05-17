@@ -76,7 +76,7 @@ Examples:
 
     >>> # faiss segfaults in doctest for some reason, so the .compute call is not tested with doctest
     >>> import evaluate
-    >>> mauve = evaluate.load_metric('mauve')
+    >>> mauve = evaluate.load('mauve')
     >>> predictions = ["hello there", "general kenobi"]
     >>> references = ["hello there", "general kenobi"]
     >>> out = mauve.compute(predictions=predictions, references=references) # doctest: +SKIP

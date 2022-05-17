@@ -58,28 +58,28 @@ Returns: depending on the XTREME-S task, one or several of:
     "bleu": BLEU score according to the `sacrebleu` metric - for 'covost2'
 Examples:
 
-    >>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'mls')  # 'mls', 'voxpopuli', 'fleurs-asr' or 'babel'
+    >>> xtreme_s_metric = evaluate.load('xtreme_s', 'mls')  # 'mls', 'voxpopuli', 'fleurs-asr' or 'babel'
     >>> references = ["it is sunny here", "paper and pen are essentials"]
     >>> predictions = ["it's sunny", "paper pen are essential"]
     >>> results = xtreme_s_metric.compute(predictions=predictions, references=references)
     >>> print({k: round(v, 2) for k, v in results.items()})
     {'wer': 0.56, 'cer': 0.27}
 
-    >>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'covost2')
+    >>> xtreme_s_metric = evaluate.load('xtreme_s', 'covost2')
     >>> references = ["bonjour paris", "il est necessaire de faire du sport de temps en temp"]
     >>> predictions = ["bonjour paris", "il est important de faire du sport souvent"]
     >>> results = xtreme_s_metric.compute(predictions=predictions, references=references)
     >>> print({k: round(v, 2) for k, v in results.items()})
     {'bleu': 31.65}
 
-    >>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'fleurs-lang_id')
+    >>> xtreme_s_metric = evaluate.load('xtreme_s', 'fleurs-lang_id')
     >>> references = [0, 1, 0, 0, 1]
     >>> predictions = [0, 1, 1, 0, 0]
     >>> results = xtreme_s_metric.compute(predictions=predictions, references=references)
     >>> print({k: round(v, 2) for k, v in results.items()})
     {'accuracy': 0.6}
 
-    >>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'minds14')
+    >>> xtreme_s_metric = evaluate.load('xtreme_s', 'minds14')
     >>> references = [0, 1, 0, 0, 1]
     >>> predictions = [0, 1, 1, 0, 0]
     >>> results = xtreme_s_metric.compute(predictions=predictions, references=references)

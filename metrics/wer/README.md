@@ -30,8 +30,8 @@ The metric takes two inputs: references (a list of references for each speech in
 
 
 ```python
-from evaluate import load_metric
-wer = load_metric("wer")
+from evaluate import load
+wer = load("wer")
 wer_score = wer.compute(predictions=predictions, references=references)
 ```
 ## Output values
@@ -59,8 +59,8 @@ See the leaderboards for [LibriSpeech](https://paperswithcode.com/sota/speech-re
 Perfect match between prediction and reference:
 
 ```python
-from evaluate import load_metric
-wer = load_metric("wer")
+from evaluate import load
+wer = load("wer")
 predictions = ["hello world", "good night moon"]
 references = ["hello world", "good night moon"]
 wer_score = wer.compute(predictions=predictions, references=references)
@@ -71,8 +71,8 @@ print(wer_score)
 Partial match between prediction and reference:
 
 ```python
-from evaluate import load_metric
-wer = load_metric("wer")
+from evaluate import load
+wer = load("wer")
 predictions = ["this is the prediction", "there is an other sample"]
 references = ["this is the reference", "there is another one"]
 wer_score = wer.compute(predictions=predictions, references=references)
@@ -83,8 +83,8 @@ print(wer_score)
 No match between prediction and reference:
 
 ```python
-from evaluate import load_metric
-wer = load_metric("wer")
+from evaluate import load
+wer = load("wer")
 predictions = ["hello world", "good night moon"]
 references = ["hi everyone", "have a great day"]
 wer_score = wer.compute(predictions=predictions, references=references)

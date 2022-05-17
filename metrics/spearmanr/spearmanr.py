@@ -47,13 +47,13 @@ Returns:
     p-value (`float`): p-value. **Note**: is only returned if `return_pvalue=True` is input.
 Examples:
     Example 1:
-        >>> spearmanr_metric = evaluate.load_metric("spearmanr")
+        >>> spearmanr_metric = evaluate.load("spearmanr")
         >>> results = spearmanr_metric.compute(references=[1, 2, 3, 4, 5], predictions=[10, 9, 2.5, 6, 4])
         >>> print(results)
         {'spearmanr': -0.7}
 
     Example 2:
-        >>> spearmanr_metric = evaluate.load_metric("spearmanr")
+        >>> spearmanr_metric = evaluate.load("spearmanr")
         >>> results = spearmanr_metric.compute(references=[1, 2, 3, 4, 5],
         ...                                     predictions=[10, 9, 2.5, 6, 4],
         ...                                     return_pvalue=True)

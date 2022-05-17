@@ -26,7 +26,7 @@ It also has several optional parameters:
 Refer to the [METEOR paper](https://aclanthology.org/W05-0909.pdf) for more information about parameter values and ranges.
 
 ```python
->>> meteor = evaluate.load_metric('meteor')
+>>> meteor = evaluate.load('meteor')
 >>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
 >>> references = ["It is a guide to action that ensures that the military will forever heed Party commands"]
 >>> results = meteor.compute(predictions=predictions, references=references)
@@ -46,7 +46,7 @@ The [METEOR paper](https://aclanthology.org/W05-0909.pdf) does not report METEOR
 Maximal values :
 
 ```python
->>> meteor = evaluate.load_metric('meteor')
+>>> meteor = evaluate.load('meteor')
 >>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
 >>> references = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
 >>> results = meteor.compute(predictions=predictions, references=references)
@@ -57,7 +57,7 @@ Maximal values :
 Minimal values:
 
 ```python
->>> meteor = evaluate.load_metric('meteor')
+>>> meteor = evaluate.load('meteor')
 >>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
 >>> references = ["Hello world"]
 >>> results = meteor.compute(predictions=predictions, references=references)
@@ -68,7 +68,7 @@ Minimal values:
 Partial match:
 
 ```python
->>> meteor = evaluate.load_metric('meteor')
+>>> meteor = evaluate.load('meteor')
 >>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
 >>> references = ["It is a guide to action that ensures that the military will forever heed Party commands"]
 >>> results = meteor.compute(predictions=predictions, references=references)

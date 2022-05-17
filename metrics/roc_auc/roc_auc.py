@@ -56,7 +56,7 @@ Returns:
     roc_auc (`float` or array-like of shape (n_classes,)): Returns array if in multilabel use case and `average='None'`. Otherwise, returns `float`.
 Examples:
     Example 1:
-        >>> roc_auc_score = evaluate.load_metric("roc_auc")
+        >>> roc_auc_score = evaluate.load("roc_auc")
         >>> refs = [1, 0, 1, 1, 0, 0]
         >>> pred_scores = [0.5, 0.2, 0.99, 0.3, 0.1, 0.7]
         >>> results = roc_auc_score.compute(references=refs, prediction_scores=pred_scores)
@@ -64,7 +64,7 @@ Examples:
         0.78
 
     Example 2:
-        >>> roc_auc_score = evaluate.load_metric("roc_auc", "multiclass")
+        >>> roc_auc_score = evaluate.load("roc_auc", "multiclass")
         >>> refs = [1, 0, 1, 2, 2, 0]
         >>> pred_scores = [[0.3, 0.5, 0.2],
         ...                 [0.7, 0.2, 0.1],
@@ -77,7 +77,7 @@ Examples:
         0.85
 
     Example 3:
-        >>> roc_auc_score = evaluate.load_metric("roc_auc", "multilabel")
+        >>> roc_auc_score = evaluate.load("roc_auc", "multilabel")
         >>> refs = [[1, 1, 0],
         ...         [1, 1, 0],
         ...         [0, 1, 0],

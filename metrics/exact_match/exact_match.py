@@ -42,14 +42,14 @@ Args:
 Returns:
     exact_match: Dictionary containing exact_match rate. Possible values are between 0.0 and 100.0, inclusive.
 Examples:
-    >>> exact_match = evaluate.load_metric("exact_match")
+    >>> exact_match = evaluate.load("exact_match")
     >>> refs = ["the cat", "theater", "YELLING", "agent007"]
     >>> preds = ["cat?", "theater", "yelling", "agent"]
     >>> results = exact_match.compute(references=refs, predictions=preds)
     >>> print(round(results["exact_match"], 1))
     25.0
 
-    >>> exact_match = evaluate.load_metric("exact_match")
+    >>> exact_match = evaluate.load("exact_match")
     >>> refs = ["the cat", "theater", "YELLING", "agent007"]
     >>> preds = ["cat?", "theater", "yelling", "agent"]
     >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell"], ignore_case=True, ignore_punctuation=True)
@@ -57,21 +57,21 @@ Examples:
     50.0
 
 
-    >>> exact_match = evaluate.load_metric("exact_match")
+    >>> exact_match = evaluate.load("exact_match")
     >>> refs = ["the cat", "theater", "YELLING", "agent007"]
     >>> preds = ["cat?", "theater", "yelling", "agent"]
     >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell", "YELL"], ignore_case=True, ignore_punctuation=True)
     >>> print(round(results["exact_match"], 1))
     75.0
 
-    >>> exact_match = evaluate.load_metric("exact_match")
+    >>> exact_match = evaluate.load("exact_match")
     >>> refs = ["the cat", "theater", "YELLING", "agent007"]
     >>> preds = ["cat?", "theater", "yelling", "agent"]
     >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell", "YELL"], ignore_case=True, ignore_punctuation=True, ignore_numbers=True)
     >>> print(round(results["exact_match"], 1))
     100.0
 
-    >>> exact_match = evaluate.load_metric("exact_match")
+    >>> exact_match = evaluate.load("exact_match")
     >>> refs = ["The cat sat on the mat.", "Theaters are great.", "It's like comparing oranges and apples."]
     >>> preds = ["The cat sat on the mat?", "Theaters are great.", "It's like comparing apples and oranges."]
     >>> results = exact_match.compute(references=refs, predictions=preds)

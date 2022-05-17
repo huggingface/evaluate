@@ -27,7 +27,7 @@ import pytest
 from absl.testing import parameterized
 
 import evaluate
-from evaluate import load_metric
+from evaluate import load
 
 from .utils import for_all_test_methods, local, slow
 
@@ -73,12 +73,12 @@ class LocalMetricTest(parameterized.TestCase):
     INTENSIVE_CALLS_PATCHER = {}
     metric_name = None
 
-    def test_load_metric(self, metric_name):
+    def test_load(self, metric_name):
         doctest.ELLIPSIS_MARKER = "[...]"
         metric_module = importlib.import_module(
-            evaluate.load.metric_module_factory(os.path.join("metrics", metric_name)).module_path
+            evaluate.loading.metric_module_factory(os.path.join("metrics", metric_name)).module_path
         )
-        metric = evaluate.load.import_main_class(metric_module.__name__, dataset=False)
+        metric = evaluate.loading.import_main_class(metric_module.__name__)
         # check parameters
         parameters = inspect.signature(metric._compute).parameters
         self.assertTrue(all([p.kind != p.VAR_KEYWORD for p in parameters.values()]))  # no **kwargs
@@ -96,7 +96,7 @@ class LocalMetricTest(parameterized.TestCase):
     def test_load_real_metric(self, metric_name):
         doctest.ELLIPSIS_MARKER = "[...]"
         metric_module = importlib.import_module(
-            evaluate.load.metric_module_factory(os.path.join("metrics", metric_name)).module_path
+            evaluate.loading.metric_module_factory(os.path.join("metrics", metric_name)).module_path
         )
         # run doctest
         with self.use_local_metrics():
@@ -115,10 +115,10 @@ class LocalMetricTest(parameterized.TestCase):
     @contextmanager
     def use_local_metrics(self):
         def load_local_metric(metric_name, *args, **kwargs):
-            return load_metric(os.path.join("metrics", metric_name), *args, **kwargs)
+            return load(os.path.join("metrics", metric_name), *args, **kwargs)
 
-        with patch("evaluate.load_metric") as mock_load_metric:
-            mock_load_metric.side_effect = load_local_metric
+        with patch("evaluate.load") as mock_load:
+            mock_load.side_effect = load_local_metric
             yield
 
     @classmethod
@@ -190,7 +190,7 @@ def patch_comet(module_name):
 
 
 def test_seqeval_raises_when_incorrect_scheme():
-    metric = load_metric(os.path.join("metrics", "seqeval"))
+    metric = load(os.path.join("metrics", "seqeval"))
     wrong_scheme = "ERROR"
     error_message = f"Scheme should be one of [IOB1, IOB2, IOE1, IOE2, IOBES, BILOU], got {wrong_scheme}"
     with pytest.raises(ValueError, match=re.escape(error_message)):

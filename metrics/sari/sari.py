@@ -72,7 +72,7 @@ Examples:
     >>> sources=["About 95 species are currently accepted ."]
     >>> predictions=["About 95 you now get in ."]
     >>> references=[["About 95 species are currently known .","About 95 species are now accepted .","95 species are now accepted ."]]
-    >>> sari = evaluate.load_metric("sari")
+    >>> sari = evaluate.load("sari")
     >>> results = sari.compute(sources=sources, predictions=predictions, references=references)
     >>> print(results)
     {'sari': 26.953601953601954}

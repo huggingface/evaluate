@@ -20,7 +20,7 @@ from typing import Optional
 import huggingface_hub
 from datasets.utils import DownloadConfig
 
-from .load import metric_module_factory
+from .loading import metric_module_factory
 from .utils.logging import get_logger
 
 
@@ -67,5 +67,5 @@ def inspect_metric(path: str, local_path: str, download_config: Optional[Downloa
     print(
         f"The processing scripts for metric {path} can be inspected at {local_path}. "
         f"The main class is in {metric_module.module_path}. "
-        f"You can modify this processing scripts and use it with `evaluate.load_metric({local_path})`."
+        f"You can modify this processing scripts and use it with `evaluate.load({local_path})`."
     )

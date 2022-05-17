@@ -19,7 +19,7 @@ This metric takes as input a list of predicted sentences and a list of lists of 
 ...     ["hello there general kenobi", "hello there !"],
 ...     ["foo bar foobar"]
 ... ]
->>> bleu = evaluate.load_metric("bleu")
+>>> bleu = evaluate.load("bleu")
 >>> results = bleu.compute(predictions=predictions, references=references)
 >>> print(results)
 {'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.1666666666666667, 'translation_length': 7, 'reference_length': 6}
@@ -65,7 +65,7 @@ Example where each prediction has 1 reference:
 ...     ["hello there general kenobi"],
 ...     ["foo bar foobar"]
 ... ]
->>> bleu = evaluate.load_metric("bleu")
+>>> bleu = evaluate.load("bleu")
 >>> results = bleu.compute(predictions=predictions, references=references)
 >>> print(results)
 {'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.0, 'translation_length': 7, 'reference_length': 7}
@@ -81,7 +81,7 @@ Example where the second prediction has 2 references:
 ...     [["hello there general kenobi"], ["hello there!"]],
 ...     [["foo bar foobar"]]
 ... ]
->>> bleu = evaluate.load_metric("bleu")
+>>> bleu = evaluate.load("bleu")
 >>> results = bleu.compute(predictions=predictions, references=references)
 >>> print(results)
 {'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.1666666666666667, 'translation_length': 7, 'reference_length': 6}
@@ -89,7 +89,7 @@ Example where the second prediction has 2 references:
 
 Example with the word tokenizer from NLTK:
 ```python
->>> bleu = evaluate.load_metric("bleu")
+>>> bleu = evaluate.load("bleu")
 >>> from nltk.tokenize import word_tokenize
 >>> predictions = [
 ...     ["hello there general kenobi",

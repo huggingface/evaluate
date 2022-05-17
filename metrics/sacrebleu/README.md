@@ -14,7 +14,7 @@ This metric takes a set of predictions and a set of references as input, along w
 >>> predictions = ["hello there general kenobi", "foo bar foobar"]
 >>> references = [["hello there general kenobi", "hello there !"],
 ...                 ["foo bar foobar", "foo bar foobar"]]
->>> sacrebleu = evaluate.load_metric("sacrebleu")
+>>> sacrebleu = evaluate.load("sacrebleu")
 >>> results = sacrebleu.compute(predictions=predictions, 
 ...                             references=references)
 >>> print(list(results.keys()))
@@ -68,7 +68,7 @@ The score can take any value between `0.0` and `100.0`, inclusive.
 ...                 "on our way to ankh morpork"]
 >>> references = [["hello there general kenobi", "hello there !"],
 ...                 ["goodbye ankh morpork", "ankh morpork"]]
->>> sacrebleu = evaluate.load_metric("sacrebleu")
+>>> sacrebleu = evaluate.load("sacrebleu")
 >>> results = sacrebleu.compute(predictions=predictions, 
 ...                             references=references)
 >>> print(list(results.keys()))

@@ -12,7 +12,7 @@ Mean Squared Error(MSE) represents the average of the squares of errors -- i.e. 
 At minimum, this metric requires predictions and references as inputs.
 
 ```python
->>> mse_metric = evaluate.load_metric("mse")
+>>> mse_metric = evaluate.load("mse")
 >>> predictions = [2.5, 0.0, 2, 8]
 >>> references = [3, -0.5, 2, 7]
 >>> results = mse_metric.compute(predictions=predictions, references=references)
@@ -57,7 +57,7 @@ If `multioutput="raw_values"`:
 
 Example with the `uniform_average` config:
 ```python
->>> mse_metric = evaluate.load_metric("mse")
+>>> mse_metric = evaluate.load("mse")
 >>> predictions = [2.5, 0.0, 2, 8]
 >>> references = [3, -0.5, 2, 7]
 >>> results = mse_metric.compute(predictions=predictions, references=references)
@@ -67,7 +67,7 @@ Example with the `uniform_average` config:
 
 Example with `squared = True`, which returns the RMSE:
 ```python
->>> mse_metric = evaluate.load_metric("mse")
+>>> mse_metric = evaluate.load("mse")
 >>> predictions = [2.5, 0.0, 2, 8]
 >>> references = [3, -0.5, 2, 7]
 >>> rmse_result = mse_metric.compute(predictions=predictions, references=references, squared=False)
@@ -77,7 +77,7 @@ Example with `squared = True`, which returns the RMSE:
 
 Example with multi-dimensional lists, and the `raw_values` config:
 ```python
->>> mse_metric = evaluate.load_metric("mse", "multilist")
+>>> mse_metric = evaluate.load("mse", "multilist")
 >>> predictions = [[0.5, 1], [-1, 1], [7, -6]]
 >>> references = [[0, 2], [-1, 2], [8, -5]]
 >>> results = mse_metric.compute(predictions=predictions, references=references, multioutput='raw_values')

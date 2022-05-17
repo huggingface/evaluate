@@ -19,10 +19,10 @@ pip install unbabel-comet
 Usage:
 
 ```python
-from evaluate import load_metric
-comet_metric = load_metric('metrics/comet/comet.py')
-#comet_metric = load_metric('comet')
-#comet_metric = load_metric('comet', 'wmt-large-hter-estimator')
+from evaluate import load
+comet_metric = load('metrics/comet/comet.py')
+#comet_metric = load('comet')
+#comet_metric = load('comet', 'wmt-large-hter-estimator')
 
 
 source = ["Dem Feuer konnte Einhalt geboten werden", "Schulen und Kindergärten wurden eröffnet."]
@@ -95,8 +95,8 @@ Returns:
 
 Examples:
 
-    >>> comet_metric = evaluate.load_metric('comet')
-    >>> # comet_metric = load_metric('comet', 'wmt20-comet-da')  # you can also choose which model to use
+    >>> comet_metric = evaluate.load('comet')
+    >>> # comet_metric = load('comet', 'wmt20-comet-da')  # you can also choose which model to use
     >>> source = ["Dem Feuer konnte Einhalt geboten werden", "Schulen und Kindergärten wurden eröffnet."]
     >>> hypothesis = ["The fire could be stopped", "Schools and kindergartens were open"]
     >>> reference = ["They were able to control the fire.", "Schools and kindergartens opened"]

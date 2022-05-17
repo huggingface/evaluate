@@ -5,7 +5,7 @@
 
 It currently contains:
 
-- **implementations of dozens of popular metrics**: the existing metrics cover a variety of tasks spanning from NLP to Computer Vision, and include dataset-specific metrics for datasets such as [GLUE](https://huggingface.co/datasets/glue) and [SQuAD](https://huggingface.co/datasets/squad). With a simple command like `bleu_score = load_metric("bleu")`, get any of these metrics ready to use for evaluating a ML model in any framework (Numpy/Pandas/PyTorch/TensorFlow/JAX).
+- **implementations of dozens of popular metrics**: the existing metrics cover a variety of tasks spanning from NLP to Computer Vision, and include dataset-specific metrics for datasets such as [GLUE](https://huggingface.co/datasets/glue) and [SQuAD](https://huggingface.co/datasets/squad). With a simple command like `bleu_score = load("bleu")`, get any of these metrics ready to use for evaluating a ML model in any framework (Numpy/Pandas/PyTorch/TensorFlow/JAX).
 - **an easy way of pushing to the 🤗 Hub**: you can create new metrics and push them to a dedicated Space in the 🤗 Hub with `evaluate-cli create [metric name]`, which allows you to see easily compare different metrics and their outputs for the same sets of references and predictions. 
 
 [🎓 **Documentation**](https://huggingface.co/docs/metrics/)
@@ -52,7 +52,7 @@ For more details on using the library with NumPy, pandas, PyTorch or TensorFlow,
 🤗 Evaluate's main methods are:
 
 - `evaluate.list_metrics()` to list the available metrics
-- `evaluate.load_metric(metric_name, **kwargs)` to instantiate a metric
+- `evaluate.load(metric_name, **kwargs)` to instantiate a metric
 - `results = metric.compute(*kwargs)` to compute a metric on a set of predictions and/or references
 
 # Adding a new metric
