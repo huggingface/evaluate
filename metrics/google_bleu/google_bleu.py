@@ -16,10 +16,10 @@
 from typing import Dict, List
 
 import datasets
-from evaluate import EvaluationModuleInfo
 from nltk.translate import gleu_score
 
 import evaluate
+from evaluate import EvaluationModuleInfo
 
 from .tokenizer_13a import Tokenizer13a
 

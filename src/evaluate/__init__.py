@@ -29,6 +29,6 @@ del version
 from .info import EvaluationModuleInfo
 from .inspect import inspect_metric, list_metrics
 from .loading import load
-from .metric import EvaluationModule
+from .module import EvaluationModule
 from .utils import *
 from .utils import gradio, logging

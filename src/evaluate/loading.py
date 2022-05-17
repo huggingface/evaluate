@@ -34,7 +34,7 @@ from datasets.utils.filelock import FileLock
 from datasets.utils.version import Version
 
 from . import config
-from .metric import EvaluationModule
+from .module import EvaluationModule
 from .utils.file_utils import (
     DownloadConfig,
     cached_path,
@@ -779,7 +779,7 @@ def load(
 
     if type and type != evaluation_instance.type:
         raise TypeError(
-            f"No module of type '{type}' not found for '{path}' locally, or on the Hugging Face Hub. Found module of type '{metric.type}' instead."
+            f"No module of type '{type}' not found for '{path}' locally, or on the Hugging Face Hub. Found module of type '{evaluation_instance.type}' instead."
         )
 
     # Download and prepare resources for the metric
