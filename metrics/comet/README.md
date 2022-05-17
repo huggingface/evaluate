@@ -9,8 +9,8 @@ Crosslingual Optimized Metric for Evaluation of Translation (COMET) is an open-s
 COMET takes 3 lists of strings as input: `sources` (a list of source sentences), `predictions` (a list of candidate translations) and `references` (a list of reference translations).
 
 ```python
-from evaluate import load_metric
-comet_metric = load_metric('comet')
+from evaluate import load
+comet_metric = load('comet')
 source = ["Dem Feuer konnte Einhalt geboten werden", "Schulen und Kindergärten wurden eröffnet."]
 hypothesis = ["The fire could be stopped", "Schools and kindergartens were open"]
 reference = ["They were able to control the fire.", "Schools and kindergartens opened"]
@@ -44,8 +44,8 @@ The [original COMET paper](https://arxiv.org/pdf/2009.09025.pdf) reported averag
 Full match:
 
 ```python
-from evaluate import load_metric
-comet_metric = load_metric('comet') 
+from evaluate import load
+comet_metric = load('comet') 
 source = ["Dem Feuer konnte Einhalt geboten werden", "Schulen und Kindergärten wurden eröffnet."]
 hypothesis = ["They were able to control the fire.", "Schools and kindergartens opened"]
 reference = ["They were able to control the fire.", "Schools and kindergartens opened"]
@@ -57,8 +57,8 @@ print([round(v, 1) for v in results["scores"]])
 Partial match:
 
 ```python
-from evaluate import load_metric
-comet_metric = load_metric('comet') 
+from evaluate import load
+comet_metric = load('comet') 
 source = ["Dem Feuer konnte Einhalt geboten werden", "Schulen und Kindergärten wurden eröffnet."]
 hypothesis = ["The fire could be stopped", "Schools and kindergartens were open"]
 reference = ["They were able to control the fire", "Schools and kindergartens opened"]
@@ -70,8 +70,8 @@ print([round(v, 2) for v in results["scores"]])
 No match:
 
 ```python
-from evaluate import load_metric
-comet_metric = load_metric('comet') 
+from evaluate import load
+comet_metric = load('comet') 
 source = ["Dem Feuer konnte Einhalt geboten werden", "Schulen und Kindergärten wurden eröffnet."]
 hypothesis = ["The girl went for a walk", "The boy was sleeping"]
 reference = ["They were able to control the fire", "Schools and kindergartens opened"]

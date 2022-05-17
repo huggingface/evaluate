@@ -80,7 +80,7 @@ Examples:
     Example 1:
         >>> predictions = ["hello there general kenobi", "foo bar foobar"]
         >>> references = [["hello there general kenobi", "hello there !"], ["foo bar foobar", "foo bar foobar"]]
-        >>> sacrebleu = evaluate.load_metric("sacrebleu")
+        >>> sacrebleu = evaluate.load("sacrebleu")
         >>> results = sacrebleu.compute(predictions=predictions, references=references)
         >>> print(list(results.keys()))
         ['score', 'counts', 'totals', 'precisions', 'bp', 'sys_len', 'ref_len']
@@ -92,7 +92,7 @@ Examples:
         ...                 "on our way to ankh morpork"]
         >>> references = [["hello there general kenobi", "hello there !"],
         ...                 ["goodbye ankh morpork", "ankh morpork"]]
-        >>> sacrebleu = evaluate.load_metric("sacrebleu")
+        >>> sacrebleu = evaluate.load("sacrebleu")
         >>> results = sacrebleu.compute(predictions=predictions,
         ...                             references=references)
         >>> print(list(results.keys()))

@@ -60,7 +60,7 @@ Returns:
         MAE output is non-negative floating point. The best value is 0.0.
 Examples:
 
-    >>> mae_metric = evaluate.load_metric("mae")
+    >>> mae_metric = evaluate.load("mae")
     >>> predictions = [2.5, 0.0, 2, 8]
     >>> references = [3, -0.5, 2, 7]
     >>> results = mae_metric.compute(predictions=predictions, references=references)
@@ -69,7 +69,7 @@ Examples:
 
     If you're using multi-dimensional lists, then set the config as follows :
 
-    >>> mae_metric = evaluate.load_metric("mae", "multilist")
+    >>> mae_metric = evaluate.load("mae", "multilist")
     >>> predictions = [[0.5, 1], [-1, 1], [7, -6]]
     >>> references = [[0, 2], [-1, 2], [8, -5]]
     >>> results = mae_metric.compute(predictions=predictions, references=references)

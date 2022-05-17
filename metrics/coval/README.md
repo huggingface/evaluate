@@ -11,8 +11,8 @@ CoVal code was written by [`@ns-moosavi`](https://github.com/ns-moosavi), with s
 The metric takes two lists of sentences as input: one representing `predictions` and `references`, with the sentences consisting of words in the CoNLL format (see the [Limitations and bias](#Limitations-and-bias) section below for more details on the CoNLL format). 
 
 ```python
-from evaluate import load_metric
-coval = load_metric('coval')
+from evaluate import load
+coval = load('coval')
 words = ['bc/cctv/00/cctv_0005   0   0       Thank   VBP  (TOP(S(VP*    thank  01   1    Xu_li  *           (V*)        *       -',
 ... 'bc/cctv/00/cctv_0005   0   1         you   PRP        (NP*)      -    -   -    Xu_li  *        (ARG1*)   (ARG0*)   (116)',
 ... 'bc/cctv/00/cctv_0005   0   2    everyone    NN        (NP*)      -    -   -    Xu_li  *    (ARGM-DIS*)        *    (116)',
@@ -60,8 +60,8 @@ The CoNLL score is used to track progress on different datasets such as the [ARR
 Maximal values
 
 ```python
-from evaluate import load_metric
-coval = load_metric('coval')
+from evaluate import load
+coval = load('coval')
 words = ['bc/cctv/00/cctv_0005   0   0       Thank   VBP  (TOP(S(VP*    thank  01   1    Xu_li  *           (V*)        *       -',
 ... 'bc/cctv/00/cctv_0005   0   1         you   PRP        (NP*)      -    -   -    Xu_li  *        (ARG1*)   (ARG0*)   (116)',
 ... 'bc/cctv/00/cctv_0005   0   2    everyone    NN        (NP*)      -    -   -    Xu_li  *    (ARGM-DIS*)        *    (116)',

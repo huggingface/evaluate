@@ -52,6 +52,7 @@ class MetricInfo:
     reference_urls: List[str] = field(default_factory=list)
     streamable: bool = False
     format: Optional[str] = None
+    type: str = "metric"
 
     # Set later by the builder
     metric_name: Optional[str] = None

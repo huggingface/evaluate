@@ -47,7 +47,7 @@ Args:
 Returns:
     scores (list of int): list of scores.
 Examples:
-    >>> frugalscore = evaluate.load_metric("frugalscore")
+    >>> frugalscore = evaluate.load("frugalscore")
     >>> results = frugalscore.compute(predictions=['hello there', 'huggingface'], references=['hello world', 'hugging face'])
     >>> print([round(s, 3) for s in results["scores"]])
     [0.631, 0.645]

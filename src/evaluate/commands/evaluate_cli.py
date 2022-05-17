@@ -8,7 +8,7 @@ from huggingface_hub import HfApi, Repository, create_repo
 
 
 INSTRUCTIONS = """\
-A new repository for your metric "{metric_name}" has been created at {output_dir} and pushed to the Hugging Face Hub: {repo_url}.
+A new repository for your metric "{metric_name}" of type "{metric_type}" has been created at {output_dir} and pushed to the Hugging Face Hub: {repo_url}.
 
 Here are the next steps:
 - implement the metric logic in {metric_slug}/{metric_slug}.py
@@ -35,8 +35,8 @@ You should then see the update widget on the Hugging Face Hub: {repo_url}
 And you can load your metric in Python with the following code:
 
 ```
-from evaluate import load_metric
-metric = load_metric("{namespace}/{metric_slug}")
+from evaluate import load
+metric = load("{namespace}/{metric_slug}")
 ```
 """
 
@@ -47,6 +47,12 @@ def main():
     parser_create = subparsers.add_parser("create", help="Create new metric.")
     parser_create.add_argument(
         "metric_name", type=str, help='Pretty name of new metric, e.g. "Recall" or "Exact Match".'
+    )
+    parser_create.add_argument(
+        "metric_type",
+        default="metric",
+        type=str,
+        help="Type of metric, has to be one of [metric|comparison|measurement].",
     )
     parser_create.add_argument(
         "--dataset_name", default="", type=str, help="Name of dataset if metric is dataest specific."
@@ -94,6 +100,7 @@ def main():
     print(
         INSTRUCTIONS.format(
             metric_name=args["metric_name"],
+            metric_type=args["metric_type"],
             metric_slug=metric_slug,
             namespace=namespace,
             repo_url=repo_url,

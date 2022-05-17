@@ -150,7 +150,7 @@ Returns:
 
 Examples:
 
-    >>> coval = evaluate.load_metric('coval')
+    >>> coval = evaluate.load('coval')
     >>> words = ['bc/cctv/00/cctv_0005   0   0       Thank   VBP  (TOP(S(VP*    thank  01   1    Xu_li  *           (V*)        *       -',
     ... 'bc/cctv/00/cctv_0005   0   1         you   PRP        (NP*)      -    -   -    Xu_li  *        (ARG1*)   (ARG0*)   (116)',
     ... 'bc/cctv/00/cctv_0005   0   2    everyone    NN        (NP*)      -    -   -    Xu_li  *    (ARGM-DIS*)        *    (116)',

@@ -13,7 +13,7 @@ The p-value roughly indicates the probability of an uncorrelated system producin
 This metric takes a list of predictions and a list of references as input
 
 ```python
->>> pearsonr_metric = evaluate.load_metric("pearsonr")
+>>> pearsonr_metric = evaluate.load("pearsonr")
 >>> results = pearsonr_metric.compute(predictions=[10, 9, 2.5, 6, 4], references=[1, 2, 3, 4, 5])
 >>> print(round(results['pearsonr']), 2)
 ['-0.74']
@@ -46,7 +46,7 @@ Output Example(s):
 
 Example 1-A simple example using only predictions and references.
 ```python
->>> pearsonr_metric = evaluate.load_metric("pearsonr")
+>>> pearsonr_metric = evaluate.load("pearsonr")
 >>> results = pearsonr_metric.compute(predictions=[10, 9, 2.5, 6, 4], references=[1, 2, 3, 4, 5])
 >>> print(round(results['pearsonr'], 2))
 -0.74
@@ -54,7 +54,7 @@ Example 1-A simple example using only predictions and references.
 
 Example 2-The same as Example 1, but that also returns the `p-value`.
 ```python
->>> pearsonr_metric = evaluate.load_metric("pearsonr")
+>>> pearsonr_metric = evaluate.load("pearsonr")
 >>> results = pearsonr_metric.compute(predictions=[10, 9, 2.5, 6, 4], references=[1, 2, 3, 4, 5], return_pvalue=True)
 >>> print(sorted(list(results.keys())))
 ['p-value', 'pearsonr']

@@ -29,7 +29,7 @@ It can also take several optional arguments:
 
 
 ```python
->>> seqeval = evaluate.load_metric('seqeval')
+>>> seqeval = evaluate.load('seqeval')
 >>> predictions = [['O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
 >>> references = [['O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
 >>> results = seqeval.compute(predictions=predictions, references=references)
@@ -69,7 +69,7 @@ More recently, seqeval continues being used for reporting performance on tasks s
 Maximal values (full match) :
 
 ```python
->>> seqeval = evaluate.load_metric('seqeval')
+>>> seqeval = evaluate.load('seqeval')
 >>> predictions = [['O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
 >>> references = [['O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
 >>> results = seqeval.compute(predictions=predictions, references=references)
@@ -81,7 +81,7 @@ Maximal values (full match) :
 Minimal values (no match):
 
 ```python
->>> seqeval = evaluate.load_metric('seqeval')
+>>> seqeval = evaluate.load('seqeval')
 >>> predictions = [['O', 'B-MISC', 'I-MISC'], ['B-PER', 'I-PER', 'O']]
 >>> references = [['B-MISC', 'O', 'O'], ['I-PER', '0', 'I-PER']]
 >>> results = seqeval.compute(predictions=predictions, references=references)
@@ -92,7 +92,7 @@ Minimal values (no match):
 Partial match:
 
 ```python
->>> seqeval = evaluate.load_metric('seqeval')
+>>> seqeval = evaluate.load('seqeval')
 >>> predictions = [['O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
 >>> references = [['O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
 >>> results = seqeval.compute(predictions=predictions, references=references)

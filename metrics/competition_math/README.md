@@ -16,8 +16,8 @@ This metric takes two arguments:
 
 
 ```python
->>> from evaluate import load_metric
->>> math = load_metric("competition_math")
+>>> from evaluate import load
+>>> math = load("competition_math")
 >>> references = ["\\frac{1}{2}"]
 >>> predictions = ["1/2"]
 >>> results = math.compute(references=references, predictions=predictions)
@@ -40,8 +40,8 @@ More recent progress on the dataset can be found on the [dataset leaderboard](ht
 Maximal values (full match):
 
 ```python
->>> from evaluate import load_metric
->>> math = load_metric("competition_math")
+>>> from evaluate import load
+>>> math = load("competition_math")
 >>> references = ["\\frac{1}{2}"]
 >>> predictions = ["1/2"]
 >>> results = math.compute(references=references, predictions=predictions)
@@ -52,8 +52,8 @@ Maximal values (full match):
 Minimal values (no match):
 
 ```python
->>> from evaluate import load_metric
->>> math = load_metric("competition_math")
+>>> from evaluate import load
+>>> math = load("competition_math")
 >>> references = ["\\frac{1}{2}"]
 >>> predictions = ["3/4"]
 >>> results = math.compute(references=references, predictions=predictions)
@@ -64,8 +64,8 @@ Minimal values (no match):
 Partial match:
 
 ```python
->>> from evaluate import load_metric
->>> math = load_metric("competition_math")
+>>> from evaluate import load
+>>> math = load("competition_math")
 >>> references = ["\\frac{1}{2}","\\frac{3}{4}"]
 >>> predictions = ["1/5", "3/4"]
 >>> results = math.compute(references=references, predictions=predictions)

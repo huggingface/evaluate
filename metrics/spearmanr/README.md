@@ -22,7 +22,7 @@ reliable but are probably reasonable for datasets larger than 500 or so.
 At minimum, this metric only requires a `list` of predictions and a `list` of references:
 
 ```python
->>> spearmanr_metric = evaluate.load_metric("spearmanr")
+>>> spearmanr_metric = evaluate.load("spearmanr")
 >>> results = spearmanr_metric.compute(references=[1, 2, 3, 4, 5], predictions=[10, 9, 2.5, 6, 4])
 >>> print(results)
 {'spearmanr': -0.7}
@@ -59,7 +59,7 @@ The p-values can take on any value from `0` to `1`, inclusive.
 ### Examples
 A basic example:
 ```python
->>> spearmanr_metric = evaluate.load_metric("spearmanr")
+>>> spearmanr_metric = evaluate.load("spearmanr")
 >>> results = spearmanr_metric.compute(references=[1, 2, 3, 4, 5], predictions=[10, 9, 2.5, 6, 4])
 >>> print(results)
 {'spearmanr': -0.7}
@@ -67,7 +67,7 @@ A basic example:
 
 The same example, but that also returns the pvalue:
 ```python
->>> spearmanr_metric = evaluate.load_metric("spearmanr")
+>>> spearmanr_metric = evaluate.load("spearmanr")
 >>> results = spearmanr_metric.compute(references=[1, 2, 3, 4, 5], predictions=[10, 9, 2.5, 6, 4], return_pvalue=True)
 >>> print(results)
 {'spearmanr': -0.7, 'spearmanr_pvalue': 0.1881204043741873

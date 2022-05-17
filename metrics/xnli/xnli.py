@@ -55,7 +55,7 @@ Examples:
 
     >>> predictions = [0, 1]
     >>> references = [0, 1]
-    >>> xnli_metric = evaluate.load_metric("xnli")
+    >>> xnli_metric = evaluate.load("xnli")
     >>> results = xnli_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'accuracy': 1.0}

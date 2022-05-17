@@ -6,7 +6,7 @@ from unittest import TestCase
 import pytest
 
 import evaluate
-from evaluate.load import (
+from evaluate.loading import (
     CachedMetricModuleFactory,
     GithubMetricModuleFactory,
     HubMetricModuleFactory,
@@ -56,7 +56,7 @@ class ModuleFactoryTest(TestCase):
         self.hf_modules_cache = tempfile.mkdtemp()
         self.cache_dir = tempfile.mkdtemp()
         self.download_config = DownloadConfig(cache_dir=self.cache_dir)
-        self.dynamic_modules_path = evaluate.load.init_dynamic_modules(
+        self.dynamic_modules_path = evaluate.loading.init_dynamic_modules(
             name="test_datasets_modules_" + os.path.basename(self.hf_modules_cache),
             hf_modules_cache=self.hf_modules_cache,
         )
@@ -64,7 +64,10 @@ class ModuleFactoryTest(TestCase):
     def test_GithubMetricModuleFactory_with_internal_import(self):
         # "squad_v2" requires additional imports (internal)
         factory = GithubMetricModuleFactory(
-            "squad_v2", download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
+            "squad_v2",
+            type="metric",
+            download_config=self.download_config,
+            dynamic_modules_path=self.dynamic_modules_path,
         )
         module_factory_result = factory.get_module()
         assert importlib.import_module(module_factory_result.module_path) is not None
@@ -72,7 +75,7 @@ class ModuleFactoryTest(TestCase):
     def test_GithubMetricModuleFactory_with_external_import(self):
         # "bleu" requires additional imports (external from github)
         factory = GithubMetricModuleFactory(
-            "bleu", download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
+            "bleu", type="metric", download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
         )
         module_factory_result = factory.get_module()
         assert importlib.import_module(module_factory_result.module_path) is not None

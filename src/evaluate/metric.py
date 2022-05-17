@@ -136,6 +136,10 @@ class MetricInfoMixin:
     def format(self) -> Optional[str]:
         return self._metric_info.format
 
+    @property
+    def type(self) -> str:
+        return self._metric_info.type
+
 
 class Metric(MetricInfoMixin):
     """A Metric is the base class and common API for all metrics.
