@@ -103,7 +103,7 @@ def pearson_and_spearman(preds, labels):
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Glue(evaluate.Metric):
+class Glue(evaluate.EvaluationModule):
     def _info(self):
         if self.config_name not in [
             "sst2",
@@ -124,7 +124,7 @@ class Glue(evaluate.Metric):
                 '["sst2", "mnli", "mnli_mismatched", "mnli_matched", '
                 '"cola", "stsb", "mrpc", "qqp", "qnli", "rte", "wnli", "hans"]'
             )
-        return evaluate.MetricInfo(
+        return evaluate.EvaluationModuleInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

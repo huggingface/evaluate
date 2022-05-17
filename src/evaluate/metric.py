@@ -32,7 +32,7 @@ from datasets.utils.filelock import BaseFileLock, FileLock, Timeout
 from datasets.utils.py_utils import copyfunc, temp_seed, zip_dict
 
 from . import config
-from .info import MetricInfo
+from .info import EvaluationModuleInfo
 from .naming import camelcase_to_snakecase
 from .utils.file_utils import DownloadConfig
 from .utils.logging import get_logger
@@ -75,17 +75,17 @@ def summarize_if_long_list(obj):
     return f"[{format_chunk(obj[:3])}, ..., {format_chunk(obj[-3:])}]"
 
 
-class MetricInfoMixin:
-    """This base class exposes some attributes of MetricInfo
+class EvaluationModuleInfoMixin:
+    """This base class exposes some attributes of EvaluationModuleInfo
     at the base level of the Metric for easy access.
     """
 
-    def __init__(self, info: MetricInfo):
+    def __init__(self, info: EvaluationModuleInfo):
         self._metric_info = info
 
     @property
     def info(self):
-        """:class:`evaluate.MetricInfo` object containing all the metadata in the metric."""
+        """:class:`evaluate.EvaluationModuleInfo` object containing all the metadata in the metric."""
         return self._metric_info
 
     @property
@@ -141,7 +141,7 @@ class MetricInfoMixin:
         return self._metric_info.type
 
 
-class Metric(MetricInfoMixin):
+class EvaluationModule(EvaluationModuleInfoMixin):
     """A Metric is the base class and common API for all metrics.
 
     Args:
@@ -180,7 +180,7 @@ class Metric(MetricInfoMixin):
         info.metric_name = camelcase_to_snakecase(self.__class__.__name__)
         info.config_name = self.config_name
         info.experiment_id = experiment_id or "default_experiment"
-        MetricInfoMixin.__init__(self, info)  # For easy access on low level
+        EvaluationModuleInfoMixin.__init__(self, info)  # For easy access on low level
 
         # Safety checks on num_process and process_id
         if not isinstance(process_id, int) or process_id < 0:
@@ -608,14 +608,14 @@ class Metric(MetricInfoMixin):
             else:
                 self._check_rendez_vous()  # wait for master to be ready and to let everyone go
 
-    def _info(self) -> MetricInfo:
-        """Construct the MetricInfo object. See `MetricInfo` for details.
+    def _info(self) -> EvaluationModuleInfo:
+        """Construct the EvaluationModuleInfo object. See `EvaluationModuleInfo` for details.
 
         Warning: This function is only called once and the result is cached for all
         following .info() calls.
 
         Returns:
-            info: (MetricInfo) The metrics information
+            info: (EvaluationModuleInfo) The metrics information
         """
         raise NotImplementedError
 

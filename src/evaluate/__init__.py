@@ -26,9 +26,9 @@ SCRIPTS_VERSION = "main" if version.parse(__version__).is_devrelease else __vers
 
 del version
 
-from .info import MetricInfo
+from .info import EvaluationModuleInfo
 from .inspect import inspect_metric, list_metrics
 from .loading import load
-from .metric import Metric
+from .metric import EvaluationModule
 from .utils import *
 from .utils import gradio, logging

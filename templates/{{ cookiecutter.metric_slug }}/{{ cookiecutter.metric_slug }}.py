@@ -62,8 +62,8 @@ class {{ cookiecutter.metric_class_name }}(evaluate.Metric):
     """TODO: Short description of my metric."""
 
     def _info(self):
-        # TODO: Specifies the evaluate.MetricInfo object
-        return evaluate.MetricInfo(
+        # TODO: Specifies the evaluate.EvaluationModuleInfo object
+        return evaluate.EvaluationModuleInfo(
             # This is the description that will appear on the metrics page.
             type={{ cookiecutter.metric_type }}
             description=_DESCRIPTION,

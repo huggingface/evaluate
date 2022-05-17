@@ -8,14 +8,14 @@ from unittest import TestCase
 import pytest
 from datasets.features import Features, Sequence, Value
 
-from evaluate.metric import Metric, MetricInfo
+from evaluate.metric import EvaluationModule, EvaluationModuleInfo
 
 from .utils import require_tf, require_torch
 
 
-class DummyMetric(Metric):
+class DummyMetric(EvaluationModule):
     def _info(self):
-        return MetricInfo(
+        return EvaluationModuleInfo(
             description="dummy metric for tests",
             citation="insert citation here",
             features=Features({"predictions": Value("int64"), "references": Value("int64")}),
@@ -512,9 +512,9 @@ class TestMetric(TestCase):
         del metric
 
 
-class MetricWithMultiLabel(Metric):
+class MetricWithMultiLabel(EvaluationModule):
     def _info(self):
-        return MetricInfo(
+        return EvaluationModuleInfo(
             description="dummy metric for tests",
             citation="insert citation here",
             features=Features(
@@ -561,9 +561,9 @@ def test_safety_checks_process_vars():
         _ = DummyMetric(num_process=2, process_id=3)
 
 
-class AccuracyWithNonStandardFeatureNames(Metric):
+class AccuracyWithNonStandardFeatureNames(EvaluationModule):
     def _info(self):
-        return MetricInfo(
+        return EvaluationModuleInfo(
             description="dummy metric for tests",
             citation="insert citation here",
             features=Features({"inputs": Value("int64"), "targets": Value("int64")}),

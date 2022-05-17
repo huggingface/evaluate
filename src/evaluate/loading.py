@@ -34,7 +34,7 @@ from datasets.utils.filelock import FileLock
 from datasets.utils.version import Version
 
 from . import config
-from .metric import Metric
+from .metric import EvaluationModule
 from .utils.file_utils import (
     DownloadConfig,
     cached_path,
@@ -73,13 +73,13 @@ def init_dynamic_modules(
     return dynamic_modules_path
 
 
-def import_main_class(module_path) -> Optional[Union[Type[DatasetBuilder], Type[Metric]]]:
+def import_main_class(module_path) -> Optional[Union[Type[DatasetBuilder], Type[EvaluationModule]]]:
     """Import a module at module_path and return its main class:
     - a DatasetBuilder if dataset is True
     - a Metric if dataset is False
     """
     module = importlib.import_module(module_path)
-    main_cls_type = Metric
+    main_cls_type = EvaluationModule
 
     # Find the main class in our imported module
     module_main_cls = None
@@ -391,17 +391,17 @@ def _create_importable_file(
 
 
 @dataclass
-class MetricModule:
+class ImportableModule:
     module_path: str
     hash: str
 
 
-class _MetricModuleFactory:
-    def get_module(self) -> MetricModule:
+class _EvaluationModuleFactory:
+    def get_module(self) -> ImportableModule:
         raise NotImplementedError
 
 
-class GithubMetricModuleFactory(_MetricModuleFactory):
+class GithubEvaluationModuleFactory(_EvaluationModuleFactory):
     """Get the module of a metric. The metric script is downloaded from GitHub."""
 
     def __init__(
@@ -429,7 +429,7 @@ class GithubMetricModuleFactory(_MetricModuleFactory):
             download_config.download_desc = "Downloading builder script"
         return cached_path(file_path, download_config=download_config)
 
-    def get_module(self) -> MetricModule:
+    def get_module(self) -> ImportableModule:
         # get script and other files
         revision = self.revision
         try:
@@ -465,10 +465,10 @@ class GithubMetricModuleFactory(_MetricModuleFactory):
         )
         # make the new module to be noticed by the import system
         importlib.invalidate_caches()
-        return MetricModule(module_path, hash)
+        return ImportableModule(module_path, hash)
 
 
-class LocalMetricModuleFactory(_MetricModuleFactory):
+class LocalEvaluationModuleFactory(_EvaluationModuleFactory):
     """Get the module of a local metric. The metric script is loaded from a local script."""
 
     def __init__(
@@ -484,7 +484,7 @@ class LocalMetricModuleFactory(_MetricModuleFactory):
         self.download_mode = download_mode
         self.dynamic_modules_path = dynamic_modules_path
 
-    def get_module(self) -> MetricModule:
+    def get_module(self) -> ImportableModule:
         # get script and other files
         imports = get_imports(self.path)
         local_imports = _download_additional_modules(
@@ -506,10 +506,10 @@ class LocalMetricModuleFactory(_MetricModuleFactory):
         )
         # make the new module to be noticed by the import system
         importlib.invalidate_caches()
-        return MetricModule(module_path, hash)
+        return ImportableModule(module_path, hash)
 
 
-class HubMetricModuleFactory(_MetricModuleFactory):
+class HubEvaluationModuleFactory(_EvaluationModuleFactory):
     """Get the module of a metric from a metric repository on the Hub."""
 
     def __init__(
@@ -535,7 +535,7 @@ class HubMetricModuleFactory(_MetricModuleFactory):
             download_config.download_desc = "Downloading builder script"
         return cached_path(file_path, download_config=download_config)
 
-    def get_module(self) -> MetricModule:
+    def get_module(self) -> ImportableModule:
         # get script and other files
         local_path = self.download_loading_script()
         imports = get_imports(local_path)
@@ -558,10 +558,10 @@ class HubMetricModuleFactory(_MetricModuleFactory):
         )
         # make the new module to be noticed by the import system
         importlib.invalidate_caches()
-        return MetricModule(module_path, hash)
+        return ImportableModule(module_path, hash)
 
 
-class CachedMetricModuleFactory(_MetricModuleFactory):
+class CachedEvaluationModuleFactory(_EvaluationModuleFactory):
     """
     Get the module of a metric that has been loaded once already and cached.
     The script that is loaded from the cache is the most recent one with a matching name.
@@ -576,7 +576,7 @@ class CachedMetricModuleFactory(_MetricModuleFactory):
         self.dynamic_modules_path = dynamic_modules_path
         assert self.name.count("/") == 0
 
-    def get_module(self) -> MetricModule:
+    def get_module(self) -> ImportableModule:
         dynamic_modules_path = self.dynamic_modules_path if self.dynamic_modules_path else init_dynamic_modules()
         importable_directory_path = os.path.join(dynamic_modules_path, "metrics", self.name)
         hashes = (
@@ -600,10 +600,10 @@ class CachedMetricModuleFactory(_MetricModuleFactory):
         # make the new module to be noticed by the import system
         module_path = ".".join([os.path.basename(dynamic_modules_path), "metrics", self.name, hash, self.name])
         importlib.invalidate_caches()
-        return MetricModule(module_path, hash)
+        return ImportableModule(module_path, hash)
 
 
-def metric_module_factory(
+def evaluation_module_factory(
     path: str,
     type: Optional[str] = None,
     revision: Optional[Union[str, Version]] = None,
@@ -612,7 +612,7 @@ def metric_module_factory(
     force_local_path: Optional[str] = None,
     dynamic_modules_path: Optional[str] = None,
     **download_kwargs,
-) -> MetricModule:
+) -> ImportableModule:
     """
     Download/extract/cache a metric module.
 
@@ -645,7 +645,7 @@ def metric_module_factory(
         download_kwargs: optional attributes for DownloadConfig() which will override the attributes in download_config if supplied.
 
     Returns:
-        MetricModule
+        ImportableModule
     """
     if download_config is None:
         download_config = DownloadConfig(**download_kwargs)
@@ -660,13 +660,13 @@ def metric_module_factory(
     # Try locally
     if path.endswith(filename):
         if os.path.isfile(path):
-            return LocalMetricModuleFactory(
+            return LocalEvaluationModuleFactory(
                 path, download_mode=download_mode, dynamic_modules_path=dynamic_modules_path
             ).get_module()
         else:
             raise FileNotFoundError(f"Couldn't find a metric script at {relative_to_absolute_path(path)}")
     elif os.path.isfile(combined_path):
-        return LocalMetricModuleFactory(
+        return LocalEvaluationModuleFactory(
             combined_path, download_mode=download_mode, dynamic_modules_path=dynamic_modules_path
         ).get_module()
     elif is_relative_path(path) and path.count("/") <= 1 and not force_local_path:
@@ -677,7 +677,7 @@ def metric_module_factory(
                 if type is None:
                     for current_type in ["metric", "comparison", "measurement"]:
                         try:
-                            return GithubMetricModuleFactory(
+                            return GithubEvaluationModuleFactory(
                                 path,
                                 current_type,
                                 revision=revision,
@@ -690,7 +690,7 @@ def metric_module_factory(
                     raise FileNotFoundError
                 # if type provided load specific type
                 else:
-                    return GithubMetricModuleFactory(
+                    return GithubEvaluationModuleFactory(
                         path,
                         type,
                         revision=revision,
@@ -700,7 +700,7 @@ def metric_module_factory(
                     ).get_module()
             # load community evaluation module from hub
             elif path.count("/") == 1:
-                return HubMetricModuleFactory(
+                return HubEvaluationModuleFactory(
                     path,
                     revision=revision,
                     download_config=download_config,
@@ -709,7 +709,7 @@ def metric_module_factory(
                 ).get_module()
         except Exception as e1:  # noqa: all the attempts failed, before raising the error we should check if the module is already cached.
             try:
-                return CachedMetricModuleFactory(path, dynamic_modules_path=dynamic_modules_path).get_module()
+                return CachedEvaluationModuleFactory(path, dynamic_modules_path=dynamic_modules_path).get_module()
             except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
                 if not isinstance(e1, FileNotFoundError):
                     raise e1 from None
@@ -733,9 +733,9 @@ def load(
     download_config: Optional[DownloadConfig] = None,
     download_mode: Optional[DownloadMode] = None,
     revision: Optional[Union[str, Version]] = None,
-    **metric_init_kwargs,
-) -> Metric:
-    """Load a `evaluate.Metric`.
+    **init_kwargs,
+) -> EvaluationModule:
+    """Load a `evaluate.EvaluationModule`.
 
     Args:
 
@@ -760,29 +760,29 @@ def load(
             your local version of the lib might cause compatibility issues.
 
     Returns:
-        `evaluate.Metric`
+        `evaluate.EvaluationModule`
     """
     download_mode = DownloadMode(download_mode or DownloadMode.REUSE_DATASET_IF_EXISTS)
-    metric_module = metric_module_factory(
+    evaluation_module = evaluation_module_factory(
         path, type=type, revision=revision, download_config=download_config, download_mode=download_mode
     ).module_path
-    metric_cls = import_main_class(metric_module)
-    metric = metric_cls(
+    evaluation_cls = import_main_class(evaluation_module)
+    evaluation_instance = evaluation_cls(
         config_name=config_name,
         process_id=process_id,
         num_process=num_process,
         cache_dir=cache_dir,
         keep_in_memory=keep_in_memory,
         experiment_id=experiment_id,
-        **metric_init_kwargs,
+        **init_kwargs,
     )
 
-    if type and type != metric.type:
+    if type and type != evaluation_instance.type:
         raise TypeError(
             f"No module of type '{type}' not found for '{path}' locally, or on the Hugging Face Hub. Found module of type '{metric.type}' instead."
         )
 
     # Download and prepare resources for the metric
-    metric.download_and_prepare(download_config=download_config)
+    evaluation_instance.download_and_prepare(download_config=download_config)
 
-    return metric
+    return evaluation_instance
