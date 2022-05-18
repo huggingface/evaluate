@@ -18,17 +18,23 @@ import datasets
 from statistics import mean
 
 _DESCRIPTION = """
-Returns the length (in words) of each instance in the text fields.
+Returns the length (in words) of the input data.
+The tokenizer used is `word_tokenize` from NLTK: https://www.nltk.org/api/nltk.tokenize.html
 """
 
 _KWARGS_DESCRIPTION = """
-Args:
+Args: 
+    data: a `str` for which the word length is calculated.
 
-Returns:
+Returns: 
+    'word length' : the number of words in the input string.
 
 Examples:
-
-
+    >>> data = ["hello world"]
+    >>> wordlength = evaluate.load("word_length", type="measurement")
+    >>> results = wordlength.compute(data=data)
+    >>> print(results["bleu"])
+    {"word length": 2}
 """
 
 # TODO: Add BibTeX citation
@@ -61,4 +67,4 @@ class WordLength(evaluate.EvaluationModule):
     def _compute(self, data):
         """Returns the word length of the input data"""
         length = len(word_tokenize(data)
-        return {"word length":length}
+        return {"word length": length}
