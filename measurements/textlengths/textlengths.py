@@ -41,7 +41,7 @@ year={2020}
 """
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class TextLength(evaluate.EvaluationModule):
+class WordLength(evaluate.EvaluationModule):
     """TODO: Short description of my evaluation module."""
 
     def _info(self):
@@ -59,7 +59,7 @@ class TextLength(evaluate.EvaluationModule):
         )
 
     def _compute(self, texts):
-        """Returns the lengths"""
+        """Returns the word length of the input data"""
         lengths = [len(word_tokenize(text)) for text in texts]
         average_length = mean(lengths)
         return {"average_length": average_length, "all lengths":lengths}
