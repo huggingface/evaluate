@@ -38,7 +38,6 @@ Returns:
     p (`float` or `int`): McNemar test score. Minimum possible value is 0. Maximum possible value is 1.0. A lower p value means a more significant difference.
 
 Examples:
-    >>> import numpy as np
     >>> mcnemar = evaluate.load("mcnemar")
     >>> results = mcnemar.compute(references=[1, 0, 1], predictions1=[1, 1, 1], predictions2=[1, 0, 1])
     >>> print(results)
