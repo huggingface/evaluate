@@ -66,5 +66,5 @@ class WordLength(evaluate.EvaluationModule):
 
     def _compute(self, data):
         """Returns the word length of the input data"""
-        length = len(word_tokenize(data)
+        length = len(word_tokenize(data))
         return {"word length": length}
