@@ -33,7 +33,7 @@ Examples:
     >>> data = ["hello world"]
     >>> wordlength = evaluate.load("word_length", type="measurement")
     >>> results = wordlength.compute(data=data)
-    >>> print(results["bleu"])
+    >>> print(results)
     {"word length": 2}
 """
 
