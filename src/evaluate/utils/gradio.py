@@ -108,7 +108,7 @@ def launch_gradio_widget(metric):
         fn=compute,
         inputs=gr.inputs.Dataframe(
             headers=feature_names,
-            col_width=len(feature_names),
+            col_count=len(feature_names),
             row_count=2,
             datatype=json_to_string_type(gradio_input_types),
         ),

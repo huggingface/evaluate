@@ -6,7 +6,7 @@ tags:
 - evaluate
 - {{ cookiecutter.module_name }}
 sdk: gradio
-sdk_version: 2.8.13
+sdk_version: 3.0.2
 app_file: app.py
 pinned: false
 ---
