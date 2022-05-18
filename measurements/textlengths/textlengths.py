@@ -41,7 +41,7 @@ year={2020}
 """
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class TestMeasurement(evaluate.EvaluationModule):
+class TextLength(evaluate.EvaluationModule):
     """TODO: Short description of my evaluation module."""
 
     def _info(self):
