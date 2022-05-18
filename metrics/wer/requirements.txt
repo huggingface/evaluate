@@ -1,0 +1,4 @@
+# TODO: fix github to release
+git+https://github.com/huggingface/evaluate.git@b6e6ed7f3e6844b297bff1b43a1b4be0709b9671
+datasets~=2.0
+jiwer
