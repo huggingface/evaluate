@@ -18,13 +18,15 @@ import datasets
 from statistics import mean
 
 _DESCRIPTION = """
-Returns the length (in words) of the input data.
-The tokenizer used is `word_tokenize` from NLTK: https://www.nltk.org/api/nltk.tokenize.html
+Returns the average length (in terms of the number of words) of the input data.
 """
 
 _KWARGS_DESCRIPTION = """
 Args:
-    data: a `str` for which the word length is calculated.
+    data: a list of `str` for which the word length is calculated.
+    tokenizer : approach used for tokenizing `data` (optional).
+        The default tokenizer is `word_tokenize` from NLTK: https://www.nltk.org/api/nltk.tokenize.html
+        This can be replaced by any function that takes a string as input and returns a list of tokens as output.
 
 Returns:
     'word length' : the number of words in the input string.
@@ -48,7 +50,7 @@ year={2020}
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class WordLength(evaluate.EvaluationModule):
-    """This measurement returns the number of words in the input string."""
+    """This measurement returns the average number of words in the input string(s)."""
 
     def _info(self):
         # TODO: Specifies the evaluate.EvaluationModuleInfo object
@@ -64,7 +66,8 @@ class WordLength(evaluate.EvaluationModule):
             })
         )
 
-    def _compute(self, data):
-        """Returns the word length of the input data"""
-        length = len(word_tokenize(data))
-        return {"word length": length}
+    def _compute(self, data, tokenizer=word_tokenize):
+        """Returns the average word length of the input data"""
+        lengths = [len(tokenizer(d)) for d in data]
+        average_length = mean(lengths)
+        return {"average_word_length": average_length}
