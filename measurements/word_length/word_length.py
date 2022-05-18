@@ -23,20 +23,20 @@ Returns the average length (in terms of the number of words) of the input data.
 
 _KWARGS_DESCRIPTION = """
 Args:
-    data: a list of `str` for which the word length is calculated.
-    tokenizer : approach used for tokenizing `data` (optional).
+    `data`: a list of `str` for which the word length is calculated.
+    `tokenizer` : approach used for tokenizing `data` (optional).
         The default tokenizer is `word_tokenize` from NLTK: https://www.nltk.org/api/nltk.tokenize.html
         This can be replaced by any function that takes a string as input and returns a list of tokens as output.
 
 Returns:
-    'word length' : the number of words in the input string.
+    `average_word_length` : the average number of words in the input list of strings.
 
 Examples:
     >>> data = ["hello world"]
     >>> wordlength = evaluate.load("word_length", type="measurement")
     >>> results = wordlength.compute(data=data)
     >>> print(results)
-    {"word length": 2}
+    {"average_word_length": 2}
 """
 
 # TODO: Add BibTeX citation
