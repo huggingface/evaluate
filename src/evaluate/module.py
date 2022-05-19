@@ -172,6 +172,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         experiment_id: Optional[str] = None,
         max_concurrent_cache_files: int = 10000,
         timeout: Union[int, float] = 100,
+        force_dict: Optional[bool] = False,
         **kwargs,
     ):
         # prepare info
@@ -229,6 +230,12 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         # This is all the cache files on which we have a lock when we are in a distributed setting
         self.file_paths = None
         self.filelocks = None
+
+        # This function is applied to the modules default outputs to allow more flexible formats
+        self._postprocessor = None
+
+        # Determines if an output
+        self.force_dict = force_dict
 
     def __len__(self):
         """Return the number of examples (predictions or predictions/references pair)
@@ -392,6 +399,13 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             self.file_paths = file_paths
             self.filelocks = filelocks
 
+    def postprocess(self, function):
+        """Add postprocessing function that is applied to the output of `compute`.
+        Args:
+            function  (Callable): Function applied to outputs.
+        """
+        self._postprocessor = function
+
     def compute(self, *, predictions=None, references=None, **kwargs) -> Optional[dict]:
         """Compute the evaluation module.
 
@@ -451,8 +465,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                     self.writer = None
                     os.remove(file_path)
                     filelock.release()
-
-            return output
+            return self._prepare_output(output)
         else:
             return None
 
@@ -535,6 +548,14 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             )
             error_msg += error_msg_inputs
             raise ValueError(error_msg) from None
+
+    def _prepare_output(self, output):
+        if not self.force_dict:
+            if isinstance(output, dict) and len(output)==1:
+                output = output.values()[0]
+        if not self.postprocessor is None:
+            output = self._postprocessor(output)
+        return output
 
     def _infer_feature_from_batch(self, batch):
         if isinstance(self.features, Features):
