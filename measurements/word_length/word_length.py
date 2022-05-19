@@ -24,7 +24,7 @@ Returns the average length (in terms of the number of words) of the input data.
 _KWARGS_DESCRIPTION = """
 Args:
     `data`: a list of `str` for which the word length is calculated.
-    `tokenizer` : approach used for tokenizing `data` (optional).
+    `tokenizer` : (`Callable`) - the approach used for tokenizing `data` (optional).
         The default tokenizer is `word_tokenize` from NLTK: https://www.nltk.org/api/nltk.tokenize.html
         This can be replaced by any function that takes a string as input and returns a list of tokens as output.
 
