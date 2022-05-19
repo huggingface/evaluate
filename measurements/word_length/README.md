@@ -17,7 +17,7 @@ This measurement requires a list of strings as input:
 
 ### Inputs
 - **data** (list of `str`): The input list of strings for which the word length is calculated.
-- **tokenizer** (`str`) : approach used for tokenizing `data` (optional). The default tokenizer is [NLTK's `word_tokenize`](https://www.nltk.org/api/nltk.tokenize.html). This can be replaced by any function that takes a string as input and returns a list of tokens as output.
+- **tokenizer** (`Callable`) : approach used for tokenizing `data` (optional). The default tokenizer is [NLTK's `word_tokenize`](https://www.nltk.org/api/nltk.tokenize.html). This can be replaced by any function that takes a string as input and returns a list of tokens as output.
 
 ### Output Values
 - **average_word_length**(`int`): the average number of words in the input string(s).
