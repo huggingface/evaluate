@@ -459,7 +459,7 @@ class GithubEvaluationModuleFactory(_EvaluationModuleFactory):
             local_imports=local_imports,
             additional_files=[],
             dynamic_modules_path=dynamic_modules_path,
-            module_namespace="metrics",
+            module_namespace=self.type,
             name=self.name,
             download_mode=self.download_mode,
         )
@@ -474,11 +474,13 @@ class LocalEvaluationModuleFactory(_EvaluationModuleFactory):
     def __init__(
         self,
         path: str,
+        type: str = "metrics",
         download_config: Optional[DownloadConfig] = None,
         download_mode: Optional[DownloadMode] = None,
         dynamic_modules_path: Optional[str] = None,
     ):
         self.path = path
+        self.type = type
         self.name = Path(path).stem
         self.download_config = download_config or DownloadConfig()
         self.download_mode = download_mode
@@ -500,7 +502,7 @@ class LocalEvaluationModuleFactory(_EvaluationModuleFactory):
             local_imports=local_imports,
             additional_files=[],
             dynamic_modules_path=dynamic_modules_path,
-            module_namespace="metrics",
+            module_namespace=self.type,
             name=self.name,
             download_mode=self.download_mode,
         )
@@ -515,12 +517,14 @@ class HubEvaluationModuleFactory(_EvaluationModuleFactory):
     def __init__(
         self,
         name: str,
+        type: str = "metrics",
         revision: Optional[Union[str, Version]] = None,
         download_config: Optional[DownloadConfig] = None,
         download_mode: Optional[DownloadMode] = None,
         dynamic_modules_path: Optional[str] = None,
     ):
         self.name = name
+        self.type = type
         self.revision = revision
         self.download_config = download_config or DownloadConfig()
         self.download_mode = download_mode
@@ -552,7 +556,7 @@ class HubEvaluationModuleFactory(_EvaluationModuleFactory):
             local_imports=local_imports,
             additional_files=[],
             dynamic_modules_path=dynamic_modules_path,
-            module_namespace="metrics",
+            module_namespace=self.type,
             name=self.name,
             download_mode=self.download_mode,
         )
@@ -570,15 +574,17 @@ class CachedEvaluationModuleFactory(_EvaluationModuleFactory):
     def __init__(
         self,
         name: str,
+        type: str = "metrics",
         dynamic_modules_path: Optional[str] = None,
     ):
         self.name = name
+        self.type = type
         self.dynamic_modules_path = dynamic_modules_path
         assert self.name.count("/") == 0
 
     def get_module(self) -> ImportableModule:
         dynamic_modules_path = self.dynamic_modules_path if self.dynamic_modules_path else init_dynamic_modules()
-        importable_directory_path = os.path.join(dynamic_modules_path, "metrics", self.name)
+        importable_directory_path = os.path.join(dynamic_modules_path, self.type, self.name)
         hashes = (
             [h for h in os.listdir(importable_directory_path) if len(h) == 64]
             if os.path.isdir(importable_directory_path)
@@ -598,7 +604,7 @@ class CachedEvaluationModuleFactory(_EvaluationModuleFactory):
             f"couldn't be found locally at {self.name}, or remotely on the Hugging Face Hub."
         )
         # make the new module to be noticed by the import system
-        module_path = ".".join([os.path.basename(dynamic_modules_path), "metrics", self.name, hash, self.name])
+        module_path = ".".join([os.path.basename(dynamic_modules_path), self.type, self.name, hash, self.name])
         importlib.invalidate_caches()
         return ImportableModule(module_path, hash)
 
