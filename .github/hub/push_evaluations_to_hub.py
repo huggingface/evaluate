@@ -8,6 +8,9 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+GIT_UP_TO_DATE = "On branch main\nYour branch is up to date with 'origin/main'.\
+\n\nnothing to commit, working tree clean\n"
+
 def copy_recursive(source_base_path, target_base_path):
     """Copy directory recursively and overwrite existing files."""
     for item in source_base_path.iterdir():
@@ -45,8 +48,11 @@ def push_module_to_hub(module_path, type, token):
         repo.git_commit(f"Update Space (evaluate main: {commit_hash[:8]})")
         repo.git_push()
         logger.info(f"Module '{module_name}' pushed to the hub")
-    except OSError:
-        logger.info(f"Module '{module_name}' already up to date.")
+    except OSError as error:
+        if str(error) == GIT_UP_TO_DATE:
+            logger.info(f"Module '{module_name}' is already up to date.")
+        else:
+            raise error
     shutil.rmtree(repo_path)
 
 
