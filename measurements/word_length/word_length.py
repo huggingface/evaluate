@@ -36,7 +36,7 @@ Examples:
     >>> wordlength = evaluate.load("word_length", type="measurement")
     >>> results = wordlength.compute(data=data)
     >>> print(results)
-    {"average_word_length": 2}
+    {'average_word_length': 2}
 """
 
 # TODO: Add BibTeX citation
