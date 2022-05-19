@@ -17,6 +17,7 @@ import evaluate
 import datasets
 from statistics import mean
 
+
 _DESCRIPTION = """
 Returns the average length (in terms of the number of words) of the input data.
 """
@@ -65,6 +66,10 @@ class WordLength(evaluate.EvaluationModule):
                 'data': datasets.Value('string'),
             })
         )
+
+    def _download_and_prepare(self, dl_manager):
+        import nltk
+        nltk.download("punkt")
 
     def _compute(self, data, tokenizer=word_tokenize):
         """Returns the average word length of the input data"""
