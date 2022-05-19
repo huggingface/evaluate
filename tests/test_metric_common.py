@@ -68,7 +68,7 @@ def get_local_module_names():
 
     evaluation_modules = metrics + comparisons + measurements
     evaluation_module_types = (
-        ["metric"] * len(metrics) + ["comparison"] * len(comparisons) + ["measurements"] * len(measurements)
+        ["metric"] * len(metrics) + ["comparison"] * len(comparisons) + ["measurement"] * len(measurements)
     )
 
     return [

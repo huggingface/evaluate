@@ -104,7 +104,7 @@ def hf_github_url(path: str, name: str, type: str, revision: Optional[str] = Non
         return config.REPO_METRICS_URL.format(revision=revision, path=path, name=name)
     elif type == "comparison":
         return config.REPO_COMPARISONS_URL.format(revision=revision, path=path, name=name)
-    elif type == "measurements":
+    elif type == "measurement":
         return config.REPO_MEASUREMENTS_URL.format(revision=revision, path=path, name=name)
     else:
         raise TypeError(
