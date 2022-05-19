@@ -20,7 +20,7 @@ This measurement requires a list of strings as input:
 - **tokenizer** (`Callable`) : approach used for tokenizing `data` (optional). The default tokenizer is [NLTK's `word_tokenize`](https://www.nltk.org/api/nltk.tokenize.html). This can be replaced by any function that takes a string as input and returns a list of tokens as output.
 
 ### Output Values
-- **average_word_length**(`int`): the average number of words in the input string(s).
+- **average_word_length**(`float`): the average number of words in the input string(s).
 
 Output Example(s):
 
