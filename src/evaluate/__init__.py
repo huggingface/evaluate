@@ -30,5 +30,6 @@ from .info import EvaluationModuleInfo
 from .inspect import inspect_metric, list_metrics
 from .loading import load
 from .module import EvaluationModule
+from .saving import save
 from .utils import *
 from .utils import gradio, logging
