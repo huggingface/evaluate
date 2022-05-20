@@ -66,7 +66,7 @@ def _setup_path(path_or_file, current_time):
 def _git_commit_hash():
     res = subprocess.run("git rev-parse --is-inside-work-tree".split(), cwd="./", stdout=subprocess.PIPE)
     if res.stdout.decode().strip() == "true":
-        res = subprocess.run("git rev-parse HEAD".split(), cwd="./", stdout=subprocess.PIPE)
+        res = subprocess.run("git rev-parse HEAD".split(), cwd=os.getcwd(), stdout=subprocess.PIPE)
         return res.stdout.decode().strip()
     else:
         return None
