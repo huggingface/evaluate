@@ -40,13 +40,13 @@ def save(path_or_file, **data):
     with FileLock(str(file_path) + ".lock"):
         with open(file_path, "w") as f:
             json.dump(data, f)
-    
+
     # cleanup lock file
     try:
         os.remove(str(file_path) + ".lock")
     except FileNotFoundError:
         pass
-    
+
     return file_path
 
 
