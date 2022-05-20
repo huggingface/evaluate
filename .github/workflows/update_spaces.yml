@@ -29,7 +29,7 @@ jobs:
       - name: Update Hub repositories
         working-directory: ./.github/hub
         run: |
-          export HF_TOKEN=${{ secrets.HUB_TRUSTED_COMMITER_TOKEN }}
+          export HF_TOKEN=${{ secrets.HF_HUB_TOKEN }}
           export EVALUATE_LIB_PATH=$GITHUB_WORKSPACE
           export GIT_HASH=$GITHUB_SHA
           export GIT_LFS_SKIP_SMUDGE=1

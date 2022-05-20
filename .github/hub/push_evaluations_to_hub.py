@@ -22,11 +22,11 @@ def copy_recursive(source_base_path, target_base_path):
             shutil.copy(item, traget_path)
 
 
-def push_module_to_hub(module_path, type, token):
+def push_module_to_hub(module_path, type, token, commit_hash):
     module_name = module_path.stem
     org = f"evaluate-{type}"
     
-    repo_url = create_repo(module_name, organization=org, repo_type="space", space_sdk="gradio", exist_ok=True, token=token)    
+    repo_url = create_repo(org + "/" + module_name, repo_type="space", space_sdk="gradio", exist_ok=True, token=token)    
     repo_path = Path(tempfile.mkdtemp())
     
     subprocess.run(
@@ -39,7 +39,7 @@ def push_module_to_hub(module_path, type, token):
         env=os.environ.copy(),
     )
 
-    repo = Repository(local_dir=repo_path / module_name, token=token)
+    repo = Repository(local_dir=repo_path / module_name, use_auth_token=token)
     
     copy_recursive(module_path, repo_path / module_name)
     
@@ -56,7 +56,7 @@ def push_module_to_hub(module_path, type, token):
     shutil.rmtree(repo_path)
 
 
-if __name__ == "__name__":
+if __name__ == "__main__":
     evaluation_paths = ["metrics", "comparisons", "measurements"]
     evaluation_types = ["metric", "comparison", "measurement"]
 
