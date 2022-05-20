@@ -1,3 +1,17 @@
+---
+title: Spearman Correlation Coefficient Metric 
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+---
+
 # Metric Card for Spearman Correlation Coefficient Metric (spearmanr)
 
 
