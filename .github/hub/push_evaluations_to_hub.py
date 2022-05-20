@@ -5,6 +5,8 @@ import subprocess
 import os
 import shutil
 import logging
+import re
+from urllib.parse import urlparse
 
 logger = logging.getLogger(__name__)
 
@@ -29,15 +31,23 @@ def push_module_to_hub(module_path, type, token, commit_hash):
     repo_url = create_repo(org + "/" + module_name, repo_type="space", space_sdk="gradio", exist_ok=True, token=token)    
     repo_path = Path(tempfile.mkdtemp())
     
-    subprocess.run(
-        f"git clone {repo_url}".split(),
-        stderr=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        check=True,
-        encoding="utf-8",
-        cwd=repo_path,
-        env=os.environ.copy(),
-    )
+    scheme = urlparse(repo_url).scheme
+    repo_url = repo_url.replace(f"{scheme}://", f"{scheme}://user:{token}@")
+    clean_repo_url = re.sub(r"(https?)://.*@", r"\1://", repo_url)
+    
+    try:
+        subprocess.run(
+            f"git clone {repo_url}".split(),
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            check=True,
+            encoding="utf-8",
+            cwd=repo_path,
+            env=os.environ.copy(),
+        )
+    except OSError:
+        # make sure we don't accidentally expose token
+        raise OSError(f"Could not clone from '{clean_repo_url}'")
 
     repo = Repository(local_dir=repo_path / module_name, use_auth_token=token)
     
