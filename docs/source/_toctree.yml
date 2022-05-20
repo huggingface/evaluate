@@ -3,12 +3,22 @@
     title: 🤗 Evaluate
   title: Get started
 - sections:
-  - local: how_to_metrics
-    title: Metrics
+  - local: installation
+    title: Installation
+  - local: a_quick_tour
+    title: A quick tour
+  title: Tutorials
+- sections:
+  - local: choosing_a_metric
+    title: Choosing a metric for your task
+  - local: creating_and_sharing
+    title: Creating and sharing a new evaluation
   title: "How-to guides"
 - sections:
-    - local: about_metrics
-      title: All about metrics
+    - local: types_of_evaluations
+      title: Types of evaluations
+    - local: considerations
+      title: Considerations for model evaluation
   title: "Conceptual guides"
 - sections:
   - local: package_reference/main_classes
