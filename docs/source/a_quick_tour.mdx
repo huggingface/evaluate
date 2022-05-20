@@ -1,13 +1,55 @@
 # A quick tour
 
-🤗 Evaluate provides access to a wide range of evaluation tools. You can load metrics associated with benchmark datasets like GLUE or SQuAD, and complex metrics like BLEURT or BERTScore, with a single command: [`evaluate.load`]. Once you've loaded a metric, easily compute and evaluate a model's performance.
-## ELI5: `evaluate.load`
+🤗 Evaluate provides access to a wide range of evaluation tools. It covers a range of modalities such as text, computer vision, audio, etc. as well as tools to evaluate models or datasets. These tools are split into three categories.
 
-When you call [`evaluate.load`], the metric loading script is downloaded and imported from GitHub (if it hasn't already been downloaded before). It contains information about the metric such as it's citation, homepage, and description.
+## Three types of evaluations
 
-The metric loading script will instantiate and return a `EvaluationModule` object. This stores the predictions and references, which you need to compute the metric values. The `EvaluationModule` object is stored as an Apache Arrow table. As a result, the predictions and references are stored directly on disk with memory-mapping. This enables 🤗 Evaluate to do a lazy computation of the metric, and makes it easier to gather all the predictions in a distributed setting.
+There are different aspects of a typical machine learning pipeline that can be evaluated and for aspect we provide a tool:
 
-## Distributed evaluation
+- **Metric**: A metric is used to evaluate a model's performance and usually involves the model's predictions as well as some ground truth labels. You can find all integrated metrics at [evaluate-metric](hf.co/evaluate-metric).
+- **Comparison**: A comparison is used to compare two models. This can for example be done by comparing their predictions to ground truth labels and compute their agreement. You can find all integrated comparisons at [evaluate-comparison](hf.co/evaluate-comparison).
+- **Measurement**: As important as the model is the dataset used to train it. With measurements one can investigate a dataset's properties. You can find all integrated measurements at [evaluate-measurement](hf.co/evaluate-measurement).
+
+For all of these methods there is a single entry point: [`evaluate.load`]!
+
+## Load
+
+Any metric, comparison, or measurement is loaded with the `evaluate.load` function: 
+
+```py
+>>> import evaluate
+>>> accuracy = evaluate.load("accuracy")
+```
+
+If you want to make sure you are loading the right type of module especially if there are name clashes you can explicitely pass the type:
+
+```py
+>>> word_length = evaluate.load("word_length", type="measurement")
+```
+
+### Community modules
+
+Besides the modules implemented in 🤗 Evaluate you can also load any community module by prepending the users name:
+
+```py
+>>> element_count = evaluate.load("lvwerra/element_count", type="measurement")
+```
+
+## Compute
+
+When it comes to computing the actual score there are two main ways to do it:
+
+1. Incremental
+2. All-in-one
+
+In the incremental approach the necessary inputs are added to the module with [`add`] or [`add_batch`] and the score is calculated at the end with [`compute`]. Alternatively, one can pass all the inputs at once to [`compute`]. Let's have a look at the two approaches.
+
+### `add` and `add_batch`
+
+
+### `compute`
+
+### Distributed evaluation
 
 Computing metrics in a distributed environment can be tricky. Metric evaluation is executed in separate Python processes, or nodes, on different subsets of a dataset. Typically, when a metric score is additive (`f(AuB) = f(A) + f(B)`), you can use distributed reduce operations to gather the scores for each subset of the dataset. But when a metric is non-additive (`f(AuB) ≠ f(A) + f(B)`), it's not that simple. For example, you can't take the sum of the [F1](https://huggingface.co/metrics/f1) scores of each data subset as your **final metric**.
 
@@ -16,6 +58,20 @@ A common way to overcome this issue is to fallback on single process evaluation.
 🤗 Evaluate solves this issue by only computing the final metric on the first node. The predictions and references are computed and provided to the metric separately for each node. These are temporarily stored in an Apache Arrow table, avoiding cluttering the GPU or CPU memory. When you are ready to `EvaluationModule.compute` the final metric, the first node is able to access the predictions and references stored on all the other nodes. Once it has gathered all the predictions and references, `EvaluationModule.compute` will perform the final metric evaluation.
 
 This solution allows 🤗 Evaluate to perform distributed predictions, which is important for evaluation speed in distributed settings. At the same time, you can also use complex non-additive metrics without wasting valuable GPU or CPU memory. distributed predictions, which is important for evaluation speed in distributed settings. At the same time, you can also use complex non-additive metrics without wasting valuable GPU or CPU memory.
+
+## Features
+
+
+## Save and share
+
+
+## ELI5: `evaluate.load`
+
+When you call [`evaluate.load`], the metric loading script is downloaded and imported from GitHub (if it hasn't already been downloaded before). It contains information about the metric such as it's citation, homepage, and description.
+
+The metric loading script will instantiate and return a `EvaluationModule` object. This stores the predictions and references, which you need to compute the metric values. The `EvaluationModule` object is stored as an Apache Arrow table. As a result, the predictions and references are stored directly on disk with memory-mapping. This enables 🤗 Evaluate to do a lazy computation of the metric, and makes it easier to gather all the predictions in a distributed setting.
+
+## Distributed evaluation
 
 
 ## Metrics
