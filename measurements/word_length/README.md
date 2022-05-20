@@ -1,3 +1,17 @@
+---
+title: Word Length
+emoji: 🤗 
+colorFrom: green
+colorTo: purple
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- measurement
+---
+
 # Measurement Card for Word Length
 
 

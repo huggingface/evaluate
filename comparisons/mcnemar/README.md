@@ -1,16 +1,16 @@
 ---
- title: McNemar
- emoji: 🤗 
- colorFrom: blue
- colorTo: green
- sdk: gradio
- sdk_version: 3.0.2
- app_file: app.py
- pinned: false
- tags:
- - evaluate
- - comparison
- ---
+title: McNemar
+emoji: 🤗 
+colorFrom: blue
+colorTo: green
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- comparison
+---
 
 
 # Comparison Card for McNemar
