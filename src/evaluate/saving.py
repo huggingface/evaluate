@@ -4,6 +4,8 @@ import sys
 from datetime import datetime
 from pathlib import Path
 
+from datasets.utils.filelock import FileLock
+
 from . import __version__
 
 
@@ -34,8 +36,9 @@ def save(path_or_file, **data):
     data["_python_version"] = sys.version
     data["_interpreter_path"] = sys.executable
 
-    with open(file_path, "w") as f:
-        json.dump(data, f)
+    with FileLock(str(file_path) + ".lock"):
+        with open(file_path, "w") as f:
+            json.dump(data, f)
 
     return file_path
 
