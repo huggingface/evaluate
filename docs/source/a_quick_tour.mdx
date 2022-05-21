@@ -92,8 +92,10 @@ Before we can apply a metric or other evaluation module to a use-case we need to
 ```
 
 <Tip>
+
 Note that features always describe the type of a single input element. In general we will add list of elements so you can always think of a list around the types in `features`. Evaluate accepts various input formats (Python lists, NumPy arrays, PyTorch tensors, etc.) and converts them to an appropriate format for storage and computation.
-<\Tip>
+
+</Tip>
 
 ## Compute
 
@@ -141,6 +143,7 @@ This is especially useful when you need to get the predictions from your model i
 >>>     predictions = model(model_inputs)
 >>>     metric.add_batch(references=gold_standards, predictions=predictions)
 >>> metric.compute()
+```
 
 ### Distributed evaluation
 
