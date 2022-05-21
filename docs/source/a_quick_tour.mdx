@@ -35,19 +35,112 @@ Besides the modules implemented in 🤗 Evaluate you can also load any community
 >>> element_count = evaluate.load("lvwerra/element_count", type="measurement")
 ```
 
+## Module attributes
+
+All evalution modules come with a range of useful attributes that help to use a module stored in a `EvaluationModuleInfo` object.
+
+|Attribute|Description|
+|---|---|
+|`description`|A short description of the evaluation module.|
+|`citation`|A BibTex string for citation.|
+|`features`|A `Features` object defining the input format.|
+|`inputs_description`|This is equivalent to the modules docstring.|
+|`homepage`|The homepage of the module.|
+|`license`|The license of the module.|
+|`codebase_urls`|Link to the code behind the module.|
+|`reference_urls`|Additional reference URLs.|
+
+Let's have a look at a few examples. First, let's look at the `description` attribute of the accuracy metric:
+
+```py
+>>> accuracy = evaluate.load("accuracy")
+>>> accuracy.description
+Accuracy is the proportion of correct predictions among the total number of cases processed. It can be computed with:
+Accuracy = (TP + TN) / (TP + TN + FP + FN)
+ Where:
+TP: True positive
+TN: True negative
+FP: False positive
+FN: False negative
+```
+
+You can see that it describes how the metric works in theory. If you use this metric for you work, especially if it is an academic publication you want to reference it properly. For that you can look at the `citation` attribute:
+
+```py
+>>> accuracy.citation
+@article{scikit-learn,
+  title={Scikit-learn: Machine Learning in {P}ython},
+  author={Pedregosa, F. and Varoquaux, G. and Gramfort, A. and Michel, V.
+         and Thirion, B. and Grisel, O. and Blondel, M. and Prettenhofer, P.
+         and Weiss, R. and Dubourg, V. and Vanderplas, J. and Passos, A. and
+         Cournapeau, D. and Brucher, M. and Perrot, M. and Duchesnay, E.},
+  journal={Journal of Machine Learning Research},
+  volume={12},
+  pages={2825--2830},
+  year={2011}
+}
+```
+
+Before we can apply a metric or other evaluation module to a use-case we need to know what the input format of the metric is:
+
+```py
+>>> accuracy.features
+{
+    'predictions': Value(dtype='int32', id=None),
+    'references': Value(dtype='int32', id=None)
+}
+```
+
+<Tip>
+Note that features always describe the type of a single input element. In general we will add list of elements so you can always think of a list around the types in `features`. Evaluate accepts various input formats (Python lists, NumPy arrays, PyTorch tensors, etc.) and converts them to an appropriate format for storage and computation.
+<\Tip>
+
 ## Compute
 
-When it comes to computing the actual score there are two main ways to do it:
+Now that we know how the evaluation module works and what should go in there we want to actually use it! When it comes to computing the actual score there are two main ways to do it:
 
-1. Incremental
-2. All-in-one
+1. All-in-one
+2. Incremental
+
 
 In the incremental approach the necessary inputs are added to the module with [`add`] or [`add_batch`] and the score is calculated at the end with [`compute`]. Alternatively, one can pass all the inputs at once to [`compute`]. Let's have a look at the two approaches.
 
+### `compute`
+The simplest way to calculate the score of an evaluation module is by calling [`compute`] directly with the necessary inputs. Simply pass the inputs as seen in `features` to the `compute` method.
+
+```py
+>>> accuracy.compute(references=[0,1,0,1], predictions=[1,0,0,1])
+{'accuracy': 0.5}
+```
+Evaluation modules return the results in a dictionary. However, in some instances you build up the predictions iteratively or in a distributed fashion in which case `add` or `add_batch` are useful.
+
 ### `add` and `add_batch`
 
+In many evaluation pipelines you build the predictions iteratively such as in a for-loop. In that case you could store the predictions in a list and at the end pass them to `compute`. With `add` and add batch you can circumvent the step of storing the predictions separately. If you are only creating single predictions at a time you can use `add`:
 
-### `compute`
+```py
+>>> for ref, pred in zip([0,1,0,1], [1,0,0,1]):
+>>>     accuracy.add(references=ref, predictions=pred)
+>>> accuracy.compute()
+{'accuracy': 0.5}
+```
+
+Once you have gathered all predictions you can call`compute` to compute the score based on all stored values. When getting predictions and references in batches you can use `add_batch` which adds a list elements for later processing. The rest works as with `add`:
+
+```py
+>>> for refs, preds in zip([[0,1],[0,1]], [[1,0],[0,1]]):
+>>>     accuracy.add_batch(references=refs, predictions=preds)
+>>> accuracy.compute()
+{'accuracy': 0.5}
+```
+
+This is especially useful when you need to get the predictions from your model in batches:
+
+```py
+>>> for model_inputs, gold_standards in evaluation_dataset:
+>>>     predictions = model(model_inputs)
+>>>     metric.add_batch(references=gold_standards, predictions=predictions)
+>>> metric.compute()
 
 ### Distributed evaluation
 
@@ -59,244 +152,6 @@ A common way to overcome this issue is to fallback on single process evaluation.
 
 This solution allows 🤗 Evaluate to perform distributed predictions, which is important for evaluation speed in distributed settings. At the same time, you can also use complex non-additive metrics without wasting valuable GPU or CPU memory. distributed predictions, which is important for evaluation speed in distributed settings. At the same time, you can also use complex non-additive metrics without wasting valuable GPU or CPU memory.
 
-## Features
-
-
 ## Save and share
 
-
-## ELI5: `evaluate.load`
-
-When you call [`evaluate.load`], the metric loading script is downloaded and imported from GitHub (if it hasn't already been downloaded before). It contains information about the metric such as it's citation, homepage, and description.
-
-The metric loading script will instantiate and return a `EvaluationModule` object. This stores the predictions and references, which you need to compute the metric values. The `EvaluationModule` object is stored as an Apache Arrow table. As a result, the predictions and references are stored directly on disk with memory-mapping. This enables 🤗 Evaluate to do a lazy computation of the metric, and makes it easier to gather all the predictions in a distributed setting.
-
-## Distributed evaluation
-
-
-## Metrics
-
-Metrics are important for evaluating a model's predictions. In the tutorial, you learned how to compute a metric over an entire evaluation set. You have also seen how to load a metric. 
-
-This guide will show you how to:
-
-- Add predictions and references.
-- Compute metrics using different methods.
-- Write your own metric loading script.
-
-## Add predictions and references
-
-When you want to add model predictions and references to a [`Metric`] instance, you have two options:
-
-- [`Metric.add`] adds a single `prediction` and `reference`.
-
-- [`Metric.add_batch`] adds a batch of `predictions` and `references`.
-
-Use [`Metric.add_batch`] by passing it your model predictions, and the references the model predictions should be evaluated against:
-
-```py
->>> import datasets
->>> metric = evaluate.load('my_metric')
->>> for model_input, gold_references in evaluation_dataset:
-...     model_predictions = model(model_inputs)
-...     metric.add_batch(predictions=model_predictions, references=gold_references)
->>> final_score = metric.compute()
-```
-
-<Tip>
-
-Metrics accepts various input formats (Python lists, NumPy arrays, PyTorch tensors, etc.) and converts them to an appropriate format for storage and computation.
-
-</Tip>
-
-## Compute scores
-
-The most straightforward way to calculate a metric is to call [`Metric.compute`]. But some metrics have additional arguments that allow you to modify the metrics behavior. 
-
-Let's load the [SacreBLEU](https://huggingface.co/metrics/sacrebleu) metric, and compute it with a different smoothing method.
-
-1. Load the SacreBLEU metric:
-
-```py
->>> import datasets
->>> metric = evaluate.load('sacrebleu')
-```
-
-2. Inspect the different argument methods for computing the metric:
-
-```py
->>> print(metric.inputs_description)
-Produces BLEU scores along with its sufficient statistics
-from a source against one or more references.
-
-Args:
-    predictions: The system stream (a sequence of segments).
-    references: A list of one or more reference streams (each a sequence of segments).
-    smooth_method: The smoothing method to use. (Default: 'exp').
-    smooth_value: The smoothing value. Only valid for 'floor' and 'add-k'. (Defaults: floor: 0.1, add-k: 1).
-    tokenize: Tokenization method to use for BLEU. If not provided, defaults to 'zh' for Chinese, 'ja-mecab' for Japanese and '13a' (mteval) otherwise.
-    lowercase: Lowercase the data. If True, enables case-insensitivity. (Default: False).
-    force: Insist that your tokenized input is actually detokenized.
-...
-```
-
-3. Compute the metric with the `floor` method, and a different `smooth_value`:
-
-```py
->>> score = metric.compute(smooth_method="floor", smooth_value=0.2)
-```
-
-<a id='metric_script'></a>
-
-## Custom metric loading script
-
-Write a metric loading script to use your own custom metric (or one that is not on the Hub). Then you can load it as usual with [`load`].
-
-To help you get started, open the [SQuAD metric loading script](https://github.com/huggingface/datasets/blob/master/metrics/squad/squad.py) and follow along.
-
-<Tip>
-
-Get jump started with our metric loading script [template](https://github.com/huggingface/datasets/blob/master/templates/new_metric_script.py)!
-
-</Tip>
-
-### Add metric attributes
-
-Start by adding some information about your metric in [`Metric._info`]. The most important attributes you should specify are:
-
-1. [`EvaluationModuleInfo.description`] provides a brief description about your metric.
-
-2. [`EvaluationModuleInfo.citation`] contains a BibTex citation for the metric.
-
-3. [`EvaluationModuleInfo.inputs_description`] describes the expected inputs and outputs. It may also provide an example usage of the metric.
-
-4. [`EvaluationModuleInfo.features`] defines the name and type of the predictions and references.
-
-After you've filled out all these fields in the template, it should look like the following example from the SQuAD metric script:
-
-```py
-class Squad(evaluate.Metric):
-    def _info(self):
-        return evaluate.EvaluationModuleInfo(
-            description=_DESCRIPTION,
-            citation=_CITATION,
-            inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": {"id": datasets.Value("string"), "prediction_text": datasets.Value("string")},
-                    "references": {
-                        "id": datasets.Value("string"),
-                        "answers": datasets.features.Sequence(
-                            {
-                                "text": datasets.Value("string"),
-                                "answer_start": datasets.Value("int32"),
-                            }
-                        ),
-                    },
-                }
-            ),
-            codebase_urls=["https://rajpurkar.github.io/SQuAD-explorer/"],
-            reference_urls=["https://rajpurkar.github.io/SQuAD-explorer/"],
-        )
-```
-
-### Download metric files
-
-If your metric needs to download, or retrieve local files, you will need to use the [`Metric._download_and_prepare`] method. For this example, let's examine the [BLEURT metric loading script](https://github.com/huggingface/datasets/blob/master/metrics/bleurt/bleurt.py). 
-
-1. Provide a dictionary of URLs that point to the metric files:
-
-```py
-CHECKPOINT_URLS = {
-    "bleurt-tiny-128": "https://storage.googleapis.com/bleurt-oss/bleurt-tiny-128.zip",
-    "bleurt-tiny-512": "https://storage.googleapis.com/bleurt-oss/bleurt-tiny-512.zip",
-    "bleurt-base-128": "https://storage.googleapis.com/bleurt-oss/bleurt-base-128.zip",
-    "bleurt-base-512": "https://storage.googleapis.com/bleurt-oss/bleurt-base-512.zip",
-    "bleurt-large-128": "https://storage.googleapis.com/bleurt-oss/bleurt-large-128.zip",
-    "bleurt-large-512": "https://storage.googleapis.com/bleurt-oss/bleurt-large-512.zip",
-}
-```
-
-<Tip>
-
-If the files are stored locally, provide a dictionary of path(s) instead of URLs.
-
-</Tip>
-
-2. [`Metric._download_and_prepare`] will take the URLs and download the metric files specified:
-
-```py
-def _download_and_prepare(self, dl_manager):
-
-    # check that config name specifies a valid BLEURT model
-    if self.config_name == "default":
-        logger.warning(
-            "Using default BLEURT-Base checkpoint for sequence maximum length 128. "
-            "You can use a bigger model for better results with e.g.: evaluate.load('bleurt', 'bleurt-large-512')."
-        )
-        self.config_name = "bleurt-base-128"
-    if self.config_name not in CHECKPOINT_URLS.keys():
-        raise KeyError(
-            f"{self.config_name} model not found. You should supply the name of a model checkpoint for bleurt in {CHECKPOINT_URLS.keys()}"
-        )
-
-    # download the model checkpoint specified by self.config_name and set up the scorer
-    model_path = dl_manager.download_and_extract(CHECKPOINT_URLS[self.config_name])
-    self.scorer = score.BleurtScorer(os.path.join(model_path, self.config_name))
-```
-
-### Compute score
-
-[`DatasetBuilder._compute`] provides the actual instructions for how to compute a metric given the predictions and references. Now let's take a look at the [GLUE metric loading script](https://github.com/huggingface/datasets/blob/master/metrics/glue/glue.py).
-
-1. Provide the functions for [`DatasetBuilder._compute`] to calculate your metric:
-
-```py
-def simple_accuracy(preds, labels):
-    return (preds == labels).mean().item()
-
-def acc_and_f1(preds, labels):
-    acc = simple_accuracy(preds, labels)
-    f1 = f1_score(y_true=labels, y_pred=preds).item()
-    return {
-        "accuracy": acc,
-        "f1": f1,
-    }
-
-def pearson_and_spearman(preds, labels):
-    pearson_corr = pearsonr(preds, labels)[0].item()
-    spearman_corr = spearmanr(preds, labels)[0].item()
-    return {
-        "pearson": pearson_corr,
-        "spearmanr": spearman_corr,
-    }
-```
-
-2. Create [`DatasetBuilder._compute`] with instructions for what metric to calculate for each configuration:
-
-```py
-def _compute(self, predictions, references):
-    if self.config_name == "cola":
-        return {"matthews_correlation": matthews_corrcoef(references, predictions)}
-    elif self.config_name == "stsb":
-        return pearson_and_spearman(predictions, references)
-    elif self.config_name in ["mrpc", "qqp"]:
-        return acc_and_f1(predictions, references)
-    elif self.config_name in ["sst2", "mnli", "mnli_mismatched", "mnli_matched", "qnli", "rte", "wnli", "hans"]:
-        return {"accuracy": simple_accuracy(predictions, references)}
-    else:
-        raise KeyError(
-            "You should supply a configuration name selected in "
-            '["sst2", "mnli", "mnli_mismatched", "mnli_matched", '
-            '"cola", "stsb", "mrpc", "qqp", "qnli", "rte", "wnli", "hans"]'
-        )
-```
-
-### Test
-
-Once you're finished writing your metric loading script, try to load it locally:
-
-```py
->>> from evaluate import load
->>> metric = load('PATH/TO/MY/SCRIPT.py')
-```
+**TODO**: add references to [`evalute.save`] and [`evalute.push_to_hub`].
