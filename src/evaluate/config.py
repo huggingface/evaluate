@@ -21,6 +21,7 @@ REPO_COMPARISONS_URL = "https://raw.githubusercontent.com/huggingface/evaluate/{
 
 # Hub
 HF_ENDPOINT = os.environ.get("HF_ENDPOINT", "https://huggingface.co")
+HF_LIST_ENDPOINT = HF_ENDPOINT + "/api/spaces?filter={type}"
 HUB_EVALUATE_URL = HF_ENDPOINT + "/spaces/{path}/resolve/{revision}/{name}"
 HUB_DEFAULT_VERSION = "main"
 
