@@ -39,7 +39,7 @@ def list_evaluation_modules(type=None, include_community=True, with_details=Fals
         type (:obj:`string`, optional, default ``None``): Type of evaluation modules to list. If ``None`` all types are listed.
         include_community (:obj:`bool`, optional, default ``True``): Include community modules in the list.
         with_details (:obj:`bool`, optional, default ``False``): Return the full details on the metrics instead of only the ID.
-    
+
     Returns:
         `list`
     """
