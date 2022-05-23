@@ -23,14 +23,10 @@
 - sections:
   - local: package_reference/main_classes
     title: Main classes
-  - local: package_reference/builder_classes
-    title: Builder classes
   - local: package_reference/loading_methods
     title: Loading methods
-  - local: package_reference/table_classes
-    title: Table Classes
+  - local: package_reference/saving_methods
+    title: Saving methods
   - local: package_reference/logging_methods
     title: Logging methods
-  - local: package_reference/task_templates
-    title: Task templates
   title: "Reference"
