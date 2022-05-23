@@ -70,8 +70,24 @@ def _list_evaluation_modules_type(module_type, include_community=True, with_deta
     if not include_community:
         d = [element for element in d if element["id"].split("/")[0] == f"evaluate-{module_type}"]
 
+    # remove namespace for canonical modules and add community tag
+    for element in d:
+        if element["id"].split("/")[0] == f"evaluate-{module_type}":
+            element["id"] = element["id"].split("/")[1]
+            element["community"] = False
+        else:
+            element["community"] = True
+
     if with_details:
-        return [{"name": element["id"], "type": type, "likes": element.get("likes", 0)} for element in d]
+        return [
+            {
+                "name": element["id"],
+                "type": module_type,
+                "community": element["community"],
+                "likes": element.get("likes", 0),
+            }
+            for element in d
+        ]
     else:
         return [element["id"] for element in d]
 
