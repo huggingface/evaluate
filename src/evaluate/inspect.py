@@ -20,7 +20,7 @@ from typing import Optional
 import requests
 from datasets.utils import DownloadConfig
 
-from .config import HF_LIST_ENDPOINT
+from .config import EVALUATION_MODULE_TYPES, HF_LIST_ENDPOINT
 from .loading import evaluation_module_factory
 from .utils.logging import get_logger
 
@@ -32,38 +32,43 @@ class SplitsNotFoundError(ValueError):
     pass
 
 
-def list_evaluation_modules(type=None, include_community=True, with_details=False):
-    """List all the metrics script available on the Hugging Face Hub.
+def list_evaluation_modules(module_type=None, include_community=True, with_details=False):
+    """List all evaluation modules available on the Hugging Face Hub.
 
     Args:
-        type (:obj:`string`, optional, default ``None``): Type of evaluation modules to list. If ``None`` all types are listed.
-        include_community (:obj:`bool`, optional, default ``True``): Include community modules in the list.
-        with_details (:obj:`bool`, optional, default ``False``): Return the full details on the metrics instead of only the ID.
+        module_type (`str`, *optional*, default `None`): Type of evaluation modules to list. Has to be one of `'metric'`, `'comparison'`, or `'measurement'`. If `None` all types are listed.
+        include_community (`bool`, *optional*, default `True`): Include community modules in the list.
+        with_details (`bool`, *optional*, default `False`): Return the full details on the metrics instead of only the ID.
 
     Returns:
-        `list`
+        `List[Union[str, dict]]`
     """
-    if type is None:
+
+    if module_type is None:
         evaluations_list = []
-        for type in ["metric", "comparison", "measurement"]:
+        for module_type in EVALUATION_MODULE_TYPES:
             evaluations_list.extend(
-                _list_evaluation_modules_type(type, include_community=include_community, with_details=with_details)
+                _list_evaluation_modules_type(
+                    module_type, include_community=include_community, with_details=with_details
+                )
             )
     else:
+        if module_type not in EVALUATION_MODULE_TYPES:
+            raise ValueError(f"Invalid module type '{module_type}'. Has to be one of {EVALUATION_MODULE_TYPES}.")
         evaluations_list = _list_evaluation_modules_type(
-            type, include_community=include_community, with_details=with_details
+            module_type, include_community=include_community, with_details=with_details
         )
     return evaluations_list
 
 
-def _list_evaluation_modules_type(type, include_community=True, with_details=False):
+def _list_evaluation_modules_type(module_type, include_community=True, with_details=False):
 
-    r = requests.get(HF_LIST_ENDPOINT.format(type=type))
+    r = requests.get(HF_LIST_ENDPOINT.format(type=module_type))
     r.raise_for_status()
     d = r.json()
 
     if not include_community:
-        d = [element for element in d if element["id"].split("/")[0] == f"evaluate-{type}"]
+        d = [element for element in d if element["id"].split("/")[0] == f"evaluate-{module_type}"]
 
     if with_details:
         return [{"name": element["id"], "type": type, "likes": element.get("likes", 0)} for element in d]
