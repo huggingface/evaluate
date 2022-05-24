@@ -26,6 +26,7 @@ SCRIPTS_VERSION = "main" if version.parse(__version__).is_devrelease else __vers
 
 del version
 
+from .evaluator import Evaluator
 from .info import EvaluationModuleInfo
 from .inspect import inspect_metric, list_metrics
 from .loading import load
