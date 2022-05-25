@@ -1,155 +1,95 @@
 # Creating and sharing a new evaluation
 
+All evaluation modules, be it metrics, comparisons, or measurements live on the 🤗 Hub in a Space (see for example [Accuracy](https://huggingface.co/spaces/evaluate-metric/accuracy)). In principle, you could setup a new Space and add a new module following the same structure. However, we added a CLI that makes creating a new evaluation module much easier:
 
-## Custom metric loading script
-
-Write a metric loading script to use your own custom metric (or one that is not on the Hub). Then you can load it as usual with [`load`].
-
-To help you get started, open the [SQuAD metric loading script](https://github.com/huggingface/datasets/blob/master/metrics/squad/squad.py) and follow along.
-
-<Tip>
-
-Get jump started with our metric loading script [template](https://github.com/huggingface/datasets/blob/master/templates/new_metric_script.py)!
-
-</Tip>
-
-### Add metric attributes
-
-Start by adding some information about your metric in [`Metric._info`]. The most important attributes you should specify are:
-
-1. [`EvaluationModuleInfo.description`] provides a brief description about your metric.
-
-2. [`EvaluationModuleInfo.citation`] contains a BibTex citation for the metric.
-
-3. [`EvaluationModuleInfo.inputs_description`] describes the expected inputs and outputs. It may also provide an example usage of the metric.
-
-4. [`EvaluationModuleInfo.features`] defines the name and type of the predictions and references.
-
-After you've filled out all these fields in the template, it should look like the following example from the SQuAD metric script:
-
-```py
-class Squad(evaluate.Metric):
-    def _info(self):
-        return evaluate.EvaluationModuleInfo(
-            description=_DESCRIPTION,
-            citation=_CITATION,
-            inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": {"id": datasets.Value("string"), "prediction_text": datasets.Value("string")},
-                    "references": {
-                        "id": datasets.Value("string"),
-                        "answers": datasets.features.Sequence(
-                            {
-                                "text": datasets.Value("string"),
-                                "answer_start": datasets.Value("int32"),
-                            }
-                        ),
-                    },
-                }
-            ),
-            codebase_urls=["https://rajpurkar.github.io/SQuAD-explorer/"],
-            reference_urls=["https://rajpurkar.github.io/SQuAD-explorer/"],
-        )
+```bash
+evaluate-cli create "My Metric" module_type="metric"
 ```
 
-### Download metric files
+This will create a new Space on the 🤗 Hub, clone it locally, and populate it with a template. Instructions how to fill the template will be displayed in the terminal, but are also explained here in more detail.
 
-If your metric needs to download, or retrieve local files, you will need to use the [`Metric._download_and_prepare`] method. For this example, let's examine the [BLEURT metric loading script](https://github.com/huggingface/datasets/blob/master/metrics/bleurt/bleurt.py). 
+## Module script
 
-1. Provide a dictionary of URLs that point to the metric files:
+The evaluation module script (the file with suffix `*.py`) is the core of the new module and includes all the code for computing the evaluation.
 
-```py
-CHECKPOINT_URLS = {
-    "bleurt-tiny-128": "https://storage.googleapis.com/bleurt-oss/bleurt-tiny-128.zip",
-    "bleurt-tiny-512": "https://storage.googleapis.com/bleurt-oss/bleurt-tiny-512.zip",
-    "bleurt-base-128": "https://storage.googleapis.com/bleurt-oss/bleurt-base-128.zip",
-    "bleurt-base-512": "https://storage.googleapis.com/bleurt-oss/bleurt-base-512.zip",
-    "bleurt-large-128": "https://storage.googleapis.com/bleurt-oss/bleurt-large-128.zip",
-    "bleurt-large-512": "https://storage.googleapis.com/bleurt-oss/bleurt-large-512.zip",
-}
-```
+### Attributes
 
-<Tip>
+Start by adding some information about your evalution module in [`EvaluationModule._info`]. The most important attributes you should specify are:
 
-If the files are stored locally, provide a dictionary of path(s) instead of URLs.
+1. [`EvaluationModuleInfo.description`] provides a brief description about your evalution module.
 
-</Tip>
+2. [`EvaluationModuleInfo.citation`] contains a BibTex citation for the evalution module.
 
-2. [`Metric._download_and_prepare`] will take the URLs and download the metric files specified:
+3. [`EvaluationModuleInfo.inputs_description`] describes the expected inputs and outputs. It may also provide an example usage of the evalution module.
+
+4. [`EvaluationModuleInfo.features`] defines the name and type of the predictions and references. This has to be either a single `datasets.Features` or a list of `datasets.Features` objects if multiple input types are allowed.
+
+Then, we can move on to prepare everything before the actualy computation.
+
+### Download
+
+Some evaluation modules require some external data such as NLTK that requires resources or the BLEURT metric that requires checkpoints. You can implement these downloads in [`EvaluationModule._download_and_prepare`], which downloads and caches the resources via the `dlmanager`. An simplified example on how BLEURT downloads and loads a checkpoint:
 
 ```py
 def _download_and_prepare(self, dl_manager):
-
-    # check that config name specifies a valid BLEURT model
-    if self.config_name == "default":
-        logger.warning(
-            "Using default BLEURT-Base checkpoint for sequence maximum length 128. "
-            "You can use a bigger model for better results with e.g.: evaluate.load('bleurt', 'bleurt-large-512')."
-        )
-        self.config_name = "bleurt-base-128"
-    if self.config_name not in CHECKPOINT_URLS.keys():
-        raise KeyError(
-            f"{self.config_name} model not found. You should supply the name of a model checkpoint for bleurt in {CHECKPOINT_URLS.keys()}"
-        )
-
-    # download the model checkpoint specified by self.config_name and set up the scorer
     model_path = dl_manager.download_and_extract(CHECKPOINT_URLS[self.config_name])
     self.scorer = score.BleurtScorer(os.path.join(model_path, self.config_name))
 ```
 
-### Compute score
-
-[`DatasetBuilder._compute`] provides the actual instructions for how to compute a metric given the predictions and references. Now let's take a look at the [GLUE metric loading script](https://github.com/huggingface/datasets/blob/master/metrics/glue/glue.py).
-
-1. Provide the functions for [`DatasetBuilder._compute`] to calculate your metric:
+Or if you need to download the NLTK `"punkt"` resources:
 
 ```py
-def simple_accuracy(preds, labels):
-    return (preds == labels).mean().item()
-
-def acc_and_f1(preds, labels):
-    acc = simple_accuracy(preds, labels)
-    f1 = f1_score(y_true=labels, y_pred=preds).item()
-    return {
-        "accuracy": acc,
-        "f1": f1,
-    }
-
-def pearson_and_spearman(preds, labels):
-    pearson_corr = pearsonr(preds, labels)[0].item()
-    spearman_corr = spearmanr(preds, labels)[0].item()
-    return {
-        "pearson": pearson_corr,
-        "spearmanr": spearman_corr,
-    }
+def _download_and_prepare(self, dl_manager):
+    import nltk
+    nltk.download("punkt")
 ```
 
-2. Create [`DatasetBuilder._compute`] with instructions for what metric to calculate for each configuration:
+Next, we need to define how the computation of the evaluatio module works.
+
+### Compute
+
+The compuation is performed in the [`EvaluationModle._compute`] method. It takes the same arguments as `EvaluationModuleInfo.features` and should then return the result as a dictionary. Here an example of a exact match metric:
+
 
 ```py
-def _compute(self, predictions, references):
-    if self.config_name == "cola":
-        return {"matthews_correlation": matthews_corrcoef(references, predictions)}
-    elif self.config_name == "stsb":
-        return pearson_and_spearman(predictions, references)
-    elif self.config_name in ["mrpc", "qqp"]:
-        return acc_and_f1(predictions, references)
-    elif self.config_name in ["sst2", "mnli", "mnli_mismatched", "mnli_matched", "qnli", "rte", "wnli", "hans"]:
-        return {"accuracy": simple_accuracy(predictions, references)}
-    else:
-        raise KeyError(
-            "You should supply a configuration name selected in "
-            '["sst2", "mnli", "mnli_mismatched", "mnli_matched", '
-            '"cola", "stsb", "mrpc", "qqp", "qnli", "rte", "wnli", "hans"]'
-        )
+def _compute(self, references, predictions):
+    em = sum([r==p for r, p in zip(references, predictions)])/len(references)
+    return {"exact_match": em}
 ```
 
-### Test
+This method is used when you call `.compute()` later on.
 
-Once you're finished writing your metric loading script, try to load it locally:
+## Readme
+
+When you use the `evalute-cli` to setup the evaluation module the Readme structure and instructions are automatically created. It should include a general description of the metric, information about its input/output format, examples as well as information about its limiations or biases and references. 
+
+## Requirements
+
+If your evaluation modules has additional dependencies (e.g. `sklearn` or `nltk`) the `requirements.txt` files is the place to put them. The file follows the `pip` format and you can list all dependencies there.
+
+## App
+
+The `app.py` is where the widget on Spaces lives. In general it looks like the following and does not require any changes:
 
 ```py
->>> from evaluate import load
->>> metric = load('PATH/TO/MY/SCRIPT.py')
+import evaluate
+from evaluate.utils import launch_gradio_widget
+
+
+module = evaluate.load("lvwerra/element_count")
+launch_gradio_widget(module)
 ```
+
+If you want a custom widget you could add your gradio app here.
+
+## Push to Hub
+
+Finally, when you are done with all the above changes it is time to push your evaluation module to the hub. To do so navigate to the folder of your module and git add/commit/push the changes to the hub:
+
+```
+cd PATH_TO_MODULE
+git add .
+git commit -m "Add my new, shiny module."
+git push
+```
+Tada 🎉! Your evaluation module is now on the 🤗 Hub and ready to be used by everybody!
