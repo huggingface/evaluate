@@ -13,6 +13,7 @@
     </a>
     <a href="CODE_OF_CONDUCT.md">
         <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg">
+    </a>
 </p>
 
 🤗 Evaluate is a library that makes evaluating and comparing models and reporting their performance easier and more standardized. 
