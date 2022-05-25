@@ -1,3 +1,20 @@
+<p align="center">
+    <a href="https://circleci.com/gh/huggingface/evaluate">
+        <img alt="Build" src="https://img.shields.io/circleci/build/github/huggingface/evaluate/main">
+    </a>
+    <a href="https://github.com/huggingface/evaluate/blob/master/LICENSE">
+        <img alt="GitHub" src="https://img.shields.io/github/license/huggingface/evaluate.svg?color=blue">
+    </a>
+    <a href="https://huggingface.co/docs/evaluate/index.html">
+        <img alt="Documentation" src="https://img.shields.io/website/http/huggingface.co/docs/evaluate/index.html.svg?down_color=red&down_message=offline&up_message=online">
+    </a>
+    <a href="https://github.com/huggingface/evaluate/releases">
+        <img alt="GitHub release" src="https://img.shields.io/github/release/huggingface/evaluate.svg">
+    </a>
+    <a href="CODE_OF_CONDUCT.md">
+        <img alt="Contributor Covenant" src="https://img.shields.io/badge/Contributor%20Covenant-2.0-4baaaa.svg">
+</p>
+
 🤗 Evaluate is a library that makes evaluating and comparing models and reporting their performance easier and more standardized. 
 
 It currently contains:
