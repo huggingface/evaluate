@@ -36,7 +36,7 @@ def list_evaluation_modules(module_type=None, include_community=True, with_detai
     """List all evaluation modules available on the Hugging Face Hub.
 
     Args:
-        module_type (`str`, *optional*, default `None`): Type of evaluation modules to list. Has to be one of `'metric'`, `'comparison'`, or `'measurement'`. If `None` all types are listed.
+        module_type (`str`, *optional*, default `None`): Type of evaluation modules to list. Has to be one of `'metric'`, `'comparison'`, or `'measurement'`. If `None`, all types are listed.
         include_community (`bool`, *optional*, default `True`): Include community modules in the list.
         with_details (`bool`, *optional*, default `False`): Return the full details on the metrics instead of only the ID.
 
