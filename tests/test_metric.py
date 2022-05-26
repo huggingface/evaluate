@@ -21,7 +21,7 @@ class DummyMetric(EvaluationModule):
             features=Features({"predictions": Value("int64"), "references": Value("int64")}),
         )
 
-    def _compute(self, predictions, references):
+    def _compute(self, predictions, references, **kwargs):
         result = {}
         if not predictions:
             return result
