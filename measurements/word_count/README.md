@@ -30,6 +30,7 @@ This measurement requires a list of strings as input:
 
 ### Inputs
 - **data** (list of `str`): The input list of strings for which the word length is calculated.
+- **max_vocab** (`int`): (optional) the top number of words to consider (can be specified if dataset is too large)
 
 ### Output Values
 - **total_word_count** (`float`): the total number of words in the input string(s).

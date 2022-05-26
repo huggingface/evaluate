@@ -23,6 +23,8 @@ Returns the total number of words, and the number of unique words in the input d
 _KWARGS_DESCRIPTION = """
 Args:
     `data`: a list of `str` for which the words are counted.
+    `max_vocab` (optional): the top number of words to consider (can be specified if dataset is too large)
+
 Returns:
     `total_word_count` (`float`) : the total number of words in the input string(s)
     `unique_words` (`float`) : the number of unique words in the input list of strings.
@@ -63,9 +65,9 @@ class WordCount(evaluate.EvaluationModule):
             })
         )
 
-    def _compute(self, data):
+    def _compute(self, data, max_vocab = None):
         """Returns the number of unique words in the input data"""
-        cvec = CountVectorizer()
+        cvec = CountVectorizer(max_features=max_vocab)
         cvec.fit(data)
         document_matrix = cvec.transform(data)
         word_count = document_matrix.toarray().sum()
