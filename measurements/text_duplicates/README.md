@@ -1,5 +1,5 @@
 ---
-title: Duplicates
+title: Text Duplicates
 emoji: 🤗
 colorFrom: green
 colorTo: purple
@@ -12,11 +12,11 @@ tags:
 - measurement
 ---
 
-# Measurement Card for Duplicates
+# Measurement Card for Text Duplicates
 
 ## Measurement Description
 
-The `duplicates` measurement returns the fraction of duplicated strings in the input data.
+The `text_duplicates` measurement returns the fraction of duplicated strings in the input data.
 
 ## How to Use
 
@@ -24,7 +24,7 @@ This measurement requires a list of strings as input:
 
 ```python
 >>> data = ["hello sun","hello moon", "hello sun"]
->>> duplicates = evaluate.load("duplicates")
+>>> duplicates = evaluate.load("text_duplicates")
 >>> results = duplicates.compute(data=data)
 ```
 
@@ -55,7 +55,7 @@ Example with no duplicates
 
 ```python
 >>> data = ["foo", "bar", "foobar"]
->>> duplicates = evaluate.load("duplicates")
+>>> duplicates = evaluate.load("text_duplicates")
 >>> results = duplicates.compute(data=data)
 >>> print(results)
 {'duplicate_fraction': 0.0}
@@ -64,7 +64,7 @@ Example with no duplicates
 Example with multiple duplicates and `list_duplicates=True`:
 ```python
 >>> data = ["hello sun", "goodbye moon", "hello sun", "foo bar", "foo bar"]
->>> duplicates = evaluate.load("duplicates")
+>>> duplicates = evaluate.load("text_duplicates")
 >>> results = duplicates.compute(data=data)
 >>> print(results)
 {'duplicate_fraction': 0.4, 'duplicates_list': [('hello sun', 2), ('foo bar', 2)]}
