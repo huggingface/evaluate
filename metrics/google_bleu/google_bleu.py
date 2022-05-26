@@ -131,12 +131,20 @@ class GoogleBleu(evaluate.EvaluationModule):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": datasets.Value("string", id="sequence"),
-                    "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
-                }
-            ),
+            features=[
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
+                    }
+                ),
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Value("string", id="sequence"),
+                    }
+                ),
+            ],
         )
 
     def _compute(
@@ -147,6 +155,10 @@ class GoogleBleu(evaluate.EvaluationModule):
         min_len: int = 1,
         max_len: int = 4,
     ) -> Dict[str, float]:
+        # if only one reference is provided make sure we still use list of lists
+        if isinstance(references[0], str):
+            references = [[ref] for ref in references]
+
         references = [[tokenizer(r) for r in ref] for ref in references]
         predictions = [tokenizer(p) for p in predictions]
         return {
