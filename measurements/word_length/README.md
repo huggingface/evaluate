@@ -1,6 +1,6 @@
 ---
 title: Word Length
-emoji: 🤗 
+emoji: 🤗
 colorFrom: green
 colorTo: purple
 sdk: gradio
@@ -15,7 +15,7 @@ tags:
 # Measurement Card for Word Length
 
 
-## Metric Description
+## Measurement Description
 
 The `word_length` measurement returns the word count of the input string, based on tokenization using [NLTK word_tokenize](https://www.nltk.org/api/nltk.tokenize.html).
 
