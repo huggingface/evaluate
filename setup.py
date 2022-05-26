@@ -63,8 +63,6 @@ from setuptools import find_packages, setup
 REQUIRED_PKGS = [
     # We need datasets as a backend
     "datasets",
-    # We need huggingface_hub for hub integration
-    "huggingface_hub>=0.7.0",
     # We use numpy>=1.17 to have np.random.Generator (Dataset shuffling)
     "numpy>=1.17",
     # For smart caching dataset processing
@@ -87,7 +85,7 @@ REQUIRED_PKGS = [
     # minimum 2021.05.0 to have the AbstractArchiveFileSystem
     "fsspec[http]>=2021.05.0",
     # To get datasets from the Datasets Hub on huggingface.co
-    "huggingface_hub>=0.1.0,<1.0.0",
+    "huggingface_hub>=0.7.0",
     # Utilities from PyPA to e.g., compare versions
     "packaging",
     "responses<0.19",
