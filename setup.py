@@ -73,8 +73,6 @@ REQUIRED_PKGS = [
     "requests>=2.19.0",
     # progress bars in download and scripts
     "tqdm>=4.62.1",
-    # dataclasses for Python versions that don't have it
-    "dataclasses;python_version<'3.7'",
     # for fast hashing
     "xxhash",
     # for better multiprocessing
@@ -123,8 +121,6 @@ TESTS_REQUIRE = [
     "texttable>=1.6.3",
     "Werkzeug>=1.0.1",
     "six~=1.15.0",
-    # metadata validation
-    "importlib_resources;python_version<'3.7'",
 ]
 
 QUALITY_REQUIRE = ["black~=22.0", "flake8>=3.8.3", "isort>=5.0.0", "pyyaml>=5.3.1"]
@@ -160,6 +156,7 @@ setup(
     entry_points={"console_scripts": ["evaluate-cli=evaluate.commands.evaluate_cli:main"]},
     install_requires=REQUIRED_PKGS,
     extras_require=EXTRAS_REQUIRE,
+    python_requires=">=3.7.0",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
