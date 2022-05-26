@@ -63,8 +63,6 @@ from setuptools import find_packages, setup
 REQUIRED_PKGS = [
     # We need datasets as a backend
     "datasets",
-    # We need huggingface_hub for hub integration
-    "huggingface_hub>=0.7.0",
     # We use numpy>=1.17 to have np.random.Generator (Dataset shuffling)
     "numpy>=1.17",
     # For smart caching dataset processing
