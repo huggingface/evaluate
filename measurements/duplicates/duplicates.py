@@ -17,6 +17,8 @@ import datasets
 from collections import Counter
 import hashlib
 
+logger = evaluate.logging.get_logger(__name__)
+
 _DESCRIPTION = """
 Returns the duplicate strings (if any) contained in the input.
 """
@@ -76,7 +78,7 @@ class Duplicates(evaluate.EvaluationModule):
     def _compute(self, data, list_duplicates = False):
         """Returns the duplicates contained in the input data and the number of times they are repeated."""
         if list_duplicates == True:
-            print("Warning: this functionality can be memory-intensive for large datasets!")
+            logger.warning("This functionality can be memory-intensive for large datasets!")
             n_dedup = len(set([get_hash(d) for d in data]))
             c = Counter(data)
             duplicates = [(k, v) for k, v in c.items() if v >=2]
