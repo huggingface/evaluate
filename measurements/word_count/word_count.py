@@ -52,7 +52,6 @@ class WordCount(evaluate.EvaluationModule):
      in the input string(s)."""
 
     def _info(self):
-        # TODO: Specifies the evaluate.EvaluationModuleInfo object
         return evaluate.EvaluationModuleInfo(
             # This is the description that will appear on the modules page.
             type="measurement",
