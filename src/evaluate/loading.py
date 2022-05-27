@@ -423,7 +423,9 @@ class GithubEvaluationModuleFactory(_EvaluationModuleFactory):
         increase_load_count(name, resource_type="metric")
 
     def download_loading_script(self, revision: Optional[str]) -> str:
-        file_path = hf_github_url(path=self.name, name=self.name + ".py", module_type=self.module_type, revision=revision)
+        file_path = hf_github_url(
+            path=self.name, name=self.name + ".py", module_type=self.module_type, revision=revision
+        )
         download_config = self.download_config.copy()
         if download_config.download_desc is None:
             download_config.download_desc = "Downloading builder script"
