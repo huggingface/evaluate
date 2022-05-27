@@ -26,8 +26,8 @@ Args:
     `max_vocab` (optional): the top number of words to consider (can be specified if dataset is too large)
 
 Returns:
-    `total_word_count` (`float`) : the total number of words in the input string(s)
-    `unique_words` (`float`) : the number of unique words in the input list of strings.
+    `total_word_count` (`int`) : the total number of words in the input string(s)
+    `unique_words` (`int`) : the number of unique words in the input list of strings.
 
 Examples:
     >>> data = ["hello world and hello moon"]
