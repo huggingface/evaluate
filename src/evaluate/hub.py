@@ -1,4 +1,12 @@
 from huggingface_hub.repocard import metadata_update
+from datasets.utils.metadata import known_task_ids
+
+
+def get_allowed_tasks(tasks_dict):
+    return (
+            list(tasks_dict.keys()) +
+            [subtask for task in tasks_dict.values() for subtask in task.get('subtasks', [])]
+    )
 
 
 def push_to_hub(
@@ -21,6 +29,11 @@ def push_to_hub(
     """
     TODO: Add documentation
     """
+
+    tasks = get_allowed_tasks(known_task_ids)
+
+    if task_type not in tasks:
+        raise ValueError(f"Task type not supported.")
 
     result = {
         "task": {
