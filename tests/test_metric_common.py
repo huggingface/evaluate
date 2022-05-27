@@ -90,7 +90,7 @@ class LocalModuleTest(parameterized.TestCase):
         doctest.ELLIPSIS_MARKER = "[...]"
         evaluation_module = importlib.import_module(
             evaluate.loading.evaluation_module_factory(
-                os.path.join(evaluation_module_type + "s", evaluation_module_name), type=type
+                os.path.join(evaluation_module_type + "s", evaluation_module_name), module_type=evaluation_module_type
             ).module_path
         )
         evaluation_instance = evaluate.loading.import_main_class(evaluation_module.__name__)

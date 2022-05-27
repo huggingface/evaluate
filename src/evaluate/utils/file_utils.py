@@ -96,19 +96,19 @@ def head_hf_s3(
     )
 
 
-def hf_github_url(path: str, name: str, type: str, revision: Optional[str] = None) -> str:
+def hf_github_url(path: str, name: str, module_type: str, revision: Optional[str] = None) -> str:
     from .. import SCRIPTS_VERSION
 
     revision = revision or os.getenv("HF_SCRIPTS_VERSION", SCRIPTS_VERSION)
-    if type == "metric":
+    if module_type == "metric":
         return config.REPO_METRICS_URL.format(revision=revision, path=path, name=name)
-    elif type == "comparison":
+    elif module_type == "comparison":
         return config.REPO_COMPARISONS_URL.format(revision=revision, path=path, name=name)
-    elif type == "measurement":
+    elif module_type == "measurement":
         return config.REPO_MEASUREMENTS_URL.format(revision=revision, path=path, name=name)
     else:
         raise TypeError(
-            f"The evaluation type {type} is not supported. Should be one of 'metric', 'comparison', 'measurement'"
+            f"The evaluation module type {module_type} is not supported. Should be one of 'metric', 'comparison', 'measurement'"
         )
 
 
