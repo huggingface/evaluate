@@ -407,14 +407,14 @@ class GithubEvaluationModuleFactory(_EvaluationModuleFactory):
     def __init__(
         self,
         name: str,
-        type: str,
+        module_type: str,
         revision: Optional[Union[str, Version]] = None,
         download_config: Optional[DownloadConfig] = None,
         download_mode: Optional[DownloadMode] = None,
         dynamic_modules_path: Optional[str] = None,
     ):
         self.name = name
-        self.type = type
+        self.module_type = module_type
         self.revision = revision
         self.download_config = download_config or DownloadConfig()
         self.download_mode = download_mode
@@ -423,7 +423,9 @@ class GithubEvaluationModuleFactory(_EvaluationModuleFactory):
         increase_load_count(name, resource_type="metric")
 
     def download_loading_script(self, revision: Optional[str]) -> str:
-        file_path = hf_github_url(path=self.name, name=self.name + ".py", type=self.type, revision=revision)
+        file_path = hf_github_url(
+            path=self.name, name=self.name + ".py", module_type=self.module_type, revision=revision
+        )
         download_config = self.download_config.copy()
         if download_config.download_desc is None:
             download_config.download_desc = "Downloading builder script"
@@ -448,7 +450,7 @@ class GithubEvaluationModuleFactory(_EvaluationModuleFactory):
         imports = get_imports(local_path)
         local_imports = _download_additional_modules(
             name=self.name,
-            base_path=hf_github_url(path=self.name, name="", type=self.type, revision=revision),
+            base_path=hf_github_url(path=self.name, name="", module_type=self.module_type, revision=revision),
             imports=imports,
             download_config=self.download_config,
         )
@@ -459,7 +461,7 @@ class GithubEvaluationModuleFactory(_EvaluationModuleFactory):
             local_imports=local_imports,
             additional_files=[],
             dynamic_modules_path=dynamic_modules_path,
-            module_namespace=self.type,
+            module_namespace=self.module_type,
             name=self.name,
             download_mode=self.download_mode,
         )
@@ -474,13 +476,13 @@ class LocalEvaluationModuleFactory(_EvaluationModuleFactory):
     def __init__(
         self,
         path: str,
-        type: str = "metrics",
+        module_type: str = "metrics",
         download_config: Optional[DownloadConfig] = None,
         download_mode: Optional[DownloadMode] = None,
         dynamic_modules_path: Optional[str] = None,
     ):
         self.path = path
-        self.type = type
+        self.module_type = module_type
         self.name = Path(path).stem
         self.download_config = download_config or DownloadConfig()
         self.download_mode = download_mode
@@ -502,7 +504,7 @@ class LocalEvaluationModuleFactory(_EvaluationModuleFactory):
             local_imports=local_imports,
             additional_files=[],
             dynamic_modules_path=dynamic_modules_path,
-            module_namespace=self.type,
+            module_namespace=self.module_type,
             name=self.name,
             download_mode=self.download_mode,
         )
@@ -517,14 +519,14 @@ class HubEvaluationModuleFactory(_EvaluationModuleFactory):
     def __init__(
         self,
         name: str,
-        type: str = "metrics",
+        module_type: str = "metrics",
         revision: Optional[Union[str, Version]] = None,
         download_config: Optional[DownloadConfig] = None,
         download_mode: Optional[DownloadMode] = None,
         dynamic_modules_path: Optional[str] = None,
     ):
         self.name = name
-        self.type = type
+        self.module_type = module_type
         self.revision = revision
         self.download_config = download_config or DownloadConfig()
         self.download_mode = download_mode
@@ -556,7 +558,7 @@ class HubEvaluationModuleFactory(_EvaluationModuleFactory):
             local_imports=local_imports,
             additional_files=[],
             dynamic_modules_path=dynamic_modules_path,
-            module_namespace=self.type,
+            module_namespace=self.module_type,
             name=self.name,
             download_mode=self.download_mode,
         )
@@ -574,17 +576,17 @@ class CachedEvaluationModuleFactory(_EvaluationModuleFactory):
     def __init__(
         self,
         name: str,
-        type: str = "metrics",
+        module_type: str = "metrics",
         dynamic_modules_path: Optional[str] = None,
     ):
         self.name = name
-        self.type = type
+        self.module_type = module_type
         self.dynamic_modules_path = dynamic_modules_path
         assert self.name.count("/") == 0
 
     def get_module(self) -> ImportableModule:
         dynamic_modules_path = self.dynamic_modules_path if self.dynamic_modules_path else init_dynamic_modules()
-        importable_directory_path = os.path.join(dynamic_modules_path, self.type, self.name)
+        importable_directory_path = os.path.join(dynamic_modules_path, self.module_type, self.name)
         hashes = (
             [h for h in os.listdir(importable_directory_path) if len(h) == 64]
             if os.path.isdir(importable_directory_path)
@@ -604,14 +606,14 @@ class CachedEvaluationModuleFactory(_EvaluationModuleFactory):
             f"couldn't be found locally at {self.name}, or remotely on the Hugging Face Hub."
         )
         # make the new module to be noticed by the import system
-        module_path = ".".join([os.path.basename(dynamic_modules_path), self.type, self.name, hash, self.name])
+        module_path = ".".join([os.path.basename(dynamic_modules_path), self.module_type, self.name, hash, self.name])
         importlib.invalidate_caches()
         return ImportableModule(module_path, hash)
 
 
 def evaluation_module_factory(
     path: str,
-    type: Optional[str] = None,
+    module_type: Optional[str] = None,
     revision: Optional[Union[str, Version]] = None,
     download_config: Optional[DownloadConfig] = None,
     download_mode: Optional[DownloadMode] = None,
@@ -680,7 +682,7 @@ def evaluation_module_factory(
             # load a canonical evaluation module from hub
             if path.count("/") == 0:
                 # if no type provided look through all possible modules
-                if type is None:
+                if module_type is None:
                     for current_type in ["metric", "comparison", "measurement"]:
                         try:
                             return GithubEvaluationModuleFactory(
@@ -694,11 +696,11 @@ def evaluation_module_factory(
                         except FileNotFoundError:
                             pass
                     raise FileNotFoundError
-                # if type provided load specific type
+                # if module_type provided load specific module_type
                 else:
                     return GithubEvaluationModuleFactory(
                         path,
-                        type,
+                        module_type,
                         revision=revision,
                         download_config=download_config,
                         download_mode=download_mode,
@@ -730,7 +732,7 @@ def evaluation_module_factory(
 def load(
     path: str,
     config_name: Optional[str] = None,
-    type: Optional[str] = None,
+    module_type: Optional[str] = None,
     process_id: int = 0,
     num_process: int = 1,
     cache_dir: Optional[str] = None,
@@ -750,9 +752,9 @@ def load(
                 - a local path to processing script or the directory containing the script (if the script has the same name as the directory),
                     e.g. ``'./metrics/rouge'`` or ``'./metrics/rogue/rouge.py'``
                 - a evaluation module identifier on the HuggingFace evaluate repo e.g. ``'rouge'`` or ``'bleu'`` that are in either ``'metrics/'``,
-                    ``'comparisons/'``, or ``'measurements/'`` depending on the provided ``type``.
+                    ``'comparisons/'``, or ``'measurements/'`` depending on the provided ``module_type``.
         config_name (:obj:`str`, optional): selecting a configuration for the metric (e.g. the GLUE metric has a configuration for each subset)
-        type (:obj:`str`, default ``'metric'``): type of evaluation module, can be one of ``'metric'``, ``'comparison'``, or ``'measurement'``.
+        module_type (:obj:`str`, default ``'metric'``): type of evaluation module, can be one of ``'metric'``, ``'comparison'``, or ``'measurement'``.
         process_id (:obj:`int`, optional): for distributed evaluation: id of the process
         num_process (:obj:`int`, optional): for distributed evaluation: total number of processes
         cache_dir (Optional str): path to store the temporary predictions and references (default to `~/.cache/huggingface/evaluate/`)
@@ -770,7 +772,7 @@ def load(
     """
     download_mode = DownloadMode(download_mode or DownloadMode.REUSE_DATASET_IF_EXISTS)
     evaluation_module = evaluation_module_factory(
-        path, type=type, revision=revision, download_config=download_config, download_mode=download_mode
+        path, module_type=module_type, revision=revision, download_config=download_config, download_mode=download_mode
     ).module_path
     evaluation_cls = import_main_class(evaluation_module)
     evaluation_instance = evaluation_cls(
@@ -783,9 +785,9 @@ def load(
         **init_kwargs,
     )
 
-    if type and type != evaluation_instance.type:
+    if module_type and module_type != evaluation_instance.module_type:
         raise TypeError(
-            f"No module of type '{type}' not found for '{path}' locally, or on the Hugging Face Hub. Found module of type '{evaluation_instance.type}' instead."
+            f"No module of module type '{module_type}' not found for '{path}' locally, or on the Hugging Face Hub. Found module of module type '{evaluation_instance.module_type}' instead."
         )
 
     # Download and prepare resources for the metric
