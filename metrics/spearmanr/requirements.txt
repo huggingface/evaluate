@@ -1,4 +1,4 @@
 # TODO: fix github to release
-git+https://github.com/huggingface/evaluate.git@b6e6ed7f3e6844b297bff1b43a1b4be0709b9671
+git+https://github.com/huggingface/evaluate.git@ff97c166f71780441561131df288d59003b6b24f
 datasets~=2.0
 scipy
