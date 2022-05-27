@@ -2,8 +2,9 @@ from unittest import TestCase
 from unittest.mock import patch
 
 import pytest
+import requests
 
-from evaluate.hub import push_to_hub, get_allowed_tasks
+from evaluate.hub import get_allowed_tasks, push_to_hub
 from tests.test_metric import DummyMetric
 
 
@@ -53,7 +54,9 @@ extras_metadata = {
 }
 
 
-@patch("evaluate.hub.get_allowed_tasks", lambda x: ['dummy-task'])
+@patch("evaluate.hub.get_allowed_tasks", lambda x: ["dummy-task"])
+@patch("evaluate.hub.dataset_info", lambda x: True)
+@patch("evaluate.hub.model_info", lambda x: True)
 @patch("evaluate.hub.metadata_update")
 @patch("evaluate.hub.known_task_ids")
 class TestHub(TestCase):
@@ -128,11 +131,40 @@ class TestHub(TestCase):
                 task_type="audio-classification",
             )
 
+    def test_push_metric_invalid_dataset_type(self, known_task_ids, metadata_update):
+        with patch("evaluate.hub.dataset_info") as mock_dataset_info:
+            mock_dataset_info.side_effect = requests.HTTPError()
+            with pytest.raises(ValueError):
+                push_to_hub(
+                    repo_id="username/repo",
+                    metric_value=self.result["accuracy"],
+                    metric_type=self.metric.type,
+                    dataset_name="dataset_name",
+                    dataset_type="bad-dataset",
+                    task_type="dummy-task",
+                )
 
-@pytest.mark.parametrize("tasks_dict, expected", [
-    ({'a': {'subtasks': ['b', 'c']}}, ['a', 'b', 'c']),
-    ({'a': {}, 'b': {'subtasks': ['c', 'd']}, 'e': {}}, ['a', 'b', 'e', 'c', 'd'])
-])
+    def test_push_metric_invalid_repo_id(self, known_task_ids, metadata_update):
+        with patch("evaluate.hub.model_info") as mock_model_info:
+            mock_model_info.side_effect = requests.HTTPError()
+            with pytest.raises(ValueError):
+                push_to_hub(
+                    repo_id="username/bad-repo",
+                    metric_value=self.result["accuracy"],
+                    metric_type=self.metric.type,
+                    dataset_name="dataset_name",
+                    dataset_type="dataset_type",
+                    task_type="dummy-task",
+                )
+
+
+@pytest.mark.parametrize(
+    "tasks_dict, expected",
+    [
+        ({"a": {"subtasks": ["b", "c"]}}, ["a", "b", "c"]),
+        ({"a": {}, "b": {"subtasks": ["c", "d"]}, "e": {}}, ["a", "b", "e", "c", "d"]),
+    ],
+)
 def test_get_allowed_tasks(tasks_dict, expected):
     tasks = get_allowed_tasks(tasks_dict)
 

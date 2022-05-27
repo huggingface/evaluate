@@ -1,12 +1,11 @@
-from huggingface_hub.repocard import metadata_update
+import requests
 from datasets.utils.metadata import known_task_ids
+from huggingface_hub import dataset_info, model_info
+from huggingface_hub.repocard import metadata_update
 
 
 def get_allowed_tasks(tasks_dict):
-    return (
-            list(tasks_dict.keys()) +
-            [subtask for task in tasks_dict.values() for subtask in task.get('subtasks', [])]
-    )
+    return list(tasks_dict.keys()) + [subtask for task in tasks_dict.values() for subtask in task.get("subtasks", [])]
 
 
 def push_to_hub(
@@ -33,7 +32,17 @@ def push_to_hub(
     tasks = get_allowed_tasks(known_task_ids)
 
     if task_type not in tasks:
-        raise ValueError(f"Task type not supported.")
+        raise ValueError("Task type not supported.")
+
+    try:
+        dataset_info(dataset_type)
+    except requests.exceptions.HTTPError:
+        raise ValueError(f"Dataset f{dataset_type} not found on hf.co/datasets")
+
+    try:
+        model_info(repo_id)
+    except requests.exceptions.HTTPError:
+        raise ValueError(f"Model f{repo_id} not found on hf.co/models")
 
     result = {
         "task": {
@@ -71,7 +80,5 @@ def push_to_hub(
         result["metrics"][0]["args"] = metric_args
 
     metadata = {"model-index": [{"results": [result]}]}
-
-    # TODO: Do we also want to add to the 'metrics' outside of model-index?
 
     return metadata_update(repo_id=repo_id, metadata=metadata, overwrite=overwrite)
