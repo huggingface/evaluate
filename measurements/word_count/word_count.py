@@ -48,7 +48,6 @@ class WordCount(evaluate.EvaluationModule):
             # This is the description that will appear on the modules page.
             type="measurement",
             description=_DESCRIPTION,
-            citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             # This defines the format of each prediction and reference
             features=datasets.Features({
