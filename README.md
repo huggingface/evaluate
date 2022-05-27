@@ -62,13 +62,13 @@ For more details on installation, check the installation page in the documentati
 
 🤗 Evaluate's main methods are:
 
-- `evaluate.list_evaluation_modules()` to list the available metrics, comparisons, and, measurements
+- `evaluate.list_evaluation_modules()` to list the available metrics, comparisons and measurements
 - `evaluate.load(module_name, **kwargs)` to instantiate an evaluation module
 - `results = module.compute(*kwargs)` to compute the result of an evaluation module
 
 # Adding a new evaluation module
 
-First install the necessary dependancies to create a new metric with the following command:
+First install the necessary dependencies to create a new metric with the following command:
 ```
 pip install evaluate[template]
 ```

@@ -21,7 +21,7 @@ Any metric, comparison, or measurement is loaded with the `evaluate.load` functi
 >>> accuracy = evaluate.load("accuracy")
 ```
 
-If you want to make sure you are loading the right type of module especially if there are name clashes you can explicitely pass the type:
+If you want to make sure you are loading the right type of module (especially if there are name clashes) you can explicitely pass the type:
 
 ```py
 >>> word_length = evaluate.load("word_length", type="measurement")
@@ -42,7 +42,7 @@ All evalution modules come with a range of useful attributes that help to use a 
 |Attribute|Description|
 |---|---|
 |`description`|A short description of the evaluation module.|
-|`citation`|A BibTex string for citation.|
+|`citation`|A BibTex string for citation when available.|
 |`features`|A `Features` object defining the input format.|
 |`inputs_description`|This is equivalent to the modules docstring.|
 |`homepage`|The homepage of the module.|
@@ -127,7 +127,7 @@ In many evaluation pipelines you build the predictions iteratively such as in a 
 {'accuracy': 0.5}
 ```
 
-Once you have gathered all predictions you can call`compute` to compute the score based on all stored values. When getting predictions and references in batches you can use `add_batch` which adds a list elements for later processing. The rest works as with `add`:
+Once you have gathered all predictions you can call `compute` to compute the score based on all stored values. When getting predictions and references in batches you can use `add_batch` which adds a list elements for later processing. The rest works as with `add`:
 
 ```py
 >>> for refs, preds in zip([[0,1],[0,1]], [[1,0],[0,1]]):
