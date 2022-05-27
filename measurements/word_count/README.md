@@ -33,8 +33,8 @@ This measurement requires a list of strings as input:
 - **max_vocab** (`int`): (optional) the top number of words to consider (can be specified if dataset is too large)
 
 ### Output Values
-- **total_word_count** (`float`): the total number of words in the input string(s).
-- **unique_words** (`float`): the number of unique words in the input string(s).
+- **total_word_count** (`int`): the total number of words in the input string(s).
+- **unique_words** (`int`): the number of unique words in the input string(s).
 
 Output Example(s):
 
