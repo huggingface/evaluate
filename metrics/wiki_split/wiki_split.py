@@ -327,12 +327,20 @@ class WikiSplit(evaluate.EvaluationModule):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": datasets.Value("string", id="sequence"),
-                    "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
-                }
-            ),
+            features=[
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
+                    }
+                ),
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Value("string", id="sequence"),
+                    }
+                ),
+            ],
             codebase_urls=[
                 "https://github.com/huggingface/transformers/blob/master/src/transformers/data/metrics/squad_metrics.py",
                 "https://github.com/cocoxu/simplification/blob/master/SARI.py",
@@ -348,6 +356,9 @@ class WikiSplit(evaluate.EvaluationModule):
         )
 
     def _compute(self, sources, predictions, references):
+        # if only one reference is provided make sure we still use list of lists
+        if isinstance(references[0], str):
+            references = [[ref] for ref in references]
         result = {}
         result.update({"sari": compute_sari(sources=sources, predictions=predictions, references=references)})
         result.update({"sacrebleu": compute_sacrebleu(predictions=predictions, references=references)})

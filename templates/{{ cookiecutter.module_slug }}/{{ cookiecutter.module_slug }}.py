@@ -65,7 +65,7 @@ class {{ cookiecutter.module_class_name }}(evaluate.EvaluationModule):
         # TODO: Specifies the evaluate.EvaluationModuleInfo object
         return evaluate.EvaluationModuleInfo(
             # This is the description that will appear on the modules page.
-            type="{{ cookiecutter.module_type }}",
+            module_type="{{ cookiecutter.module_type }}",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
