@@ -36,13 +36,7 @@ Examples:
     >>> print(results)
     {'total_word_count': 5, 'unique_words': 4}
 """
-_CITATION = """\
-@InProceedings{huggingface:module,
-title = {A great new module},
-authors={huggingface, Inc.},
-year={2020}
-}
-"""
+_CITATION = ""
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class WordCount(evaluate.EvaluationModule):
