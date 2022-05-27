@@ -2,7 +2,7 @@ from huggingface_hub.repocard import metadata_update
 
 
 def push_to_hub(
-    to: str,
+    repo_id: str,
     task_type: str,
     metric_value: float,
     metric_type: str,
@@ -16,6 +16,7 @@ def push_to_hub(
     metric_name: str = None,
     metric_config: str = None,
     metric_args: dict[str, int] = None,
+    overwrite: bool = False,
 ):
     """
     TODO: Add documentation
@@ -37,27 +38,27 @@ def push_to_hub(
         ],
     }
 
-    if dataset_config:
+    if dataset_config is not None:
         result["dataset"]["config"] = dataset_config
-    if dataset_split:
+    if dataset_split is not None:
         result["dataset"]["split"] = dataset_split
-    if dataset_revision:
+    if dataset_revision is not None:
         result["dataset"]["revision"] = dataset_revision
-    if dataset_args:
+    if dataset_args is not None:
         result["dataset"]["args"] = dataset_args
 
-    if task_name:
+    if task_name is not None:
         result["task"]["name"] = task_name
 
-    if metric_name:
+    if metric_name is not None:
         result["metrics"][0]["name"] = metric_name
-    if metric_config:
+    if metric_config is not None:
         result["metrics"][0]["config"] = metric_config
-    if metric_args:
+    if metric_args is not None:
         result["metrics"][0]["args"] = metric_args
 
     metadata = {"model-index": [{"results": [result]}]}
 
     # TODO: Do we also want to add to the 'metrics' outside of model-index?
 
-    return metadata_update(repo_id=to, metadata=metadata, overwrite=True)
+    return metadata_update(repo_id=repo_id, metadata=metadata, overwrite=overwrite)

@@ -59,11 +59,11 @@ class TestHub(TestCase):
         self.metric = DummyMetric()
         self.metric.add()
         self.args = {"hello": 1, "world": 2}
-        self.result = self.metric.compute(**self.args)
+        self.result = self.metric.compute()
 
     def test_push_metric_required_arguments(self, metadata_update):
         push_to_hub(
-            to="username/repo",
+            repo_id="username/repo",
             metric_value=self.result["accuracy"],
             metric_type=self.metric.type,
             dataset_name="dataset_name",
@@ -71,12 +71,12 @@ class TestHub(TestCase):
             task_type="task_type",
         )
 
-        metadata_update.assert_called_once_with(repo_id="username/repo", metadata=minimum_metadata, overwrite=True)
+        metadata_update.assert_called_once_with(repo_id="username/repo", metadata=minimum_metadata, overwrite=False)
 
     def test_push_metric_missing_arguments(self, metadata_update):
         with pytest.raises(TypeError):
             push_to_hub(
-                to="username/repo",
+                repo_id="username/repo",
                 metric_value=self.result["accuracy"],
                 metric_type=self.metric.type,
                 dataset_name="dataset_name",
@@ -86,7 +86,7 @@ class TestHub(TestCase):
     def test_push_metric_invalid_arguments(self, metadata_update):
         with pytest.raises(TypeError):
             push_to_hub(
-                to="username/repo",
+                repo_id="username/repo",
                 metric_value=self.result["accuracy"],
                 metric_type=self.metric.type,
                 dataset_name="dataset_name",
@@ -97,7 +97,7 @@ class TestHub(TestCase):
 
     def test_push_metric_extra_arguments(self, metadata_update):
         push_to_hub(
-            to="username/repo",
+            repo_id="username/repo",
             metric_value=self.result["accuracy"],
             metric_type=self.metric.type,
             dataset_name="dataset_name",
@@ -113,4 +113,4 @@ class TestHub(TestCase):
             metric_args=self.args,
         )
 
-        metadata_update.assert_called_once_with(repo_id="username/repo", metadata=extras_metadata, overwrite=True)
+        metadata_update.assert_called_once_with(repo_id="username/repo", metadata=extras_metadata, overwrite=False)
