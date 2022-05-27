@@ -49,7 +49,6 @@ class WordCount(evaluate.EvaluationModule):
             type="measurement",
             description=_DESCRIPTION,
             inputs_description=_KWARGS_DESCRIPTION,
-            # This defines the format of each prediction and reference
             features=datasets.Features({
                 'data': datasets.Value('string'),
             })
