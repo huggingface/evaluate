@@ -137,8 +137,8 @@ class EvaluationModuleInfoMixin:
         return self._module_info.format
 
     @property
-    def type(self) -> str:
-        return self._module_info.type
+    def module_type(self) -> str:
+        return self._module_info.module_type
 
 
 class EvaluationModule(EvaluationModuleInfoMixin):
@@ -238,7 +238,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
 
     def __repr__(self):
         return (
-            f'EvaluationModule(name: "{self.name}", type: "{self.type}", '
+            f'EvaluationModule(name: "{self.name}", module_type: "{self.module_type}", '
             f'features: {self.features}, usage: """{self.inputs_description}""", '
             f"stored examples: {len(self)})"
         )

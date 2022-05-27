@@ -63,7 +63,7 @@ _CITATION = """
 class McNemar(evaluate.EvaluationModule):
     def _info(self):
         return evaluate.EvaluationModuleInfo(
-            type="comparison",
+            module_type="comparison",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

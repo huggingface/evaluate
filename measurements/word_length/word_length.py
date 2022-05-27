@@ -34,7 +34,7 @@ Returns:
 
 Examples:
     >>> data = ["hello world"]
-    >>> wordlength = evaluate.load("word_length", type="measurement")
+    >>> wordlength = evaluate.load("word_length", module_type="measurement")
     >>> results = wordlength.compute(data=data)
     >>> print(results)
     {'average_word_length': 2}
@@ -57,7 +57,7 @@ class WordLength(evaluate.EvaluationModule):
         # TODO: Specifies the evaluate.EvaluationModuleInfo object
         return evaluate.EvaluationModuleInfo(
             # This is the description that will appear on the modules page.
-            type="measurement",
+            module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
