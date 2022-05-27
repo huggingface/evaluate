@@ -1,1 +1,64 @@
 # Choosing a metric for your task
+
+**So you've trained your model and want to see how well it’s doing on a dataset of your choice. Where do you start?**
+
+There is no “one size fits all” approach to choosing an evaluation metric, but some good guidelines to keep in mind are:
+
+## Categories of metrics
+
+There are 3 high-level categories of metrics:
+
+1. *Generic metrics*, which can be applied to a variety of situations and datasets, such as precision and accuracy.
+2. *Task-specific metrics*, which are limited to a given task, such as Machine Translation (often evaluated using metrics [BLEU](https://huggingface.co/metrics/bleu) or [ROUGE](https://huggingface.co/metrics/rouge)) or Named Entity Recognition (often evaluated with [seqeval](https://huggingface.co/metrics/seqeval)).
+3. *Dataset-specific metrics*, which aim to measure model performance on specific benchmarks: for instance, the [GLUE benchmark](https://huggingface.co/datasets/glue) has a dedicated [evaluation metric](https://huggingface.co/metrics/glue).
+
+Let's look at each of these three cases:
+
+### Generic metrics
+
+Many of the metrics used in the Machine Learning community are quite generic and can be applied in a variety of tasks and datasets.
+
+This is the case for metrics like [accuracy](https://huggingface.co/metrics/accuracy) and [precision](https://huggingface.co/metrics/precision), which can be used for evaluating labeled (supervised) datasets, as well as [perplexity](https://huggingface.co/metrics/perplexity), which can be used for evaluating different kinds of (unsupervised) generative tasks.
+
+To see the input structure of a given metric, you can look at its metric card. For example, in the case of [precision](https://huggingface.co/metrics/precision), the format is:
+```
+>>> precision_metric = evaluate.load("precision")
+>>> results = precision_metric.compute(references=[0, 1], predictions=[0, 1])
+>>> print(results)
+{'precision': 1.0}
+```
+
+### Task-specific metrics
+
+Popular ML tasks like Machine Translation and Named Entity Recognition have specific metrics that can be used to compare models. For example, a series of different metrics have been proposed for text generation, ranging from [BLEU](https://huggingface.co/metrics/bleu) and its derivatives such as [GoogleBLEU](https://huggingface.co/metrics/google_bleu) and [GLEU](https://huggingface.co/metrics/gleu), but also [ROUGE](https://huggingface.co/metrics/rouge), [MAUVE](https://huggingface.co/metrics/mauve), etc.
+
+You can find the right metric for your task by:
+
+- **Looking at the [Task pages](https://huggingface.co/tasks)** to see what metrics can be used for evaluating models for a given task.
+- **Checking out leaderboards** on sites like [Papers With Code](https://paperswithcode.com/) (you can search by task and by dataset).
+-  **Reading the metric cards** for the relevant metrics and see which ones are a good fit for your use case. For example, see the [BLEU metric card](https://github.com/huggingface/evaluate/tree/main/metrics/bleu) or [SQuaD metric card](https://github.com/huggingface/evaluate/tree/main/metrics/squad).
+- **Looking at papers and blog posts** published on the topic and see what metrics they report. This can change over time, so try to pick papers from the last couple of years!
+
+### Dataset-specific metrics
+
+Some datasets have specific metrics associated with them -- this is especially in the case of popular benchmarks like [GLUE](https://huggingface.co/metrics/glue) and [SQuAD](https://huggingface.co/metrics/squad).
+
+<Tip warning={true}>
+💡
+GLUE is actually a collection of different subsets on different tasks, so first you need to choose the one that corresponds to the NLI task, such as mnli, which is described as “crowdsourced collection of sentence pairs with textual entailment annotations”
+</Tip>
+
+
+If you are evaluating your model on a benchmark dataset like the ones mentioned above, you can use its dedicated evaluation metric. Make sure you respect the format that they require. For example, to evaluate your model on the [SQuAD](https://huggingface.co/datasets/squad) dataset, you need to feed the `question` and `context` into your model and return the `prediction_text`, which should be compared with the `references` (based on matching the `id` of the question) :
+
+```
+>>> from evaluate import load
+>>> squad_metric = load("squad")
+>>> predictions = [{'prediction_text': '1976', 'id': '56e10a3be3433e1400422b22'}]
+>>> references = [{'answers': {'answer_start': [97], 'text': ['1976']}, 'id': '56e10a3be3433e1400422b22'}]
+>>> results = squad_metric.compute(predictions=predictions, references=references)
+>>> results
+{'exact_match': 100.0, 'f1': 100.0}
+```
+
+You can find examples of dataset structures by consulting the "Dataset Preview" function or the dataset card for a given dataset, and you can see how to use its dedicated evaluation function based on the metric card.
