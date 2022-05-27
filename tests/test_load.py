@@ -65,7 +65,7 @@ class ModuleFactoryTest(TestCase):
         # "squad_v2" requires additional imports (internal)
         factory = GithubEvaluationModuleFactory(
             "squad_v2",
-            type="metric",
+            module_type="metric",
             download_config=self.download_config,
             dynamic_modules_path=self.dynamic_modules_path,
         )
@@ -75,7 +75,7 @@ class ModuleFactoryTest(TestCase):
     def test_GithubMetricModuleFactory_with_external_import(self):
         # "bleu" requires additional imports (external from github)
         factory = GithubEvaluationModuleFactory(
-            "bleu", type="metric", download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
+            "bleu", module_type="metric", download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
         )
         module_factory_result = factory.get_module()
         assert importlib.import_module(module_factory_result.module_path) is not None

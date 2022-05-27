@@ -28,29 +28,21 @@ year={2020}
 
 # TODO: Add description of the module here
 _DESCRIPTION = """\
-This new module is designed to solve this great NLP task and is crafted with a lot of care.
+A simple measurement that returns the number of elements in dataset.
 """
 
 
 # TODO: Add description of the arguments of the module here
 _KWARGS_DESCRIPTION = """
-Calculates how good are predictions given some references, using certain scores
+Calculates number of elements in dataset
 Args:
-    predictions: list of predictions to score. Each predictions
-        should be a string with tokens separated by spaces.
-    references: list of reference for each prediction. Each
-        reference should be a string with tokens separated by spaces.
+    data: list of elements.
 Returns:
-    accuracy: description of the first score,
-    another_score: description of the second score,
+    element_count: number of elements in dataset,
 Examples:
-    Examples should be written in doctest format, and should illustrate how
-    to use the function.
-
-    >>> my_new_module = evaluate.load("my_new_module")
-    >>> results = my_new_module.compute(references=[0, 1], predictions=[0, 1])
-    >>> print(results)
-    {'accuracy': 1.0}
+    >>> measure = evaluate.load("lvwerra/element_count")
+    >>> measure.compute(["a", "b", "c")
+    {"element_count": 3}
 """
 
 # TODO: Define external resources urls if needed
@@ -58,22 +50,22 @@ BAD_WORDS_URL = "http://url/to/external/resource/bad_words.txt"
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class {{ cookiecutter.module_class_name }}(evaluate.EvaluationModule):
+class ElementCount(evaluate.EvaluationModule):
     """TODO: Short description of my evaluation module."""
 
     def _info(self):
         # TODO: Specifies the evaluate.EvaluationModuleInfo object
         return evaluate.EvaluationModuleInfo(
             # This is the description that will appear on the modules page.
-            module_type="{{ cookiecutter.module_type }}",
+            module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             # This defines the format of each prediction and reference
-            features=datasets.Features({
-                'predictions': datasets.Value('int64'),
-                'references': datasets.Value('int64'),
-            }),
+            features=[
+                datasets.Features({'data': datasets.Value('int64')}),
+                datasets.Features({'data': datasets.Value('string')})
+                ],
             # Homepage of the module for documentation
             homepage="http://module.homepage",
             # Additional links to the codebase or references
@@ -81,15 +73,8 @@ class {{ cookiecutter.module_class_name }}(evaluate.EvaluationModule):
             reference_urls=["http://path.to.reference.url/new_module"]
         )
 
-    def _download_and_prepare(self, dl_manager):
-        """Optional: download external resources useful to compute the scores"""
-        # TODO: Download external resources if needed
-        pass
-
-    def _compute(self, predictions, references):
+    def _compute(self, data):
         """Returns the scores"""
-        # TODO: Compute the different scores of the module
-        accuracy = sum(i == j for i, j in zip(predictions, references)) / len(predictions)
         return {
-            "accuracy": accuracy,
+            "element_count": len(data),
         }
