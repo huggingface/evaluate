@@ -46,13 +46,7 @@ Examples:
 """
 
 # TODO: Add BibTeX citation
-_CITATION = """\
-@InProceedings{huggingface:module,
-title = {A great new module},
-authors={huggingface, Inc.},
-year={2022}
-}
-"""
+_CITATION = ""
 def get_hash(example):
     """Get the hash of a string"""
     return hashlib.md5(example.strip().encode("utf-8")).hexdigest()
