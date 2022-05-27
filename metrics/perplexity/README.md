@@ -72,7 +72,7 @@ print(round(results["perplexities"][0], 2))
 ```
 Calculating perplexity on input_texts loaded in from a dataset:
 ```python
-perplexity = evaluate.load("perplexity")
+perplexity = evaluate.load("perplexity", module_type = "metric")
 input_texts = datasets.load_dataset("wikitext",
                                     "wikitext-2-raw-v1",
                                     split="test")["text"][:50]
