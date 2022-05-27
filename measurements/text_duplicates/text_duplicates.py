@@ -29,7 +29,7 @@ Args:
 
 Returns:
     `duplicate_fraction` (`float`) : the fraction of strings that are duplicated.
-    `duplicates_list` (`list`) (optional) : a list containing tuples with the duplicate strings and the number of times they are repeated.
+    `duplicates_list` (`dict`) (optional) : a dictionary containing tuples with the duplicate strings and the number of times they are repeated.
 
 Examples:
     >>> data = ["hello sun","hello moon", "hello sun"]
@@ -42,7 +42,7 @@ Examples:
     >>> duplicates = evaluate.load("text_duplicates")
     >>> results =  duplicates.compute(data=data, list_duplicates=True)
     >>> print(results)
-    {'duplicate_fraction': 0.33333333333333337, 'duplicates_list': [('hello sun', 2)]}
+    {'duplicate_fraction': 0.33333333333333337, 'duplicates_list': {'hello sun': 2}}
 """
 
 # TODO: Add BibTeX citation
