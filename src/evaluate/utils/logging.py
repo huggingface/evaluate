@@ -41,16 +41,16 @@ _default_log_level = logging.WARNING
 
 def _get_default_logging_level():
     """
-    If DATASETS_VERBOSITY env var is set to one of the valid choices return that as the new default level.
+    If EVALUATE_VERBOSITY env var is set to one of the valid choices return that as the new default level.
     If it is not - fall back to ``_default_log_level``
     """
-    env_level_str = os.getenv("DATASETS_VERBOSITY", None)
+    env_level_str = os.getenv("EVALUATE_VERBOSITY", None)
     if env_level_str:
         if env_level_str in log_levels:
             return log_levels[env_level_str]
         else:
             logging.getLogger().warning(
-                f"Unknown option DATASETS_VERBOSITY={env_level_str}, "
+                f"Unknown option EVALUATE_VERBOSITY={env_level_str}, "
                 f"has to be one of: { ', '.join(log_levels.keys()) }"
             )
     return _default_log_level
