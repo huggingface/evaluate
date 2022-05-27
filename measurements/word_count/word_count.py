@@ -68,6 +68,6 @@ class WordCount(evaluate.EvaluationModule):
         """Returns the number of unique words in the input data"""
         count_vectorizer = CountVectorizer(max_features=max_vocab)
         document_matrix = count_vectorizer.fit_transform(data)
-        word_count = document_matrix.toarray().sum()
+        word_count = document_matrix.sum()
         unique_words = document_matrix.shape[1]
         return {"total_word_count": word_count, "unique_words": unique_words}
