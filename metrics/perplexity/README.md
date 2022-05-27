@@ -91,6 +91,7 @@ print(round(results["perplexities"][0], 2))
 ## Limitations and Bias
 Note that the output value is based heavily on what text the model was trained on. This means that perplexity scores are not comparable between models or datasets.
 
+See Meister and Cotterell, ["Language Model Evaluation Beyond Perplexity"]( https://arxiv.org/abs/2106.00085) (2021) for more information about alternative model evaluation strategies. 
 
 ## Citation
 
