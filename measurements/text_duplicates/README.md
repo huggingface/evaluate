@@ -41,10 +41,10 @@ By default, this measurement outputs a dictionary containing the fraction of dup
 {'duplicate_fraction': 0.33333333333333337}
 ```
 
-With the `list_duplicates=True` option, this measurement will also output a list of tuples with duplicate strings and their counts.
+With the `list_duplicates=True` option, this measurement will also output a dictionary of tuples with duplicate strings and their counts.
 
 ```python
-{'duplicate_fraction': 0.33333333333333337, 'duplicates_list': [('hello sun', 2)]}
+{'duplicate_fraction': 0.33333333333333337, 'duplicates_list': {'hello sun': 2}}
 ```
 
 Warning: the `list_duplicates=True` function can be memory-intensive for large datasets.
@@ -67,7 +67,7 @@ Example with multiple duplicates and `list_duplicates=True`:
 >>> duplicates = evaluate.load("text_duplicates")
 >>> results = duplicates.compute(data=data)
 >>> print(results)
-{'duplicate_fraction': 0.4, 'duplicates_list': [('hello sun', 2), ('foo bar', 2)]}
+{'duplicate_fraction': 0.4, 'duplicates_list': {'hello sun': 2, 'foo bar': 2}}
 ```
 
 ## Citation(s)
