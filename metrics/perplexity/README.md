@@ -1,6 +1,6 @@
 ---
 title: Perplexity
-emoji: 🤗 
+emoji: 🤗
 colorFrom: blue
 colorTo: red
 sdk: gradio
@@ -30,7 +30,7 @@ The metric takes a list of text as input, as well as the name of the model used 
 
 ```python
 from evaluate import load
-perplexity = load("perplexity")
+perplexity = load("perplexity", module_type = "metric")
 results = perplexity.compute(input_texts=input_texts, model_id='gpt2')
 ```
 
@@ -58,7 +58,7 @@ This metric's range is 0 and up. A lower score is better.
 ### Examples
 Calculating perplexity on input_texts defined here:
 ```python
-perplexity = evaluate.load("perplexity")
+perplexity = evaluate.load("perplexity", module_type = "metric")
 input_texts = ["lorem ipsum", "Happy Birthday!", "Bienvenue"]
 results = perplexity.compute(model_id='gpt2',
                              add_start_token=False,
