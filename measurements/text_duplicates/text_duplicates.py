@@ -65,7 +65,7 @@ class TextDuplicates(evaluate.EvaluationModule):
         # TODO: Specifies the evaluate.EvaluationModuleInfo object
         return evaluate.EvaluationModuleInfo(
             # This is the description that will appear on the modules page.
-            type="measurement",
+            module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
