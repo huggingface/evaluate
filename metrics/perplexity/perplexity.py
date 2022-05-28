@@ -88,7 +88,7 @@ Examples:
 class Perplexity(evaluate.EvaluationModule):
     def _info(self):
         return evaluate.EvaluationModuleInfo(
-            module_type = "metric",
+            module_type="metric",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
