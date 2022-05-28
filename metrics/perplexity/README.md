@@ -31,7 +31,7 @@ The metric takes a list of text as input, as well as the name of the model used 
 
 ```python
 from evaluate import load
-perplexity = load("perplexity", module_type = "metric")
+perplexity = load("perplexity", module_type="metric")
 results = perplexity.compute(input_texts=input_texts, model_id='gpt2')
 ```
 
@@ -59,7 +59,7 @@ This metric's range is 0 and up. A lower score is better.
 ### Examples
 Calculating perplexity on input_texts defined here:
 ```python
-perplexity = evaluate.load("perplexity", module_type = "metric")
+perplexity = evaluate.load("perplexity", module_type="metric")
 input_texts = ["lorem ipsum", "Happy Birthday!", "Bienvenue"]
 results = perplexity.compute(model_id='gpt2',
                              add_start_token=False,
@@ -73,7 +73,7 @@ print(round(results["perplexities"][0], 2))
 ```
 Calculating perplexity on input_texts loaded in from a dataset:
 ```python
-perplexity = evaluate.load("perplexity", module_type = "metric")
+perplexity = evaluate.load("perplexity", module_type="metric")
 input_texts = datasets.load_dataset("wikitext",
                                     "wikitext-2-raw-v1",
                                     split="test")["text"][:50]
