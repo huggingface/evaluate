@@ -1,3 +1,5 @@
+from typing import Dict
+
 import requests
 from datasets.utils.metadata import known_task_ids
 from huggingface_hub import dataset_info, model_info
@@ -20,9 +22,9 @@ def push_to_hub(
     dataset_config: str = None,
     dataset_split: str = None,
     dataset_revision: str = None,
-    dataset_args: dict[str, int] = None,
+    dataset_args: Dict[str, int] = None,
     metric_config: str = None,
-    metric_args: dict[str, int] = None,
+    metric_args: Dict[str, int] = None,
     overwrite: bool = False,
 ):
     r"""
