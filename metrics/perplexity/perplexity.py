@@ -56,7 +56,7 @@ Returns:
         max length for the perplexity computation.
 Examples:
     Example 1:
-        >>> perplexity = evaluate.load("perplexity")
+        >>> perplexity = evaluate.load("perplexity", module_type="metric")
         >>> input_texts = ["lorem ipsum", "Happy Birthday!", "Bienvenue"]
         >>> results = perplexity.compute(model_id='gpt2',
         ...                              add_start_token=False,
@@ -70,7 +70,7 @@ Examples:
 
     Example 2:
         >>> from datasets import load_dataset
-        >>> perplexity = evaluate.load("perplexity")
+        >>> perplexity = evaluate.load("perplexity", module_type="metric")
         >>> input_texts = load_dataset("wikitext", "wikitext-2-raw-v1", split="test")["text"][:10] # doctest: +SKIP
         >>> input_texts = [s for s in input_texts if s!='']
         >>> results = perplexity.compute(model_id='gpt2',
@@ -88,6 +88,7 @@ Examples:
 class Perplexity(evaluate.EvaluationModule):
     def _info(self):
         return evaluate.EvaluationModuleInfo(
+            module_type="metric",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
