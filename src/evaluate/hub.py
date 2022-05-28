@@ -68,7 +68,7 @@ def push_to_hub(
     tasks = get_allowed_tasks(known_task_ids)
 
     if task_type not in tasks:
-        raise ValueError("Task type not supported.")
+        raise ValueError(f"Task type not supported. Task has to be one of {tasks}")
 
     try:
         dataset_info(dataset_type)
@@ -78,7 +78,7 @@ def push_to_hub(
     try:
         model_info(repo_id)
     except requests.exceptions.HTTPError:
-        raise ValueError(f"Model {repo_id} not found on hf.co/models")
+        raise ValueError(f"Model {repo_id} not found on the Hub at hf.co/{repo_id}")
 
     result = {
         "task": {
