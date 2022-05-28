@@ -16,7 +16,7 @@ minimum_metadata = {
                     "task": {"type": "dummy-task"},
                     "dataset": {"type": "dataset_type", "name": "dataset_name"},
                     "metrics": [
-                        {"type": "metric", "value": 1.0, "name": "dummy_metric"},
+                        {"type": "dummy_metric", "value": 1.0, "name": "Pretty Metric Name"},
                     ],
                 }
             ]
@@ -40,9 +40,9 @@ extras_metadata = {
                     },
                     "metrics": [
                         {
-                            "type": "metric",
+                            "type": "dummy_metric",
                             "value": 1.0,
-                            "name": "dummy_metric",
+                            "name": "Pretty Metric Name",
                             "config": "default",
                             "args": {"hello": 1, "world": 2},
                         },
@@ -74,8 +74,8 @@ class TestHub(TestCase):
         push_to_hub(
             repo_id="username/repo",
             metric_value=self.result["accuracy"],
-            metric_name=self.metric.name,
-            metric_type=self.metric.module_type,
+            metric_name="Pretty Metric Name",
+            metric_type=self.metric.name,
             dataset_name="dataset_name",
             dataset_type="dataset_type",
             task_type="dummy-task",
@@ -88,8 +88,8 @@ class TestHub(TestCase):
             push_to_hub(
                 repo_id="username/repo",
                 metric_value=self.result["accuracy"],
-                metric_name=self.metric.name,
-                metric_type=self.metric.module_type,
+                metric_name="Pretty Metric Name",
+                metric_type=self.metric.name,
                 dataset_name="dataset_name",
                 dataset_type="dummy-task",
             )
@@ -99,8 +99,8 @@ class TestHub(TestCase):
             push_to_hub(
                 repo_id="username/repo",
                 metric_value=self.result["accuracy"],
-                metric_name=self.metric.name,
-                metric_type=self.metric.module_type,
+                metric_name="Pretty Metric Name",
+                metric_type=self.metric.name,
                 dataset_name="dataset_name",
                 dataset_type="dataset_type",
                 task_type="dummy-task",
@@ -111,8 +111,8 @@ class TestHub(TestCase):
         push_to_hub(
             repo_id="username/repo",
             metric_value=self.result["accuracy"],
-            metric_name=self.metric.name,
-            metric_type=self.metric.module_type,
+            metric_name="Pretty Metric Name",
+            metric_type=self.metric.name,
             dataset_name="dataset_name",
             dataset_type="dataset_type",
             dataset_config="fr",
@@ -132,8 +132,8 @@ class TestHub(TestCase):
             push_to_hub(
                 repo_id="username/repo",
                 metric_value=self.result["accuracy"],
-                metric_name=self.metric.name,
-                metric_type=self.metric.module_type,
+                metric_name="Pretty Metric Name",
+                metric_type=self.metric.name,
                 dataset_name="dataset_name",
                 dataset_type="dataset_type",
                 task_type="audio-classification",
@@ -145,8 +145,8 @@ class TestHub(TestCase):
             push_to_hub(
                 repo_id="username/repo",
                 metric_value=self.result["accuracy"],
-                metric_name=self.metric.name,
-                metric_type=self.metric.module_type,
+                metric_name="Pretty Metric Name",
+                metric_type=self.metric.name,
                 dataset_name="dataset_name",
                 dataset_type="dataset_type",
                 task_type="dummy-task",
@@ -164,8 +164,8 @@ class TestHub(TestCase):
                 push_to_hub(
                     repo_id="username/bad-repo",
                     metric_value=self.result["accuracy"],
-                    metric_name=self.metric.name,
-                    metric_type=self.metric.module_type,
+                    metric_name="Pretty Metric Name",
+                    metric_type=self.metric.name,
                     dataset_name="dataset_name",
                     dataset_type="dataset_type",
                     task_type="dummy-task",
