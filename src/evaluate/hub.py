@@ -11,24 +11,57 @@ def get_allowed_tasks(tasks_dict):
 def push_to_hub(
     repo_id: str,
     task_type: str,
-    metric_value: float,
-    metric_type: str,
-    dataset_name: str,
     dataset_type: str,
+    dataset_name: str,
+    metric_type: str,
+    metric_name: str,
+    metric_value: float,
     task_name: str = None,
     dataset_config: str = None,
     dataset_split: str = None,
     dataset_revision: str = None,
     dataset_args: dict[str, int] = None,
-    metric_name: str = None,
     metric_config: str = None,
     metric_args: dict[str, int] = None,
     overwrite: bool = False,
 ):
-    """
-    TODO: Add documentation
-    """
+    """Pushes the result of a metric to the Hub, adding it to the specified model's card.
 
+    Args:
+        repo_id (``str``): Model id from https://hf.co/datasets.
+        task_type (``str``): Task id, refer to
+            https://github.com/huggingface/datasets/blob/master/src/datasets/utils/resources/tasks.json for allowed values.
+        dataset_type (``str``): Dataset id from https://hf.co/datasets.
+        dataset_name (``str``): Pretty name for the dataset.
+        metric_type (``str``): Metric id from https://hf.co/metrics.
+        metric_name (``str``): Pretty name for the metric.
+        metric_value (``float``): Computed metric value.
+        task_name (``str``, optional): Pretty name for the task.
+        dataset_config (``str``, optional): Dataset configuration used in datasets.load_dataset().
+            See huggingface/datasets docs for more info: https://huggingface.co/docs/datasets/package_reference/loading_methods#datasets.load_dataset.name
+        dataset_split (``str``, optional): Name of split used for metric computation.
+        dataset_revision (``str``, optional): Git hash for the specific version of the dataset.
+        dataset_args (``dict[str, int]``, optional): Additional arguments passed to datasets.load_dataset().
+        metric_config (``str``, optional): Configuration for the metric, e.g. (e.g. the GLUE metric has a configuration for each subset)
+        metric_args (``dict[str, int]``, optional): Arguments passed during Metric.compute().
+        overwrite (``bool``, optional, defaults to `False`): If set to `True` an existing metric field can be overwritten, otherwise
+             attempting to overwrite any existing fields will cause an error.
+
+        Example:
+        ```python
+        >>> push_to_hub(
+        ...     repo_id="huggingface/gpt2-wikitext2",
+        ...     metric_value=0.5
+        ...     metric_type="bleu",
+        ...     metric_name="BLEU",
+        ...     dataset_name="WikiText",
+        ...     dataset_type="wikitext",
+        ...     dataset_split="test",
+        ...     task_type="text-generation",
+        ...     task_name="Text Generation"
+        ... )
+        ```
+    """
     tasks = get_allowed_tasks(known_task_ids)
 
     if task_type not in tasks:
@@ -37,12 +70,12 @@ def push_to_hub(
     try:
         dataset_info(dataset_type)
     except requests.exceptions.HTTPError:
-        raise ValueError(f"Dataset f{dataset_type} not found on hf.co/datasets")
+        raise ValueError(f"Dataset {dataset_type} not found on hf.co/datasets")
 
     try:
         model_info(repo_id)
     except requests.exceptions.HTTPError:
-        raise ValueError(f"Model f{repo_id} not found on hf.co/models")
+        raise ValueError(f"Model {repo_id} not found on hf.co/models")
 
     result = {
         "task": {
