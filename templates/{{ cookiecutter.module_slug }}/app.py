@@ -1,6 +1,6 @@
-from {{ cookiecutter.module_slug }} import {{ cookiecutter.module_class_name }}
+import evaluate
 from evaluate.utils import launch_gradio_widget
 
 
-module = {{ cookiecutter.module_class_name }}()
+module = evaluate.load("{{ cookiecutter.namespace }}/{{ cookiecutter.module_slug }}")
 launch_gradio_widget(module)
