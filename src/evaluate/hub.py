@@ -7,7 +7,7 @@ from huggingface_hub.repocard import metadata_update
 
 
 def get_allowed_tasks(tasks_dict):
-    return list(tasks_dict.keys()) + [subtask for task in tasks_dict.values() for subtask in task.get("subtasks", [])]
+    return list(tasks_dict.keys())
 
 
 def push_to_hub(
