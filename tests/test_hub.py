@@ -60,6 +60,10 @@ extras_metadata = {
 @patch("evaluate.hub.metadata_update")
 @patch("evaluate.hub.known_task_ids")
 class TestHub(TestCase):
+    @pytest.fixture(autouse=True)
+    def inject_fixtures(self, caplog):
+        self._caplog = caplog
+
     def setUp(self):
         self.metric = DummyMetric()
         self.metric.add()
@@ -138,16 +142,20 @@ class TestHub(TestCase):
     def test_push_metric_invalid_dataset_type(self, known_task_ids, metadata_update):
         with patch("evaluate.hub.dataset_info") as mock_dataset_info:
             mock_dataset_info.side_effect = requests.HTTPError()
-            with pytest.raises(ValueError):
-                push_to_hub(
-                    repo_id="username/repo",
-                    metric_value=self.result["accuracy"],
-                    metric_name=self.metric.name,
-                    metric_type=self.metric.module_type,
-                    dataset_name="dataset_name",
-                    dataset_type="bad-dataset",
-                    task_type="dummy-task",
-                )
+            push_to_hub(
+                repo_id="username/repo",
+                metric_value=self.result["accuracy"],
+                metric_name=self.metric.name,
+                metric_type=self.metric.module_type,
+                dataset_name="dataset_name",
+                dataset_type="dataset_type",
+                task_type="dummy-task",
+            )
+
+            assert "Dataset dataset_type not found on hf.co/datasets" in self._caplog.text
+            metadata_update.assert_called_once_with(
+                repo_id="username/repo", metadata=minimum_metadata, overwrite=False
+            )
 
     def test_push_metric_invalid_repo_id(self, known_task_ids, metadata_update):
         with patch("evaluate.hub.model_info") as mock_model_info:

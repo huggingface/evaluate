@@ -5,6 +5,11 @@ from datasets.utils.metadata import known_task_ids
 from huggingface_hub import dataset_info, model_info
 from huggingface_hub.repocard import metadata_update
 
+from .utils.logging import get_logger
+
+
+logger = get_logger(__name__)
+
 
 def get_allowed_tasks(tasks_dict):
     return list(tasks_dict.keys())
@@ -73,7 +78,7 @@ def push_to_hub(
     try:
         dataset_info(dataset_type)
     except requests.exceptions.HTTPError:
-        raise ValueError(f"Dataset {dataset_type} not found on hf.co/datasets")
+        logger.warning(f"Dataset {dataset_type} not found on hf.co/datasets")
 
     try:
         model_info(repo_id)
