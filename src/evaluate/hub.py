@@ -25,7 +25,8 @@ def push_to_hub(
     metric_args: dict[str, int] = None,
     overwrite: bool = False,
 ):
-    """Pushes the result of a metric to the Hub, adding it to the specified model's card.
+    r"""
+    Pushes the result of a metric to the Hub, adding it to the specified model's card.
 
     Args:
         repo_id (``str``): Model id from https://hf.co/datasets.
@@ -47,21 +48,21 @@ def push_to_hub(
         overwrite (``bool``, optional, defaults to `False`): If set to `True` an existing metric field can be overwritten, otherwise
              attempting to overwrite any existing fields will cause an error.
 
-        Example:
-        ```python
-        >>> push_to_hub(
-        ...     repo_id="huggingface/gpt2-wikitext2",
-        ...     metric_value=0.5
-        ...     metric_type="bleu",
-        ...     metric_name="BLEU",
-        ...     dataset_name="WikiText",
-        ...     dataset_type="wikitext",
-        ...     dataset_split="test",
-        ...     task_type="text-generation",
-        ...     task_name="Text Generation"
-        ... )
-        ```
-    """
+    Example:
+
+    ```python
+    >>> push_to_hub(
+    ...     repo_id="huggingface/gpt2-wikitext2",
+    ...     metric_value=0.5
+    ...     metric_type="bleu",
+    ...     metric_name="BLEU",
+    ...     dataset_name="WikiText",
+    ...     dataset_type="wikitext",
+    ...     dataset_split="test",
+    ...     task_type="text-generation",
+    ...     task_name="Text Generation"
+    ... )
+    ```"""
     tasks = get_allowed_tasks(known_task_ids)
 
     if task_type not in tasks:

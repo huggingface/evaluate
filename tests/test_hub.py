@@ -16,7 +16,7 @@ minimum_metadata = {
                     "task": {"type": "dummy-task"},
                     "dataset": {"type": "dataset_type", "name": "dataset_name"},
                     "metrics": [
-                        {"type": "metric", "value": 1.0},
+                        {"type": "metric", "value": 1.0, "name": "dummy_metric"},
                     ],
                 }
             ]
@@ -70,6 +70,7 @@ class TestHub(TestCase):
         push_to_hub(
             repo_id="username/repo",
             metric_value=self.result["accuracy"],
+            metric_name=self.metric.name,
             metric_type=self.metric.type,
             dataset_name="dataset_name",
             dataset_type="dataset_type",
@@ -83,6 +84,7 @@ class TestHub(TestCase):
             push_to_hub(
                 repo_id="username/repo",
                 metric_value=self.result["accuracy"],
+                metric_name=self.metric.name,
                 metric_type=self.metric.type,
                 dataset_name="dataset_name",
                 dataset_type="dummy-task",
@@ -93,6 +95,7 @@ class TestHub(TestCase):
             push_to_hub(
                 repo_id="username/repo",
                 metric_value=self.result["accuracy"],
+                metric_name=self.metric.name,
                 metric_type=self.metric.type,
                 dataset_name="dataset_name",
                 dataset_type="dataset_type",
@@ -104,6 +107,7 @@ class TestHub(TestCase):
         push_to_hub(
             repo_id="username/repo",
             metric_value=self.result["accuracy"],
+            metric_name=self.metric.name,
             metric_type=self.metric.type,
             dataset_name="dataset_name",
             dataset_type="dataset_type",
@@ -113,7 +117,6 @@ class TestHub(TestCase):
             dataset_args={"a": 1, "b": 2},
             task_type="dummy-task",
             task_name="task_name",
-            metric_name=self.metric.name,
             metric_config=self.metric.config_name,
             metric_args=self.args,
         )
@@ -125,6 +128,7 @@ class TestHub(TestCase):
             push_to_hub(
                 repo_id="username/repo",
                 metric_value=self.result["accuracy"],
+                metric_name=self.metric.name,
                 metric_type=self.metric.type,
                 dataset_name="dataset_name",
                 dataset_type="dataset_type",
@@ -138,6 +142,7 @@ class TestHub(TestCase):
                 push_to_hub(
                     repo_id="username/repo",
                     metric_value=self.result["accuracy"],
+                    metric_name=self.metric.name,
                     metric_type=self.metric.type,
                     dataset_name="dataset_name",
                     dataset_type="bad-dataset",
@@ -151,6 +156,7 @@ class TestHub(TestCase):
                 push_to_hub(
                     repo_id="username/bad-repo",
                     metric_value=self.result["accuracy"],
+                    metric_name=self.metric.name,
                     metric_type=self.metric.type,
                     dataset_name="dataset_name",
                     dataset_type="dataset_type",
