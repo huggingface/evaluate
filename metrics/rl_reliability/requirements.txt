@@ -4,3 +4,4 @@ datasets~=2.0
 git+https://github.com/google-research/rl-reliability-metrics
 scipy
 tensorflow
+gin
