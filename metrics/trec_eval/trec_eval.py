@@ -13,11 +13,12 @@
 # limitations under the License.
 """Module to compute TREC evaluation scores."""
 
-import evaluate
 import datasets
-
 import pandas as pd
-from trectools import TrecRun, TrecQrel, TrecEval
+from trectools import TrecEval, TrecQrel, TrecRun
+
+import evaluate
+
 
 _CITATION = """\
 @inproceedings{palotti2019,
@@ -79,42 +80,42 @@ class TRECEval(evaluate.EvaluationModule):
             features=datasets.Features(
                 {
                     "predictions": {
-                        "query": datasets.Sequence(datasets.Value('int64')),
-                        "q0": datasets.Sequence(datasets.Value('string')),
-                        "docid": datasets.Sequence(datasets.Value('string')),
-                        "rank": datasets.Sequence(datasets.Value('int64')),
-                        "score":  datasets.Sequence(datasets.Value('float')),
-                        "system": datasets.Sequence(datasets.Value('string')),
-                        },
+                        "query": datasets.Sequence(datasets.Value("int64")),
+                        "q0": datasets.Sequence(datasets.Value("string")),
+                        "docid": datasets.Sequence(datasets.Value("string")),
+                        "rank": datasets.Sequence(datasets.Value("int64")),
+                        "score": datasets.Sequence(datasets.Value("float")),
+                        "system": datasets.Sequence(datasets.Value("string")),
+                    },
                     "references": {
-                        "query": datasets.Sequence(datasets.Value('int64')),
-                        "q0": datasets.Sequence(datasets.Value('string')),
-                        "docid": datasets.Sequence(datasets.Value('string')),
-                        "rel": datasets.Sequence(datasets.Value('int64')),
-                    }
-
+                        "query": datasets.Sequence(datasets.Value("int64")),
+                        "q0": datasets.Sequence(datasets.Value("string")),
+                        "docid": datasets.Sequence(datasets.Value("string")),
+                        "rel": datasets.Sequence(datasets.Value("int64")),
+                    },
                 }
             ),
             homepage="https://github.com/joaopalotti/trectools",
         )
 
-
     def _compute(self, references, predictions):
         """Returns the TREC evaluation scores."""
-        
-        if len(predictions)>1 or len(references)>1:
-            raise ValueError(f"You can only pass one prediction and reference per evaluation. You passed {len(predictions)} prediction(s) and {len(references)} reference(s).")
+
+        if len(predictions) > 1 or len(references) > 1:
+            raise ValueError(
+                f"You can only pass one prediction and reference per evaluation. You passed {len(predictions)} prediction(s) and {len(references)} reference(s)."
+            )
 
         df_run = pd.DataFrame(predictions[0])
         df_qrel = pd.DataFrame(references[0])
 
         trec_run = TrecRun()
         trec_run.filename = "placeholder.file"
-        trec_run.run_data = df_run        
+        trec_run.run_data = df_run
 
         trec_qrel = TrecQrel()
         trec_qrel.filename = "placeholder.file"
-        trec_qrel.qrels_data = df_qrel 
+        trec_qrel.qrels_data = df_qrel
 
         trec_eval = TrecEval(trec_run, trec_qrel)
 
