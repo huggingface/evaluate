@@ -114,7 +114,6 @@ TESTS_REQUIRE = [
     "jiwer",
     "sentencepiece",  # for bleurt
     "mauve-text",
-    "git+https://github.com/google-research/rl-reliability-metrics"
     # to speed up pip backtracking
     "toml>=0.10.1",
     "requests_file>=1.5.1",
