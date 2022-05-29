@@ -43,7 +43,7 @@ Args:
                     in the AutoModelForCausalLM documentation here:
                     https://huggingface.co/docs/transformers/master/en/model_doc/auto#transformers.AutoModelForCausalLM )
 
-    input_texts (list of str): input text, each separate text snippet
+    data (list of str): input data, each separate text snippet
         is one list entry.
     batch_size (int): the batch size to run texts through the model. Defaults to 16.
     add_start_token (bool): whether to add the start token to the texts,
@@ -57,10 +57,10 @@ Returns:
 Examples:
     Example 1:
         >>> perplexity = evaluate.load("perplexity", module_type="measurement")
-        >>> input_texts = ["lorem ipsum", "Happy Birthday!", "Bienvenue"]
+        >>> data = ["lorem ipsum", "Happy Birthday!", "Bienvenue"]
         >>> results = perplexity.compute(model_id='gpt2',
         ...                              add_start_token=False,
-        ...                              input_texts=input_texts) # doctest:+ELLIPSIS
+        ...                              data=data) # doctest:+ELLIPSIS
         >>> print(list(results.keys()))
         ['perplexities', 'mean_perplexity']
         >>> print(round(results["mean_perplexity"], 2))
@@ -71,10 +71,10 @@ Examples:
     Example 2:
         >>> from datasets import load_dataset
         >>> perplexity = evaluate.load("perplexity", module_type="measurement")
-        >>> input_texts = load_dataset("wikitext", "wikitext-2-raw-v1", split="test")["text"][:10] # doctest: +SKIP
-        >>> input_texts = [s for s in input_texts if s!='']
+        >>> data = load_dataset("wikitext", "wikitext-2-raw-v1", split="test")["text"][:10] # doctest: +SKIP
+        >>> data = [s for s in data if s!='']
         >>> results = perplexity.compute(model_id='gpt2',
-        ...                              input_texts=input_texts)
+        ...                              data=data)
         >>> print(list(results.keys()))
         ['perplexities', 'mean_perplexity']
         >>> print(round(results["mean_perplexity"], 2)) # doctest: +SKIP
@@ -94,13 +94,13 @@ class Perplexity(evaluate.EvaluationModule):
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
                 {
-                    "input_texts": datasets.Value("string"),
+                    "data": datasets.Value("string"),
                 }
             ),
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
-    def _compute(self, input_texts, model_id, batch_size: int = 16, add_start_token: bool = True, device=None):
+    def _compute(self, data, model_id, batch_size: int = 16, add_start_token: bool = True, device=None):
 
         if device is not None:
             assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
@@ -136,7 +136,7 @@ class Perplexity(evaluate.EvaluationModule):
             max_tokenized_len = model.config.max_length
 
         encodings = tokenizer(
-            input_texts,
+            data,
             add_special_tokens=False,
             padding=True,
             truncation=True,
