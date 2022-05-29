@@ -28,7 +28,7 @@ _CITATION = """\
  year = {2019},
  location = {Paris, France},
  publisher = {ACM}
-} 
+}
 """
 
 # TODO: Add description of the module here
@@ -41,7 +41,7 @@ precision and nDCG. It is used to score rankings of retrieved documents with ref
 _KWARGS_DESCRIPTION = """
 Calculates TREC evaluation scores based on a run and qrel.
 Args:
-    predictions: list containing a single run. 
+    predictions: list containing a single run.
     references: list containing a single qrel.
 Returns:
     dict: TREC evaluation scores.
