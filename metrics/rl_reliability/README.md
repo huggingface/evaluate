@@ -51,31 +51,30 @@ KWARGS:
 ### Output Values
 
 In `"online"` mode:
-- HighFreqEnergyWithinRuns
-- IqrWithinRuns
-- IqrAcrossRuns
-- LowerCVaROnDiffs
-- LowerCVaROnDrawdown
-- LowerCVaROnAcross
-- LowerCVaROnRaw
-- MadAcrossRuns
-- MadWithinRuns
-- MaxDrawdown
-- StddevAcrossRuns
-- StddevWithinRuns
-- UpperCVaROnAcross
-- UpperCVaROnDiffs
-- UpperCVaROnDrawdown
-- UpperCVaROnRaw
-- MedianPerfDuringTraining
+- HighFreqEnergyWithinRuns: High Frequency across Time (DT)
+- IqrWithinRuns: IQR across Time (DT)
+- MadWithinRuns: 'MAD across Time (DT)
+- StddevWithinRuns: Stddev across Time (DT)
+- LowerCVaROnDiffs: Lower CVaR on Differences (SRT)
+- UpperCVaROnDiffs: Upper CVaR on Differences (SRT)
+- MaxDrawdown: Max Drawdown (LRT)
+- LowerCVaROnDrawdown: Lower CVaR on Drawdown (LRT)
+- UpperCVaROnDrawdown: Upper CVaR on Drawdown (LRT)
+- LowerCVaROnRaw: Lower CVaR on Raw
+- UpperCVaROnRaw: Upper CVaR on Raw
+- IqrAcrossRuns: IQR across Runs (DR)
+- MadAcrossRuns: MAD across Runs (DR)
+- StddevAcrossRuns: Stddev across Runs (DR)
+- LowerCVaROnAcross: Lower CVaR across Runs (RR)
+- UpperCVaROnAcross: Upper CVaR across Runs (RR)
+- MedianPerfDuringTraining: Median Performance across Runs
 
 In `"offline"` mode:
-- MadAcrossRollouts
-- IqrAcrossRollouts
-- StddevAcrossRollouts
-- LowerCVaRAcrossRollouts
-- UpperCVaRAcrossRollouts
-- MedianPerfAcrossRollouts
+- MadAcrossRollouts: MAD across rollouts (DF)
+- IqrAcrossRollouts: IQR across rollouts (DF)
+- LowerCVaRAcrossRollouts: Lower CVaR across rollouts (RF)
+- UpperCVaRAcrossRollouts: Upper CVaR across rollouts (RF)
+- MedianPerfAcrossRollouts: Median Performance across rollouts
 
 
 ### Examples
@@ -99,11 +98,11 @@ rl_reliability.compute(timesteps=[df["Metrics/EnvironmentSteps"] for df in dfs],
 ```
 
 ## Limitations and Bias
-This implementation of RL reliability metrics does not compute permutation tests to determine whether algorithms are statistically different in their metric values and also does not compute bootstrap confidence intervals on the rankings of the algorithms.
+This implementation of RL reliability metrics does not compute permutation tests to determine whether algorithms are statistically different in their metric values and also does not compute bootstrap confidence intervals on the rankings of the algorithms. See the [original library](https://github.com/google-research/rl-reliability-metrics/) for more resources.
 
 ## Citation
 
-```bitex
+```bibtex
 @conference{rl_reliability_metrics,
   title = {Measuring the Reliability of Reinforcement Learning Algorithms},
   author = {Stephanie CY Chan, Sam Fishman, John Canny, Anoop Korattikara, and Sergio Guadarrama},
