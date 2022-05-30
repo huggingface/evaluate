@@ -1,4 +1,10 @@
 <p align="center">
+    <br>
+    <img src="https://huggingface.co/datasets/evaluate/media/resolve/main/evaluate-banner.png" width="400"/>
+    <br>
+<p>
+
+<p align="center">
     <a href="https://circleci.com/gh/huggingface/evaluate">
         <img alt="Build" src="https://img.shields.io/circleci/build/github/huggingface/evaluate/main">
     </a>
