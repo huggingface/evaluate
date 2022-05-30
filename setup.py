@@ -73,8 +73,6 @@ REQUIRED_PKGS = [
     "requests>=2.19.0",
     # progress bars in download and scripts
     "tqdm>=4.62.1",
-    # for bootstrap calculations in Evaluator
-    "scipy",
     # for fast hashing
     "xxhash",
     # for better multiprocessing
@@ -89,6 +87,12 @@ REQUIRED_PKGS = [
     # Utilities from PyPA to e.g., compare versions
     "packaging",
     "responses<0.19",
+    # for bootstrap computations in Evaluator
+    "scipy>=1.7.1",
+    # for metric computations in Evaluator
+    "sklearn",
+    # for predictions computations in Evaluator:
+    "torch",
 ]
 
 TEMPLATE_REQUIRE = [
@@ -115,6 +119,7 @@ TESTS_REQUIRE = [
     "scikit-learn",
     "jiwer",
     "sentencepiece",  # for bleurt
+    "transformers", # for evaluator
     "mauve-text",
     # to speed up pip backtracking
     "toml>=0.10.1",
