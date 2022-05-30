@@ -40,44 +40,43 @@ Args:
     ignore_numbers: Boolean, defaults to False. If true, removes all punctuation before
         comparing predictions and references.
 Returns:
-    exact_match: Dictionary containing exact_match rate. Possible values are between 0.0 and 100.0, inclusive.
+    exact_match: Dictionary containing exact_match rate. Possible values are between 0.0 and 1.0, inclusive.
 Examples:
     >>> exact_match = evaluate.load("exact_match")
     >>> refs = ["the cat", "theater", "YELLING", "agent007"]
     >>> preds = ["cat?", "theater", "yelling", "agent"]
     >>> results = exact_match.compute(references=refs, predictions=preds)
-    >>> print(round(results["exact_match"], 1))
-    25.0
+    >>> print(round(results["exact_match"], 2))
+    0.25
 
     >>> exact_match = evaluate.load("exact_match")
     >>> refs = ["the cat", "theater", "YELLING", "agent007"]
     >>> preds = ["cat?", "theater", "yelling", "agent"]
     >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell"], ignore_case=True, ignore_punctuation=True)
-    >>> print(round(results["exact_match"], 1))
-    50.0
+    >>> print(round(results["exact_match"], 2))
+    0.5
 
 
     >>> exact_match = evaluate.load("exact_match")
     >>> refs = ["the cat", "theater", "YELLING", "agent007"]
     >>> preds = ["cat?", "theater", "yelling", "agent"]
     >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell", "YELL"], ignore_case=True, ignore_punctuation=True)
-    >>> print(round(results["exact_match"], 1))
-    75.0
+    >>> print(round(results["exact_match"], 2))
+    0.75
 
     >>> exact_match = evaluate.load("exact_match")
     >>> refs = ["the cat", "theater", "YELLING", "agent007"]
     >>> preds = ["cat?", "theater", "yelling", "agent"]
     >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell", "YELL"], ignore_case=True, ignore_punctuation=True, ignore_numbers=True)
-    >>> print(round(results["exact_match"], 1))
-    100.0
+    >>> print(round(results["exact_match"], 2))
+    1.0
 
     >>> exact_match = evaluate.load("exact_match")
     >>> refs = ["The cat sat on the mat.", "Theaters are great.", "It's like comparing oranges and apples."]
     >>> preds = ["The cat sat on the mat?", "Theaters are great.", "It's like comparing apples and oranges."]
     >>> results = exact_match.compute(references=refs, predictions=preds)
-    >>> print(round(results["exact_match"], 1))
-    33.3
-
+    >>> print(round(results["exact_match"], 2))
+    0.33
 """
 
 _CITATION = """
@@ -134,4 +133,4 @@ class ExactMatch(evaluate.EvaluationModule):
 
         score_list = predictions == references
 
-        return {"exact_match": np.mean(score_list) * 100}
+        return {"exact_match": np.mean(score_list)}
