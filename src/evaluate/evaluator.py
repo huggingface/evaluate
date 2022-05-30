@@ -72,9 +72,9 @@ class Evaluator(ABC):
     def compute(
         self,
         model_or_pipeline: Union[str, Pipeline, Callable, PreTrainedModel, TFPreTrainedModel] = None,
-        tokenizer: Optional[Union[str, PreTrainedTokenizer]] = None,
         data: Union[str, Dataset] = None,
         metric: Union[str, EvaluationModule] = None,
+        tokenizer: Optional[Union[str, PreTrainedTokenizer]] = None,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
@@ -97,9 +97,9 @@ class TextClassificationEvaluator(Evaluator):
     def compute(
         self,
         model_or_pipeline: Union[str, Pipeline, Callable, PreTrainedModel, TFPreTrainedModel] = None,
-        tokenizer: Optional[Union[str, PreTrainedTokenizer]] = None,
         data: Union[str, Dataset] = None,
         metric: Union[str, EvaluationModule] = None,
+        tokenizer: Optional[Union[str, PreTrainedTokenizer]] = None,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,

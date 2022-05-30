@@ -59,9 +59,9 @@ class TestEvaluator(TestCase):
         tokenizer = AutoTokenizer.from_pretrained("huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli")
         scores, bootstrap = self.evaluator.compute(
             model_or_pipeline=model,
-            tokenizer=tokenizer,
             data=self.data,
             metric="accuracy",
+            tokenizer=tokenizer,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
