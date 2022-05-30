@@ -19,10 +19,18 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 # Lint as: python3
 from datasets import Dataset, load_dataset
 from scipy.stats import bootstrap
-from transformers import Pipeline, PreTrainedModel, PreTrainedTokenizer, TFPreTrainedModel, pipeline
-from transformers.pipelines import SUPPORTED_TASKS as SUPPORTED_PIPELINE_TASKS
-from transformers.pipelines import TASK_ALIASES
-from transformers.pipelines import check_task as check_pipeline_task
+
+
+try:
+    from transformers import Pipeline, PreTrainedModel, PreTrainedTokenizer, TFPreTrainedModel, pipeline
+    from transformers.pipelines import SUPPORTED_TASKS as SUPPORTED_PIPELINE_TASKS
+    from transformers.pipelines import TASK_ALIASES
+    from transformers.pipelines import check_task as check_pipeline_task
+
+    TRANSFORMERS_AVAILABLE = True
+except ImportError:
+    TRANSFORMERS_AVAILABLE = False
+
 from typing_extensions import Literal
 
 from .loading import load
@@ -42,6 +50,10 @@ class Evaluator(ABC):
     """
 
     def __init__(self, task: str, default_metric_name: str = None):
+        if not TRANSFORMERS_AVAILABLE:
+            raise ImportError(
+                "If you want to use the `Evaluator` you need `transformers`. Run `pip install evaluate[transformers]`."
+            )
         self.task = task
         self.default_metric_name = default_metric_name
 
@@ -65,7 +77,7 @@ class Evaluator(ABC):
         """
         bootstrap_dict = {}
         for key in metric_keys:
-            bootstrap_dict[key] = bootstrap(
+            bs = bootstrap(
                 data=(predictions, references),
                 statistic=lambda predictions, references: metric.compute(
                     predictions=predictions,
@@ -77,6 +89,10 @@ class Evaluator(ABC):
                 n_resamples=n_resamples,
                 random_state=random_state,
             )
+            bootstrap_dict[key] = {
+                "confidence_interval": (bs.confidence_interval.low, bs.confidence_interval.high),
+                "standard_error": bs.standard_error,
+            }
         return bootstrap_dict
 
     @abstractmethod
@@ -177,9 +193,9 @@ class TextClassificationEvaluator(Evaluator):
                 defined in the `label_column` of the `data` dataset.
 
         Return:
-            A `Tuple`. The first element of the tuple contains the outcome of the metric computation. The second
-            element of the tuple is `None` for the `"simple"` strategy. For the `"bootstrap"` strategy, it contains
-            a dictionary with the confidence interval and the standard error calculated for each metric key.
+            A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
+            `"simple"` strategy, the value is the metric score. For the `"bootstrap"` strategy, the value is a `Dict`
+            containing the score, the confidence interval and the standard error calculated for each metric key.
 
         Examples:
 
@@ -190,7 +206,7 @@ class TextClassificationEvaluator(Evaluator):
         >>> e = evaluator("text-classification")
         >>> data =  Dataset.from_dict(load_dataset("imdb")["test"][:2])
 
-        >>> scores, bootstrap = e.compute(
+        >>> results = e.compute(
         >>>     model_or_pipeline="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
         >>>     data=data,
         >>>     metric="accuracy",
@@ -251,20 +267,23 @@ class TextClassificationEvaluator(Evaluator):
         predictions = self._compute_predictions(pipe, data[input_column], label_mapping=label_mapping)
         result = metric.compute(predictions=predictions, references=references)
 
-        bootstrap = (
-            Evaluator._compute_confidence_interval(
+        if strategy == "bootstrap":
+            metric_keys = result.keys()
+            bootstrap_dict = Evaluator._compute_confidence_interval(
                 predictions,
                 references,
                 metric,
-                result.keys(),
+                metric_keys,
                 confidence_level,
                 n_resamples,
                 random_state,
             )
-            if strategy == "bootstrap"
-            else None
-        )
-        return result, bootstrap
+            for key in metric_keys:
+                bootstrap_dict[key]["score"] = result[key]
+
+            return bootstrap_dict
+
+        return result
 
 
 SUPPORTED_EVALUATOR_TASKS = {

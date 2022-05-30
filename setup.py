@@ -89,12 +89,6 @@ REQUIRED_PKGS = [
     "responses<0.19",
     # for bootstrap computations in Evaluator
     "scipy>=1.7.1",
-    # for metric computations in Evaluator
-    "sklearn",
-    # for predictions computations in Evaluator
-    "torch",
-    # for pipeline usage in Evaluator
-    "transformers"
 ]
 
 TEMPLATE_REQUIRE = [

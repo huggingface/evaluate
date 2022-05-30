@@ -32,7 +32,7 @@ class TestEvaluator(TestCase):
         self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
 
     def test_pipe_init(self):
-        scores, bootstrap = self.evaluator.compute(
+        scores = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             input_column="text",
@@ -40,10 +40,9 @@ class TestEvaluator(TestCase):
             label_mapping=self.label_mapping,
         )
         self.assertEqual(scores, {"f1": 0.0})
-        self.assertIsNone(bootstrap)
 
     def test_model_init(self):
-        scores, bootstrap = self.evaluator.compute(
+        scores = self.evaluator.compute(
             model_or_pipeline="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
             data=self.data,
             metric="accuracy",
@@ -52,12 +51,11 @@ class TestEvaluator(TestCase):
             label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
         )
         self.assertEqual(scores, {"accuracy": 0.5})
-        self.assertIsNone(bootstrap)
         model = BertForSequenceClassification.from_pretrained(
             "huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli"
         )
         tokenizer = AutoTokenizer.from_pretrained("huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli")
-        scores, bootstrap = self.evaluator.compute(
+        scores = self.evaluator.compute(
             model_or_pipeline=model,
             data=self.data,
             metric="accuracy",
@@ -67,14 +65,13 @@ class TestEvaluator(TestCase):
             label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
         )
         self.assertEqual(scores, {"accuracy": 0.5})
-        self.assertIsNone(bootstrap)
 
     def test_class_init(self):
         evaluator = TextClassificationEvaluator()
         self.assertEqual(evaluator.task, "text-classification")
         self.assertIsNone(evaluator.default_metric_name)
 
-        scores, bootstrap = evaluator.compute(
+        scores = evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric="f1",
@@ -83,21 +80,19 @@ class TestEvaluator(TestCase):
             label_mapping=self.label_mapping,
         )
         self.assertEqual(scores, {"f1": 0.0})
-        self.assertIsNone(bootstrap)
 
     def test_default_pipe_init(self):
-        scores, bootstrap = self.evaluator.compute(
+        scores = self.evaluator.compute(
             data=self.data,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
         self.assertEqual(scores, {"f1": 0.0})
-        self.assertIsNone(bootstrap)
 
     def test_overwrite_default_metric(self):
         accuracy = load_metric("accuracy")
-        scores, bootstrap = self.evaluator.compute(
+        scores = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric=accuracy,
@@ -106,8 +101,7 @@ class TestEvaluator(TestCase):
             label_mapping=self.label_mapping,
         )
         self.assertEqual(scores, {"accuracy": 1.0})
-        self.assertIsNone(bootstrap)
-        scores, bootstrap = self.evaluator.compute(
+        scores = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric="accuracy",
@@ -116,14 +110,13 @@ class TestEvaluator(TestCase):
             label_mapping=self.label_mapping,
         )
         self.assertEqual(scores, {"accuracy": 1.0})
-        self.assertIsNone(bootstrap)
 
     def test_bootstrap(self):
         model = BertForSequenceClassification.from_pretrained(
             "huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli"
         )
         tokenizer = AutoTokenizer.from_pretrained("huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli")
-        scores, bootstrap = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=model,
             data=self.data,
             metric="accuracy",
@@ -135,11 +128,10 @@ class TestEvaluator(TestCase):
             n_resamples=10,
             random_state=0,
         )
-        self.assertEqual(scores, {"accuracy": 0.5})
-        self.assertTrue(len(bootstrap.keys()) == 1 and "accuracy" in bootstrap.keys())
-        self.assertAlmostEqual(bootstrap["accuracy"].confidence_interval.low, 0.0, 5)
-        self.assertAlmostEqual(bootstrap["accuracy"].confidence_interval.high, 0.5, 5)
-        self.assertAlmostEqual(bootstrap["accuracy"].standard_error, 0.3689323936863109, 5)
+        self.assertEqual(results["accuracy"]["score"], 0.5)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][0], 0.0, 5)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.5, 5)
+        self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.3689323936863109, 5)
 
     def test_wrong_task(self):
         self.assertRaises(KeyError, evaluator, "bad_task")
