@@ -21,6 +21,8 @@ from rl_reliability_metrics.metrics import metrics_offline, metrics_online
 import evaluate
 
 
+logger = evaluate.logging.get_logger(__name__)
+
 DEFAULT_EVAL_POINTS = [
     50000,
     150000,
@@ -43,6 +45,8 @@ DEFAULT_EVAL_POINTS = [
     1850000,
     1950000,
 ]
+
+N_RUNS_RECOMMENDED = 10
 
 _CITATION = """\
 @conference{rl_reliability_metrics,
@@ -110,6 +114,10 @@ class RLReliability(evaluate.EvaluationModule):
         alpha=0.05,
         eval_points=None,
     ):
+        if len(timesteps) < N_RUNS_RECOMMENDED:
+            logger.warning(
+                f"For robust statistics it is recommended to use at least {N_RUNS_RECOMMENDED} runs whereas you provided {len(timesteps)}."
+            )
 
         curves = []
         for timestep, reward in zip(timesteps, rewards):
