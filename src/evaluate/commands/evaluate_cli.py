@@ -77,6 +77,7 @@ def main():
         namespace = hfapi.whoami()["name"]
     else:
         namespace = organization
+    args["namespace"] = namespace
     repo_url = f"https://huggingface.co/spaces/{namespace}/{module_slug}"
 
     create_repo(namespace + "/" + module_slug, repo_type="space", space_sdk="gradio", private=args["private"])
