@@ -1,0 +1,95 @@
+# Creating and sharing a new evaluation
+
+All evaluation modules, be it metrics, comparisons, or measurements live on the 🤗 Hub in a Space (see for example [Accuracy](https://huggingface.co/spaces/evaluate-metric/accuracy)). In principle, you could setup a new Space and add a new module following the same structure. However, we added a CLI that makes creating a new evaluation module much easier:
+
+```bash
+evaluate-cli create "My Metric" module_type="metric"
+```
+
+This will create a new Space on the 🤗 Hub, clone it locally, and populate it with a template. Instructions how to fill the template will be displayed in the terminal, but are also explained here in more detail.
+
+## Module script
+
+The evaluation module script (the file with suffix `*.py`) is the core of the new module and includes all the code for computing the evaluation.
+
+### Attributes
+
+Start by adding some information about your evalution module in [`EvaluationModule._info`]. The most important attributes you should specify are:
+
+1. [`EvaluationModuleInfo.description`] provides a brief description about your evalution module.
+
+2. [`EvaluationModuleInfo.citation`] contains a BibTex citation for the evalution module.
+
+3. [`EvaluationModuleInfo.inputs_description`] describes the expected inputs and outputs. It may also provide an example usage of the evalution module.
+
+4. [`EvaluationModuleInfo.features`] defines the name and type of the predictions and references. This has to be either a single `datasets.Features` or a list of `datasets.Features` objects if multiple input types are allowed.
+
+Then, we can move on to prepare everything before the actualy computation.
+
+### Download
+
+Some evaluation modules require some external data such as NLTK that requires resources or the BLEURT metric that requires checkpoints. You can implement these downloads in [`EvaluationModule._download_and_prepare`], which downloads and caches the resources via the `dlmanager`. An simplified example on how BLEURT downloads and loads a checkpoint:
+
+```py
+def _download_and_prepare(self, dl_manager):
+    model_path = dl_manager.download_and_extract(CHECKPOINT_URLS[self.config_name])
+    self.scorer = score.BleurtScorer(os.path.join(model_path, self.config_name))
+```
+
+Or if you need to download the NLTK `"punkt"` resources:
+
+```py
+def _download_and_prepare(self, dl_manager):
+    import nltk
+    nltk.download("punkt")
+```
+
+Next, we need to define how the computation of the evaluatio module works.
+
+### Compute
+
+The computation is performed in the [`EvaluationModle._compute`] method. It takes the same arguments as `EvaluationModuleInfo.features` and should then return the result as a dictionary. Here an example of a exact match metric:
+
+
+```py
+def _compute(self, references, predictions):
+    em = sum([r==p for r, p in zip(references, predictions)])/len(references)
+    return {"exact_match": em}
+```
+
+This method is used when you call `.compute()` later on.
+
+## Readme
+
+When you use the `evalute-cli` to setup the evaluation module the Readme structure and instructions are automatically created. It should include a general description of the metric, information about its input/output format, examples as well as information about its limiations or biases and references. 
+
+## Requirements
+
+If your evaluation modules has additional dependencies (e.g. `sklearn` or `nltk`) the `requirements.txt` files is the place to put them. The file follows the `pip` format and you can list all dependencies there.
+
+## App
+
+The `app.py` is where the Spaces widget lives. In general it looks like the following and does not require any changes:
+
+```py
+import evaluate
+from evaluate.utils import launch_gradio_widget
+
+
+module = evaluate.load("lvwerra/element_count")
+launch_gradio_widget(module)
+```
+
+If you want a custom widget you could add your gradio app here.
+
+## Push to Hub
+
+Finally, when you are done with all the above changes it is time to push your evaluation module to the hub. To do so navigate to the folder of your module and git add/commit/push the changes to the hub:
+
+```
+cd PATH_TO_MODULE
+git add .
+git commit -m "Add my new, shiny module."
+git push
+```
+Tada 🎉! Your evaluation module is now on the 🤗 Hub and ready to be used by everybody!

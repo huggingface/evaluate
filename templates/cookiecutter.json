@@ -4,5 +4,6 @@
     "module_description": "This new module is designed to solve this great ML task and is crafted with a lot of care and love.",
     "module_slug": "{{ cookiecutter.module_name|lower|replace(' ', '_') }}",
     "module_class_name": "{{ cookiecutter.module_name|replace(' ', '') }}",
+    "namespace": "",
     "dataset_name": ""
 }

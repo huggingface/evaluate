@@ -35,8 +35,9 @@ from transformers.pipelines import TASK_ALIASES
 from transformers.pipelines import check_task as check_pipeline_task
 
 from .evaluator import Evaluator, TextClassificationEvaluator
+from .hub import push_to_hub
 from .info import EvaluationModuleInfo
-from .inspect import inspect_metric, list_metrics
+from .inspect import inspect_evaluation_module, list_evaluation_modules
 from .loading import load
 from .module import EvaluationModule
 from .saving import save

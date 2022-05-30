@@ -4,7 +4,7 @@ datasets:
 - {{ cookiecutter.dataset_name }} 
 tags:
 - evaluate
-- {{ cookiecutter.module_name }}
+- {{ cookiecutter.module_type }}
 sdk: gradio
 sdk_version: 3.0.2
 app_file: app.py

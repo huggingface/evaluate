@@ -1,0 +1,68 @@
+# Installation
+
+Before you start, you will need to setup your environment and install the appropriate packages. 🤗 Evaluate is tested on **Python 3.7+**.
+
+## Virtual environment
+
+You should install 🤗 Evaluate in a [virtual environment](https://docs.python.org/3/library/venv.html) to keep everything neat and tidy.
+
+1. Create and navigate to your project directory:
+
+   ```bash
+   mkdir ~/my-project
+   cd ~/my-project
+   ```
+
+2. Start a virtual environment inside the directory:
+
+   ```bash
+   python -m venv .env
+   ```
+
+3. Activate and deactivate the virtual environment with the following commands:
+
+   ```bash
+   # Activate the virtual environment
+   source .env/bin/activate
+   
+   # Deactivate the virtual environment
+   source .env/bin/deactivate
+   ```
+
+Once you have created your virtual environment, you can install 🤗 Evaluate in it.
+
+## pip
+
+The most straightforward way to install 🤗 Evaluate is with pip:
+
+```bash
+pip install evaluate
+```
+
+Run the following command to check if 🤗 Evaluate has been properly installed:
+
+```bash
+python -c "import evaluate; print(evaluate.load('accuracy').compute(references=[1], predictions=[1]))"
+```
+
+This should return:
+
+```bash
+{'accuracy': 1.0}
+```
+
+## source
+
+Building 🤗 Evaluate from source lets you make changes to the code base. To install from source, clone the repository and install with the following commands:
+
+```bash
+git clone https://github.com/huggingface/evaluate.git
+cd evaluate
+pip install -e .
+```
+
+Again, you can check if 🤗 Evaluate has been properly installed with:
+
+```bash
+python -c "import evaluate; print(evaluate.load('accuracy').compute(references=[1], predictions=[1]))"
+```
