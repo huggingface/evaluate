@@ -181,9 +181,27 @@ class TextClassificationEvaluator(Evaluator):
             element of the tuple is `None` for the `"simple"` strategy. For the `"bootstrap"` strategy, it contains
             a dictionary with the confidence interval and the standard error calculated for each metric key.
 
-        Example:
+        Examples:
 
-        """
+        ```python
+        >>> from evaluation import evaluator
+        >>> from datasets import Dataset, load_dataset
+
+        >>> e = evaluator("text-classification")
+        >>> data =  Dataset.from_dict(load_dataset("imdb")["test"][:2])
+
+        >>> scores, bootstrap = e.compute(
+        >>>     model_or_pipeline="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
+        >>>     data=data,
+        >>>     metric="accuracy",
+        >>>     input_column="text",
+        >>>     label_column="label",
+        >>>     label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
+        >>>     strategy="bootstrap",
+        >>>     n_resamples=10,
+        >>>     random_state=0
+        >>> )
+        ```"""
         # Prepare data.
         if data is None:
             raise ValueError(
