@@ -145,8 +145,8 @@ class TextClassificationEvaluator(Evaluator):
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
         random_state: Optional[int] = None,
-        input_column: str = "inputs",
-        label_column: str = "references",
+        input_column: str = "text",
+        label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
     ) -> Tuple[Dict[str, float], Any]:
         """
@@ -184,9 +184,9 @@ class TextClassificationEvaluator(Evaluator):
             random_state (`int`, *optional*, defaults to `None`):
                 The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
                 debugging.
-            input_column (`str`, defaults to `"inputs"`):
+            input_column (`str`, defaults to `"text"`):
                 the name of the column containing the text feature in the dataset specified by `data`.
-            label_column (`str`, defaults to `"inputs"`):
+            label_column (`str`, defaults to `"label"`):
                 the name of the column containing the labels in the dataset specified by `data`.
             label_mapping (`Dict[str, Number]`, *optional*, defaults to `None`):
                 We want to map class labels defined by the model in the pipeline to values consistent with those
