@@ -15,7 +15,7 @@ pinned: false
 
 ## Metric Description
 
-The TREC Eval metric combines a number of information retrieval metrics such as precision and nDCG. It is used to score rankings of retrieved documents with reference values.
+The TREC Eval metric combines a number of information retrieval metrics such as precision and normalized Discounted Cumulative Gain (nDCG). It is used to score rankings of retrieved documents with reference values.
 
 ## How to Use
 ```Python
@@ -143,4 +143,4 @@ The `trec_eval` metric requires the inputs to be in the TREC run and qrel format
 
 ## Further References
 
-- Hompage: https://github.com/joaopalotti/trectools
+- Homepage: https://github.com/joaopalotti/trectools
