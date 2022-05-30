@@ -14,6 +14,7 @@
 """Exact match test for model comparison."""
 
 import datasets
+import numpy as np
 
 import evaluate
 
@@ -27,16 +28,15 @@ _KWARGS_DESCRIPTION = """
 Args:
     predictions1 (`list` of `int`): Predicted labels for model 1.
     predictions2 (`list` of `int`): Predicted labels for model 2.
-    references (`list` of `int`): Ground truth labels.
 
 Returns:
-    exact_match (`float`): Dictionary containing exact_match rate. Possible values are between 0.0 and 100.0, inclusive.
+    exact_match (`float`): Dictionary containing exact_match rate. Possible values are between 0.0 and 1.0, inclusive.
 
 Examples:
     >>> exact_match = evaluate.load("exact_match", module_type="comparison")
-    >>> results = exact_match.compute(references=[1, 0, 1], predictions1=[1, 1, 1], predictions2=[1, 1, 1])
+    >>> results = exact_match.compute(predictions1=[1, 1, 1], predictions2=[1, 1, 1])
     >>> print(results)
-    {'exact_match': 100.0}
+    {'exact_match': 1.0}
 """
 
 
@@ -56,11 +56,10 @@ class ExactMatch(evaluate.EvaluationModule):
                 {
                     "predictions1": datasets.Value("int64"),
                     "predictions2": datasets.Value("int64"),
-                    "references": datasets.Value("int64"),
                 }
             ),
         )
 
-    def _compute(self, predictions1, predictions2, references):
-        exact_match = evaluate.load("exact_match", module_type="metric")
-        return exact_match.compute(references=predictions1, predictions=predictions2)
+    def _compute(self, predictions1, predictions2):
+        score_list = predictions1 == predictions2
+        return {"exact_match": np.mean(score_list)}
