@@ -1,8 +1,8 @@
 # Considerations for model evaluation
 
-Developing an ML model is rarely a one-shot deal: it often involves multiple stages of defining the model architecture and tuning hyper-parameters before converging on a final set. Responsible model evaluation is a key part of this process, and the 🤗  `evaluate` package is here to help!
+Developing an ML model is rarely a one-shot deal: it often involves multiple stages of defining the model architecture and tuning hyper-parameters before converging on a final set. Responsible model evaluation is a key part of this process, and 🤗 Evaluate is here to help!
 
-Here are some things to keep in mind when evaluating your model using the 🤗  `evaluate` package:
+Here are some things to keep in mind when evaluating your model using the 🤗 Evaluate library:
 
 ## Properly splitting your data
 
@@ -22,21 +22,21 @@ If the dataset you're using doesn't have a predefined train-test split, it is up
 Training and evaluating on the same split can misrepresent your results! If you overfit on your training data the evaluation results on that split will look great but the model will perform poorly on new data.
 </Tip>
 
-Depending on the size of the dataset, you can keep anywhere from 10-30% for evaluation and the rest for testing, while aiming to set up the test set to reflect the production data as close as possible. Check out [this thread](https://discuss.huggingface.co/t/how-to-split-main-dataset-into-train-dev-test-as-datasetdict/1090) for a more in-depth discussion of dataset splitting!
+Depending on the size of the dataset, you can keep anywhere from 10-30% for evaluation and the rest for training, while aiming to set up the test set to reflect the production data as close as possible. Check out [this thread](https://discuss.huggingface.co/t/how-to-split-main-dataset-into-train-dev-test-as-datasetdict/1090) for a more in-depth discussion of dataset splitting!
 
 ## The impact of class imbalance
 
-While many academic datasets, such as the [IMDb dataset](https://huggingface.co/datasets/imdb) of movie reviews, are perfectly balanced (as all things should be), most real-world datasets are not. In machine learning a *balanced dataset* corresponds to a datasets where all labels are represented equally. In the case of the IMDb dataset this means that there are as many positive as negative reviews in the dataset. In an imbalanced dataset this is not the case: in fraud detection for example there are usually many more non-fraud cases than fraud cases in the dataset.
+While many academic datasets, such as the [IMDb dataset](https://huggingface.co/datasets/imdb) of movie reviews, are perfectly balanced, most real-world datasets are not. In machine learning a *balanced dataset* corresponds to a datasets where all labels are represented equally. In the case of the IMDb dataset this means that there are as many positive as negative reviews in the dataset. In an imbalanced dataset this is not the case: in fraud detection for example there are usually many more non-fraud cases than fraud cases in the dataset.
 
 Having an imbalanced dataset can skew the results of your metrics. Imagine a dataset with 99 "non-fraud" cases and 1 "fraud" case. A simple model that always predicts "non-fraud" cases would give yield a 99% accuracy which might sound good at first until you realize that you will never catch a fraud case.
 
 Often, using more than one metric can help get a better idea of your model’s performance from different points of view. For instance, metrics like **[recall](https://huggingface.co/metrics/recall)** and **[precision](https://huggingface.co/metrics/precision)** can be used together, and the **[f1 score](https://huggingface.co/metrics/f1)** is actually the harmonic mean of the two.
 
-In cases where a dataset is balanced, using [accuracy](https://huggingface.co/metrics/accuracy) can be reflect the overall model performance:
+In cases where a dataset is balanced, using [accuracy](https://huggingface.co/metrics/accuracy) can reflect the overall model performance:
 
 ![Balanced Labels](https://huggingface.co/datasets/evaluate/media/resolve/main/balanced-classes.png)
 
-In cases where there is an imbalance, using [F1 score](https://huggingface.co/metrics/f1)can be a better representation of performance, given that it encompasses both precision and recall.
+In cases where there is an imbalance, using [F1 score](https://huggingface.co/metrics/f1) can be a better representation of performance, given that it encompasses both precision and recall.
 
 ![Imbalanced Labels](https://huggingface.co/datasets/evaluate/media/resolve/main/imbalanced-classes.png)
 
@@ -64,7 +64,7 @@ When evaluating models, **interpretability** (i.e. the ability to *interpret* re
 
 For instance, metrics such as [exact match](https://huggingface.co/metrics/exact_match) have a set range (between 0 and 1, or 0% and 100%) and are easily understandable to users: for a pair of strings, the exact match score is 1 if the two strings are the exact same, and 0 otherwise.
 
-Other metrics, such as [BLEU](https://huggingface.co/metrics/bleu) are harder to interpret: while they also range between 0 and 1, it can vary greatly depending on which parameters are used to generate the scores, especially when different tokenization and normalization techniques are used (see the [metric card](https://github.com/huggingface/evaluate/tree/main/metrics/bleu) for more information about BLEU limitations). This means that it is difficult to interpret a BLEU score without having more information procedure used for obtaining it.
+Other metrics, such as [BLEU](https://huggingface.co/metrics/bleu) are harder to interpret: while they also range between 0 and 1, they can vary greatly depending on which parameters are used to generate the scores, especially when different tokenization and normalization techniques are used (see the [metric card](https://github.com/huggingface/evaluate/tree/main/metrics/bleu) for more information about BLEU limitations). This means that it is difficult to interpret a BLEU score without having more information about the procedure used for obtaining it.
 
 Interpretability can be more or less important depending on the evaluation use case, but it is a useful aspect of model evaluation to keep in mind, since communicating and comparing model evaluations is an important part of responsible machine learning.
 
@@ -83,6 +83,6 @@ When doing online model evaluation, there is often a trade-off to be done betwee
 
 All models and all metrics have their limitations and biases, which depend on the way in which they were trained, the data that was used, and their intended uses. It is important to measure and communicate these limitations clearly to prevent misuse and unintended impacts, for instance via [model cards](https://huggingface.co/course/chapter4/4?fw=pt) which document the training and evaluation process.
 
-Measuring biases can be done by evaluating models on datasets such as [Wino Bias](https://huggingface.co/datasets/wino_bias) of [MD Gender Bias](https://huggingface.co/datasets/md_gender_bias), and by doing [Interactive Error Analyis](https://huggingface.co/spaces/nazneen/error-analysis) to try to identify which subsets of the evaluation dataset a model performs poorly on.
+Measuring biases can be done by evaluating models on datasets such as [Wino Bias](https://huggingface.co/datasets/wino_bias) or [MD Gender Bias](https://huggingface.co/datasets/md_gender_bias), and by doing [Interactive Error Analyis](https://huggingface.co/spaces/nazneen/error-analysis) to try to identify which subsets of the evaluation dataset a model performs poorly on.
 
 We are currently working on additional measurements that can be used to quantify different dimensions of bias in both models and datasets -- stay tuned for more documentation on this topic!
