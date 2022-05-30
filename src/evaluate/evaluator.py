@@ -102,10 +102,10 @@ class TextClassificationEvaluator(Evaluator):
     """
     Text classification evaluator.
 
-    This text classification pipeline can currently be loaded from [`evaluator`] using the following task identifier:
-    `"sentiment-analysis"` (for classifying sequences according to positive or negative sentiments).
+    This text classification evaluator can currently be loaded from [`evaluator`] using the default task name
+    `text-classification` or with a `"sentiment-analysis"` alias.
 
-    Methods in this class assume a data format compatible with [`TextClassificationPipeline`] - a single textual
+    Methods in this class assume a data format compatible with the [`TextClassificationPipeline`] - a single textual
     feature as input and a categorical label as output.
     """
 
@@ -134,7 +134,7 @@ class TextClassificationEvaluator(Evaluator):
         label_mapping: Optional[Dict[str, Number]] = None,
     ) -> Tuple[Dict[str, float], Any]:
         """
-        Compute metrics for a given pipeline and dataset combination.
+        Compute the metric for a given pipeline and dataset combination.
 
         Args:
             model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`,
@@ -147,8 +147,8 @@ class TextClassificationEvaluator(Evaluator):
                 Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
                 name, and load it. Otherwise we assume it represents a pre-loaded dataset.
             metric (`str` or `EvaluationModule`, defaults to `None`"
-                Specifies the metric we use run.  If it is of type `str`, we treat it as the metric
-                name, and load it. Otherwise we assume it represents a pre-loaded metric.
+                Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
+                load it. Otherwise we assume it represents a pre-loaded metric.
             tokenizer: (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
                 Argument can be used to overwrite a default tokenizer if `model_or_pipeline` represents a model for
                 which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
@@ -284,19 +284,18 @@ def get_supported_tasks() -> List[str]:
 
 def check_task(task: str) -> Dict:
     """
-    Checks an incoming task string, to validate it's correct and return the default Evaluator class and default metric
+    Checks an incoming task string, to validate it's correct and returns the default Evaluator class and default metric
     name. It first performs a check to validata that the string is a valid `Pipeline` task, then it checks if it's a
-    valid. `Evaluator` task. `Evaluator` tasks are a substet of `Pipeline tasks.
+    valid `Evaluator` task. `Evaluator` tasks are a substet of `Pipeline` tasks.
 
     Args:
         task (`str`):
-            The task defining which pipeline will be returned. Currently accepted tasks are:
+            The task defining which evaluator will be returned. Currently accepted tasks are:
 
             - `"text-classification"` (alias `"sentiment-analysis"` available)
 
     Returns:
-        task_defaults: `dict` The actual dictionary required to initialize the pipeline
-        and some extra task options for parametrized tasks like "translation_XX_to_YY"
+        task_defaults: `dict`, contains the implementasion class of a give Evaluator and the default metric name.
     """
     if task in TASK_ALIASES:
         task = TASK_ALIASES[task]
@@ -311,8 +310,8 @@ def evaluator(task: str = None) -> Evaluator:
     """
     Utility factory method to build an [`Evaluator`].
 
-    Evaluators encapsulate a task and a default function. They are intended to simplify the evaluation
-    of multiple combinations of models, datasets and metrics for a given task.
+    Evaluators encapsulate a task and a default metric name. They leverate `pipeline` functionalify from `transformers`
+    to simplify the evaluation of multiple combinations of models, datasets and metrics for a given task.
 
     Args:
         task (`str`):
