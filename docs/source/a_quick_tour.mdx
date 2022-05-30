@@ -10,11 +10,11 @@ There are different aspects of a typical machine learning pipeline that can be e
 - **Comparison**: A comparison is used to compare two models. This can for example be done by comparing their predictions to ground truth labels and computing their agreement. You can find all integrated comparisons at [evaluate-comparison](hf.co/evaluate-comparison).
 - **Measurement**: The dataset is as important as the model trained on it. With measurements one can investigate a dataset's properties. You can find all integrated measurements at [evaluate-measurement](hf.co/evaluate-measurement).
 
-For all of these methods there is a single entry point: [`evaluate.load`]!
+Each metric, comparison, and measurement is a separate Python module, but for using any of them, there is a single entry point: `evaluate.load`!
 
 ## Load
 
-Any metric, comparison, or measurement is loaded with the `evaluate.load` function: 
+Any metric, comparison, or measurement is loaded with the `evaluate.load` function:
 
 ```py
 >>> import evaluate
@@ -37,7 +37,7 @@ Besides the modules implemented in 🤗 Evaluate you can also load any community
 
 ## Module attributes
 
-All evalution modules come with a range of useful attributes that help to use a module stored in a `EvaluationModuleInfo` object.
+All evalution modules come with a range of useful attributes that help to use a module stored in a [`EvaluationModuleInfo`](https://moon-ci-docs.huggingface.co/docs/evaluate/pr_72/en/package_reference/main_classes#evaluate.EvaluationModuleInfo) object.
 
 |Attribute|Description|
 |---|---|
@@ -105,10 +105,10 @@ Now that we know how the evaluation module works and what should go in there we 
 2. Incremental
 
 
-In the incremental approach the necessary inputs are added to the module with [`add`] or [`add_batch`] and the score is calculated at the end with [`compute`]. Alternatively, one can pass all the inputs at once to [`compute`]. Let's have a look at the two approaches.
+In the incremental approach the necessary inputs are added to the module with `add` or `add_batch` and the score is calculated at the end with `compute()`. Alternatively, one can pass all the inputs at once to `compute()`. Let's have a look at the two approaches.
 
-### `compute`
-The simplest way to calculate the score of an evaluation module is by calling [`compute`] directly with the necessary inputs. Simply pass the inputs as seen in `features` to the `compute` method.
+### `compute()`
+The simplest way to calculate the score of an evaluation module is by calling `compute()` directly with the necessary inputs. Simply pass the inputs as seen in `features` to the `compute()` method.
 
 ```py
 >>> accuracy.compute(references=[0,1,0,1], predictions=[1,0,0,1])
@@ -118,7 +118,7 @@ Evaluation modules return the results in a dictionary. However, in some instance
 
 ### `add` and `add_batch`
 
-In many evaluation pipelines you build the predictions iteratively such as in a for-loop. In that case you could store the predictions in a list and at the end pass them to `compute`. With `add` and `add_batch` you can circumvent the step of storing the predictions separately. If you are only creating single predictions at a time you can use `add`:
+In many evaluation pipelines you build the predictions iteratively such as in a for-loop. In that case you could store the predictions in a list and at the end pass them to `compute()`. With `add` and `add_batch` you can circumvent the step of storing the predictions separately. If you are only creating single predictions at a time you can use `add`:
 
 ```py
 >>> for ref, pred in zip([0,1,0,1], [1,0,0,1]):
@@ -127,7 +127,7 @@ In many evaluation pipelines you build the predictions iteratively such as in a 
 {'accuracy': 0.5}
 ```
 
-Once you have gathered all predictions you can call `compute` to compute the score based on all stored values. When getting predictions and references in batches you can use `add_batch` which adds a list elements for later processing. The rest works as with `add`:
+Once you have gathered all predictions you can call `compute()` to compute the score based on all stored values. When getting predictions and references in batches you can use `add_batch` which adds a list elements for later processing. The rest works as with `add`:
 
 ```py
 >>> for refs, preds in zip([[0,1],[0,1]], [[1,0],[0,1]]):
