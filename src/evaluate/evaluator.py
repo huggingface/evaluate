@@ -14,12 +14,13 @@
 
 from abc import ABC, abstractmethod
 from numbers import Number
+from selectors import EpollSelector
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
 from datasets import Dataset, load_dataset
 from scipy.stats import bootstrap
-from transformers import Pipeline, pipeline
+from transformers import Pipeline, PreTrainedModel, PreTrainedTokenizer, TFPreTrainedModel, pipeline
 from transformers.pipelines import SUPPORTED_TASKS as SUPPORTED_PIPELINE_TASKS
 from transformers.pipelines import TASK_ALIASES
 from transformers.pipelines import check_task as check_pipeline_task
@@ -27,6 +28,10 @@ from typing_extensions import Literal
 
 from .loading import load
 from .module import EvaluationModule
+from .utils.logging import get_logger
+
+
+logger = get_logger(__name__)
 
 
 class Evaluator(ABC):
@@ -64,7 +69,8 @@ class Evaluator(ABC):
     @abstractmethod
     def compute(
         self,
-        model_or_pipeline=None,
+        model_or_pipeline: Union[str, Pipeline, Callable, PreTrainedModel, TFPreTrainedModel] = None,
+        tokenizer: Optional[Union[str, PreTrainedTokenizer]] = None,
         data: Union[str, Dataset] = None,
         metric: Union[str, EvaluationModule] = None,
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -88,7 +94,8 @@ class TextClassificationEvaluator(Evaluator):
 
     def compute(
         self,
-        model_or_pipeline=None,
+        model_or_pipeline: Union[str, Pipeline, Callable, PreTrainedModel, TFPreTrainedModel] = None,
+        tokenizer: Optional[Union[str, PreTrainedTokenizer]] = None,
         data: Union[str, Dataset] = None,
         metric: Union[str, EvaluationModule] = None,
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -98,32 +105,12 @@ class TextClassificationEvaluator(Evaluator):
         label_column: str = "references",
         label_mapping: Optional[Dict[str, Number]] = None,
     ) -> Tuple[Dict[str, float], Any]:
+        # Prepare data.
         if data is None:
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
         data = load_dataset(data) if isinstance(data, str) else data
-
-        if model_or_pipeline is None:
-            pipe = pipeline(self.task)
-        elif isinstance(model_or_pipeline, Pipeline) or isinstance(model_or_pipeline, Callable):
-            pipe = model_or_pipeline
-        else:
-            pipe = pipeline(self.task, model=model_or_pipeline)
-        if pipe.task != self.task:
-            raise ValueError(
-                f"Incompatible `model_or_pipeline`. Please specify `model_or_pipeline` compatible with the `{self.task}` task."
-            )
-
-        if metric is None:
-            if self.default_metric_name is None:
-                raise ValueError(
-                    f"`Evaluator` doesn't specify a default metric. Please specify a valid `metric` argument."
-                )
-            metric = load(self.default_metric_name)
-        elif isinstance(metric, str):
-            metric = load(metric)
-
         if input_column not in data.column_names:
             raise ValueError(
                 f"Invalid `input_column` {input_column} specified. The dataset contains the following columns: {data.column_names}."
@@ -133,6 +120,36 @@ class TextClassificationEvaluator(Evaluator):
                 f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
             )
 
+        # Prepare pipeline.
+        if (
+            isinstance(model_or_pipeline, PreTrainedModel)
+            or isinstance(model_or_pipeline, TFPreTrainedModel)
+            or isinstance(model_or_pipeline, str)
+        ):
+            pipe = pipeline(self.task, model=model_or_pipeline, tokenizer=tokenizer)
+        else:
+            if model_or_pipeline is None:
+                pipe = pipeline(self.task)
+            else:
+                pipe = model_or_pipeline
+            if tokenizer is not None:
+                logger.warning("Ignoring the value of the `tokenizer` argument.")
+        if pipe.task != self.task:
+            raise ValueError(
+                f"Incompatible `model_or_pipeline`. Please specify `model_or_pipeline` compatible with the `{self.task}` task."
+            )
+
+        # Prepare metric.
+        if metric is None:
+            if self.default_metric_name is None:
+                raise ValueError(
+                    f"`Evaluator` doesn't specify a default metric. Please specify a valid `metric` argument."
+                )
+            metric = load(self.default_metric_name)
+        elif isinstance(metric, str):
+            metric = load(metric)
+
+        # Core computations.
         references = data[label_column]
         predictions = self._compute_predictions(pipe, data[input_column], label_mapping=label_mapping)
         result = metric.compute(predictions=predictions, references=references)
@@ -161,8 +178,7 @@ def get_supported_tasks() -> List[str]:
 
 def check_task(task: str) -> Dict:
     """
-    Checks an incoming task string, to validate it's correct and return the default Pipeline and Model classes, and
-    default models if they exist.
+    Checks an incoming task string, to validate it's correct and return the default Evaluator class metric name.
     """
     if task in TASK_ALIASES:
         task = TASK_ALIASES[task]

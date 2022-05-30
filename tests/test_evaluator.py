@@ -17,7 +17,7 @@
 from unittest import TestCase
 
 from datasets import load_dataset, load_metric
-from transformers import pipeline
+from transformers import AutoTokenizer, BertForSequenceClassification, pipeline
 
 from evaluate import TextClassificationEvaluator, evaluator
 
@@ -25,23 +25,36 @@ from evaluate import TextClassificationEvaluator, evaluator
 class TestEvaluator(TestCase):
     def test_evaluator(self):
         pipe = pipeline("text-classification")
+        model = BertForSequenceClassification.from_pretrained(
+            "huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli"
+        )
+        tokenizer = AutoTokenizer.from_pretrained("huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli")
         accuracy = load_metric("accuracy")
         ds = load_dataset("imdb")
         ds = ds["test"].shuffle().select(range(32))  # just for speed
         ds = ds.rename_columns({"text": "inputs", "label": "references"})
 
         ev = evaluator("text-classification")
-        print(ev.compute(pipe, ds, label_mapping={"NEGATIVE": 0, "POSITIVE": 1}))
+        print(ev.compute(pipe, data=ds, label_mapping={"NEGATIVE": 0, "POSITIVE": 1}))
         print(
             ev.compute(
                 model_or_pipeline="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
                 data=ds,
                 label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
                 strategy="bootstrap",
-                n_resamples=99,
+                n_resamples=9,
             )
         )
-
+        print(
+            ev.compute(
+                model_or_pipeline=model,
+                tokenizer=tokenizer,
+                data=ds,
+                label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
+                strategy="bootstrap",
+                n_resamples=9,
+            )
+        )
         print(
             ev.compute(
                 data=ds,
