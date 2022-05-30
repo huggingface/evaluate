@@ -58,7 +58,7 @@ class Evaluator(ABC):
         self.default_metric_name = default_metric_name
 
     @abstractmethod
-    def _compute_predictions(self, pipe: Pipeline, inputs, **predictions_parameters: Dict):
+    def _compute_predictions(self, pipe: "Pipeline", inputs, **predictions_parameters: Dict):
         raise NotImplementedError()
 
     @staticmethod
@@ -98,7 +98,7 @@ class Evaluator(ABC):
     @abstractmethod
     def compute(
         self,
-        model_or_pipeline: Union[str, Pipeline, Callable, PreTrainedModel, TFPreTrainedModel] = None,
+        model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
         data: Union[str, Dataset] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, PreTrainedTokenizer]] = None,
@@ -128,7 +128,7 @@ class TextClassificationEvaluator(Evaluator):
     def __init__(self, task="text-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
-    def _compute_predictions(self, pipe: Pipeline, inputs, label_mapping: Dict[str, Number] = None) -> List[Number]:
+    def _compute_predictions(self, pipe: "Pipeline", inputs, label_mapping: Dict[str, Number] = None) -> List[Number]:
         predictions = pipe(inputs, truncation=True)
         return [
             label_mapping[element["label"]] if label_mapping is not None else element["label"]
@@ -137,7 +137,7 @@ class TextClassificationEvaluator(Evaluator):
 
     def compute(
         self,
-        model_or_pipeline: Union[str, Pipeline, Callable, PreTrainedModel, TFPreTrainedModel] = None,
+        model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
         data: Union[str, Dataset] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, PreTrainedTokenizer]] = None,
@@ -349,7 +349,10 @@ def evaluator(task: str = None) -> Evaluator:
     >>> # Sentiment analysis evaluator
     >>> evaluator("sentiment-analysis")
     ```"""
-
+    if not TRANSFORMERS_AVAILABLE:
+        raise ImportError(
+            "If you want to use the `Evaluator` you need `transformers`. Run `pip install evaluate[transformers]`."
+        )
     targeted_task = check_task(task)
     evaluator_class = targeted_task["implementation"]
     default_metric_name = targeted_task["default_metric_name"]
