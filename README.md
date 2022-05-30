@@ -81,4 +81,4 @@ TODO : make step-by-step guide similar to the one for [datasets](https://hugging
 
 ## Credits
 
-Thanks to @marella for letting us use the `evaluate` namespace on PyPi previously used by his [libary](https://github.com/marella/evaluate).
+Thanks to @marella for letting us use the `evaluate` namespace on PyPi previously used by his [library](https://github.com/marella/evaluate).
