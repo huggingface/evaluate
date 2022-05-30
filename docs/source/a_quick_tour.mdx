@@ -155,6 +155,88 @@ A common way to overcome this issue is to fallback on single process evaluation.
 
 This solution allows 🤗 Evaluate to perform distributed predictions, which is important for evaluation speed in distributed settings. At the same time, you can also use complex non-additive metrics without wasting valuable GPU or CPU memory.
 
-## Save and share
+## Save and push to hub
 
-**TODO**: add references to save and push_to_hub.
+Saving and sharing evaluation results is an important step. We provide the [`evaluate.save()`] function to easily save metrics result. You can either point pass a specific filename or a directory. In the latter case the results are saved in a file with an automatically created file name. Besides the directory or file name the function takes any key-value pairs as inputs and stores them in a JSON file.
+
+```py
+result = accuracy.compute(references=[0,1,0,1], predictions=[1,0,0,1])
+
+hyperparams = {"model": "bert-base-uncased"}
+evaluate.save("./results/"experiment="run 42", **result, **hyperparams)
+>>> PosixPath('results/result-2022_05_30-22_09_11.json')
+```
+
+The content of the JSON file look like the following:
+
+```json
+{
+    "experiment": "run 42",
+    "accuracy": 0.5,
+    "model": "bert-base-uncased",
+    "_timestamp": "2022-05-30T22:09:11.959469",
+    "_git_commit_hash": "123456789abcdefghijkl",
+    "_evaluate_version": "0.1.0",
+    "_python_version": "3.9.12 (main, Mar 26 2022, 15:51:15) \n[Clang 13.1.6 (clang-1316.0.21.2)]",
+    "_interpreter_path": "/Users/leandro/git/evaluate/env/bin/python"
+}
+```
+
+In addition to the specified fields it also contains information about the system useful for reproducing the results. 
+
+Besides storing the results locally we also want to report them on the model's repository on the hub. With the [`evaluate.push_to_hub()`] you can easily report an evaluation results to the model's repository:
+
+```py
+evaluate.push_to_hub(
+  model_id="huggingface/gpt2-wikitext2",  # model repository on hub
+  metric_value=0.5,                       # metric value
+  metric_type="bleu",                     # metric name, e.g. accuracy.name
+  metric_name="BLEU",                     # pretty name which is displayed
+  dataset_type="wikitext",                # dataset name on the hub
+  dataset_name="WikiText",                # pretty name
+  dataset_split="test",                   # dataset split used
+  task_type="text-generation",            # task id, see https://github.com/huggingface/datasets/blob/master/src/datasets/utils/resources/tasks.json
+  task_name="Text Generation"             # pretty name for task
+)
+```
+
+## Evaluator
+
+The [`evaluate.evaluator()`] provides integrate the inference part of evaluation and only requires a model, dataset, metric in contrast to the metrics in `EvaluationModule`s that require the model's predictions. As such it is easier to evaluate a model on a dataset with a given metric. To make that possible it uses the `Pipeline` abstraction from `transformers`. However, you can use your own framework as long as it follows the `Pipeline` interface.
+
+To make an evaluation with the `evaluator` let's load a pipeline with an model trained on IMDb, the IMDb test split and the accuracy metric. 
+
+```python
+from transformers import pipeline
+from datasets import load_dataset
+from evaluate import evaluator
+import evaluate
+
+pipe = pipeline("text-classification", model="lvwerra/distilbert-imdb", device=0)
+data = load_dataset("imdb", split="test").shuffle().select(range(1000))
+metric = evaluate.load("accuracy")
+```
+
+Then we can create an evaluator for text classification and pass the three objects to the `compute` method. With the label mapping we provide a method to align the pipeline outputs with the label column in the dataset:
+
+```python
+eval = evaluator("text-classification")
+
+results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric, label_mapping={"NEGATIVE": 0, "POSITIVE": 1},)
+
+print(results)
+>>> {'accuracy': 0.934}
+```
+
+Calculating the value of the metric alone is often not enough to know if a model performs significantly better than another one. With _bootstrapping_ we compute confidence intervales and the standard error which helps estimate how stable a score is:
+
+```python
+results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric,
+                       label_mapping={"NEGATIVE": 0, "POSITIVE": 1},
+                       strategy="bootstrap", n_resamples=200)
+
+print(results)
+>>> {'accuracy': {'confidence_interval': (0.906, 0.9406749892841922), 'standard_error': 0.00865213251082787, 'score': 0.923}}
+```
+
+The evaluator expects a `"text"` and `"label"` column for the data input. If your dataset differs you can provide the columns with the keywords `input_column="text"` and `label_column="label"`. Currently only `"text-classification"` is supported with more tasks being added in the future.
