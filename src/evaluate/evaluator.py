@@ -30,11 +30,7 @@ class Evaluator(ABC):
         self.default_metric = default_metric
 
     @abstractmethod
-    def _compute_predictions(self, pipe: Pipeline, data: Dataset, label_mapping: Dict[str, Number] = None):
-        raise NotImplementedError()
-
-    @abstractmethod
-    def _references(self, data: Dataset):
+    def _compute_predictions(self, pipe: Pipeline, inputs, **predictions_parameters: Dict):
         raise NotImplementedError()
 
     @staticmethod
@@ -67,11 +63,10 @@ class Evaluator(ABC):
         pipe: Union[Pipeline, Callable] = None,
         data: Union[str, Dataset] = None,
         metric: Union[str, Metric] = None,
-        col_mapping: Optional[Dict[str, str]] = None,
-        label_mapping: Optional[Dict[str, Number]] = None,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
+        **compute_parameters: Dict,
     ):
         raise NotImplementedError()
 
@@ -80,17 +75,12 @@ class TextClassificationEvaluator(Evaluator):
     def __init__(self, task="text-classification", default_metric=None):
         super().__init__(task, default_metric=default_metric)
 
-    def _compute_predictions(
-        self, pipe: Pipeline, data: Dataset, label_mapping: Dict[str, Number] = None
-    ) -> List[Number]:
-        predictions = pipe(data["inputs"], truncation=True)
+    def _compute_predictions(self, pipe: Pipeline, inputs, label_mapping: Dict[str, Number] = None) -> List[Number]:
+        predictions = pipe(inputs, truncation=True)
         return [
             label_mapping[element["label"]] if label_mapping is not None else element["label"]
             for element in predictions
         ]
-
-    def _references(self, data: Dataset) -> List[Any]:
-        return data["references"]
 
     def compute(
         self,
@@ -98,11 +88,12 @@ class TextClassificationEvaluator(Evaluator):
         pipe: Union[Pipeline, Callable] = None,
         data: Union[str, Dataset] = None,
         metric: Union[str, Metric] = None,
-        col_mapping: Optional[Dict[str, str]] = None,
-        label_mapping: Optional[Dict[str, Number]] = None,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
+        input_column: str = "inputs",
+        label_column: str = "references",
+        label_mapping: Optional[Dict[str, Number]] = None,
     ) -> Tuple[Dict[str, float], Any]:
         assert data is not None
 
@@ -123,11 +114,16 @@ class TextClassificationEvaluator(Evaluator):
         assert metric is not None
 
         data = load_dataset(data) if isinstance(data, str) else data
-        if col_mapping is not None:
-            data = data.rename_columns(col_mapping)
 
-        predictions = self._compute_predictions(pipe, data, label_mapping=label_mapping)
-        references = self._references(data)
+        assert (
+            input_column in data.column_names
+        ), f"Invalid `input_column` specified: the dataset contains the columns {data.column_names}."
+        assert (
+            label_column in data.column_names
+        ), f"Invalid `label_column` specified: the dataset contains the columns {data.column_names}."
+
+        references = data[label_column]
+        predictions = self._compute_predictions(pipe, data[input_column], label_mapping=label_mapping)
         result = metric.compute(predictions=predictions, references=references)
 
         bootstrap = (
