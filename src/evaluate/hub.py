@@ -16,7 +16,7 @@ def get_allowed_tasks(tasks_dict):
 
 
 def push_to_hub(
-    repo_id: str,
+    model_id: str,
     task_type: str,
     dataset_type: str,
     dataset_name: str,
@@ -33,10 +33,10 @@ def push_to_hub(
     overwrite: bool = False,
 ):
     r"""
-    Pushes the result of a metric to the Hub, adding it to the specified model's card.
+    Pushes the result of a metric to the metadata of a model repository in the Hub.
 
     Args:
-        repo_id (``str``): Model id from https://hf.co/datasets.
+        model_id (``str``): Model id from https://hf.co/models.
         task_type (``str``): Task id, refer to
             https://github.com/huggingface/datasets/blob/master/src/datasets/utils/resources/tasks.json for allowed values.
         dataset_type (``str``): Dataset id from https://hf.co/datasets.
@@ -50,7 +50,7 @@ def push_to_hub(
         dataset_split (``str``, optional): Name of split used for metric computation.
         dataset_revision (``str``, optional): Git hash for the specific version of the dataset.
         dataset_args (``dict[str, int]``, optional): Additional arguments passed to datasets.load_dataset().
-        metric_config (``str``, optional): Configuration for the metric, e.g. (e.g. the GLUE metric has a configuration for each subset)
+        metric_config (``str``, optional): Configuration for the metric (e.g. the GLUE metric has a configuration for each subset)
         metric_args (``dict[str, int]``, optional): Arguments passed during Metric.compute().
         overwrite (``bool``, optional, defaults to `False`): If set to `True` an existing metric field can be overwritten, otherwise
              attempting to overwrite any existing fields will cause an error.
@@ -59,7 +59,7 @@ def push_to_hub(
 
     ```python
     >>> push_to_hub(
-    ...     repo_id="huggingface/gpt2-wikitext2",
+    ...     model_id="huggingface/gpt2-wikitext2",
     ...     metric_value=0.5
     ...     metric_type="bleu",
     ...     metric_name="BLEU",
@@ -78,12 +78,12 @@ def push_to_hub(
     try:
         dataset_info(dataset_type)
     except requests.exceptions.HTTPError:
-        logger.warning(f"Dataset {dataset_type} not found on hf.co/datasets")
+        logger.warning(f"Dataset {dataset_type} not found on the Hub at hf.co/datasets/{dataset_type}")
 
     try:
-        model_info(repo_id)
+        model_info(model_id)
     except requests.exceptions.HTTPError:
-        raise ValueError(f"Model {repo_id} not found on the Hub at hf.co/{repo_id}")
+        raise ValueError(f"Model {model_id} not found on the Hub at hf.co/{model_id}")
 
     result = {
         "task": {
@@ -122,4 +122,4 @@ def push_to_hub(
 
     metadata = {"model-index": [{"results": [result]}]}
 
-    return metadata_update(repo_id=repo_id, metadata=metadata, overwrite=overwrite)
+    return metadata_update(repo_id=model_id, metadata=metadata, overwrite=overwrite)

@@ -72,7 +72,7 @@ class TestHub(TestCase):
 
     def test_push_metric_required_arguments(self, known_task_ids, metadata_update):
         push_to_hub(
-            repo_id="username/repo",
+            model_id="username/repo",
             metric_value=self.result["accuracy"],
             metric_name="Pretty Metric Name",
             metric_type=self.metric.name,
@@ -86,7 +86,7 @@ class TestHub(TestCase):
     def test_push_metric_missing_arguments(self, known_task_ids, metadata_update):
         with pytest.raises(TypeError):
             push_to_hub(
-                repo_id="username/repo",
+                model_id="username/repo",
                 metric_value=self.result["accuracy"],
                 metric_name="Pretty Metric Name",
                 metric_type=self.metric.name,
@@ -97,7 +97,7 @@ class TestHub(TestCase):
     def test_push_metric_invalid_arguments(self, known_task_ids, metadata_update):
         with pytest.raises(TypeError):
             push_to_hub(
-                repo_id="username/repo",
+                model_id="username/repo",
                 metric_value=self.result["accuracy"],
                 metric_name="Pretty Metric Name",
                 metric_type=self.metric.name,
@@ -109,7 +109,7 @@ class TestHub(TestCase):
 
     def test_push_metric_extra_arguments(self, known_task_ids, metadata_update):
         push_to_hub(
-            repo_id="username/repo",
+            model_id="username/repo",
             metric_value=self.result["accuracy"],
             metric_name="Pretty Metric Name",
             metric_type=self.metric.name,
@@ -130,7 +130,7 @@ class TestHub(TestCase):
     def test_push_metric_invalid_task_type(self, known_task_ids, metadata_update):
         with pytest.raises(ValueError):
             push_to_hub(
-                repo_id="username/repo",
+                model_id="username/repo",
                 metric_value=self.result["accuracy"],
                 metric_name="Pretty Metric Name",
                 metric_type=self.metric.name,
@@ -143,7 +143,7 @@ class TestHub(TestCase):
         with patch("evaluate.hub.dataset_info") as mock_dataset_info:
             mock_dataset_info.side_effect = requests.HTTPError()
             push_to_hub(
-                repo_id="username/repo",
+                model_id="username/repo",
                 metric_value=self.result["accuracy"],
                 metric_name="Pretty Metric Name",
                 metric_type=self.metric.name,
@@ -152,17 +152,17 @@ class TestHub(TestCase):
                 task_type="dummy-task",
             )
 
-            assert "Dataset dataset_type not found on hf.co/datasets" in self._caplog.text
+            assert "Dataset dataset_type not found on the Hub at hf.co/datasets/dataset_type" in self._caplog.text
             metadata_update.assert_called_once_with(
                 repo_id="username/repo", metadata=minimum_metadata, overwrite=False
             )
 
-    def test_push_metric_invalid_repo_id(self, known_task_ids, metadata_update):
+    def test_push_metric_invalid_model_id(self, known_task_ids, metadata_update):
         with patch("evaluate.hub.model_info") as mock_model_info:
             mock_model_info.side_effect = requests.HTTPError()
             with pytest.raises(ValueError):
                 push_to_hub(
-                    repo_id="username/bad-repo",
+                    model_id="username/bad-repo",
                     metric_value=self.result["accuracy"],
                     metric_name="Pretty Metric Name",
                     metric_type=self.metric.name,
