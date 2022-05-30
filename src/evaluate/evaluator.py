@@ -146,7 +146,7 @@ class TextClassificationEvaluator(Evaluator):
         if metric is None:
             if self.default_metric_name is None:
                 raise ValueError(
-                    f"`Evaluator` doesn't specify a default metric. Please specify a valid `metric` argument."
+                    "`Evaluator` doesn't specify a default metric. Please specify a valid `metric` argument."
                 )
             metric = load(self.default_metric_name)
         elif isinstance(metric, str):
