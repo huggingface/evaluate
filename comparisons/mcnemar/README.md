@@ -25,15 +25,21 @@ Where:
 * SE: Sensitivity (Test 1 positive; Test 2 negative)
 * SP: Specificity (Test 1 negative; Test 2 positive)
 
+In other words, SE and SP are the diagonal elements of the contingency table for the classifier predictions (`predictions1` and `predictions2`) with respect to the ground truth `references`.
+
 ## How to use 
 
-The McNemar comparison calculates the proportions of responses that exhibit disagreement between two classifiers. It is used to analyze paired nominal data. Its arguments are:
+The McNemar comparison calculates the proportions of responses that exhibit disagreement between two classifiers. It is used to analyze paired nominal data.
+
+## Inputs
+
+Its arguments are:
 
 `predictions1`: a list of predictions from the first model.
 
 `predictions2`: a list of predictions from the second model.
 
-`references`: a list of the grount truth reference labels.
+`references`: a list of the ground truth reference labels.
 
 ## Output values
 
@@ -56,7 +62,7 @@ print(results)
 
 ## Limitations and bias
 
-The McNemar test is a non-parametric test, so it has relatively few assumptions. It should be used used to analyze paired nominal data only.
+The McNemar test is a non-parametric test, so it has relatively few assumptions (basically only that the observations are independent). It should be used used to analyze paired nominal data only.
 
 ## Citations
 
