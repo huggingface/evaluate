@@ -17,17 +17,22 @@ from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
-from datasets import Dataset, load_dataset, load_metric
-from datasets.metric import Metric
+from datasets import Dataset, load_dataset
 from scipy.stats import bootstrap
 from transformers import Pipeline, pipeline
+from transformers.pipelines import SUPPORTED_TASKS as SUPPORTED_PIPELINE_TASKS
+from transformers.pipelines import TASK_ALIASES
+from transformers.pipelines import check_task as check_pipeline_task
 from typing_extensions import Literal
+
+from .loading import load
+from .module import EvaluationModule
 
 
 class Evaluator(ABC):
-    def __init__(self, task, default_metric=None):
+    def __init__(self, task: str, default_metric_name: str = None):
         self.task = task
-        self.default_metric = default_metric
+        self.default_metric_name = default_metric_name
 
     @abstractmethod
     def _compute_predictions(self, pipe: Pipeline, inputs, **predictions_parameters: Dict):
@@ -37,7 +42,7 @@ class Evaluator(ABC):
     def _compute_confidence_interval(
         predictions,
         references,
-        metric: Metric,
+        metric: EvaluationModule,
         metric_keys: List[str],
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
@@ -59,10 +64,9 @@ class Evaluator(ABC):
     @abstractmethod
     def compute(
         self,
-        model: str = None,
-        pipe: Union[Pipeline, Callable] = None,
+        model_or_pipeline=None,
         data: Union[str, Dataset] = None,
-        metric: Union[str, Metric] = None,
+        metric: Union[str, EvaluationModule] = None,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
@@ -72,8 +76,8 @@ class Evaluator(ABC):
 
 
 class TextClassificationEvaluator(Evaluator):
-    def __init__(self, task="text-classification", default_metric=None):
-        super().__init__(task, default_metric=default_metric)
+    def __init__(self, task="text-classification", default_metric_name=None):
+        super().__init__(task, default_metric_name=default_metric_name)
 
     def _compute_predictions(self, pipe: Pipeline, inputs, label_mapping: Dict[str, Number] = None) -> List[Number]:
         predictions = pipe(inputs, truncation=True)
@@ -84,10 +88,9 @@ class TextClassificationEvaluator(Evaluator):
 
     def compute(
         self,
-        model: str = None,
-        pipe: Union[Pipeline, Callable] = None,
+        model_or_pipeline=None,
         data: Union[str, Dataset] = None,
-        metric: Union[str, Metric] = None,
+        metric: Union[str, EvaluationModule] = None,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
@@ -95,32 +98,40 @@ class TextClassificationEvaluator(Evaluator):
         label_column: str = "references",
         label_mapping: Optional[Dict[str, Number]] = None,
     ) -> Tuple[Dict[str, float], Any]:
-        assert data is not None
-
-        pipe = (
-            pipeline(self.task, model=model)
-            if model is not None
-            else pipe
-            if pipe is not None
-            else pipeline(self.task)
-        )
-        assert pipe.task == self.task
-
-        metric = (
-            load_metric(metric)
-            if isinstance(metric, str)
-            else (metric if metric is not None else (self.default_metric if self.default_metric is not None else None))
-        )
-        assert metric is not None
-
+        if data is None:
+            raise ValueError(
+                "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
+            )
         data = load_dataset(data) if isinstance(data, str) else data
 
-        assert (
-            input_column in data.column_names
-        ), f"Invalid `input_column` specified: the dataset contains the columns {data.column_names}."
-        assert (
-            label_column in data.column_names
-        ), f"Invalid `label_column` specified: the dataset contains the columns {data.column_names}."
+        if model_or_pipeline is None:
+            pipe = pipeline(self.task)
+        elif isinstance(model_or_pipeline, Pipeline) or isinstance(model_or_pipeline, Callable):
+            pipe = model_or_pipeline
+        else:
+            pipe = pipeline(self.task, model=model_or_pipeline)
+        if pipe.task != self.task:
+            raise ValueError(
+                f"Incompatible `model_or_pipeline`. Please specify `model_or_pipeline` compatible with the `{self.task}` task."
+            )
+
+        if metric is None:
+            if self.default_metric_name is None:
+                raise ValueError(
+                    f"`Evaluator` doesn't specify a default metric. Please specify a valid `metric` argument."
+                )
+            metric = load(self.default_metric_name)
+        elif isinstance(metric, str):
+            metric = load(metric)
+
+        if input_column not in data.column_names:
+            raise ValueError(
+                f"Invalid `input_column` {input_column} specified. The dataset contains the following columns: {data.column_names}."
+            )
+        if label_column not in data.column_names:
+            raise ValueError(
+                f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
+            )
 
         references = data[label_column]
         predictions = self._compute_predictions(pipe, data[input_column], label_mapping=label_mapping)
@@ -134,3 +145,36 @@ class TextClassificationEvaluator(Evaluator):
             else None
         )
         return result, bootstrap
+
+
+SUPPORTED_EVALUATOR_TASKS = {
+    "text-classification": {
+        "implementation": TextClassificationEvaluator,
+        "default_metric_name": "f1",
+    }
+}
+
+
+def get_supported_tasks() -> List[str]:
+    return SUPPORTED_EVALUATOR_TASKS.keys()
+
+
+def check_task(task: str) -> Dict:
+    """
+    Checks an incoming task string, to validate it's correct and return the default Pipeline and Model classes, and
+    default models if they exist.
+    """
+    if task in TASK_ALIASES:
+        task = TASK_ALIASES[task]
+    if not check_pipeline_task(task):
+        raise KeyError(f"Unknown task {task}, available tasks are: {get_supported_tasks()}.")
+    if task in SUPPORTED_EVALUATOR_TASKS.keys() and task in SUPPORTED_PIPELINE_TASKS.keys():
+        return SUPPORTED_EVALUATOR_TASKS[task]
+    raise KeyError(f"Unknown task {task}, available tasks are: {get_supported_tasks()}.")
+
+
+def evaluator(task: str = None) -> Evaluator:
+    targeted_task = check_task(task)
+    evaluator_class = targeted_task["implementation"]
+    default_metric_name = targeted_task["default_metric_name"]
+    return evaluator_class(task=task, default_metric_name=default_metric_name)

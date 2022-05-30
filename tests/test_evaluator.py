@@ -31,10 +31,10 @@ class TestEvaluator(TestCase):
         ds = ds.rename_columns({"text": "inputs", "label": "references"})
 
         ev = evaluator("text-classification")
-        print(ev.compute(None, pipe, ds, label_mapping={"NEGATIVE": 0, "POSITIVE": 1}))
+        print(ev.compute(pipe, ds, label_mapping={"NEGATIVE": 0, "POSITIVE": 1}))
         print(
             ev.compute(
-                "huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
+                model_or_pipeline="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
                 data=ds,
                 label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
                 strategy="bootstrap",
@@ -53,10 +53,12 @@ class TestEvaluator(TestCase):
         ev3 = TextClassificationEvaluator()
         print(
             ev3.compute(
-                pipe=pipe,
+                model_or_pipeline=pipe,
                 data=ds,
                 metric=accuracy,
                 label_mapping={"NEGATIVE": 0, "POSITIVE": 1},
             )
         )
+
+        ev_err = evaluator("question_answering")
         self.assertEqual(1, 2)
