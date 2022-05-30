@@ -35,7 +35,8 @@ Args:
     references (`list` of `int`): Ground truth labels.
 
 Returns:
-    p (`float` or `int`): McNemar test score. Minimum possible value is 0. Maximum possible value is 1.0. A lower p value means a more significant difference.
+    stat (`float`): McNemar test score.
+    p (`float`): The p value. Minimum possible value is 0. Maximum possible value is 1.0. A lower p value means a more significant difference.
 
 Examples:
     >>> mcnemar = evaluate.load("mcnemar")
