@@ -91,8 +91,10 @@ REQUIRED_PKGS = [
     "scipy>=1.7.1",
     # for metric computations in Evaluator
     "sklearn",
-    # for predictions computations in Evaluator:
+    # for predictions computations in Evaluator
     "torch",
+    # for pipeline usage in Evaluator
+    "transformers"
 ]
 
 TEMPLATE_REQUIRE = [
