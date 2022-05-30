@@ -34,6 +34,13 @@ logger = get_logger(__name__)
 
 
 class Evaluator(ABC):
+    """
+    The Evaluator class is the class from which all evaluators inherit. Refer to this class for methods shared across
+    different evaluators.
+
+    Base class implementing evaluator operations.
+    """
+
     def __init__(self, task: str, default_metric_name: str = None):
         self.task = task
         self.default_metric_name = default_metric_name
@@ -52,6 +59,10 @@ class Evaluator(ABC):
         n_resamples: int = 9999,
         random_state: Optional[int] = None,
     ) -> Dict[str, Any]:
+        """
+        A utility function enabling the confidence interval calculation for metrics computed
+        by the evaluator based on `scipy`'s `bootstrap` method.
+        """
         bootstrap_dict = {}
         for key in metric_keys:
             bootstrap_dict[key] = bootstrap(
@@ -80,10 +91,24 @@ class Evaluator(ABC):
         n_resamples: int = 9999,
         **compute_parameters: Dict,
     ):
+        """
+        A core method of the `Evaluator` class, computes the metric value for a pipeline and dataset compatible
+        with the task specified by the `Evaluator`.
+        """
         raise NotImplementedError()
 
 
 class TextClassificationEvaluator(Evaluator):
+    """
+    Text classification evaluator.
+
+    This text classification pipeline can currently be loaded from [`evaluator`] using the following task identifier:
+    `"sentiment-analysis"` (for classifying sequences according to positive or negative sentiments).
+
+    Methods in this class assume a data format compatible with [`TextClassificationPipeline`] - a single textual
+    feature as input and a categorical label as output.
+    """
+
     def __init__(self, task="text-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
@@ -108,6 +133,57 @@ class TextClassificationEvaluator(Evaluator):
         label_column: str = "references",
         label_mapping: Optional[Dict[str, Number]] = None,
     ) -> Tuple[Dict[str, float], Any]:
+        """
+        Compute metrics for a given pipeline and dataset combination.
+
+        Args:
+            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`,
+            defaults to `None`):
+                If the argument in not specified, we initialize the default pipeline for the task (in this case
+                `text-classification` or its alias - `sentiment-analysis`). If the argument is of the type `str` or
+                is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
+                argument specifies a pre-initialized pipeline.
+            data (`str` or `Dataset`, defaults to `None):
+                Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
+                name, and load it. Otherwise we assume it represents a pre-loaded dataset.
+            metric (`str` or `EvaluationModule`, defaults to `None`"
+                Specifies the metric we use run.  If it is of type `str`, we treat it as the metric
+                name, and load it. Otherwise we assume it represents a pre-loaded metric.
+            tokenizer: (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
+                Argument can be used to overwrite a default tokenizer if `model_or_pipeline` represents a model for
+                which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
+                this argument.
+            strategy: (`Literal["simple", "bootstrap"]`, defaults to "simple"):
+                specifies the evaluation strategy. Possible values are:
+
+                - `"simple"` - we evaluate the metric and return the scores.
+                - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each
+                of the returned metric keys, using ``scipy`'s `bootstrap` method
+                https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html`.
+
+            confidence_level (`float`, defaults to `0.95`):
+                The `confidence_level` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
+            n_resamples (`int`, defaults to `9999`):
+                The `n_resamples` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
+            random_state (`int`, *optional*, defaults to `None`):
+                The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
+                debugging.
+            input_column (`str`, defaults to `"inputs"`):
+                the name of the column containing the text feature in the dataset specified by `data`.
+            label_column (`str`, defaults to `"inputs"`):
+                the name of the column containing the labels in the dataset specified by `data`.
+            label_mapping (`Dict[str, Number]`, *optional*, defaults to `None`):
+                We want to map class labels defined by the model in the pipeline to values consistent with those
+                defined in the `label_column` of the `data` dataset.
+
+        Return:
+            A `Tuple`. The first element of the tuple contains the outcome of the metric computation. The second
+            element of the tuple is `None` for the `"simple"` strategy. For the `"bootstrap"` strategy, it contains
+            a dictionary with the confidence interval and the standard error calculated for each metric key.
+
+        Example:
+
+        """
         # Prepare data.
         if data is None:
             raise ValueError(
@@ -182,12 +258,27 @@ SUPPORTED_EVALUATOR_TASKS = {
 
 
 def get_supported_tasks() -> List[str]:
+    """
+    Returns a list of supported task strings.
+    """
     return SUPPORTED_EVALUATOR_TASKS.keys()
 
 
 def check_task(task: str) -> Dict:
     """
-    Checks an incoming task string, to validate it's correct and return the default Evaluator class metric name.
+    Checks an incoming task string, to validate it's correct and return the default Evaluator class and default metric
+    name. It first performs a check to validata that the string is a valid `Pipeline` task, then it checks if it's a
+    valid. `Evaluator` task. `Evaluator` tasks are a substet of `Pipeline tasks.
+
+    Args:
+        task (`str`):
+            The task defining which pipeline will be returned. Currently accepted tasks are:
+
+            - `"text-classification"` (alias `"sentiment-analysis"` available)
+
+    Returns:
+        task_defaults: `dict` The actual dictionary required to initialize the pipeline
+        and some extra task options for parametrized tasks like "translation_XX_to_YY"
     """
     if task in TASK_ALIASES:
         task = TASK_ALIASES[task]
@@ -199,6 +290,30 @@ def check_task(task: str) -> Dict:
 
 
 def evaluator(task: str = None) -> Evaluator:
+    """
+    Utility factory method to build an [`Evaluator`].
+
+    Evaluators encapsulate a task and a default function. They are intended to simplify the evaluation
+    of multiple combinations of models, datasets and metrics for a given task.
+
+    Args:
+        task (`str`):
+            The task defining which evaluator will be returned. Currently accepted tasks are:
+
+            - `"text-classification"` (alias `"sentiment-analysis"` available): will return a [`TextClassificationEvaluator`].
+
+    Returns:
+        [`Evaluator`]: An evaluator suitable for the task.
+
+    Examples:
+
+    ```python
+    >>> from evaluation import evaluator
+
+    >>> # Sentiment analysis evaluator
+    >>> evaluator("sentiment-analysis")
+    ```"""
+
     targeted_task = check_task(task)
     evaluator_class = targeted_task["implementation"]
     default_metric_name = targeted_task["default_metric_name"]
