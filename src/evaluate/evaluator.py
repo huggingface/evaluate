@@ -14,7 +14,6 @@
 
 from abc import ABC, abstractmethod
 from numbers import Number
-from selectors import EpollSelector
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
@@ -51,18 +50,21 @@ class Evaluator(ABC):
         metric_keys: List[str],
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
+        random_state: Optional[int] = None,
     ) -> Dict[str, Any]:
         bootstrap_dict = {}
         for key in metric_keys:
             bootstrap_dict[key] = bootstrap(
                 data=(predictions, references),
                 statistic=lambda predictions, references: metric.compute(
-                    predictions=predictions, references=references
+                    predictions=predictions,
+                    references=references,
                 )[key],
                 paired=True,
                 vectorized=False,
                 confidence_level=confidence_level,
                 n_resamples=n_resamples,
+                random_state=random_state,
             )
         return bootstrap_dict
 
@@ -101,6 +103,7 @@ class TextClassificationEvaluator(Evaluator):
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
+        random_state: Optional[int] = None,
         input_column: str = "inputs",
         label_column: str = "references",
         label_mapping: Optional[Dict[str, Number]] = None,
@@ -156,7 +159,13 @@ class TextClassificationEvaluator(Evaluator):
 
         bootstrap = (
             Evaluator._compute_confidence_interval(
-                predictions, references, metric, result.keys(), confidence_level, n_resamples
+                predictions,
+                references,
+                metric,
+                result.keys(),
+                confidence_level,
+                n_resamples,
+                random_state,
             )
             if strategy == "bootstrap"
             else None
