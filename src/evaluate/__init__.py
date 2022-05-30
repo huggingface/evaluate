@@ -26,7 +26,15 @@ SCRIPTS_VERSION = "main" if version.parse(__version__).is_devrelease else __vers
 
 del version
 
-from .evaluator import Evaluator
+from typing import Dict, List
+
+from datasets import load_metric
+from datasets.metric import Metric
+from transformers.pipelines import SUPPORTED_TASKS as SUPPORTED_PIPELINE_TASKS
+from transformers.pipelines import TASK_ALIASES
+from transformers.pipelines import check_task as check_pipeline_task
+
+from .evaluator import Evaluator, TextClassificationEvaluator
 from .info import EvaluationModuleInfo
 from .inspect import inspect_metric, list_metrics
 from .loading import load
@@ -34,3 +42,37 @@ from .module import EvaluationModule
 from .saving import save
 from .utils import *
 from .utils import gradio, logging
+
+
+SUPPORTED_EVALUATOR_TASKS = {
+    "text-classification": {
+        "impl": TextClassificationEvaluator,
+        "default_metric": "f1",
+    }
+}
+
+
+def get_supported_tasks() -> List[str]:
+    return SUPPORTED_EVALUATOR_TASKS.keys()
+
+
+def check_task(task: str) -> Dict:
+    """
+    Checks an incoming task string, to validate it's correct and return the default Pipeline and Model classes, and
+    default models if they exist.
+    """
+    if task in TASK_ALIASES:
+        task = TASK_ALIASES[task]
+    if not check_pipeline_task(task):
+        raise KeyError(f"Unknown task {task}, available tasks are {get_supported_tasks()}")
+    pipeline_tasks = SUPPORTED_PIPELINE_TASKS.keys()
+    if task in SUPPORTED_EVALUATOR_TASKS.keys() and task in pipeline_tasks:
+        return SUPPORTED_EVALUATOR_TASKS[task]
+    raise KeyError(f"Unknown task {task}, available tasks are {get_supported_tasks()}")
+
+
+def evaluator(task: str = None, default_metric: Metric = None) -> Evaluator:
+    targeted_task = check_task(task)
+    evaluator_class = targeted_task["impl"]
+    default_metric = load_metric(targeted_task["default_metric"])
+    return evaluator_class(task=task, default_metric=default_metric)

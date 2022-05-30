@@ -19,32 +19,44 @@ from unittest import TestCase
 from datasets import load_dataset, load_metric
 from transformers import pipeline
 
-from evaluate import Evaluator
+from evaluate import TextClassificationEvaluator, evaluator
 
 
 class TestEvaluator(TestCase):
     def test_evaluator(self):
         pipe = pipeline("text-classification")
-        metric = load_metric("accuracy")
+        accuracy = load_metric("accuracy")
         ds = load_dataset("imdb")
         ds = ds["test"].shuffle().select(range(32))  # just for speed
         ds = ds.rename_columns({"text": "inputs", "label": "references"})
 
-        evaluator = Evaluator(pipe, ds, metric, metric_key="accuracy", label_mapping={"NEGATIVE": 0, "POSITIVE": 1})
-        print(evaluator.compute())
-        print(evaluator.get_confidence_interval(n_resamples=99))
+        ev = evaluator("text-classification")
+        print(ev.compute(None, pipe, ds, label_mapping={"NEGATIVE": 0, "POSITIVE": 1}))
         print(
-            evaluator.get_bootstrap_p_value(
-                baseline_pipe=pipeline(
-                    "text-classification", model="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli"
-                ),
-                baseline_label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
+            ev.compute(
+                "huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
+                data=ds,
+                label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
+                strategy="bootstrap",
                 n_resamples=99,
             )
         )
 
-        evaluator = Evaluator(
-            "text-classification", ds, "accuracy", metric_key="accuracy", label_mapping={"NEGATIVE": 0, "POSITIVE": 1}
+        print(
+            ev.compute(
+                data=ds,
+                metric="accuracy",
+                label_mapping={"NEGATIVE": 0, "POSITIVE": 1},
+            )
         )
-        print(evaluator.compute())
+
+        ev3 = TextClassificationEvaluator()
+        print(
+            ev3.compute(
+                pipe=pipe,
+                data=ds,
+                metric=accuracy,
+                label_mapping={"NEGATIVE": 0, "POSITIVE": 1},
+            )
+        )
         self.assertEqual(1, 2)
