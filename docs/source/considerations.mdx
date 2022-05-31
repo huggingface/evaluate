@@ -62,9 +62,9 @@ Here are other aspects of model performance to consider during evaluation:
 
 When evaluating models, **interpretability** (i.e. the ability to *interpret* results)  can be very important, especially when deploying models in production.
 
-For instance, metrics such as [exact match](https://huggingface.co/metrics/exact_match) have a set range (between 0 and 1, or 0% and 100%) and are easily understandable to users: for a pair of strings, the exact match score is 1 if the two strings are the exact same, and 0 otherwise.
+For instance, metrics such as [exact match](https://huggingface.co/spaces/evaluate-metric/exact_match) have a set range (between 0 and 1, or 0% and 100%) and are easily understandable to users: for a pair of strings, the exact match score is 1 if the two strings are the exact same, and 0 otherwise.
 
-Other metrics, such as [BLEU](https://huggingface.co/metrics/bleu) are harder to interpret: while they also range between 0 and 1, they can vary greatly depending on which parameters are used to generate the scores, especially when different tokenization and normalization techniques are used (see the [metric card](https://github.com/huggingface/evaluate/tree/main/metrics/bleu) for more information about BLEU limitations). This means that it is difficult to interpret a BLEU score without having more information about the procedure used for obtaining it.
+Other metrics, such as [BLEU](https://huggingface.co/spaces/evaluate-metric/exact_match) are harder to interpret: while they also range between 0 and 1, they can vary greatly depending on which parameters are used to generate the scores, especially when different tokenization and normalization techniques are used (see the [metric card](https://huggingface.co/spaces/evaluate-metric/bleu/blob/main/README.md) for more information about BLEU limitations). This means that it is difficult to interpret a BLEU score without having more information about the procedure used for obtaining it.
 
 Interpretability can be more or less important depending on the evaluation use case, but it is a useful aspect of model evaluation to keep in mind, since communicating and comparing model evaluations is an important part of responsible machine learning.
 

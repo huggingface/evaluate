@@ -2,13 +2,13 @@
 
 🤗 Evaluate provides access to a wide range of evaluation tools. It covers a range of modalities such as text, computer vision, audio, etc. as well as tools to evaluate models or datasets. These tools are split into three categories.
 
-## Three types of evaluations
+## Types of evaluations
 
-There are different aspects of a typical machine learning pipeline that can be evaluated and for aspect we provide a tool:
+There are different aspects of a typical machine learning pipeline that can be evaluated and for each aspect 🤗 Evaluate provides a tool:
 
-- **Metric**: A metric is used to evaluate a model's performance and usually involves the model's predictions as well as some ground truth labels. You can find all integrated metrics at [evaluate-metric](hf.co/evaluate-metric).
-- **Comparison**: A comparison is used to compare two models. This can for example be done by comparing their predictions to ground truth labels and computing their agreement. You can find all integrated comparisons at [evaluate-comparison](hf.co/evaluate-comparison).
-- **Measurement**: The dataset is as important as the model trained on it. With measurements one can investigate a dataset's properties. You can find all integrated measurements at [evaluate-measurement](hf.co/evaluate-measurement).
+- **Metric**: A metric is used to evaluate a model's performance and usually involves the model's predictions as well as some ground truth labels. You can find all integrated metrics at [evaluate-metric](https://huggingface.co/evaluate-metric).
+- **Comparison**: A comparison is used to compare two models. This can for example be done by comparing their predictions to ground truth labels and computing their agreement. You can find all integrated comparisons at [evaluate-comparison](https://huggingface.co/evaluate-comparison).
+- **Measurement**: The dataset is as important as the model trained on it. With measurements one can investigate a dataset's properties. You can find all integrated measurements at [evaluate-measurement](https://huggingface.co/evaluate-measurement).
 
 Each metric, comparison, and measurement is a separate Python module, but for using any of them, there is a single entry point: [`evaluate.load`]!
 
@@ -21,7 +21,7 @@ Any metric, comparison, or measurement is loaded with the `evaluate.load` functi
 >>> accuracy = evaluate.load("accuracy")
 ```
 
-If you want to make sure you are loading the right type of module (especially if there are name clashes) you can explicitely pass the type:
+If you want to make sure you are loading the right type of evaluation (especially if there are name clashes) you can explicitely pass the type:
 
 ```py
 >>> word_length = evaluate.load("word_length", module_type="measurement")
@@ -29,11 +29,13 @@ If you want to make sure you are loading the right type of module (especially if
 
 ### Community modules
 
-Besides the modules implemented in 🤗 Evaluate you can also load any community module by prepending the user's username:
+Besides the modules implemented in 🤗 Evaluate you can also load any community module by specifying the repository ID of the metric implementation:
 
 ```py
 >>> element_count = evaluate.load("lvwerra/element_count", module_type="measurement")
 ```
+
+See the [Creating and Sharing Guide](/docs/evaluate/main/en/creating_and_sharing) for information about uploading custom metrics.
 
 ### List available modules
 
