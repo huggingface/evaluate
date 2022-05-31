@@ -10,7 +10,7 @@ There are different aspects of a typical machine learning pipeline that can be e
 - **Comparison**: A comparison is used to compare two models. This can for example be done by comparing their predictions to ground truth labels and computing their agreement. You can find all integrated comparisons at [evaluate-comparison](hf.co/evaluate-comparison).
 - **Measurement**: The dataset is as important as the model trained on it. With measurements one can investigate a dataset's properties. You can find all integrated measurements at [evaluate-measurement](hf.co/evaluate-measurement).
 
-Each metric, comparison, and measurement is a separate Python module, but for using any of them, there is a single entry point: `evaluate.load`!
+Each metric, comparison, and measurement is a separate Python module, but for using any of them, there is a single entry point: [`evaluate.load`]!
 
 ## Load
 
@@ -119,7 +119,7 @@ Now that we know how the evaluation module works and what should go in there we 
 2. Incremental
 
 
-In the incremental approach the necessary inputs are added to the module with `add` or `add_batch` and the score is calculated at the end with `compute()`. Alternatively, one can pass all the inputs at once to `compute()`. Let's have a look at the two approaches.
+In the incremental approach the necessary inputs are added to the module with [`EvaluationModule.add()`] or [`EvaluationModule.add_batch()`] and the score is calculated at the end with [`EvaluationModule.compute`]. Alternatively, one can pass all the inputs at once to `compute()`. Let's have a look at the two approaches.
 
 ### `compute()`
 The simplest way to calculate the score of an evaluation module is by calling `compute()` directly with the necessary inputs. Simply pass the inputs as seen in `features` to the `compute()` method.
@@ -128,11 +128,11 @@ The simplest way to calculate the score of an evaluation module is by calling `c
 >>> accuracy.compute(references=[0,1,0,1], predictions=[1,0,0,1])
 {'accuracy': 0.5}
 ```
-Evaluation modules return the results in a dictionary. However, in some instances you build up the predictions iteratively or in a distributed fashion in which case `add` or `add_batch` are useful.
+Evaluation modules return the results in a dictionary. However, in some instances you build up the predictions iteratively or in a distributed fashion in which case `add()` or `add_batch()` are useful.
 
-### `add` and `add_batch`
+### `add()` and `add_batch()`
 
-In many evaluation pipelines you build the predictions iteratively such as in a for-loop. In that case you could store the predictions in a list and at the end pass them to `compute()`. With `add` and `add_batch` you can circumvent the step of storing the predictions separately. If you are only creating single predictions at a time you can use `add`:
+In many evaluation pipelines you build the predictions iteratively such as in a for-loop. In that case you could store the predictions in a list and at the end pass them to `compute()`. With `add()` and `add_batch()` you can circumvent the step of storing the predictions separately. If you are only creating single predictions at a time you can use `add()`:
 
 ```py
 >>> for ref, pred in zip([0,1,0,1], [1,0,0,1]):
@@ -141,7 +141,7 @@ In many evaluation pipelines you build the predictions iteratively such as in a 
 {'accuracy': 0.5}
 ```
 
-Once you have gathered all predictions you can call `compute()` to compute the score based on all stored values. When getting predictions and references in batches you can use `add_batch` which adds a list elements for later processing. The rest works as with `add`:
+Once you have gathered all predictions you can call `compute()` to compute the score based on all stored values. When getting predictions and references in batches you can use `add_batch()` which adds a list elements for later processing. The rest works as with `add()`:
 
 ```py
 >>> for refs, preds in zip([[0,1],[0,1]], [[1,0],[0,1]]):
@@ -161,11 +161,11 @@ This is especially useful when you need to get the predictions from your model i
 
 ### Distributed evaluation
 
-Computing metrics in a distributed environment can be tricky. Metric evaluation is executed in separate Python processes, or nodes, on different subsets of a dataset. Typically, when a metric score is additive (`f(AuB) = f(A) + f(B)`), you can use distributed reduce operations to gather the scores for each subset of the dataset. But when a metric is non-additive (`f(AuB) ≠ f(A) + f(B)`), it's not that simple. For example, you can't take the sum of the [F1](https://huggingface.co/metrics/f1) scores of each data subset as your **final metric**.
+Computing metrics in a distributed environment can be tricky. Metric evaluation is executed in separate Python processes, or nodes, on different subsets of a dataset. Typically, when a metric score is additive (`f(AuB) = f(A) + f(B)`), you can use distributed reduce operations to gather the scores for each subset of the dataset. But when a metric is non-additive (`f(AuB) ≠ f(A) + f(B)`), it's not that simple. For example, you can't take the sum of the [F1](https://huggingface.co/spaces/evaluate-metric/f1) scores of each data subset as your **final metric**.
 
 A common way to overcome this issue is to fallback on single process evaluation. The metrics are evaluated on a single GPU, which becomes inefficient.
 
-🤗 Evaluate solves this issue by only computing the final metric on the first node. The predictions and references are computed and provided to the metric separately for each node. These are temporarily stored in an Apache Arrow table, avoiding cluttering the GPU or CPU memory. When you are ready to `EvaluationModule.compute` the final metric, the first node is able to access the predictions and references stored on all the other nodes. Once it has gathered all the predictions and references, `EvaluationModule.compute` will perform the final metric evaluation.
+🤗 Evaluate solves this issue by only computing the final metric on the first node. The predictions and references are computed and provided to the metric separately for each node. These are temporarily stored in an Apache Arrow table, avoiding cluttering the GPU or CPU memory. When you are ready to `compute` the final metric, the first node is able to access the predictions and references stored on all the other nodes. Once it has gathered all the predictions and references, `compute` will perform the final metric evaluation.
 
 This solution allows 🤗 Evaluate to perform distributed predictions, which is important for evaluation speed in distributed settings. At the same time, you can also use complex non-additive metrics without wasting valuable GPU or CPU memory.
 
