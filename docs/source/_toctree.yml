@@ -27,6 +27,10 @@
     title: Loading methods
   - local: package_reference/saving_methods
     title: Saving methods
+  - local: package_reference/hub_methods
+    title: Hub methods
+  - local: package_reference/evaluator_classes
+    title: Evaluator classes
   - local: package_reference/logging_methods
     title: Logging methods
   title: "Reference"
