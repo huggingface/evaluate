@@ -202,9 +202,9 @@ evaluate.push_to_hub(
 
 ## Evaluator
 
-The [`evaluate.evaluator()`] provides integrate the inference part of evaluation and only requires a model, dataset, metric in contrast to the metrics in `EvaluationModule`s that require the model's predictions. As such it is easier to evaluate a model on a dataset with a given metric. To make that possible it uses the `Pipeline` abstraction from `transformers`. However, you can use your own framework as long as it follows the `Pipeline` interface.
+The [`evaluate.evaluator()`] provides automated evaluation and only requires a model, dataset, metric in contrast to the metrics in `EvaluationModule`s that require the model's predictions. As such it is easier to evaluate a model on a dataset with a given metric as the inference is handled internally. To make that possible it uses the `Pipeline` abstraction from `transformers`. However, you can use your own framework as long as it follows the `Pipeline` interface.
 
-To make an evaluation with the `evaluator` let's load a pipeline with an model trained on IMDb, the IMDb test split and the accuracy metric. 
+To make an evaluation with the `evaluator` let's load a `transformers` pipeline with an model trained on IMDb, the IMDb test split and the accuracy metric. 
 
 ```python
 from transformers import pipeline
@@ -217,7 +217,7 @@ data = load_dataset("imdb", split="test").shuffle().select(range(1000))
 metric = evaluate.load("accuracy")
 ```
 
-Then you can create an evaluator for text classification and pass the three objects to the `compute` method. With the label mapping `evaluate` provides a method to align the pipeline outputs with the label column in the dataset:
+Then you can create an evaluator for text classification and pass the three objects to the `compute()` method. With the label mapping `evaluate` provides a method to align the pipeline outputs with the label column in the dataset:
 
 ```python
 eval = evaluator("text-classification")
