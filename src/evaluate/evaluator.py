@@ -52,7 +52,7 @@ class Evaluator(ABC):
     def __init__(self, task: str, default_metric_name: str = None):
         if not TRANSFORMERS_AVAILABLE:
             raise ImportError(
-                "If you want to use the `Evaluator` you need `transformers`. Run `pip install evaluate[transformers]`."
+                "If you want to use the `Evaluator` you need `transformers`. Run `pip install evaluate[evaluator]`."
             )
         self.task = task
         self.default_metric_name = default_metric_name
