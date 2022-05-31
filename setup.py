@@ -96,6 +96,10 @@ TEMPLATE_REQUIRE = [
     "cookiecutter"
 ]
 
+EVALUATOR_REQUIRE = [
+   "transformers"
+]
+
 TESTS_REQUIRE = [
     # test dependencies
     "absl-py",
@@ -142,6 +146,7 @@ EXTRAS_REQUIRE = {
         "s3fs",
     ],
     "template": TEMPLATE_REQUIRE,
+    "evaluator": EVALUATOR_REQUIRE
 }
 
 setup(
