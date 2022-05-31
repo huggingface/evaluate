@@ -168,7 +168,7 @@ Computing metrics in a distributed environment can be tricky. Metric evaluation 
 
 A common way to overcome this issue is to fallback on single process evaluation. The metrics are evaluated on a single GPU, which becomes inefficient.
 
-🤗 Evaluate solves this issue by only computing the final metric on the first node. The predictions and references are computed and provided to the metric separately for each node. These are temporarily stored in an Apache Arrow table, avoiding cluttering the GPU or CPU memory. When you are ready to `compute` the final metric, the first node is able to access the predictions and references stored on all the other nodes. Once it has gathered all the predictions and references, `compute` will perform the final metric evaluation.
+🤗 Evaluate solves this issue by only computing the final metric on the first node. The predictions and references are computed and provided to the metric separately for each node. These are temporarily stored in an Apache Arrow table, avoiding cluttering the GPU or CPU memory. When you are ready to `compute()` the final metric, the first node is able to access the predictions and references stored on all the other nodes. Once it has gathered all the predictions and references, `compute()` will perform the final metric evaluation.
 
 This solution allows 🤗 Evaluate to perform distributed predictions, which is important for evaluation speed in distributed settings. At the same time, you can also use complex non-additive metrics without wasting valuable GPU or CPU memory.
 
