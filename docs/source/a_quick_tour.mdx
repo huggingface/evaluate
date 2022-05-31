@@ -35,9 +35,23 @@ Besides the modules implemented in 🤗 Evaluate you can also load any community
 >>> element_count = evaluate.load("lvwerra/element_count", module_type="measurement")
 ```
 
+### List available modules
+
+With [`list_available_modules`] you can check what modules are available on the hub. You can also filter for a specific modules and skip community metrics if you want. You can also see additional information such as likes:
+
+```python
+evaluate.list_evaluation_modules(
+  module_type="comparison",
+  include_community=False, 
+  with_details=True)
+
+>>> [{'name': 'mcnemar', 'type': 'comparison', 'community': False, 'likes': 1},
+...  {'name': 'exact_match', 'type': 'comparison', 'community': False, 'likes': 0}]
+```
+
 ## Module attributes
 
-All evalution modules come with a range of useful attributes that help to use a module stored in a [`EvaluationModuleInfo`](https://moon-ci-docs.huggingface.co/docs/evaluate/pr_72/en/package_reference/main_classes#evaluate.EvaluationModuleInfo) object.
+All evalution modules come with a range of useful attributes that help to use a module stored in a [`EvaluationModuleInfo`] object.
 
 |Attribute|Description|
 |---|---|
