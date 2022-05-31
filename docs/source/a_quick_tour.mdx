@@ -155,9 +155,9 @@ A common way to overcome this issue is to fallback on single process evaluation.
 
 This solution allows 🤗 Evaluate to perform distributed predictions, which is important for evaluation speed in distributed settings. At the same time, you can also use complex non-additive metrics without wasting valuable GPU or CPU memory.
 
-## Save and push to hub
+## Save and push to the Hub
 
-Saving and sharing evaluation results is an important step. We provide the [`evaluate.save()`] function to easily save metrics result. You can either point pass a specific filename or a directory. In the latter case the results are saved in a file with an automatically created file name. Besides the directory or file name the function takes any key-value pairs as inputs and stores them in a JSON file.
+Saving and sharing evaluation results is an important step. We provide the [`evaluate.save()`] function to easily save metrics results. You can either pass a specific filename or a directory. In the latter case, the results are saved in a file with an automatically created file name. Besides the directory or file name, the function takes any key-value pairs as inputs and stores them in a JSON file.
 
 ```py
 result = accuracy.compute(references=[0,1,0,1], predictions=[1,0,0,1])
@@ -182,9 +182,9 @@ The content of the JSON file look like the following:
 }
 ```
 
-In addition to the specified fields it also contains information about the system useful for reproducing the results. 
+In addition to the specified fields, it also contains useful system information for reproducing the results. 
 
-Besides storing the results locally we also want to report them on the model's repository on the hub. With the [`evaluate.push_to_hub()`] you can easily report an evaluation results to the model's repository:
+Besides storing the results locally, you should report them on the model's repository on the Hub. With the [`evaluate.push_to_hub()`] function, you can easily report evaluation results to the model's repository:
 
 ```py
 evaluate.push_to_hub(
@@ -217,7 +217,7 @@ data = load_dataset("imdb", split="test").shuffle().select(range(1000))
 metric = evaluate.load("accuracy")
 ```
 
-Then we can create an evaluator for text classification and pass the three objects to the `compute` method. With the label mapping we provide a method to align the pipeline outputs with the label column in the dataset:
+Then you can create an evaluator for text classification and pass the three objects to the `compute` method. With the label mapping `evaluate` provides a method to align the pipeline outputs with the label column in the dataset:
 
 ```python
 eval = evaluator("text-classification")
@@ -228,7 +228,7 @@ print(results)
 >>> {'accuracy': 0.934}
 ```
 
-Calculating the value of the metric alone is often not enough to know if a model performs significantly better than another one. With _bootstrapping_ we compute confidence intervales and the standard error which helps estimate how stable a score is:
+Calculating the value of the metric alone is often not enough to know if a model performs significantly better than another one. With _bootstrapping_ `evaluate` computes confidence intervals and the standard error which helps estimate how stable a score is:
 
 ```python
 results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric,
