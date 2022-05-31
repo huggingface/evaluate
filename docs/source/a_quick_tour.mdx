@@ -37,7 +37,7 @@ Besides the modules implemented in 🤗 Evaluate you can also load any community
 
 ### List available modules
 
-With [`list_available_modules`] you can check what modules are available on the hub. You can also filter for a specific modules and skip community metrics if you want. You can also see additional information such as likes:
+With [`list_evaluation_modules`] you can check what modules are available on the hub. You can also filter for a specific modules and skip community metrics if you want. You can also see additional information such as likes:
 
 ```python
 evaluate.list_evaluation_modules(
@@ -119,9 +119,9 @@ Now that we know how the evaluation module works and what should go in there we 
 2. Incremental
 
 
-In the incremental approach the necessary inputs are added to the module with [`EvaluationModule.add()`] or [`EvaluationModule.add_batch()`] and the score is calculated at the end with [`EvaluationModule.compute`]. Alternatively, one can pass all the inputs at once to `compute()`. Let's have a look at the two approaches.
+In the incremental approach the necessary inputs are added to the module with [`EvaluationModule.add`] or [`EvaluationModule.add_batch`] and the score is calculated at the end with [`EvaluationModule.compute`]. Alternatively, one can pass all the inputs at once to `compute()`. Let's have a look at the two approaches.
 
-### `compute()`
+### Using `compute()` alone
 The simplest way to calculate the score of an evaluation module is by calling `compute()` directly with the necessary inputs. Simply pass the inputs as seen in `features` to the `compute()` method.
 
 ```py
@@ -130,7 +130,7 @@ The simplest way to calculate the score of an evaluation module is by calling `c
 ```
 Evaluation modules return the results in a dictionary. However, in some instances you build up the predictions iteratively or in a distributed fashion in which case `add()` or `add_batch()` are useful.
 
-### `add()` and `add_batch()`
+### Using `add()` and `add_batch()` with `compute()`
 
 In many evaluation pipelines you build the predictions iteratively such as in a for-loop. In that case you could store the predictions in a list and at the end pass them to `compute()`. With `add()` and `add_batch()` you can circumvent the step of storing the predictions separately. If you are only creating single predictions at a time you can use `add()`:
 
@@ -171,7 +171,7 @@ This solution allows 🤗 Evaluate to perform distributed predictions, which is 
 
 ## Save and push to the Hub
 
-Saving and sharing evaluation results is an important step. We provide the [`evaluate.save()`] function to easily save metrics results. You can either pass a specific filename or a directory. In the latter case, the results are saved in a file with an automatically created file name. Besides the directory or file name, the function takes any key-value pairs as inputs and stores them in a JSON file.
+Saving and sharing evaluation results is an important step. We provide the [`evaluate.save`] function to easily save metrics results. You can either pass a specific filename or a directory. In the latter case, the results are saved in a file with an automatically created file name. Besides the directory or file name, the function takes any key-value pairs as inputs and stores them in a JSON file.
 
 ```py
 result = accuracy.compute(references=[0,1,0,1], predictions=[1,0,0,1])
@@ -198,7 +198,7 @@ The content of the JSON file look like the following:
 
 In addition to the specified fields, it also contains useful system information for reproducing the results. 
 
-Besides storing the results locally, you should report them on the model's repository on the Hub. With the [`evaluate.push_to_hub()`] function, you can easily report evaluation results to the model's repository:
+Besides storing the results locally, you should report them on the model's repository on the Hub. With the [`evaluate.push_to_hub`] function, you can easily report evaluation results to the model's repository:
 
 ```py
 evaluate.push_to_hub(
@@ -216,7 +216,7 @@ evaluate.push_to_hub(
 
 ## Evaluator
 
-The [`evaluate.evaluator()`] provides automated evaluation and only requires a model, dataset, metric in contrast to the metrics in `EvaluationModule`s that require the model's predictions. As such it is easier to evaluate a model on a dataset with a given metric as the inference is handled internally. To make that possible it uses the `Pipeline` abstraction from `transformers`. However, you can use your own framework as long as it follows the `Pipeline` interface.
+The [`evaluate.evaluator`] provides automated evaluation and only requires a model, dataset, metric in contrast to the metrics in `EvaluationModule`s that require the model's predictions. As such it is easier to evaluate a model on a dataset with a given metric as the inference is handled internally. To make that possible it uses the `Pipeline` abstraction from `transformers`. However, you can use your own framework as long as it follows the `Pipeline` interface.
 
 To make an evaluation with the `evaluator` let's load a `transformers` pipeline (but you can pass your own custom inference class for any framework as long as it follows the pipeline call API) with an model trained on IMDb, the IMDb test split and the accuracy metric. 
 
@@ -236,7 +236,8 @@ Then you can create an evaluator for text classification and pass the three obje
 ```python
 eval = evaluator("text-classification")
 
-results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric, label_mapping={"NEGATIVE": 0, "POSITIVE": 1},)
+results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric,
+                       label_mapping={"NEGATIVE": 0, "POSITIVE": 1},)
 
 print(results)
 >>> {'accuracy': 0.934}
@@ -250,7 +251,13 @@ results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric,
                        strategy="bootstrap", n_resamples=200)
 
 print(results)
->>> {'accuracy': {'confidence_interval': (0.906, 0.9406749892841922), 'standard_error': 0.00865213251082787, 'score': 0.923}}
+>>> {'accuracy': 
+...     {
+...       'confidence_interval': (0.906, 0.9406749892841922),
+...       'standard_error': 0.00865213251082787,
+...       'score': 0.923
+...     }
+... }
 ```
 
 The evaluator expects a `"text"` and `"label"` column for the data input. If your dataset differs you can provide the columns with the keywords `input_column="text"` and `label_column="label"`. Currently only `"text-classification"` is supported with more tasks being added in the future.
