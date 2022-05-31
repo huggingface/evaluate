@@ -121,7 +121,8 @@ Now that we know how the evaluation module works and what should go in there we 
 
 In the incremental approach the necessary inputs are added to the module with [`EvaluationModule.add`] or [`EvaluationModule.add_batch`] and the score is calculated at the end with [`EvaluationModule.compute`]. Alternatively, one can pass all the inputs at once to `compute()`. Let's have a look at the two approaches.
 
-### Using `compute()` alone
+### Using `compute()`
+
 The simplest way to calculate the score of an evaluation module is by calling `compute()` directly with the necessary inputs. Simply pass the inputs as seen in `features` to the `compute()` method.
 
 ```py
@@ -130,7 +131,7 @@ The simplest way to calculate the score of an evaluation module is by calling `c
 ```
 Evaluation modules return the results in a dictionary. However, in some instances you build up the predictions iteratively or in a distributed fashion in which case `add()` or `add_batch()` are useful.
 
-### Using `add()` and `add_batch()` with `compute()`
+### Using `add()` and `add_batch()`
 
 In many evaluation pipelines you build the predictions iteratively such as in a for-loop. In that case you could store the predictions in a list and at the end pass them to `compute()`. With `add()` and `add_batch()` you can circumvent the step of storing the predictions separately. If you are only creating single predictions at a time you can use `add()`:
 
