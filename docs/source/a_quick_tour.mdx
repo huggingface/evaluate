@@ -218,7 +218,7 @@ evaluate.push_to_hub(
 
 The [`evaluate.evaluator()`] provides automated evaluation and only requires a model, dataset, metric in contrast to the metrics in `EvaluationModule`s that require the model's predictions. As such it is easier to evaluate a model on a dataset with a given metric as the inference is handled internally. To make that possible it uses the `Pipeline` abstraction from `transformers`. However, you can use your own framework as long as it follows the `Pipeline` interface.
 
-To make an evaluation with the `evaluator` let's load a `transformers` pipeline with an model trained on IMDb, the IMDb test split and the accuracy metric. 
+To make an evaluation with the `evaluator` let's load a `transformers` pipeline (but you can pass your own custom inference class for any framework as long as it follows the pipeline call API) with an model trained on IMDb, the IMDb test split and the accuracy metric. 
 
 ```python
 from transformers import pipeline
