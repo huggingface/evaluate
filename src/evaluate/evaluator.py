@@ -18,8 +18,14 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
 from datasets import Dataset, load_dataset
-from scipy.stats import bootstrap
 
+
+try:
+    from scipy.stats import bootstrap
+
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
 
 try:
     from transformers import Pipeline, PreTrainedModel, PreTrainedTokenizer, TFPreTrainedModel, pipeline
@@ -53,6 +59,10 @@ class Evaluator(ABC):
         if not TRANSFORMERS_AVAILABLE:
             raise ImportError(
                 "If you want to use the `Evaluator` you need `transformers`. Run `pip install evaluate[evaluator]`."
+            )
+        if not SCIPY_AVAILABLE:
+            raise ImportError(
+                "If you want to use the `Evaluator` you need `scipy>=1.7.1`. Run `pip install evaluate[evaluator]`."
             )
         self.task = task
         self.default_metric_name = default_metric_name
