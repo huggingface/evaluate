@@ -87,8 +87,7 @@ REQUIRED_PKGS = [
     # Utilities from PyPA to e.g., compare versions
     "packaging",
     "responses<0.19",
-    # for bootstrap computations in Evaluator
-    "scipy>=1.7.1",
+
 ]
 
 TEMPLATE_REQUIRE = [
@@ -98,6 +97,8 @@ TEMPLATE_REQUIRE = [
 
 EVALUATOR_REQUIRE = [
    "transformers"
+   # for bootstrap computations in Evaluator
+   "scipy>=1.7.1",
 ]
 
 TESTS_REQUIRE = [
