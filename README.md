@@ -71,7 +71,7 @@ Then you can get started with the following command which will create a new fold
 ```batch
 evaluate-cli create "Awesome Metric"
 ```
-See this [step-by-step guide](https://huggingface.co/docs/evaluate/creating_and_sharing.html) in the documentation for detailed instructions.
+See this [step-by-step guide](https://huggingface.co/docs/evaluate/creating_and_sharing) in the documentation for detailed instructions.
 
 ## Credits
 
