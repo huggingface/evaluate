@@ -184,8 +184,8 @@ class TextClassificationEvaluator(Evaluator):
 
                 - `"simple"` - we evaluate the metric and return the scores.
                 - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each
-                of the returned metric keys, using ``scipy`'s `bootstrap` method
-                https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html`.
+                of the returned metric keys, using `scipy`'s `bootstrap` method
+                https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html.
 
             confidence_level (`float`, defaults to `0.95`):
                 The `confidence_level` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
