@@ -53,17 +53,6 @@ It currently contains:
 pip install evaluate
 ```
 
-## With conda
-
-🤗 Evaluate can be installed using conda as follows:
-
-
-```bash
-conda install -c huggingface -c conda-forge evaluate
-```
-
-For more details on installation, check the installation page in the documentation: https://huggingface.co/docs/evaluate/installation
-
 # Usage
 
 🤗 Evaluate's main methods are:
