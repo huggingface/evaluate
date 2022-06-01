@@ -53,17 +53,6 @@ It currently contains:
 pip install evaluate
 ```
 
-## With conda
-
-🤗 Evaluate can be installed using conda as follows:
-
-
-```bash
-conda install -c huggingface -c conda-forge evaluate
-```
-
-For more details on installation, check the installation page in the documentation: https://huggingface.co/docs/evaluate/installation
-
 # Usage
 
 🤗 Evaluate's main methods are:
@@ -82,7 +71,7 @@ Then you can get started with the following command which will create a new fold
 ```batch
 evaluate-cli create "Awesome Metric"
 ```
-See this [step-by-step guide](https://huggingface.co/docs/evaluate/creating_and_sharing.html) in the documentation for detailed instructions.
+See this [step-by-step guide](https://huggingface.co/docs/evaluate/creating_and_sharing) in the documentation for detailed instructions.
 
 ## Credits
 
