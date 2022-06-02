@@ -96,7 +96,7 @@ TEMPLATE_REQUIRE = [
 ]
 
 EVALUATOR_REQUIRE = [
-   "transformers"
+   "transformers",
    # for bootstrap computations in Evaluator
    "scipy>=1.7.1",
 ]
