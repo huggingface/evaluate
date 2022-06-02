@@ -32,7 +32,7 @@ It currently contains:
 
 [🎓 **Documentation**](https://huggingface.co/docs/evaluate/)
 
-🔎 **Find a [metric](https://huggingface.co/evaluate-metric), [comparison](https://huggingface.co/evaluate-comparison), [measurement](https://huggingface.co/evaluate-metric) on the Hub**
+🔎 **Find a [metric](https://huggingface.co/evaluate-metric), [comparison](https://huggingface.co/evaluate-comparison), [measurement](https://huggingface.co/evaluate-measurement) on the Hub**
 
 [🌟 **Add a new evaluation module**](https://huggingface.co/docs/evaluate/)
 
