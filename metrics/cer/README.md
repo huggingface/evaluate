@@ -10,6 +10,25 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  Character error rate (CER) is a common metric of the performance of an automatic speech recognition system.
+  
+  CER is similar to Word Error Rate (WER), but operates on character instead of word. Please refer to docs of WER for further information.
+  
+  Character error rate can be computed as:
+  
+  CER = (S + D + I) / N = (S + D + I) / (S + D + C)
+  
+  where
+  
+  S is the number of substitutions,
+  D is the number of deletions,
+  I is the number of insertions,
+  C is the number of correct characters,
+  N is the number of characters in the reference (N=S+D+C).
+  
+  CER's output is not always a number between 0 and 1, in particular when there is a high number of insertions. This value is often associated to the percentage of characters that were incorrectly predicted. The lower the value, the better the
+  performance of the ASR system with a CER of 0 being a perfect score.
 ---
 
 # Metric Card for CER

@@ -10,6 +10,9 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  XTREME-S is a benchmark to evaluate universal cross-lingual speech representations in many languages.
+  XTREME-S covers four task families: speech recognition, classification, speech-to-text translation and retrieval.
 ---
 
 # Metric Card for XTREME-S

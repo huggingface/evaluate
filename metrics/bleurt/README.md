@@ -10,6 +10,12 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  BLEURT a learnt evaluation metric for Natural Language Generation. It is built using multiple phases of transfer learning starting from a pretrained BERT model (Devlin et al. 2018)
+  and then employing another pre-training phrase using synthetic data. Finally it is trained on WMT human annotations. You may run BLEURT out-of-the-box or fine-tune
+  it for your specific application (the latter is expected to perform better).
+
+  See the project's README at https://github.com/google-research/bleurt#readme for more information.
 ---
 
 # Metric Card for BLEURT

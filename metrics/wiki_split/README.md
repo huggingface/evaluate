@@ -10,6 +10,9 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  WIKI_SPLIT is the combination of three metrics SARI, EXACT and SACREBLEU
+  It can be used to evaluate the quality of machine-generated texts.
 ---
 
 # Metric Card for WikiSplit

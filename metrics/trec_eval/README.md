@@ -1,14 +1,17 @@
 ---
 title: TREC Eval
-datasets:
--  
-tags:
-- evaluate
-- metric
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
 sdk: gradio
 sdk_version: 3.0.2
 app_file: app.py
 pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  The TREC Eval metric combines a number of information retrieval metrics such as precision and nDCG. It is used to score rankings of retrieved documents with reference values.
 ---
 
 # Metric Card for TREC Eval

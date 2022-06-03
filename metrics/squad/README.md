@@ -10,6 +10,12 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  This metric wrap the official scoring script for version 1 of the Stanford Question Answering Dataset (SQuAD).
+
+  Stanford Question Answering Dataset (SQuAD) is a reading comprehension dataset, consisting of questions posed by
+  crowdworkers on a set of Wikipedia articles, where the answer to every question is a segment of text, or span,
+  from the corresponding reading passage, or the question might be unanswerable.
 ---
 
 # Metric Card for SQuAD

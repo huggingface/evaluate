@@ -10,6 +10,27 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  SARI is a metric used for evaluating automatic text simplification systems.
+  The metric compares the predicted simplified sentences against the reference
+  and the source sentences. It explicitly measures the goodness of words that are
+  added, deleted and kept by the system.
+  Sari = (F1_add + F1_keep + P_del) / 3
+  where
+  F1_add: n-gram F1 score for add operation
+  F1_keep: n-gram F1 score for keep operation
+  P_del: n-gram precision score for delete operation
+  n = 4, as in the original paper.
+  
+  This implementation is adapted from Tensorflow's tensor2tensor implementation [3].
+  It has two differences with the original GitHub [1] implementation:
+  (1) Defines 0/0=1 instead of 0 to give higher scores for predictions that match
+  a target exactly.
+  (2) Fixes an alleged bug [2] in the keep score computation.
+  [1] https://github.com/cocoxu/simplification/blob/master/SARI.py
+  (commit 0210f15)
+  [2] https://github.com/cocoxu/simplification/issues/6
+  [3] https://github.com/tensorflow/tensor2tensor/blob/master/tensor2tensor/utils/sari_hook.py
 ---
 
 # Metric Card for SARI

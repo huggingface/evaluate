@@ -10,6 +10,10 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  IoU is the area of overlap between the predicted segmentation and the ground truth divided by the area of union
+  between the predicted segmentation and the ground truth. For binary (two classes) or multi-class segmentation,
+  the mean IoU of the image is calculated by taking the IoU of each class and averaging them.
 ---
 
 # Metric Card for Mean IoU 

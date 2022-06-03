@@ -10,6 +10,9 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  IndicGLUE is a natural language understanding benchmark for Indian languages. It contains a wide
+  variety of tasks and covers 11 major Indian languages - as, bn, gu, hi, kn, ml, mr, or, pa, ta, te.
 ---
 
 # Metric Card for IndicGLUE

@@ -10,6 +10,14 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  Compute the Mahalanobis Distance
+  
+  Mahalonobis distance is the distance between a point and a distribution.
+  And not between two distinct points. It is effectively a multivariate equivalent of the Euclidean distance.
+  It was introduced by Prof. P. C. Mahalanobis in 1936
+  and has been used in various statistical applications ever since
+  [source: https://www.machinelearningplus.com/statistics/mahalanobis-distance/]
 ---
 
 # Metric Card for Mahalanobis Distance
