@@ -10,6 +10,8 @@ pinned: false
 tags:
 - evaluate
 - measurement
+description: >-
+  Returns the total number of words, and the number of unique words in the input data.
 ---
 
 # Measurement Card for Word Count
