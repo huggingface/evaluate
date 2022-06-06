@@ -210,7 +210,7 @@ class TextClassificationEvaluator(Evaluator):
         Examples:
 
         ```python
-        >>> from evaluation import evaluator
+        >>> from evaluate import evaluator
         >>> from datasets import Dataset, load_dataset
 
         >>> e = evaluator("text-classification")
@@ -354,7 +354,7 @@ def evaluator(task: str = None) -> Evaluator:
     Examples:
 
     ```python
-    >>> from evaluation import evaluator
+    >>> from evaluate import evaluator
 
     >>> # Sentiment analysis evaluator
     >>> evaluator("sentiment-analysis")
