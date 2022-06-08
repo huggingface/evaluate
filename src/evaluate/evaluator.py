@@ -18,8 +18,14 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
 from datasets import Dataset, load_dataset
-from scipy.stats import bootstrap
 
+
+try:
+    from scipy.stats import bootstrap
+
+    SCIPY_AVAILABLE = True
+except ImportError:
+    SCIPY_AVAILABLE = False
 
 try:
     from transformers import Pipeline, PreTrainedModel, PreTrainedTokenizer, TFPreTrainedModel, pipeline
@@ -52,7 +58,11 @@ class Evaluator(ABC):
     def __init__(self, task: str, default_metric_name: str = None):
         if not TRANSFORMERS_AVAILABLE:
             raise ImportError(
-                "If you want to use the `Evaluator` you need `transformers`. Run `pip install evaluate[transformers]`."
+                "If you want to use the `Evaluator` you need `transformers`. Run `pip install evaluate[evaluator]`."
+            )
+        if not SCIPY_AVAILABLE:
+            raise ImportError(
+                "If you want to use the `Evaluator` you need `scipy>=1.7.1`. Run `pip install evaluate[evaluator]`."
             )
         self.task = task
         self.default_metric_name = default_metric_name
@@ -174,8 +184,8 @@ class TextClassificationEvaluator(Evaluator):
 
                 - `"simple"` - we evaluate the metric and return the scores.
                 - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each
-                of the returned metric keys, using ``scipy`'s `bootstrap` method
-                https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html`.
+                of the returned metric keys, using `scipy`'s `bootstrap` method
+                https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html.
 
             confidence_level (`float`, defaults to `0.95`):
                 The `confidence_level` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
@@ -200,7 +210,7 @@ class TextClassificationEvaluator(Evaluator):
         Examples:
 
         ```python
-        >>> from evaluation import evaluator
+        >>> from evaluate import evaluator
         >>> from datasets import Dataset, load_dataset
 
         >>> e = evaluator("text-classification")
@@ -344,7 +354,7 @@ def evaluator(task: str = None) -> Evaluator:
     Examples:
 
     ```python
-    >>> from evaluation import evaluator
+    >>> from evaluate import evaluator
 
     >>> # Sentiment analysis evaluator
     >>> evaluator("sentiment-analysis")

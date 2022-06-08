@@ -10,6 +10,12 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  XNLI is a subset of a few thousand examples from MNLI which has been translated
+  into a 14 different languages (some low-ish resource). As with MNLI, the goal is
+  to predict textual entailment (does sentence A imply/contradict/neither sentence
+  B) and is a classification task (given two sentences, predict one of three
+  labels).
 ---
 
 # Metric Card for XNLI

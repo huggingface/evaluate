@@ -10,6 +10,39 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  CoVal is a coreference evaluation tool for the CoNLL and ARRAU datasets which
+  implements of the common evaluation metrics including MUC [Vilain et al, 1995],
+  B-cubed [Bagga and Baldwin, 1998], CEAFe [Luo et al., 2005],
+  LEA [Moosavi and Strube, 2016] and the averaged CoNLL score
+  (the average of the F1 values of MUC, B-cubed and CEAFe)
+  [Denis and Baldridge, 2009a; Pradhan et al., 2011].
+  
+  This wrapper of CoVal currently only work with CoNLL line format:
+  The CoNLL format has one word per line with all the annotation for this word in column separated by spaces:
+  Column	Type	Description
+  1	Document ID	This is a variation on the document filename
+  2	Part number	Some files are divided into multiple parts numbered as 000, 001, 002, ... etc.
+  3	Word number
+  4	Word itself	This is the token as segmented/tokenized in the Treebank. Initially the *_skel file contain the placeholder [WORD] which gets replaced by the actual token from the Treebank which is part of the OntoNotes release.
+  5	Part-of-Speech
+  6	Parse bit	This is the bracketed structure broken before the first open parenthesis in the parse, and the word/part-of-speech leaf replaced with a *. The full parse can be created by substituting the asterix with the "([pos] [word])" string (or leaf) and concatenating the items in the rows of that column.
+  7	Predicate lemma	The predicate lemma is mentioned for the rows for which we have semantic role information. All other rows are marked with a "-"
+  8	Predicate Frameset ID	This is the PropBank frameset ID of the predicate in Column 7.
+  9	Word sense	This is the word sense of the word in Column 3.
+  10	Speaker/Author	This is the speaker or author name where available. Mostly in Broadcast Conversation and Web Log data.
+  11	Named Entities	These columns identifies the spans representing various named entities.
+  12:N	Predicate Arguments	There is one column each of predicate argument structure information for the predicate mentioned in Column 7.
+  N	Coreference	Coreference chain information encoded in a parenthesis structure.
+  More informations on the format can be found here (section "*_conll File Format"): http://www.conll.cemantix.org/2012/data.html
+  
+  Details on the evaluation on CoNLL can be found here: https://github.com/ns-moosavi/coval/blob/master/conll/README.md
+  
+  CoVal code was written by @ns-moosavi.
+  Some parts are borrowed from https://github.com/clarkkev/deep-coref/blob/master/evaluation.py
+  The test suite is taken from https://github.com/conll/reference-coreference-scorers/
+  Mention evaluation and the test suite are added by @andreasvc.
+  Parsing CoNLL files is developed by Leo Born.
 ---
 
 ## Metric description

@@ -3,13 +3,15 @@ title: RL Reliability
 emoji: 🤗 
 colorFrom: blue
 colorTo: red
-tags:
-- evaluate
-- metric
 sdk: gradio
 sdk_version: 3.0.2
 app_file: app.py
 pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  Computes the RL reliability metrics from a set of experiments. There is an `"online"` and `"offline"` configuration for evaluation.
 ---
 
 # Metric Card for RL Reliability

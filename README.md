@@ -1,4 +1,10 @@
 <p align="center">
+    <br>
+    <img src="https://huggingface.co/datasets/evaluate/media/resolve/main/evaluate-banner.png" width="400"/>
+    <br>
+</p>
+
+<p align="center">
     <a href="https://circleci.com/gh/huggingface/evaluate">
         <img alt="Build" src="https://img.shields.io/circleci/build/github/huggingface/evaluate/main">
     </a>
@@ -26,7 +32,7 @@ It currently contains:
 
 [🎓 **Documentation**](https://huggingface.co/docs/evaluate/)
 
-🔎 **Find a [metric](https://huggingface.co/evaluate-metric), [comparison](https://huggingface.co/evaluate-comparison), [measurement](https://huggingface.co/evaluate-metric) on the Hub**
+🔎 **Find a [metric](https://huggingface.co/evaluate-metric), [comparison](https://huggingface.co/evaluate-comparison), [measurement](https://huggingface.co/evaluate-measurement) on the Hub**
 
 [🌟 **Add a new evaluation module**](https://huggingface.co/docs/evaluate/)
 
@@ -47,17 +53,6 @@ It currently contains:
 pip install evaluate
 ```
 
-## With conda
-
-🤗 Evaluate can be installed using conda as follows:
-
-
-```bash
-conda install -c huggingface -c conda-forge evaluate
-```
-
-For more details on installation, check the installation page in the documentation: https://huggingface.co/docs/evaluate/installation
-
 # Usage
 
 🤗 Evaluate's main methods are:
@@ -76,8 +71,7 @@ Then you can get started with the following command which will create a new fold
 ```batch
 evaluate-cli create "Awesome Metric"
 ```
-For detailed documentation see ...
-TODO : make step-by-step guide similar to the one for [datasets](https://huggingface.co/docs/datasets/share.html).
+See this [step-by-step guide](https://huggingface.co/docs/evaluate/creating_and_sharing) in the documentation for detailed instructions.
 
 ## Credits
 

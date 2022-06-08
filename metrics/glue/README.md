@@ -10,6 +10,10 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  GLUE, the General Language Understanding Evaluation benchmark
+  (https://gluebenchmark.com/) is a collection of resources for training,
+  evaluating, and analyzing natural language understanding systems.
 ---
 
 # Metric Card for GLUE

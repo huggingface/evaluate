@@ -10,6 +10,9 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  Mean Squared Error(MSE) is the average of the square of difference between the predicted
+  and actual values.
 ---
 
 # Metric Card for MSE

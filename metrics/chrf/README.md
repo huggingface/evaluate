@@ -10,6 +10,16 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  ChrF and ChrF++ are two MT evaluation metrics. They both use the F-score statistic for character n-gram matches,
+  and ChrF++ adds word n-grams as well which correlates more strongly with direct assessment. We use the implementation
+  that is already present in sacrebleu.
+  
+  The implementation here is slightly different from sacrebleu in terms of the required input format. The length of
+  the references and hypotheses lists need to be the same, so you may need to transpose your references compared to
+  sacrebleu's required input format. See https://github.com/huggingface/datasets/issues/3154#issuecomment-950746534
+  
+  See the README.md file at https://github.com/mjpost/sacreBLEU#chrf--chrf for more information.
 ---
 
 # Metric Card for chrF(++)

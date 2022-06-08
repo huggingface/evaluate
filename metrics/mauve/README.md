@@ -10,6 +10,15 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  MAUVE is a library built on PyTorch and HuggingFace Transformers to measure the gap between neural text and human text with the eponymous MAUVE measure.
+  
+  MAUVE summarizes both Type I and Type II errors measured softly using Kullback–Leibler (KL) divergences.
+  
+  For details, see the MAUVE paper: https://arxiv.org/abs/2102.01454 (Neurips, 2021).
+  
+  This metrics is a wrapper around the official implementation of MAUVE:
+  https://github.com/krishnap25/mauve
 ---
 
 # Metric Card for MAUVE

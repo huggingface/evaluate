@@ -10,6 +10,8 @@ pinned: false
 tags:
 - evaluate
 - comparison
+description: >-
+  Returns the rate at which the predictions of one model exactly match those of another model.
 ---
 
 

@@ -10,6 +10,8 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  Returns the rate at which the input predicted strings exactly match their references, ignoring any strings input as part of the regexes_to_ignore list.
 ---
 
 # Metric Card for Exact Match

@@ -10,6 +10,8 @@ pinned: false
 tags:
 - evaluate
 - measurement
+description: >-
+  Returns the duplicate fraction of duplicate strings in the input.
 ---
 
 # Measurement Card for Text Duplicates

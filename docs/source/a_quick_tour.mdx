@@ -2,15 +2,15 @@
 
 🤗 Evaluate provides access to a wide range of evaluation tools. It covers a range of modalities such as text, computer vision, audio, etc. as well as tools to evaluate models or datasets. These tools are split into three categories.
 
-## Three types of evaluations
+## Types of evaluations
 
-There are different aspects of a typical machine learning pipeline that can be evaluated and for aspect we provide a tool:
+There are different aspects of a typical machine learning pipeline that can be evaluated and for each aspect 🤗 Evaluate provides a tool:
 
-- **Metric**: A metric is used to evaluate a model's performance and usually involves the model's predictions as well as some ground truth labels. You can find all integrated metrics at [evaluate-metric](hf.co/evaluate-metric).
-- **Comparison**: A comparison is used to compare two models. This can for example be done by comparing their predictions to ground truth labels and computing their agreement. You can find all integrated comparisons at [evaluate-comparison](hf.co/evaluate-comparison).
-- **Measurement**: The dataset is as important as the model trained on it. With measurements one can investigate a dataset's properties. You can find all integrated measurements at [evaluate-measurement](hf.co/evaluate-measurement).
+- **Metric**: A metric is used to evaluate a model's performance and usually involves the model's predictions as well as some ground truth labels. You can find all integrated metrics at [evaluate-metric](https://huggingface.co/evaluate-metric).
+- **Comparison**: A comparison is used to compare two models. This can for example be done by comparing their predictions to ground truth labels and computing their agreement. You can find all integrated comparisons at [evaluate-comparison](https://huggingface.co/evaluate-comparison).
+- **Measurement**: The dataset is as important as the model trained on it. With measurements one can investigate a dataset's properties. You can find all integrated measurements at [evaluate-measurement](https://huggingface.co/evaluate-measurement).
 
-Each metric, comparison, and measurement is a separate Python module, but for using any of them, there is a single entry point: `evaluate.load`!
+Each metric, comparison, and measurement is a separate Python module, but for using any of them, there is a single entry point: [`evaluate.load`]!
 
 ## Load
 
@@ -21,7 +21,7 @@ Any metric, comparison, or measurement is loaded with the `evaluate.load` functi
 >>> accuracy = evaluate.load("accuracy")
 ```
 
-If you want to make sure you are loading the right type of module (especially if there are name clashes) you can explicitely pass the type:
+If you want to make sure you are loading the right type of evaluation (especially if there are name clashes) you can explicitely pass the type:
 
 ```py
 >>> word_length = evaluate.load("word_length", module_type="measurement")
@@ -29,15 +29,31 @@ If you want to make sure you are loading the right type of module (especially if
 
 ### Community modules
 
-Besides the modules implemented in 🤗 Evaluate you can also load any community module by prepending the user's username:
+Besides the modules implemented in 🤗 Evaluate you can also load any community module by specifying the repository ID of the metric implementation:
 
 ```py
 >>> element_count = evaluate.load("lvwerra/element_count", module_type="measurement")
 ```
 
+See the [Creating and Sharing Guide](/docs/evaluate/main/en/creating_and_sharing) for information about uploading custom metrics.
+
+### List available modules
+
+With [`list_evaluation_modules`] you can check what modules are available on the hub. You can also filter for a specific modules and skip community metrics if you want. You can also see additional information such as likes:
+
+```python
+evaluate.list_evaluation_modules(
+  module_type="comparison",
+  include_community=False, 
+  with_details=True)
+
+>>> [{'name': 'mcnemar', 'type': 'comparison', 'community': False, 'likes': 1},
+...  {'name': 'exact_match', 'type': 'comparison', 'community': False, 'likes': 0}]
+```
+
 ## Module attributes
 
-All evalution modules come with a range of useful attributes that help to use a module stored in a [`EvaluationModuleInfo`](https://moon-ci-docs.huggingface.co/docs/evaluate/pr_72/en/package_reference/main_classes#evaluate.EvaluationModuleInfo) object.
+All evalution modules come with a range of useful attributes that help to use a module stored in a [`EvaluationModuleInfo`] object.
 
 |Attribute|Description|
 |---|---|
@@ -105,20 +121,21 @@ Now that we know how the evaluation module works and what should go in there we 
 2. Incremental
 
 
-In the incremental approach the necessary inputs are added to the module with `add` or `add_batch` and the score is calculated at the end with `compute()`. Alternatively, one can pass all the inputs at once to `compute()`. Let's have a look at the two approaches.
+In the incremental approach the necessary inputs are added to the module with [`EvaluationModule.add`] or [`EvaluationModule.add_batch`] and the score is calculated at the end with [`EvaluationModule.compute`]. Alternatively, one can pass all the inputs at once to `compute()`. Let's have a look at the two approaches.
 
-### `compute()`
+### Using `compute()`
+
 The simplest way to calculate the score of an evaluation module is by calling `compute()` directly with the necessary inputs. Simply pass the inputs as seen in `features` to the `compute()` method.
 
 ```py
 >>> accuracy.compute(references=[0,1,0,1], predictions=[1,0,0,1])
 {'accuracy': 0.5}
 ```
-Evaluation modules return the results in a dictionary. However, in some instances you build up the predictions iteratively or in a distributed fashion in which case `add` or `add_batch` are useful.
+Evaluation modules return the results in a dictionary. However, in some instances you build up the predictions iteratively or in a distributed fashion in which case `add()` or `add_batch()` are useful.
 
-### `add` and `add_batch`
+### Using `add()` and `add_batch()`
 
-In many evaluation pipelines you build the predictions iteratively such as in a for-loop. In that case you could store the predictions in a list and at the end pass them to `compute()`. With `add` and `add_batch` you can circumvent the step of storing the predictions separately. If you are only creating single predictions at a time you can use `add`:
+In many evaluation pipelines you build the predictions iteratively such as in a for-loop. In that case you could store the predictions in a list and at the end pass them to `compute()`. With `add()` and `add_batch()` you can circumvent the step of storing the predictions separately. If you are only creating single predictions at a time you can use `add()`:
 
 ```py
 >>> for ref, pred in zip([0,1,0,1], [1,0,0,1]):
@@ -127,7 +144,7 @@ In many evaluation pipelines you build the predictions iteratively such as in a 
 {'accuracy': 0.5}
 ```
 
-Once you have gathered all predictions you can call `compute()` to compute the score based on all stored values. When getting predictions and references in batches you can use `add_batch` which adds a list elements for later processing. The rest works as with `add`:
+Once you have gathered all predictions you can call `compute()` to compute the score based on all stored values. When getting predictions and references in batches you can use `add_batch()` which adds a list elements for later processing. The rest works as with `add()`:
 
 ```py
 >>> for refs, preds in zip([[0,1],[0,1]], [[1,0],[0,1]]):
@@ -147,14 +164,103 @@ This is especially useful when you need to get the predictions from your model i
 
 ### Distributed evaluation
 
-Computing metrics in a distributed environment can be tricky. Metric evaluation is executed in separate Python processes, or nodes, on different subsets of a dataset. Typically, when a metric score is additive (`f(AuB) = f(A) + f(B)`), you can use distributed reduce operations to gather the scores for each subset of the dataset. But when a metric is non-additive (`f(AuB) ≠ f(A) + f(B)`), it's not that simple. For example, you can't take the sum of the [F1](https://huggingface.co/metrics/f1) scores of each data subset as your **final metric**.
+Computing metrics in a distributed environment can be tricky. Metric evaluation is executed in separate Python processes, or nodes, on different subsets of a dataset. Typically, when a metric score is additive (`f(AuB) = f(A) + f(B)`), you can use distributed reduce operations to gather the scores for each subset of the dataset. But when a metric is non-additive (`f(AuB) ≠ f(A) + f(B)`), it's not that simple. For example, you can't take the sum of the [F1](https://huggingface.co/spaces/evaluate-metric/f1) scores of each data subset as your **final metric**.
 
 A common way to overcome this issue is to fallback on single process evaluation. The metrics are evaluated on a single GPU, which becomes inefficient.
 
-🤗 Evaluate solves this issue by only computing the final metric on the first node. The predictions and references are computed and provided to the metric separately for each node. These are temporarily stored in an Apache Arrow table, avoiding cluttering the GPU or CPU memory. When you are ready to `EvaluationModule.compute` the final metric, the first node is able to access the predictions and references stored on all the other nodes. Once it has gathered all the predictions and references, `EvaluationModule.compute` will perform the final metric evaluation.
+🤗 Evaluate solves this issue by only computing the final metric on the first node. The predictions and references are computed and provided to the metric separately for each node. These are temporarily stored in an Apache Arrow table, avoiding cluttering the GPU or CPU memory. When you are ready to `compute()` the final metric, the first node is able to access the predictions and references stored on all the other nodes. Once it has gathered all the predictions and references, `compute()` will perform the final metric evaluation.
 
 This solution allows 🤗 Evaluate to perform distributed predictions, which is important for evaluation speed in distributed settings. At the same time, you can also use complex non-additive metrics without wasting valuable GPU or CPU memory.
 
-## Save and share
+## Save and push to the Hub
 
-**TODO**: add references to save and push_to_hub.
+Saving and sharing evaluation results is an important step. We provide the [`evaluate.save`] function to easily save metrics results. You can either pass a specific filename or a directory. In the latter case, the results are saved in a file with an automatically created file name. Besides the directory or file name, the function takes any key-value pairs as inputs and stores them in a JSON file.
+
+```py
+result = accuracy.compute(references=[0,1,0,1], predictions=[1,0,0,1])
+
+hyperparams = {"model": "bert-base-uncased"}
+evaluate.save("./results/"experiment="run 42", **result, **hyperparams)
+>>> PosixPath('results/result-2022_05_30-22_09_11.json')
+```
+
+The content of the JSON file look like the following:
+
+```json
+{
+    "experiment": "run 42",
+    "accuracy": 0.5,
+    "model": "bert-base-uncased",
+    "_timestamp": "2022-05-30T22:09:11.959469",
+    "_git_commit_hash": "123456789abcdefghijkl",
+    "_evaluate_version": "0.1.0",
+    "_python_version": "3.9.12 (main, Mar 26 2022, 15:51:15) \n[Clang 13.1.6 (clang-1316.0.21.2)]",
+    "_interpreter_path": "/Users/leandro/git/evaluate/env/bin/python"
+}
+```
+
+In addition to the specified fields, it also contains useful system information for reproducing the results. 
+
+Besides storing the results locally, you should report them on the model's repository on the Hub. With the [`evaluate.push_to_hub`] function, you can easily report evaluation results to the model's repository:
+
+```py
+evaluate.push_to_hub(
+  model_id="huggingface/gpt2-wikitext2",  # model repository on hub
+  metric_value=0.5,                       # metric value
+  metric_type="bleu",                     # metric name, e.g. accuracy.name
+  metric_name="BLEU",                     # pretty name which is displayed
+  dataset_type="wikitext",                # dataset name on the hub
+  dataset_name="WikiText",                # pretty name
+  dataset_split="test",                   # dataset split used
+  task_type="text-generation",            # task id, see https://github.com/huggingface/datasets/blob/master/src/datasets/utils/resources/tasks.json
+  task_name="Text Generation"             # pretty name for task
+)
+```
+
+## Evaluator
+
+The [`evaluate.evaluator`] provides automated evaluation and only requires a model, dataset, metric in contrast to the metrics in `EvaluationModule`s that require the model's predictions. As such it is easier to evaluate a model on a dataset with a given metric as the inference is handled internally. To make that possible it uses the `Pipeline` abstraction from `transformers`. However, you can use your own framework as long as it follows the `Pipeline` interface.
+
+To make an evaluation with the `evaluator` let's load a `transformers` pipeline (but you can pass your own custom inference class for any framework as long as it follows the pipeline call API) with an model trained on IMDb, the IMDb test split and the accuracy metric. 
+
+```python
+from transformers import pipeline
+from datasets import load_dataset
+from evaluate import evaluator
+import evaluate
+
+pipe = pipeline("text-classification", model="lvwerra/distilbert-imdb", device=0)
+data = load_dataset("imdb", split="test").shuffle().select(range(1000))
+metric = evaluate.load("accuracy")
+```
+
+Then you can create an evaluator for text classification and pass the three objects to the `compute()` method. With the label mapping `evaluate` provides a method to align the pipeline outputs with the label column in the dataset:
+
+```python
+eval = evaluator("text-classification")
+
+results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric,
+                       label_mapping={"NEGATIVE": 0, "POSITIVE": 1},)
+
+print(results)
+>>> {'accuracy': 0.934}
+```
+
+Calculating the value of the metric alone is often not enough to know if a model performs significantly better than another one. With _bootstrapping_ `evaluate` computes confidence intervals and the standard error which helps estimate how stable a score is:
+
+```python
+results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric,
+                       label_mapping={"NEGATIVE": 0, "POSITIVE": 1},
+                       strategy="bootstrap", n_resamples=200)
+
+print(results)
+>>> {'accuracy': 
+...     {
+...       'confidence_interval': (0.906, 0.9406749892841922),
+...       'standard_error': 0.00865213251082787,
+...       'score': 0.923
+...     }
+... }
+```
+
+The evaluator expects a `"text"` and `"label"` column for the data input. If your dataset differs you can provide the columns with the keywords `input_column="text"` and `label_column="label"`. Currently only `"text-classification"` is supported with more tasks being added in the future.

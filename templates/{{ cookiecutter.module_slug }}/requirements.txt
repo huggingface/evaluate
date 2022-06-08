@@ -1,3 +1,2 @@
-# TODO: fix github to release
-git+https://github.com/huggingface/evaluate.git@main
+evaluate==0.1.0
 datasets~=2.0

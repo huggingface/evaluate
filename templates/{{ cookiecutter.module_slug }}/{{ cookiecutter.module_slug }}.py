@@ -28,7 +28,7 @@ year={2020}
 
 # TODO: Add description of the module here
 _DESCRIPTION = """\
-This new module is designed to solve this great NLP task and is crafted with a lot of care.
+This new module is designed to solve this great ML task and is crafted with a lot of care.
 """
 
 

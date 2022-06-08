@@ -58,7 +58,7 @@ _CITATION = """\
 """
 
 _DESCRIPTION = """\
-This new module is designed to solve this great NLP task and is crafted with a lot of care.
+Computes the RL reliability metrics from a set of experiments. There is an `"online"` and `"offline"` configuration for evaluation.
 """
 
 
