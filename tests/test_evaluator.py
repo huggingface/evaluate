@@ -16,15 +16,15 @@
 
 from unittest import TestCase
 
-from datasets import Dataset, load_dataset, load_metric
-from transformers import AutoTokenizer, BertForSequenceClassification, pipeline
+from datasets import load_dataset
+from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 
-from evaluate import TextClassificationEvaluator, evaluator
+from evaluate import TextClassificationEvaluator, evaluator, load
 
 
 class TestEvaluator(TestCase):
     def setUp(self):
-        self.data = Dataset.from_dict(load_dataset("imdb")["test"][:2])
+        self.data = load_dataset("imdb", split="test[:2]")
         self.input_column = "text"
         self.label_column = "label"
         self.pipe = pipeline("text-classification")
@@ -39,7 +39,7 @@ class TestEvaluator(TestCase):
             label_column="label",
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"f1": 0.0})
+        self.assertEqual(scores, {"accuracy": 1.0})
 
     def test_model_init(self):
         scores = self.evaluator.compute(
@@ -51,7 +51,7 @@ class TestEvaluator(TestCase):
             label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
         )
         self.assertEqual(scores, {"accuracy": 0.5})
-        model = BertForSequenceClassification.from_pretrained(
+        model = AutoModelForSequenceClassification.from_pretrained(
             "huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli"
         )
         tokenizer = AutoTokenizer.from_pretrained("huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli")
@@ -88,10 +88,10 @@ class TestEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"f1": 0.0})
+        self.assertEqual(scores, {"accuracy": 1.0})
 
     def test_overwrite_default_metric(self):
-        accuracy = load_metric("accuracy")
+        accuracy = load("accuracy")
         scores = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
@@ -112,7 +112,7 @@ class TestEvaluator(TestCase):
         self.assertEqual(scores, {"accuracy": 1.0})
 
     def test_bootstrap(self):
-        model = BertForSequenceClassification.from_pretrained(
+        model = AutoModelForSequenceClassification.from_pretrained(
             "huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli"
         )
         tokenizer = AutoTokenizer.from_pretrained("huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli")
