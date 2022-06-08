@@ -101,8 +101,8 @@ def hf_github_url(path: str, name: str, module_type: str, revision: Optional[str
 
     revision = revision or os.getenv("HF_SCRIPTS_VERSION", SCRIPTS_VERSION)
 
-    if re.match("\d*\.\d*\.\d*", revision): # revision is version number (three digits separated by full stops)
-        revision = "v" + revision # tagging convention on evaluate repository starts with v
+    if re.match("\d*\.\d*\.\d*", revision):  # revision is version number (three digits separated by full stops)
+        revision = "v" + revision  # tagging convention on evaluate repository starts with v
 
     if module_type == "metric":
         return config.REPO_METRICS_URL.format(revision=revision, path=path, name=name)
