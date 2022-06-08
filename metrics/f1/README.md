@@ -10,6 +10,9 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  The F1 score is the harmonic mean of the precision and recall. It can be computed with the equation:
+  F1 = 2 * (precision * recall) / (precision + recall)
 ---
 
 # Metric Card for F1

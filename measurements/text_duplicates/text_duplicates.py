@@ -20,7 +20,7 @@ import hashlib
 logger = evaluate.logging.get_logger(__name__)
 
 _DESCRIPTION = """
-Returns the duplicate strings (if any) contained in the input.
+Returns the duplicate fraction of duplicate strings in the input.
 """
 
 _KWARGS_DESCRIPTION = """

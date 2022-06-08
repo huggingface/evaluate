@@ -10,6 +10,8 @@ pinned: false
 tags:
 - evaluate
 - measurement
+description: >-
+  Returns the average length (in terms of the number of words) of the input data.
 ---
 
 # Measurement Card for Word Length

@@ -10,6 +10,12 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  This metric wrap the official scoring script for version 1 of the Contract Understanding Atticus Dataset (CUAD).
+
+  Contract Understanding Atticus Dataset (CUAD) v1 is a corpus of more than 13,000 labels in 510 
+  commercial legal contracts that have been manually labeled to identify 41 categories of important
+  clauses that lawyers look for when reviewing contracts in connection with corporate transactions.
 ---
 
 # Metric Card for CUAD

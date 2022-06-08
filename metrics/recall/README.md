@@ -10,6 +10,10 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  Recall is the fraction of the positive examples that were correctly labeled by the model as positive. It can be computed with the equation:
+  Recall = TP / (TP + FN)
+  Where TP is the true positives and FN is the false negatives.
 ---
 
 # Metric Card for Recall

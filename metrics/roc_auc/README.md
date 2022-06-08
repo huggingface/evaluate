@@ -10,6 +10,13 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  This metric computes the area under the curve (AUC) for the Receiver Operating Characteristic Curve (ROC). The return values represent how well the model used is predicting the correct classes, based on the input data. A score of `0.5` means that the model is predicting exactly at chance, i.e. the model's predictions are correct at the same rate as if the predictions were being decided by the flip of a fair coin or the roll of a fair die. A score above `0.5` indicates that the model is doing better than chance, while a score below `0.5` indicates that the model is doing worse than chance.
+  
+  This metric has three separate use cases:
+  - binary: The case in which there are only two different label classes, and each example gets only one label. This is the default implementation.
+  - multiclass: The case in which there can be more than two different label classes, but each example still gets only one label.
+  - multilabel: The case in which there can be more than two different label classes, and each example can have more than one label.
 ---
 
 # Metric Card for ROC AUC

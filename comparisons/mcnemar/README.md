@@ -10,6 +10,12 @@ pinned: false
 tags:
 - evaluate
 - comparison
+description: >-
+  McNemar's test is a diagnostic test over a contingency table resulting from the predictions of two classifiers. The test compares the sensitivity and specificity of the diagnostic tests on the same group reference labels. It can be computed with:
+  McNemar = (SE - SP)**2 / SE + SP
+  Where:
+  SE: Sensitivity (Test 1 positive; Test 2 negative)
+  SP: Specificity (Test 1 negative; Test 2 positive)
 ---
 
 

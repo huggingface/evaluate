@@ -10,6 +10,10 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  This metric implements the evaluation harness for the HumanEval problem solving dataset
+  described in the paper "Evaluating Large Language Models Trained on Code"
+  (https://arxiv.org/abs/2107.03374).
 ---
 
 # Metric Card for Code Eval

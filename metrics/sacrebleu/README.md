@@ -10,6 +10,12 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  SacreBLEU provides hassle-free computation of shareable, comparable, and reproducible BLEU scores.
+  Inspired by Rico Sennrich's `multi-bleu-detok.perl`, it produces the official WMT scores but works with plain text.
+  It also knows all the standard test sets and handles downloading, processing, and tokenization for you.
+  
+  See the [README.md] file at https://github.com/mjpost/sacreBLEU for more information.
 ---
 
 # Metric Card for SacreBLEU

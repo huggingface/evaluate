@@ -10,6 +10,11 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  Perplexity (PPL) is one of the most common metrics for evaluating language models.
+  It is defined as the exponentiated average negative log-likelihood of a sequence.
+  
+  For more information, see https://huggingface.co/docs/transformers/perplexity
 ---
 
 # Metric Card for Perplexity

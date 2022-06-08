@@ -10,6 +10,9 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  Mean Absolute Error (MAE) is the mean of the magnitude of difference between the predicted and actual
+  values.
 ---
 
 # Metric Card for MAE

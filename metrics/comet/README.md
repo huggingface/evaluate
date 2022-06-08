@@ -10,6 +10,11 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  Crosslingual Optimized Metric for Evaluation of Translation (COMET) is an open-source framework used to train Machine Translation metrics that achieve high levels of correlation with different types of human judgments (HTER, DA's or MQM).
+  With the release of the framework the authors also released fully trained models that were used to compete in the WMT20 Metrics Shared Task achieving SOTA in that years competition.
+  
+  See the [README.md] file at https://unbabel.github.io/COMET/html/models.html for more information.
 ---
 
 # Metric Card for COMET

@@ -10,6 +10,17 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  TER (Translation Edit Rate, also called Translation Error Rate) is a metric to quantify the edit operations that a
+  hypothesis requires to match a reference translation. We use the implementation that is already present in sacrebleu
+  (https://github.com/mjpost/sacreBLEU#ter), which in turn is inspired by the TERCOM implementation, which can be found
+  here: https://github.com/jhclark/tercom.
+  
+  The implementation here is slightly different from sacrebleu in terms of the required input format. The length of
+  the references and hypotheses lists need to be the same, so you may need to transpose your references compared to
+  sacrebleu's required input format. See https://github.com/huggingface/datasets/issues/3154#issuecomment-950746534
+  
+  See the README.md file at https://github.com/mjpost/sacreBLEU#ter for more information.
 ---
 
 # Metric Card for TER

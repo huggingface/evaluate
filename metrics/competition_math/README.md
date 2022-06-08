@@ -10,6 +10,9 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  This metric is used to assess performance on the Mathematics Aptitude Test of Heuristics (MATH) dataset.
+  It first canonicalizes the inputs (e.g., converting "1/2" to "\frac{1}{2}") and then computes accuracy.
 ---
 
 # Metric Card for Competition MATH

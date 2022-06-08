@@ -10,6 +10,10 @@ pinned: false
 tags:
 - evaluate
 - metric
+description: >-
+  Precision is the fraction of correctly labeled positive examples out of all of the examples that were labeled as positive. It is computed via the equation:
+  Precision = TP / (TP + FP)
+  where TP is the True positives (i.e. the examples correctly labeled as positive) and FP is the False positive examples (i.e. the examples incorrectly labeled as positive).
 ---
 
 # Metric Card for Precision
