@@ -299,7 +299,7 @@ class TextClassificationEvaluator(Evaluator):
 SUPPORTED_EVALUATOR_TASKS = {
     "text-classification": {
         "implementation": TextClassificationEvaluator,
-        "default_metric_name": "f1",
+        "default_metric_name": "accuracy",
     }
 }
 
