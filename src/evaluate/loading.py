@@ -445,7 +445,7 @@ class GithubEvaluationModuleFactory(_EvaluationModuleFactory):
                 local_path = self.download_loading_script(revision)
                 logger.warning(
                     f"Couldn't find a directory or a metric named '{self.name}' in this version. "
-                    f"It was picked from the master branch on github instead."
+                    f"It was picked from the main branch on github instead."
                 )
         imports = get_imports(local_path)
         local_imports = _download_additional_modules(
