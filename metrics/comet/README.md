@@ -36,7 +36,7 @@ reference = ["They were able to control the fire.", "Schools and kindergartens o
 comet_score = comet_metric.compute(predictions=hypothesis, references=reference, sources=source)
 ```
 
-It has several configurations, named after the COMET model to be used. It will default to `wmt20-comet-da` (previously known as `wmt-large-da-estimator-1719`). Alternate models that can be chosen include `wmt20-comet-qe-da`, `wmt21-comet-mqm`, `wmt21-cometinho-da`, `wmt21-comet-qe-mqm` and `emnlp20-comet-rank`.
+It has several configurations, named after the COMET model to be used. It will default to `wmt20-comet-da` (previously known as `wmt-large-da-estimator-1719`). Alternate models that can be chosen include `wmt20-comet-qe-da`, `wmt21-comet-mqm`, `wmt21-cometinho-da`, `wmt21-comet-qe-mqm` and `emnlp20-comet-rank`. Notably, a distilled model is also available, which is 80% smaller and 2.128x faster while performing close to non-distilled alternatives. You can use it with the identifier `eamt22-cometinho-da`. This version, called Cometinho, was elected as [the best paper](https://aclanthology.org/2022.eamt-1.9) at the annual European conference on machine translation.
 
 It also has several optional arguments:
 
@@ -139,6 +139,28 @@ Also, calculating the COMET metric involves downloading the model from which fea
    url = "https://www.aclweb.org/anthology/2020.emnlp-main.213",
    pages = "2685--2702",
 
+```
+
+For the distilled version:
+
+```bibtex
+@inproceedings{rei-etal-2022-searching,
+    title = "Searching for {COMETINHO}: The Little Metric That Could",
+    author = "Rei, Ricardo  and
+      Farinha, Ana C  and
+      de Souza, Jos{\'e} G.C.  and
+      Ramos, Pedro G.  and
+      Martins, Andr{\'e} F.T.  and
+      Coheur, Luisa  and
+      Lavie, Alon",
+    booktitle = "Proceedings of the 23rd Annual Conference of the European Association for Machine Translation",
+    month = jun,
+    year = "2022",
+    address = "Ghent, Belgium",
+    publisher = "European Association for Machine Translation",
+    url = "https://aclanthology.org/2022.eamt-1.9",
+    pages = "61--70",
+}
 ```
 
 ## Further References
