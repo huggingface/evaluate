@@ -138,7 +138,7 @@ Also, calculating the COMET metric involves downloading the model from which fea
    publisher = "Association for Computational Linguistics",
    url = "https://www.aclweb.org/anthology/2020.emnlp-main.213",
    pages = "2685--2702",
-
+}
 ```
 
 For the distilled version:
