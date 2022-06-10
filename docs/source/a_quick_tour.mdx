@@ -10,6 +10,10 @@ There are different aspects of a typical machine learning pipeline that can be e
 - **Comparison**: A comparison is used to compare two models. This can for example be done by comparing their predictions to ground truth labels and computing their agreement. You can find all integrated comparisons at [evaluate-comparison](https://huggingface.co/evaluate-comparison).
 - **Measurement**: The dataset is as important as the model trained on it. With measurements one can investigate a dataset's properties. You can find all integrated measurements at [evaluate-measurement](https://huggingface.co/evaluate-measurement).
 
+Each of these evaluation modules live on Hugging Face Hub as a Space. They come with an interactive widget and a metric card documenting its use and limitations. For example [accuracy](https://huggingface.co/spaces/evaluate-metric/accuracy):
+
+![Metric widget](https://huggingface.co/datasets/evaluate/media/resolve/main/metric-widget.png)
+
 Each metric, comparison, and measurement is a separate Python module, but for using any of them, there is a single entry point: [`evaluate.load`]!
 
 ## Load
