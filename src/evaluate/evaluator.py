@@ -28,7 +28,7 @@ except ImportError:
     SCIPY_AVAILABLE = False
 
 try:
-    from transformers import Pipeline, PreTrainedModel, PreTrainedTokenizer, TFPreTrainedModel, pipeline
+    from transformers import Pipeline, PreTrainedTokenizer, pipeline
     from transformers.pipelines import SUPPORTED_TASKS as SUPPORTED_PIPELINE_TASKS
     from transformers.pipelines import TASK_ALIASES
     from transformers.pipelines import check_task as check_pipeline_task
@@ -244,10 +244,9 @@ class TextClassificationEvaluator(Evaluator):
             )
 
         # Prepare pipeline.
-        if (
-            isinstance(model_or_pipeline, PreTrainedModel)
-            or isinstance(model_or_pipeline, TFPreTrainedModel)
-            or isinstance(model_or_pipeline, str)
+        if isinstance(model_or_pipeline, str) or (
+            hasattr(model_or_pipeline, "__class__")
+            and model_or_pipeline.__class__.__module__.startswith("transformers.models")
         ):
             pipe = pipeline(self.task, model=model_or_pipeline, tokenizer=tokenizer)
         else:
