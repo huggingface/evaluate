@@ -158,6 +158,7 @@ class TextClassificationEvaluator(Evaluator):
         input_column: str = "text",
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
+        **compute_parameters: Dict
     ) -> Tuple[Dict[str, float], Any]:
         """
         Compute the metric for a given pipeline and dataset combination.
@@ -275,7 +276,7 @@ class TextClassificationEvaluator(Evaluator):
         # Core computations.
         references = data[label_column]
         predictions = self._compute_predictions(pipe, data[input_column], label_mapping=label_mapping)
-        result = metric.compute(predictions=predictions, references=references)
+        result = metric.compute(predictions=predictions, references=references, **compute_parameters)
 
         if strategy == "bootstrap":
             metric_keys = result.keys()
