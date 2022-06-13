@@ -246,7 +246,10 @@ class TextClassificationEvaluator(Evaluator):
         # Prepare pipeline.
         if isinstance(model_or_pipeline, str) or (
             hasattr(model_or_pipeline, "__class__")
-            and model_or_pipeline.__class__.__module__.startswith("transformers.models")
+            and any(
+                cls_name in [parent_cls.__name__ for parent_cls in model_or_pipeline.__class__.__mro__]
+                for cls_name in ["PreTrainedModel", "TFPreTrainedModel"]
+            )
         ):
             pipe = pipeline(self.task, model=model_or_pipeline, tokenizer=tokenizer)
         else:
