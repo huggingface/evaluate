@@ -22,8 +22,8 @@ def save(path_or_file, **data):
     Example:
         ```py
         >>> import evaluate
-        >>> result = {"bleu", 0.7}
-        >>> params = {"model", "gpt-2"}
+        >>> result = {"bleu": 0.7}
+        >>> params = {"model": "gpt-2"}
         >>> evaluate.save("./results/", **result, **params)
         ```
     """
