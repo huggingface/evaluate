@@ -11,8 +11,8 @@
     <a href="https://github.com/huggingface/evaluate/blob/master/LICENSE">
         <img alt="GitHub" src="https://img.shields.io/github/license/huggingface/evaluate.svg?color=blue">
     </a>
-    <a href="https://huggingface.co/docs/evaluate/index.html">
-        <img alt="Documentation" src="https://img.shields.io/website/http/huggingface.co/docs/evaluate/index.html.svg?down_color=red&down_message=offline&up_message=online">
+    <a href="https://huggingface.co/docs/evaluate/index">
+        <img alt="Documentation" src="https://img.shields.io/website/http/huggingface.co/docs/evaluate/index.svg?down_color=red&down_message=offline&up_message=online">
     </a>
     <a href="https://github.com/huggingface/evaluate/releases">
         <img alt="GitHub release" src="https://img.shields.io/github/release/huggingface/evaluate.svg">
