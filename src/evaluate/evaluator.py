@@ -157,7 +157,6 @@ class TextClassificationEvaluator(Evaluator):
         input_column: str = "text",
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
-        **compute_parameters: Dict
     ) -> Tuple[Dict[str, float], Any]:
         """
         Compute the metric for a given pipeline and dataset combination.
