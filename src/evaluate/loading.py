@@ -27,9 +27,9 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Type, Union
 from urllib.parse import urlparse
 
+from datasets import DownloadMode
 from datasets.builder import DatasetBuilder
 from datasets.packaged_modules import _EXTENSION_TO_MODULE, _hash_python_lines
-from datasets.utils.download_manager import DownloadMode
 from datasets.utils.filelock import FileLock
 from datasets.utils.version import Version
 
