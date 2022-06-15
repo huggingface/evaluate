@@ -203,6 +203,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         else:
             self.seed: int = seed
         self.timeout: Union[int, float] = timeout
+        self.kwargs = kwargs
 
         # Update 'compute' and 'add' docstring
         # methods need to be copied otherwise it changes the docstrings of every instance
@@ -409,7 +410,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             - Dictionary with the results if this evaluation module is run on the main process (``process_id == 0``).
             - None if the evaluation module is not run on the main process (``process_id != 0``).
         """
-        all_kwargs = {"predictions": predictions, "references": references, **kwargs}
+        all_kwargs = {"predictions": predictions, "references": references, **kwargs, **self.kwargs}
         if predictions is None and references is None:
             missing_kwargs = {k: None for k in self._feature_names() if k not in all_kwargs}
             all_kwargs.update(missing_kwargs)
@@ -421,6 +422,8 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                 )
         inputs = {input_name: all_kwargs[input_name] for input_name in self._feature_names()}
         compute_kwargs = {k: kwargs[k] for k in kwargs if k not in self._feature_names()}
+        self_kwargs = {k: self.kwargs[k] for k in self.kwargs if k not in self._feature_names()}
+        compute_kwargs.update(self_kwargs)
 
         if any(v is not None for v in inputs.values()):
             self.add_batch(**inputs)

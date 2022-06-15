@@ -115,7 +115,6 @@ class Evaluator(ABC):
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
-        **compute_parameters: Dict,
     ):
         """
         A core method of the `Evaluator` class, computes the metric value for a pipeline and dataset compatible
@@ -276,7 +275,7 @@ class TextClassificationEvaluator(Evaluator):
         # Core computations.
         references = data[label_column]
         predictions = self._compute_predictions(pipe, data[input_column], label_mapping=label_mapping)
-        result = metric.compute(predictions=predictions, references=references, **compute_parameters)
+        result = metric.compute(predictions=predictions, references=references)
 
         if strategy == "bootstrap":
             metric_keys = result.keys()
