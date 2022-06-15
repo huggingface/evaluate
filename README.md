@@ -27,7 +27,7 @@
 It currently contains:
 
 - **implementations of dozens of popular metrics**: the existing metrics cover a variety of tasks spanning from NLP to Computer Vision, and include dataset-specific metrics for datasets. With a simple command like `accuracy = load("accuracy")`, get any of these metrics ready to use for evaluating a ML model in any framework (Numpy/Pandas/PyTorch/TensorFlow/JAX).
-- **includes comparisons and measurements**: comparisons are used to measure the difference between models and measurements are tools to evaluate datasets.
+- **comparisons and measurements**: comparisons are used to measure the difference between models and measurements are tools to evaluate datasets.
 - **an easy way of adding new evaluation modules to the 🤗 Hub**: you can create new evaluation modules and push them to a dedicated Space in the 🤗 Hub with `evaluate-cli create [metric name]`, which allows you to see easily compare different metrics and their outputs for the same sets of references and predictions.
 
 [🎓 **Documentation**](https://huggingface.co/docs/evaluate/)
