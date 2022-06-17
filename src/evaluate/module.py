@@ -14,6 +14,8 @@
 
 # Lint as: python3
 """ EvaluationModule base class."""
+import collections
+import itertools
 import os
 import types
 import uuid
@@ -706,3 +708,116 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         elif isinstance(schema, Value):
             if pa.types.is_string(schema.pa_type) and not isinstance(obj, str):
                 raise TypeError(f"Expected type str but got {type(obj)}.")
+
+
+class EvaluationEnsemble:
+    """A EvaluationModule is the base class and common API for metrics, comparisons, and measurements.
+
+    Args:
+        evaluation_modules (``Union[list, dict]``): A list or dictionary of evaluation modules. The modules can either be passed
+            as strings or loaded `EvaluationMoudule`s. If a dictionary is passed its keys are the names used and the values the modules.
+            The names are used as prefix in case there are name overlaps in the returned results of each module or if `force_prefix=True`.
+        force_prefix (``bool``, optional, defaults to `False`): If `True` all scores from the modules are prefixed with their name. If
+            a dictionary is passed the keys are used as name otherwise the module's name.
+
+    Examples:
+        >>> clf_metrics = EvaluationEnsemble(["accuracy", "f1", "precision","recall"])
+        >>> clf_metrics.compute(predictions=[0,1], references=[1,1])
+        {'accuracy': 0.5, 'f1': 0.66, 'precision': 1.0, 'recall': 0.5}
+    """
+
+    def __init__(self, evaluation_modules, force_prefix=False):
+        from .loading import load  # avoid circular imports
+
+        self.evaluation_module_names = None
+        if isinstance(evaluation_modules, list):
+            self.evaluation_modules = evaluation_modules
+        elif isinstance(evaluation_modules, dict):
+            self.evaluation_modules = list(evaluation_modules.values())
+            self.evaluation_module_names = list(evaluation_modules.keys())
+        loaded_modules = []
+
+        for module in self.evaluation_modules:
+            if isinstance(module, str):
+                module = load(module)
+            loaded_modules.append(module)
+        self.evaluation_modules = loaded_modules
+
+        if self.evaluation_module_names is None:
+            self.evaluation_module_names = [module.name for module in self.evaluation_modules]
+
+        self.force_prefix = force_prefix
+
+    def add(self, prediction=None, reference=None, **kwargs):
+        """Add one prediction and reference for each evaluation module's stack.
+
+        Args:
+            prediction (list/array/tensor, optional): Predictions.
+            reference (list/array/tensor, optional): References.
+        """
+        for evaluation_module in self.evaluation_modules:
+            batch = {"predictions": prediction, "references": reference, **kwargs}
+            batch = {intput_name: batch[intput_name] for intput_name in evaluation_module._feature_names()}
+            evaluation_module.add(**batch)
+
+    def add_batch(self, predictions=None, references=None, **kwargs):
+        """Add a batch of predictions and references for each evaluation module's stack.
+
+        Args:
+            predictions (list/array/tensor, optional): Predictions.
+            references (list/array/tensor, optional): References.
+        """
+        for evaluation_module in self.evaluation_modules:
+            batch = {"predictions": predictions, "references": references, **kwargs}
+            batch = {intput_name: batch[intput_name] for intput_name in evaluation_module._feature_names()}
+            evaluation_module.add_batch(**batch)
+
+    def compute(self, predictions=None, references=None, **kwargs):
+        """Compute each evaluation module.
+
+        Usage of positional arguments is not allowed to prevent mistakes.
+
+        Args:
+            predictions (list/array/tensor, optional): Predictions.
+            references (list/array/tensor, optional): References.
+            **kwargs (optional): Keyword arguments that will be forwarded to the evaluation module :meth:`_compute`
+                method (see details in the docstring).
+
+        Return:
+            dict or None
+
+            - Dictionary with the results if this evaluation module is run on the main process (``process_id == 0``).
+            - None if the evaluation module is not run on the main process (``process_id != 0``).
+        """
+        results = []
+
+        for evaluation_module in self.evaluation_modules:
+            batch = {"predictions": predictions, "references": references, **kwargs}
+            batch = {intput_name: batch[intput_name] for intput_name in evaluation_module._feature_names()}
+            results.append(evaluation_module.compute(**batch))
+
+        return self._merge_results(results)
+
+    def _merge_results(self, results):
+        merged_results = {}
+        results_keys = list(itertools.chain.from_iterable([r.keys() for r in results]))
+        duplicate_keys = {item for item, count in collections.Counter(results_keys).items() if count > 1}
+
+        duplicate_names = [
+            item for item, count in collections.Counter(self.evaluation_module_names).items() if count > 1
+        ]
+        duplicate_counter = {name: 0 for name in duplicate_names}
+
+        for module_name, result in zip(self.evaluation_module_names, results):
+            for k, v in result.items():
+                if k not in duplicate_keys and not self.force_prefix:
+                    merged_results[f"{k}"] = v
+                elif module_name in duplicate_counter:
+                    merged_results[f"{module_name}_{duplicate_counter[module_name]}_{k}"] = v
+                else:
+                    merged_results[f"{module_name}_{k}"] = v
+
+            if module_name in duplicate_counter:
+                duplicate_counter[module_name] += 1
+
+        return merged_results
