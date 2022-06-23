@@ -21,16 +21,18 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipe
 
 from evaluate import TextClassificationEvaluator, evaluator, load
 
+
 class DummyTextClassificationPipeline:
     def __init__(self):
         self.task = "text-classification"
 
     def __call__(self, text, **kwargs):
-        return [{"label": "NEGATIVE"} if i%2==1 else {"label": "POSITIVE"} for i, _ in enumerate(text)]
+        return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(text)]
+
 
 class TestEvaluator(TestCase):
     def setUp(self):
-        self.data = Dataset.from_dict({"label":[1, 0], "text":["great movie", "horrible movie"]})
+        self.data = Dataset.from_dict({"label": [1, 0], "text": ["great movie", "horrible movie"]})
         self.default_model = "lvwerra/distilbert-imdb"
         self.input_column = "text"
         self.label_column = "label"
@@ -67,8 +69,8 @@ class TestEvaluator(TestCase):
             tokenizer=tokenizer,
             input_column=self.input_column,
             label_column=self.label_column,
-            label_mapping=self.label_mapping
-            )
+            label_mapping=self.label_mapping,
+        )
         self.assertEqual(scores, {"accuracy": 1.0})
 
     def test_class_init(self):
@@ -117,10 +119,10 @@ class TestEvaluator(TestCase):
         self.assertEqual(scores, {"accuracy": 1.0})
 
     def test_bootstrap(self):
-        data = Dataset.from_dict({"label":[1, 0, 0], "text":["great movie", "great movie", "horrible movie"]})
+        data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
         model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
         tokenizer = AutoTokenizer.from_pretrained(self.default_model)
-        
+
         results = self.evaluator.compute(
             model_or_pipeline=model,
             data=data,
