@@ -17,7 +17,7 @@
 from unittest import TestCase
 
 from datasets import Dataset
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from evaluate import TextClassificationEvaluator, evaluator, load
 
