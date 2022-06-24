@@ -98,3 +98,19 @@ class EvaluationModuleInfo:
     def from_dict(cls, metric_info_dict: dict) -> "EvaluationModuleInfo":
         field_names = {f.name for f in dataclasses.fields(cls)}
         return cls(**{k: v for k, v in metric_info_dict.items() if k in field_names})
+
+
+@dataclass
+class MetricInfo(EvaluationModuleInfo):
+    """MetricInfo"""
+    module_type: str = "metric"
+
+@dataclass
+class ComparisonInfo(EvaluationModuleInfo):
+    """ComparisonInfo"""
+    module_type: str = "comparison"
+
+@dataclass
+class MeasurementInfo(EvaluationModuleInfo):
+    """MeasurementInfo"""
+    module_type: str = "measurement"
