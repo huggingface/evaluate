@@ -76,7 +76,7 @@ Examples:
     >>> references = ["hello there", "general kenobi"]
     >>> results = rouge.compute(predictions=predictions, references=references)
     >>> print(results)
-    {'rouge1': 1.0, 'rouge2': 1.0, 'rougeL': 1.0, 'rougeLsum': 1.0} 
+    {'rouge1': 1.0, 'rouge2': 1.0, 'rougeL': 1.0, 'rougeLsum': 1.0}
 """
 
 
