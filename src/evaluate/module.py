@@ -710,22 +710,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                 raise TypeError(f"Expected type str but got {type(obj)}.")
 
 
-class EvaluationEnsemble:
-    """A EvaluationModule is the base class and common API for metrics, comparisons, and measurements.
-
-    Args:
-        evaluation_modules (``Union[list, dict]``): A list or dictionary of evaluation modules. The modules can either be passed
-            as strings or loaded `EvaluationMoudule`s. If a dictionary is passed its keys are the names used and the values the modules.
-            The names are used as prefix in case there are name overlaps in the returned results of each module or if `force_prefix=True`.
-        force_prefix (``bool``, optional, defaults to `False`): If `True` all scores from the modules are prefixed with their name. If
-            a dictionary is passed the keys are used as name otherwise the module's name.
-
-    Examples:
-        >>> clf_metrics = EvaluationEnsemble(["accuracy", "f1", "precision","recall"])
-        >>> clf_metrics.compute(predictions=[0,1], references=[1,1])
-        {'accuracy': 0.5, 'f1': 0.66, 'precision': 1.0, 'recall': 0.5}
-    """
-
+class AggregateEvaluation:
     def __init__(self, evaluation_modules, force_prefix=False):
         from .loading import load  # avoid circular imports
 
@@ -821,3 +806,23 @@ class EvaluationEnsemble:
                 duplicate_counter[module_name] += 1
 
         return merged_results
+
+
+def combine(evaluation_modules, force_prefix=False):
+    """A function to comine several metrics, comparisons, and measurements into a single `AggregateEvalution` that
+    can be used like a single evaluation module.
+
+    Args:
+        evaluation_modules (``Union[list, dict]``): A list or dictionary of evaluation modules. The modules can either be passed
+            as strings or loaded `EvaluationMoudule`s. If a dictionary is passed its keys are the names used and the values the modules.
+            The names are used as prefix in case there are name overlaps in the returned results of each module or if `force_prefix=True`.
+        force_prefix (``bool``, optional, defaults to `False`): If `True` all scores from the modules are prefixed with their name. If
+            a dictionary is passed the keys are used as name otherwise the module's name.
+
+    Examples:
+        >>> clf_metrics = combine(["accuracy", "f1", "precision","recall"])
+        >>> clf_metrics.compute(predictions=[0,1], references=[1,1])
+        {'accuracy': 0.5, 'f1': 0.66, 'precision': 1.0, 'recall': 0.5}
+    """
+
+    return AggregateEvaluation(evaluation_modules, force_prefix=force_prefix)
