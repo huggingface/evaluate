@@ -219,14 +219,14 @@ def wer_and_cer(preds, labels, concatenate_texts, config_name):
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class XtremeS(evaluate.EvaluationModule):
+class XtremeS(evaluate.Metric):
     def _info(self):
         if self.config_name not in _CONFIG_NAMES:
             raise KeyError(f"You should supply a configuration name selected in {_CONFIG_NAMES}")
 
         pred_type = "int64" if self.config_name in ["fleurs-lang_id", "minds14"] else "string"
 
-        return evaluate.EvaluationModuleInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

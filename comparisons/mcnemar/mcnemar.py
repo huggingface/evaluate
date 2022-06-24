@@ -61,9 +61,9 @@ _CITATION = """
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class McNemar(evaluate.EvaluationModule):
+class McNemar(evaluate.Comparison):
     def _info(self):
-        return evaluate.EvaluationModuleInfo(
+        return evaluate.ComparisonInfo(
             module_type="comparison",
             description=_DESCRIPTION,
             citation=_CITATION,
