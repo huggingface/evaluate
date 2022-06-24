@@ -55,7 +55,7 @@ class EvaluationModuleInfo:
     module_type: str = "metric"
 
     # Set later by the builder
-    metric_name: Optional[str] = None
+    module_name: Optional[str] = None
     config_name: Optional[str] = None
     experiment_id: Optional[str] = None
 
