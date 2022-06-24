@@ -474,7 +474,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             self._init_writer()
         try:
             for key, column in batch.items():
-                if len(column)>0:
+                if len(column) > 0:
                     self._enforce_nested_string_type(self.current_features[key], column[0])
             batch = self.current_features.encode_batch(batch)
             self.writer.write_batch(batch)
