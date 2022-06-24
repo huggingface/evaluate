@@ -123,9 +123,12 @@ class Rouge(evaluate.EvaluationModule):
 
         if use_aggregator:
             result = aggregator.aggregate()
+            for key in result:
+                result[key] = result[key].mid.fmeasure
+
         else:
             result = {}
             for key in scores[0]:
-                result[key] = list(score[key] for score in scores)
+                result[key] = list(score[key].fmeasure for score in scores)
 
         return result
