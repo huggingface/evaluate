@@ -52,7 +52,7 @@ class EvaluationModuleInfo:
     reference_urls: List[str] = field(default_factory=list)
     streamable: bool = False
     format: Optional[str] = None
-    module_type: str = "metric" # deprecate this in the future
+    module_type: str = "metric"  # deprecate this in the future
 
     # Set later by the builder
     module_name: Optional[str] = None
@@ -103,14 +103,19 @@ class EvaluationModuleInfo:
 @dataclass
 class MetricInfo(EvaluationModuleInfo):
     """MetricInfo"""
+
     module_type: str = "metric"
+
 
 @dataclass
 class ComparisonInfo(EvaluationModuleInfo):
     """ComparisonInfo"""
+
     module_type: str = "comparison"
+
 
 @dataclass
 class MeasurementInfo(EvaluationModuleInfo):
     """MeasurementInfo"""
+
     module_type: str = "measurement"

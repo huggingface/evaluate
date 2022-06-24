@@ -707,11 +707,14 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             if pa.types.is_string(schema.pa_type) and not isinstance(obj, str):
                 raise TypeError(f"Expected type str but got {type(obj)}.")
 
+
 class Metric(EvaluationModule):
     """Metric"""
 
+
 class Comparison(EvaluationModule):
     """Comparison"""
+
 
 class Measurement(EvaluationModule):
     """Measurement"""
