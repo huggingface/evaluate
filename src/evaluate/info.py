@@ -52,7 +52,7 @@ class EvaluationModuleInfo:
     reference_urls: List[str] = field(default_factory=list)
     streamable: bool = False
     format: Optional[str] = None
-    module_type: str = "metric"
+    module_type: str = "metric" # deprecate this in the future
 
     # Set later by the builder
     module_name: Optional[str] = None
