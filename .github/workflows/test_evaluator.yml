@@ -30,6 +30,7 @@ jobs:
     - name: Install dependencies
       run: |
         pip install wheel
+        pip install git+https://github.com/huggingface/transformers.git#egg=transformers
         pip install .[evaluator]
     - name: Test with unittest
       working-directory: tests
