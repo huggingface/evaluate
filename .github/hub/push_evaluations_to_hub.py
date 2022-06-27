@@ -8,10 +8,29 @@ import logging
 import re
 from urllib.parse import urlparse
 
+from matplotlib.pyplot import get
+
 logger = logging.getLogger(__name__)
 
 GIT_UP_TO_DATE = "On branch main\nYour branch is up to date with 'origin/main'.\
 \n\nnothing to commit, working tree clean\n"
+
+
+def get_git_tag(lib_path, commit_hash):
+    command = f"git describe --exact-match {commit_hash}"
+    output = subprocess.run(command.split(),
+            stderr=subprocess.PIPE,
+            stdout=subprocess.PIPE,
+            encoding="utf-8",
+            cwd=lib_path,
+            env=os.environ.copy(),
+        )
+    tag = output.stdout.strip()
+    if re.match(r"v\d*\.\d*\.\d*", tag) is not None:
+        return tag
+    else:
+        return None
+
 
 def copy_recursive(source_base_path, target_base_path):
     """Copy directory recursively and overwrite existing files."""
@@ -24,7 +43,7 @@ def copy_recursive(source_base_path, target_base_path):
             shutil.copy(item, traget_path)
 
 
-def push_module_to_hub(module_path, type, token, commit_hash):
+def push_module_to_hub(module_path, type, token, commit_hash, tag):
     module_name = module_path.stem
     org = f"evaluate-{type}"
     
@@ -63,6 +82,10 @@ def push_module_to_hub(module_path, type, token, commit_hash):
             logger.info(f"Module '{module_name}' is already up to date.")
         else:
             raise error
+
+    if tag is not None:
+        repo.add_tag(tag)
+    
     shutil.rmtree(repo_path)
 
 
@@ -73,11 +96,12 @@ if __name__ == "__main__":
     token = os.getenv("HF_TOKEN")
     evaluate_lib_path = Path(os.getenv("EVALUATE_LIB_PATH"))
     commit_hash = os.getenv("GIT_HASH")
+    git_tag = get_git_tag(evaluate_lib_path, commit_hash)
 
     for type, dir in zip(evaluation_types, evaluation_paths):
         if (evaluate_lib_path/dir).exists():
             for module_path in (evaluate_lib_path/dir).iterdir():
                 if module_path.is_dir():
-                    push_module_to_hub(module_path, type, token, commit_hash)
+                    push_module_to_hub(module_path, type, token, commit_hash, tag)
         else:
             logger.warning(f"No folder {str(evaluate_lib_path/dir)} for {type} found.")
