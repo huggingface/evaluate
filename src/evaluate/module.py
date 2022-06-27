@@ -470,7 +470,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                 f"Bad inputs for evaluation module: {bad_inputs}. All required inputs are {list(self._feature_names())}"
             )
         batch = {"predictions": predictions, "references": references, **kwargs}
-        batch = {intput_name: batch[intput_name] for intput_name in self._feature_names()}
+        batch = {input_name: batch[input_name] for input_name in self._feature_names()}
         if self.writer is None:
             self.current_features = self._infer_feature_from_batch(batch)
             self._init_writer()
@@ -517,7 +517,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                 f"Bad inputs for evaluation module: {bad_inputs}. All required inputs are {list(self._feature_names())}"
             )
         example = {"predictions": prediction, "references": reference, **kwargs}
-        example = {intput_name: example[intput_name] for intput_name in self._feature_names()}
+        example = {input_name: example[input_name] for input_name in self._feature_names()}
         if self.writer is None:
             self.current_features = self._infer_feature_from_example(example)
             self._init_writer()
@@ -742,7 +742,7 @@ class AggregateEvaluation:
         """
         for evaluation_module in self.evaluation_modules:
             batch = {"predictions": prediction, "references": reference, **kwargs}
-            batch = {intput_name: batch[intput_name] for intput_name in evaluation_module._feature_names()}
+            batch = {input_name: batch[input_name] for input_name in evaluation_module._feature_names()}
             evaluation_module.add(**batch)
 
     def add_batch(self, predictions=None, references=None, **kwargs):
@@ -754,7 +754,7 @@ class AggregateEvaluation:
         """
         for evaluation_module in self.evaluation_modules:
             batch = {"predictions": predictions, "references": references, **kwargs}
-            batch = {intput_name: batch[intput_name] for intput_name in evaluation_module._feature_names()}
+            batch = {input_name: batch[input_name] for input_name in evaluation_module._feature_names()}
             evaluation_module.add_batch(**batch)
 
     def compute(self, predictions=None, references=None, **kwargs):
@@ -778,7 +778,7 @@ class AggregateEvaluation:
 
         for evaluation_module in self.evaluation_modules:
             batch = {"predictions": predictions, "references": references, **kwargs}
-            batch = {intput_name: batch[intput_name] for intput_name in evaluation_module._feature_names()}
+            batch = {input_name: batch[input_name] for input_name in evaluation_module._feature_names()}
             results.append(evaluation_module.compute(**batch))
 
         return self._merge_results(results)
@@ -809,12 +809,12 @@ class AggregateEvaluation:
 
 
 def combine(evaluation_modules, force_prefix=False):
-    """A function to comine several metrics, comparisons, and measurements into a single `AggregateEvalution` that
+    """A function to combine several metrics, comparisons, and measurements into a single `AggregateEvaluation` that
     can be used like a single evaluation module.
 
     Args:
         evaluation_modules (``Union[list, dict]``): A list or dictionary of evaluation modules. The modules can either be passed
-            as strings or loaded `EvaluationMoudule`s. If a dictionary is passed its keys are the names used and the values the modules.
+            as strings or loaded `EvaluationModule`s. If a dictionary is passed its keys are the names used and the values the modules.
             The names are used as prefix in case there are name overlaps in the returned results of each module or if `force_prefix=True`.
         force_prefix (``bool``, optional, defaults to `False`): If `True` all scores from the modules are prefixed with their name. If
             a dictionary is passed the keys are used as name otherwise the module's name.
