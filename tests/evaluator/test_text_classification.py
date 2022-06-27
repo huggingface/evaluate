@@ -33,7 +33,7 @@ class TestTextClassificationEvaluator(unittest.TestCase):
             f" --do_eval"
             f" --max_seq_length 9999999999"  # rely on tokenizer.model_max_length for max_length
             f" --output_dir {dir_path}/textclassification_sst2_transformers"
-            f" --max_eval_samples 100",
+            f" --max_eval_samples 200",
             shell=True,
         )
 
@@ -45,7 +45,7 @@ class TestTextClassificationEvaluator(unittest.TestCase):
         transformers_accuracy = eval_dict["eval_accuracy"]
 
         raw_datasets = load_dataset("glue", "sst2")
-        eval_dataset = raw_datasets["validation"].select([i for i in range(100)])
+        eval_dataset = raw_datasets["validation"].select([i for i in range(200)])
 
         model = AutoModelForSequenceClassification.from_pretrained(model_name)
         tokenizer = AutoTokenizer.from_pretrained(model_name)
