@@ -31,7 +31,7 @@ jobs:
       run: |
         pip install wheel
         pip install git+https://github.com/huggingface/transformers.git#egg=transformers
-        pip install .[evaluator, torch]
+        pip install .[evaluator,torch]
     - name: Test with unittest
       working-directory: tests
       run: |
