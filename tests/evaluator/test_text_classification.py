@@ -64,4 +64,10 @@ class TestTextClassificationEvaluator(unittest.TestCase):
 
         evaluator_accuracy = results["accuracy"]
 
+        print("Evaluator accuracy:")
+        print(evaluator_accuracy)
+
+        print("Transformers example accuracy:")
+        print(transformers_accuracy)
+
         self.assertEqual(transformers_accuracy, evaluator_accuracy)
