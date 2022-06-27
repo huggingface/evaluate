@@ -8,8 +8,6 @@ import logging
 import re
 from urllib.parse import urlparse
 
-from matplotlib.pyplot import get
-
 logger = logging.getLogger(__name__)
 
 GIT_UP_TO_DATE = "On branch main\nYour branch is up to date with 'origin/main'.\
