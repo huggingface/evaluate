@@ -808,12 +808,12 @@ class CombinedEvaluations:
         return merged_results
 
 
-def combine(evaluation_modules, force_prefix=False):
-    """A function to combine several metrics, comparisons, and measurements into a single `AggregateEvaluation` that
+def combine(evaluations, force_prefix=False):
+    """Combines several metrics, comparisons, or measurements into a single `CombinedEvaluations` object that
     can be used like a single evaluation module.
 
     Args:
-        evaluation_modules (``Union[list, dict]``): A list or dictionary of evaluation modules. The modules can either be passed
+        evaluations (``Union[list, dict]``): A list or dictionary of evaluation modules. The modules can either be passed
             as strings or loaded `EvaluationModule`s. If a dictionary is passed its keys are the names used and the values the modules.
             The names are used as prefix in case there are name overlaps in the returned results of each module or if `force_prefix=True`.
         force_prefix (``bool``, optional, defaults to `False`): If `True` all scores from the modules are prefixed with their name. If
