@@ -710,7 +710,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                 raise TypeError(f"Expected type str but got {type(obj)}.")
 
 
-class AggregateEvaluation:
+class CombinedEvaluations:
     def __init__(self, evaluation_modules, force_prefix=False):
         from .loading import load  # avoid circular imports
 
@@ -825,4 +825,4 @@ def combine(evaluation_modules, force_prefix=False):
         {'accuracy': 0.5, 'f1': 0.66, 'precision': 1.0, 'recall': 0.5}
     """
 
-    return AggregateEvaluation(evaluation_modules, force_prefix=force_prefix)
+    return CombinedEvaluations(evaluations, force_prefix=force_prefix)
