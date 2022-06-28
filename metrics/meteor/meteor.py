@@ -124,13 +124,13 @@ class Meteor(evaluate.EvaluationModule):
             if any(isinstance(el, list) for el in references):
                 scores = [
                     meteor_score.meteor_score(
-                        [[word_tokenize(ref) for ref in group] for group in references][0],
+                        [word_tokenize(ref) for ref in refs],
                         word_tokenize(pred),
                         alpha=alpha,
                         beta=beta,
                         gamma=gamma,
                     )
-                    for ref, pred in zip(references, predictions)
+                    for refs, pred in zip(references, predictions)
                 ]
             else:
                 scores = [
