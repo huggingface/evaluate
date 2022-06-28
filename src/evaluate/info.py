@@ -33,9 +33,10 @@ logger = get_logger(__name__)
 
 @dataclass
 class EvaluationModuleInfo:
-    """Information about a metric.
+    """Base class to store fnformation about an evaluation used for `MetricInfo`, `ComparisonInfo`, 
+    and `MeasurementInfo`.
 
-    `EvaluationModuleInfo` documents a metric, including its name, version, and features.
+    `EvaluationModuleInfo` documents an evaluation, including its name, version, and features.
     See the constructor arguments and properties for a full list.
 
     Note: Not all fields are known on construction and may be updated later.
@@ -102,20 +103,38 @@ class EvaluationModuleInfo:
 
 @dataclass
 class MetricInfo(EvaluationModuleInfo):
-    """MetricInfo"""
+    """Information about a metric.
+
+    `EvaluationModuleInfo` documents a metric, including its name, version, and features.
+    See the constructor arguments and properties for a full list.
+
+    Note: Not all fields are known on construction and may be updated later.
+    """
 
     module_type: str = "metric"
 
 
 @dataclass
 class ComparisonInfo(EvaluationModuleInfo):
-    """ComparisonInfo"""
+    """Information about a comparison.
+
+    `EvaluationModuleInfo` documents a comparison, including its name, version, and features.
+    See the constructor arguments and properties for a full list.
+
+    Note: Not all fields are known on construction and may be updated later.
+    """
 
     module_type: str = "comparison"
 
 
 @dataclass
 class MeasurementInfo(EvaluationModuleInfo):
-    """MeasurementInfo"""
+    """Information about a measurement.
+
+    `EvaluationModuleInfo` documents a measurement, including its name, version, and features.
+    See the constructor arguments and properties for a full list.
+
+    Note: Not all fields are known on construction and may be updated later.
+    """
 
     module_type: str = "measurement"
