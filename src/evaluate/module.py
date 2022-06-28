@@ -728,6 +728,7 @@ class Metric(EvaluationModule):
         timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
     """
 
+
 class Comparison(EvaluationModule):
     """A Comparison is the base class and common API for all comparisons.
 
@@ -747,6 +748,7 @@ class Comparison(EvaluationModule):
         max_concurrent_cache_files (``int``): Max number of concurrent comparison cache files (default 10000).
         timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
     """
+
 
 class Measurement(EvaluationModule):
     """A Measurement is the base class and common API for all measurements.

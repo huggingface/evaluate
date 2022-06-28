@@ -33,7 +33,7 @@ logger = get_logger(__name__)
 
 @dataclass
 class EvaluationModuleInfo:
-    """Base class to store fnformation about an evaluation used for `MetricInfo`, `ComparisonInfo`, 
+    """Base class to store fnformation about an evaluation used for `MetricInfo`, `ComparisonInfo`,
     and `MeasurementInfo`.
 
     `EvaluationModuleInfo` documents an evaluation, including its name, version, and features.
