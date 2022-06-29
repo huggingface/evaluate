@@ -28,7 +28,7 @@ class TestTokenClassificationEvaluator(unittest.TestCase):
         )
         self.default_model = "elastic/distilbert-base-uncased-finetuned-conll03-english"
         self.input_column = "tokens"
-        self.ref_column = "ner_tags"
+        self.label_column = "ner_tags"
 
         self.model = AutoModelForTokenClassification.from_pretrained(self.default_model)
         self.tokenizer = AutoTokenizer.from_pretrained(self.default_model)
@@ -41,7 +41,7 @@ class TestTokenClassificationEvaluator(unittest.TestCase):
             data=self.data,
             metric="seqeval",
             input_column=self.input_column,
-            ref_column=self.ref_column,
+            label_column=self.label_column,
         )
         self.assertEqual(scores["overall_accuracy"], 1.0)
         scores = self.evaluator.compute(
@@ -50,7 +50,7 @@ class TestTokenClassificationEvaluator(unittest.TestCase):
             metric="seqeval",
             tokenizer=self.tokenizer,
             input_column=self.input_column,
-            ref_column=self.ref_column,
+            label_column=self.label_column,
         )
         self.assertEqual(scores["overall_accuracy"], 1.0)
 
@@ -64,7 +64,7 @@ class TestTokenClassificationEvaluator(unittest.TestCase):
             data=self.data,
             metric="seqeval",
             input_column=self.input_column,
-            ref_column=self.ref_column,
+            label_column=self.label_column,
         )
         self.assertEqual(scores["overall_accuracy"], 1.0)
 
@@ -72,7 +72,7 @@ class TestTokenClassificationEvaluator(unittest.TestCase):
         scores = self.evaluator.compute(
             data=self.data,
             input_column=self.input_column,
-            ref_column=self.ref_column,
+            label_column=self.label_column,
         )
         self.assertEqual(scores["overall_accuracy"], 8 / 9)
 
@@ -83,7 +83,7 @@ class TestTokenClassificationEvaluator(unittest.TestCase):
             data=self.data,
             metric=accuracy,
             input_column=self.input_column,
-            ref_column=self.ref_column,
+            label_column=self.label_column,
         )
         self.assertEqual(scores["overall_accuracy"], 1.0)
         scores = self.evaluator.compute(
@@ -91,7 +91,7 @@ class TestTokenClassificationEvaluator(unittest.TestCase):
             data=self.data,
             metric="seqeval",
             input_column=self.input_column,
-            ref_column=self.ref_column,
+            label_column=self.label_column,
         )
         self.assertEqual(scores["overall_accuracy"], 1.0)
 
@@ -144,7 +144,7 @@ class TestTokenClassificationEvaluator(unittest.TestCase):
             data=eval_dataset,
             metric="seqeval",
             input_column="tokens",
-            ref_column="ner_tags",
+            label_column="ner_tags",
             strategy="simple",
         )
 
