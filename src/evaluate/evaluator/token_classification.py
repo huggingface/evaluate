@@ -17,7 +17,7 @@ from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
-from datasets import ClassLabel, Dataset, load_dataset
+from datasets import ClassLabel, Dataset, Sequence, load_dataset
 
 
 try:
@@ -46,19 +46,26 @@ class TokenClassificationEvaluator(Evaluator):
     `token-classification`.
 
     Methods in this class assume a data format compatible with the [`TokenClassificationPipeline`].
+
+    In particular, the following cases are not handled:
+    * models not splitting tokens by space (e.g. where `"he oh"` can be a token).
+    * datasets as https://huggingface.co/datasets/msra_ner , where tokens are provided ideogram by ideogram, and where a tokenizer may map several ideograms to a single token.
+    * datasets not providing the input and reference columns as a list of "words" as the conll2003 dataset.
     """
 
     def __init__(self, task="token-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
-    def _compute_predictions(self, pipe: "Pipeline", inputs, label_mapping: Optional[Dict] = None) -> List[Number]:
+    def _compute_predictions(
+        self, pipe: "Pipeline", inputs, label_mapping: Optional[Dict] = None, join_by: str = " "
+    ) -> List[Number]:
         all_preds = []
 
         for data in inputs:
-            inp = " ".join(data)
+            inp = join_by.join(data)
             res = pipe(inp)
 
-            # BatchEncoding.word_ids may be wrong as we joined words with " ", so let's populate it ourselves
+            # BatchEncoding.word_ids may be wrong (as we joined words with " "), so let's populate it ourselves
             token_to_word_id = []
             for j, word in enumerate(data):
                 preprocessed_inputs = pipe.preprocess(word)
@@ -95,9 +102,10 @@ class TokenClassificationEvaluator(Evaluator):
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
         random_state: Optional[int] = None,
-        input_column: str = "text",
+        input_column: str = "tokens",
         ref_column: str = "ner_tags",
         label_mapping: Optional[Dict] = None,
+        join_by: Optional[str] = " ",
     ) -> Tuple[Dict[str, float], Any]:
         """
         Compute the metric for a given pipeline and dataset combination.
@@ -106,7 +114,7 @@ class TokenClassificationEvaluator(Evaluator):
             model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`,
             defaults to `None`):
                 If the argument in not specified, we initialize the default pipeline for the task (in this case
-                `text-classification` or its alias - `sentiment-analysis`). If the argument is of the type `str` or
+                `token-classification`). If the argument is of the type `str` or
                 is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
                 argument specifies a pre-initialized pipeline.
             data (`str` or `Dataset`, defaults to `None):
@@ -133,13 +141,16 @@ class TokenClassificationEvaluator(Evaluator):
             random_state (`int`, *optional*, defaults to `None`):
                 The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
                 debugging.
-            input_column (`str`, defaults to `"text"`):
-                the name of the column containing the text feature in the dataset specified by `data`.
+            input_column (`str`, defaults to `"tokens"`):
+                the name of the column containing the tokens feature in the dataset specified by `data`.
             label_column (`str`, defaults to `"label"`):
                 the name of the column containing the labels in the dataset specified by `data`.
             label_mapping (`Dict`, *optional*, defaults to `None`):
                 We want to map class labels defined by the model in the pipeline to values consistent with those
                 defined in the `label_column` of the `data` dataset.
+            join_by (`str`, *optional*, defaults to `" "`):
+                This evaluator supports dataset whose input column is a list of words. This parameter specifies how to join
+                words to generate a string input. This is especially useful for languages that do not separate words by a space.
 
         Return:
             A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
@@ -160,6 +171,9 @@ class TokenClassificationEvaluator(Evaluator):
             raise ValueError(
                 f"Invalid `label_column` {ref_column} specified. The dataset contains the following columns: {data.column_names}."
             )
+
+        if not isinstance(data.features[input_column], Sequence):
+            raise NotImplementedError("Only datasets with the input column as a list of word is supported.")
 
         kwargs = {
             "ignore_labels": [],  # do not ignore "O"
@@ -221,7 +235,7 @@ class TokenClassificationEvaluator(Evaluator):
 
         # Core computations.
         references = [[ref_to_labels[l] for l in label] for label in data[ref_column]]
-        predictions = self._compute_predictions(pipe, data[input_column], label_mapping=label_mapping)
+        predictions = self._compute_predictions(pipe, data[input_column], label_mapping=label_mapping, join_by=join_by)
         result = metric.compute(predictions=predictions, references=references)
 
         if strategy == "bootstrap":
