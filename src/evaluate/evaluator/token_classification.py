@@ -103,7 +103,7 @@ class TokenClassificationEvaluator(Evaluator):
         n_resamples: int = 9999,
         random_state: Optional[int] = None,
         input_column: str = "tokens",
-        ref_column: str = "ner_tags",
+        label_column: str = "ner_tags",
         label_mapping: Optional[Dict] = None,
         join_by: Optional[str] = " ",
     ) -> Tuple[Dict[str, float], Any]:
@@ -167,9 +167,9 @@ class TokenClassificationEvaluator(Evaluator):
             raise ValueError(
                 f"Invalid `input_column` {input_column} specified. The dataset contains the following columns: {data.column_names}."
             )
-        if ref_column not in data.column_names:
+        if label_column not in data.column_names:
             raise ValueError(
-                f"Invalid `label_column` {ref_column} specified. The dataset contains the following columns: {data.column_names}."
+                f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
             )
 
         if not isinstance(data.features[input_column], Sequence):
@@ -214,11 +214,11 @@ class TokenClassificationEvaluator(Evaluator):
 
         # If the labels are of type ClassLabel, they are already integers and we have the map stored somewhere.
         # Otherwise, we have to get the list of labels manually.
-        labels_are_int = isinstance(features[ref_column].feature, ClassLabel)
+        labels_are_int = isinstance(features[label_column].feature, ClassLabel)
         if labels_are_int:
-            label_list = features[ref_column].feature.names  # list of string labels
+            label_list = features[label_column].feature.names  # list of string labels
             ref_to_labels = {i: label for i, label in enumerate(label_list)}
-        elif features[ref_column].feature.dtype.startswith("int"):
+        elif features[label_column].feature.dtype.startswith("int"):
             raise NotImplementedError(
                 "References provided as int, but the reference column is not instanciated as a Sequence of ClassLabel."
             )
@@ -229,12 +229,12 @@ class TokenClassificationEvaluator(Evaluator):
             # `ref_to_labels` will map labels to labels, here {"LOC": "LOC", "PER": "PER", "O": "O"}
             # Normally `ref_to_labels` would just be e.g. {0: "O", 1: "LOC", 2: "PER"}
             unique_labels = set()
-            for label in data[ref_column]:
+            for label in data[label_column]:
                 unique_labels = unique_labels | set(label)
             ref_to_labels = {label: label for label in unique_labels}
 
         # Core computations.
-        references = [[ref_to_labels[l] for l in label] for label in data[ref_column]]
+        references = [[ref_to_labels[l] for l in label] for label in data[label_column]]
         predictions = self._compute_predictions(pipe, data[input_column], label_mapping=label_mapping, join_by=join_by)
         result = metric.compute(predictions=predictions, references=references)
 
