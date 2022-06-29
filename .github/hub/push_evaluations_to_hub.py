@@ -15,6 +15,7 @@ GIT_UP_TO_DATE = "On branch main\nYour branch is up to date with 'origin/main'.\
 
 
 def get_git_tag(lib_path, commit_hash):
+    # check if commit has a tag, see: https://stackoverflow.com/questions/1474115/how-to-find-the-tag-associated-with-a-given-git-commit
     command = f"git describe --exact-match {commit_hash}"
     output = subprocess.run(command.split(),
             stderr=subprocess.PIPE,
@@ -41,7 +42,7 @@ def copy_recursive(source_base_path, target_base_path):
             shutil.copy(item, traget_path)
 
 
-def push_module_to_hub(module_path, type, token, commit_hash, tag):
+def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
     module_name = module_path.stem
     org = f"evaluate-{type}"
     
@@ -100,6 +101,6 @@ if __name__ == "__main__":
         if (evaluate_lib_path/dir).exists():
             for module_path in (evaluate_lib_path/dir).iterdir():
                 if module_path.is_dir():
-                    push_module_to_hub(module_path, type, token, commit_hash, tag)
+                    push_module_to_hub(module_path, type, token, commit_hash, tag=tag)
         else:
             logger.warning(f"No folder {str(evaluate_lib_path/dir)} for {type} found.")
