@@ -811,6 +811,9 @@ class CombinedEvaluations:
 def combine(evaluations, force_prefix=False):
     """Combines several metrics, comparisons, or measurements into a single `CombinedEvaluations` object that
     can be used like a single evaluation module.
+    
+    If two scores have the same name, then they are prefixed with their module names.
+    And if two modules have the same name, please use a dictionary to give them different names, otherwise an integer id is appended to the prefix.
 
     Args:
         evaluations (``Union[list, dict]``): A list or dictionary of evaluation modules. The modules can either be passed
