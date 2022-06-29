@@ -8,7 +8,7 @@ from unittest import TestCase
 import pytest
 from datasets.features import Features, Sequence, Value
 
-from evaluate.module import EvaluationModule, EvaluationModuleInfo
+from evaluate.module import EvaluationModule, EvaluationModuleInfo, combine
 
 from .utils import require_tf, require_torch
 
@@ -68,6 +68,22 @@ class DummyMetric(EvaluationModule):
     @classmethod
     def separate_expected_results(cls):
         return [{"accuracy": 1.0, "set_equality": True}, {"accuracy": 0.5, "set_equality": False}]
+
+
+class AnotherDummyMetric(EvaluationModule):
+    def _info(self):
+        return EvaluationModuleInfo(
+            description="another dummy metric for tests",
+            citation="insert citation here",
+            features=Features({"predictions": Value("int64"), "references": Value("int64")}),
+        )
+
+    def _compute(self, predictions, references):
+        return {"set_equality": False}
+
+    @classmethod
+    def expected_results(cls):
+        return {"set_equality": False}
 
 
 def properly_del_metric(metric):
@@ -612,3 +628,82 @@ def test_metric_with_non_standard_feature_names_compute(tmp_path):
     metric = AccuracyWithNonStandardFeatureNames(cache_dir=cache_dir)
     results = metric.compute(inputs=inputs, targets=targets)
     assert results == AccuracyWithNonStandardFeatureNames.expected_results()
+
+
+class TestEvaluationcombined_evaluation(TestCase):
+    def test_single_module(self):
+        preds, refs = DummyMetric.predictions_and_references()
+        expected_results = DummyMetric.expected_results()
+
+        combined_evaluation = combine([DummyMetric()])
+
+        self.assertDictEqual(expected_results, combined_evaluation.compute(predictions=preds, references=refs))
+
+    def test_add(self):
+        preds, refs = DummyMetric.predictions_and_references()
+        expected_results = DummyMetric.expected_results()
+
+        combined_evaluation = combine([DummyMetric()])
+
+        for pred, ref in zip(preds, refs):
+            combined_evaluation.add(pred, ref)
+        self.assertDictEqual(expected_results, combined_evaluation.compute())
+
+    def test_add_batch(self):
+        preds, refs = DummyMetric.predictions_and_references()
+        expected_results = DummyMetric.expected_results()
+
+        combined_evaluation = combine([DummyMetric()])
+
+        combined_evaluation.add_batch(predictions=preds, references=refs)
+        self.assertDictEqual(expected_results, combined_evaluation.compute())
+
+    def test_force_prefix_with_dict(self):
+        prefix = "test_prefix"
+        preds, refs = DummyMetric.predictions_and_references()
+
+        expected_results = DummyMetric.expected_results()
+        expected_results[f"{prefix}_accuracy"] = expected_results.pop("accuracy")
+        expected_results[f"{prefix}_set_equality"] = expected_results.pop("set_equality")
+
+        combined_evaluation = combine({prefix: DummyMetric()}, force_prefix=True)
+
+        self.assertDictEqual(expected_results, combined_evaluation.compute(predictions=preds, references=refs))
+
+    def test_duplicate_module(self):
+        preds, refs = DummyMetric.predictions_and_references()
+        dummy_metric = DummyMetric()
+        dummy_result = DummyMetric.expected_results()
+        combined_evaluation = combine([dummy_metric, dummy_metric])
+
+        expected_results = {}
+        for i in range(2):
+            for k in dummy_result:
+                expected_results[f"{dummy_metric.name}_{i}_{k}"] = dummy_result[k]
+        self.assertDictEqual(expected_results, combined_evaluation.compute(predictions=preds, references=refs))
+
+    def test_two_modules_with_same_score_name(self):
+        preds, refs = DummyMetric.predictions_and_references()
+        dummy_metric = DummyMetric()
+        another_dummy_metric = AnotherDummyMetric()
+
+        dummy_result_1 = DummyMetric.expected_results()
+        dummy_result_2 = AnotherDummyMetric.expected_results()
+
+        dummy_result_1[dummy_metric.name + "_set_equality"] = dummy_result_1.pop("set_equality")
+        dummy_result_1[another_dummy_metric.name + "_set_equality"] = dummy_result_2["set_equality"]
+
+        combined_evaluation = combine([dummy_metric, another_dummy_metric])
+
+        self.assertDictEqual(dummy_result_1, combined_evaluation.compute(predictions=preds, references=refs))
+
+    def test_modules_from_string(self):
+        expected_result = {"accuracy": 0.5, "recall": 0.5, "precision": 1.0}
+        predictions = [0, 1]
+        references = [1, 1]
+
+        combined_evaluation = combine(["accuracy", "recall", "precision"])
+
+        self.assertDictEqual(
+            expected_result, combined_evaluation.compute(predictions=predictions, references=references)
+        )
