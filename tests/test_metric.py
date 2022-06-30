@@ -3,7 +3,7 @@ import pickle
 import tempfile
 import time
 from multiprocessing import Pool
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import pytest
 from datasets.features import Features, Sequence, Value
@@ -498,6 +498,29 @@ class TestMetric(TestCase):
         metric.compute(predictions=[["a"]], references=[["a"]])
         with self.assertRaises(ValueError):
             metric.compute(predictions=["a"], references=["a"])
+
+    def test_string_casting_tested_once(self):
+
+        self.counter = 0
+        def checked_fct(fct):  # wrapper function that increases a counter on each call
+            def wrapped(*args, **kwargs):
+                self.counter += 1
+                return fct(*args, **kwargs)
+            return wrapped
+
+        with mock.patch('evaluate.EvaluationModule._enforce_nested_string_type', checked_fct(DummyMetric._enforce_nested_string_type)):
+            metric = DummyMetric(experiment_id="test_string_casting_called_once")
+            metric.info.features = Features({"references": Sequence(Value("string")), "predictions": Sequence(Value("string"))})
+            refs = [["test"]*10]*10
+            preds = [["test"]*10]*10
+            
+            metric.add_batch(references=refs, predictions=preds)
+            metric.add_batch(references=refs, predictions=preds)
+
+        # the function is called twice for every batch's input: once on the
+        # sequence and then recursively agin on the first input of the sequence
+        self.assertEqual(self.counter, 8)
+        
 
     def test_multiple_features(self):
         metric = DummyMetric()
