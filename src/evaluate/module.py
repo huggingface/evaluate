@@ -476,7 +476,8 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             self._init_writer()
         try:
             for key, column in batch.items():
-                [self._enforce_nested_string_type(self.current_features[key], obj) for obj in column]
+                if len(column) > 0:
+                    self._enforce_nested_string_type(self.current_features[key], column[0])
             batch = self.current_features.encode_batch(batch)
             self.writer.write_batch(batch)
         except (pa.ArrowInvalid, TypeError):
@@ -687,11 +688,19 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                 if isinstance(obj, (list, tuple)):
                     # obj is a list of dict
                     for k, dict_tuples in zip_dict(schema.feature, *obj):
-                        return [self._enforce_nested_string_type(dict_tuples[0], o) for o in dict_tuples[1:]]
+                        for sub_obj in dict_tuples[1:]:
+                            if _check_non_null_non_empty_recursive(sub_obj, dict_tuples[0]):
+                                self._enforce_nested_string_type(dict_tuples[0], sub_obj)
+                                break
+                    return None
                 else:
                     # obj is a single dict
                     for k, (sub_schema, sub_objs) in zip_dict(schema.feature, obj):
-                        return [self._enforce_nested_string_type(sub_schema, o) for o in sub_objs]
+                        for sub_obj in sub_objs:
+                            if _check_non_null_non_empty_recursive(sub_obj, sub_schema):
+                                self._enforce_nested_string_type(sub_schema, sub_obj)
+                                break
+                    return None
             # schema.feature is not a dict
             if isinstance(obj, str):  # don't interpret a string as a list
                 raise ValueError(f"Got a string but expected a list instead: '{obj}'")
@@ -703,7 +712,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                         if _check_non_null_non_empty_recursive(first_elmt, schema.feature):
                             break
                     if not isinstance(first_elmt, list):
-                        return [self._enforce_nested_string_type(schema.feature, o) for o in obj]
+                        return self._enforce_nested_string_type(schema.feature, first_elmt)
 
         elif isinstance(schema, Value):
             if pa.types.is_string(schema.pa_type) and not isinstance(obj, str):
