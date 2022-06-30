@@ -695,7 +695,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                     # obj is a single dict
                     for k, (sub_schema, sub_objs) in zip_dict(schema.feature, obj):
                         for sub_obj in sub_objs:
-                            if _check_non_null_non_empty_recursive(sub_obj, dict_tuples[0]):
+                            if _check_non_null_non_empty_recursive(sub_obj, sub_schema):
                                 self._enforce_nested_string_type(sub_schema, sub_obj)
                                 break
                     return None
