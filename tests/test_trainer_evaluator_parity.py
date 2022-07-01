@@ -1,8 +1,9 @@
 import json
 import os
+import shutil
 import subprocess
+import tempfile
 import unittest
-from datetime import datetime
 
 from datasets import load_dataset
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
@@ -10,21 +11,27 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipe
 from evaluate import evaluator
 
 
-class TestTextClassificationEvaluator(unittest.TestCase):
-    def test_match_transformers_example(self):
-        model_name = "howey/bert-base-uncased-sst2"
+class TestEvaluatorTrainerParity(unittest.TestCase):
+    def setUp(self):
+        self.dir_path = tempfile.mkdtemp("evaluator_trainer_parity_test")
 
-        tps = datetime.now().isoformat()
-        dir_path = f"/tmp/{tps}_textclassification"
-        if not os.path.exists(dir_path):
-            os.makedirs(dir_path)
-        os.chdir(dir_path)
         subprocess.run(
-            "git clone --depth 3 --filter=blob:none --sparse https://github.com/huggingface/transformers", shell=True
+            "git clone --depth 3 --filter=blob:none --sparse https://github.com/huggingface/transformers",
+            shell=True,
+            cwd=self.dir_path,
         )
 
-        os.chdir("transformers")
-        subprocess.run("git sparse-checkout set examples/pytorch/text-classification", shell=True)
+    def tearDown(self):
+        shutil.rmtree(self.dir_path)
+
+    def test_text_classification_parity(self):
+        model_name = "howey/bert-base-uncased-sst2"
+
+        subprocess.run(
+            "git sparse-checkout set examples/pytorch/text-classification",
+            shell=True,
+            cwd=os.path.join(self.dir_path, "transformers"),
+        )
 
         subprocess.run(
             f"python3 examples/pytorch/text-classification/run_glue.py"
@@ -32,17 +39,14 @@ class TestTextClassificationEvaluator(unittest.TestCase):
             f" --task_name sst2"
             f" --do_eval"
             f" --max_seq_length 9999999999"  # rely on tokenizer.model_max_length for max_length
-            f" --output_dir {dir_path}/textclassification_sst2_transformers"
+            f" --output_dir {self.dir_path}/textclassification_sst2_transformers"
             f" --max_eval_samples 200",
             shell=True,
+            cwd=os.path.join(self.dir_path, "transformers"),
         )
 
-        eval_filename = f"{dir_path}/textclassification_sst2_transformers/eval_results.json"
-
-        with open(eval_filename, "r") as f:
-            eval_dict = json.load(f)
-
-        transformers_accuracy = eval_dict["eval_accuracy"]
+        with open(f"{self.dir_path}/textclassification_sst2_transformers/eval_results.json", "r") as f:
+            transformers_results = json.load(f)
 
         raw_datasets = load_dataset("glue", "sst2")
         eval_dataset = raw_datasets["validation"].select([i for i in range(200)])
@@ -52,7 +56,7 @@ class TestTextClassificationEvaluator(unittest.TestCase):
         pipe = pipeline(task="text-classification", model=model, tokenizer=tokenizer)
 
         e = evaluator(task="text-classification")
-        results = e.compute(
+        evaluator_results = e.compute(
             model_or_pipeline=pipe,
             data=eval_dataset,
             metric="accuracy",
@@ -62,12 +66,10 @@ class TestTextClassificationEvaluator(unittest.TestCase):
             strategy="simple",
         )
 
-        evaluator_accuracy = results["accuracy"]
-
         print("Evaluator accuracy:")
         print(evaluator_accuracy)
 
         print("Transformers example accuracy:")
         print(transformers_accuracy)
 
-        self.assertEqual(transformers_accuracy, evaluator_accuracy)
+        self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["accuracy"])
