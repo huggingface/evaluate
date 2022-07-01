@@ -31,7 +31,7 @@ from .hub import push_to_hub
 from .info import EvaluationModuleInfo
 from .inspect import inspect_evaluation_module, list_evaluation_modules
 from .loading import load
-from .module import EvaluationModule
+from .module import CombinedEvaluations, EvaluationModule, combine
 from .saving import save
 from .utils import *
 from .utils import gradio, logging

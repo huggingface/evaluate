@@ -16,18 +16,27 @@
 
 from unittest import TestCase
 
-from datasets import load_dataset
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
+from datasets import Dataset
+from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
 from evaluate import TextClassificationEvaluator, evaluator, load
 
 
+class DummyTextClassificationPipeline:
+    def __init__(self):
+        self.task = "text-classification"
+
+    def __call__(self, text, **kwargs):
+        return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(text)]
+
+
 class TestEvaluator(TestCase):
     def setUp(self):
-        self.data = load_dataset("imdb", split="test[:2]")
+        self.data = Dataset.from_dict({"label": [1, 0], "text": ["great movie", "horrible movie"]})
+        self.default_model = "lvwerra/distilbert-imdb"
         self.input_column = "text"
         self.label_column = "label"
-        self.pipe = pipeline("text-classification")
+        self.pipe = DummyTextClassificationPipeline()
         self.evaluator = evaluator("text-classification")
         self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
 
@@ -43,18 +52,16 @@ class TestEvaluator(TestCase):
 
     def test_model_init(self):
         scores = self.evaluator.compute(
-            model_or_pipeline="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
+            model_or_pipeline=self.default_model,
             data=self.data,
             metric="accuracy",
             input_column=self.input_column,
             label_column=self.label_column,
-            label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
+            label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 0.5})
-        model = AutoModelForSequenceClassification.from_pretrained(
-            "huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli"
-        )
-        tokenizer = AutoTokenizer.from_pretrained("huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli")
+        self.assertEqual(scores, {"accuracy": 1.0})
+        model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
+        tokenizer = AutoTokenizer.from_pretrained(self.default_model)
         scores = self.evaluator.compute(
             model_or_pipeline=model,
             data=self.data,
@@ -62,9 +69,9 @@ class TestEvaluator(TestCase):
             tokenizer=tokenizer,
             input_column=self.input_column,
             label_column=self.label_column,
-            label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
+            label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 0.5})
+        self.assertEqual(scores, {"accuracy": 1.0})
 
     def test_class_init(self):
         evaluator = TextClassificationEvaluator()
@@ -79,7 +86,7 @@ class TestEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"f1": 0.0})
+        self.assertEqual(scores, {"f1": 1.0})
 
     def test_default_pipe_init(self):
         scores = self.evaluator.compute(
@@ -112,26 +119,26 @@ class TestEvaluator(TestCase):
         self.assertEqual(scores, {"accuracy": 1.0})
 
     def test_bootstrap(self):
-        model = AutoModelForSequenceClassification.from_pretrained(
-            "huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli"
-        )
-        tokenizer = AutoTokenizer.from_pretrained("huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli")
+        data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
+        model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
+        tokenizer = AutoTokenizer.from_pretrained(self.default_model)
+
         results = self.evaluator.compute(
             model_or_pipeline=model,
-            data=self.data,
+            data=data,
             metric="accuracy",
             tokenizer=tokenizer,
             input_column=self.input_column,
             label_column=self.label_column,
-            label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
+            label_mapping=self.label_mapping,
             strategy="bootstrap",
             n_resamples=10,
             random_state=0,
         )
-        self.assertEqual(results["accuracy"]["score"], 0.5)
-        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][0], 0.0, 5)
-        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.5, 5)
-        self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.3689323936863109, 5)
+        self.assertAlmostEqual(results["accuracy"]["score"], 0.666666, 5)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][0], 0.33333, 5)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.68326, 5)
+        self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.24595, 5)
 
     def test_wrong_task(self):
         self.assertRaises(KeyError, evaluator, "bad_task")

@@ -65,22 +65,18 @@ Args:
     use_stemmer: Bool indicating whether Porter stemmer should be used to strip word suffixes.
     use_aggregator: Return aggregates if this is set to True
 Returns:
-    rouge1: rouge_1 (precision, recall, f1),
-    rouge2: rouge_2 (precision, recall, f1),
-    rougeL: rouge_l (precision, recall, f1),
-    rougeLsum: rouge_lsum (precision, recall, f1)
+    rouge1: rouge_1 (f1),
+    rouge2: rouge_2 (f1),
+    rougeL: rouge_l (f1),
+    rougeLsum: rouge_lsum (f1)
 Examples:
 
     >>> rouge = evaluate.load('rouge')
     >>> predictions = ["hello there", "general kenobi"]
     >>> references = ["hello there", "general kenobi"]
     >>> results = rouge.compute(predictions=predictions, references=references)
-    >>> print(list(results.keys()))
-    ['rouge1', 'rouge2', 'rougeL', 'rougeLsum']
-    >>> print(results["rouge1"])
-    AggregateScore(low=Score(precision=1.0, recall=1.0, fmeasure=1.0), mid=Score(precision=1.0, recall=1.0, fmeasure=1.0), high=Score(precision=1.0, recall=1.0, fmeasure=1.0))
-    >>> print(results["rouge1"].mid.fmeasure)
-    1.0
+    >>> print(results)
+    {'rouge1': 1.0, 'rouge2': 1.0, 'rougeL': 1.0, 'rougeLsum': 1.0}
 """
 
 
@@ -123,9 +119,12 @@ class Rouge(evaluate.EvaluationModule):
 
         if use_aggregator:
             result = aggregator.aggregate()
+            for key in result:
+                result[key] = result[key].mid.fmeasure
+
         else:
             result = {}
             for key in scores[0]:
-                result[key] = list(score[key] for score in scores)
+                result[key] = list(score[key].fmeasure for score in scores)
 
         return result
