@@ -45,6 +45,9 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             cwd=os.path.join(self.dir_path, "transformers"),
         )
 
+        print(os.listdir(self.dir_path))
+        print("---")
+        print(os.listdir(os.path.join(self.dir_path, "textclassification_sst2_transformers")))
         with open(
             f"{os.path.join(self.dir_path, 'textclassification_sst2_transformers', 'eval_results.json')}", "r"
         ) as f:
