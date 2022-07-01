@@ -66,10 +66,4 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             strategy="simple",
         )
 
-        print("Evaluator accuracy:")
-        print(evaluator_accuracy)
-
-        print("Transformers example accuracy:")
-        print(transformers_accuracy)
-
         self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["accuracy"])
