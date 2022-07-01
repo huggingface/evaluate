@@ -16,6 +16,8 @@ from abc import ABC, abstractmethod
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+from functools import partial
+
 # Lint as: python3
 from datasets import ClassLabel, Dataset, Sequence, load_dataset
 
@@ -56,6 +58,42 @@ class TokenClassificationEvaluator(Evaluator):
     def __init__(self, task="token-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
+
+    # Tokenize all texts and align the labels with them.
+    def _tokenize_and_align_labels(self, examples, tokenizer, input_column):
+        tokenized_inputs = tokenizer(
+            examples[input_column],
+            padding=False,
+            truncation=True,
+            max_length=tokenizer.model_max_length,
+            # We use this argument because the texts in our dataset are lists of words (with a label for each word).
+            is_split_into_words=True,
+        )
+        """
+        labels = []
+        for i, label in enumerate(examples[label_column]):
+            word_ids = tokenized_inputs.word_ids(batch_index=i)
+            previous_word_idx = None
+            label_ids = []
+            for word_idx in word_ids:
+                # Special tokens have a word id that is None. We set the label to -100 so they are automatically
+                # ignored in the loss function.
+                if word_idx is None:
+                    label_ids.append(-100)
+                # We set the label for the first token of each word.
+                elif word_idx != previous_word_idx:
+                    label_ids.append(label_to_id[label[word_idx]])
+                # For the other tokens in a word, we set the label to -100
+                else:
+                    label_ids.append(-100)
+                previous_word_idx = word_idx
+
+            labels.append(label_ids)
+        tokenized_inputs["labels"] = labels
+        """
+        return tokenized_inputs
+
+
     def _compute_predictions(
         self, pipe: "Pipeline", inputs, label_mapping: Optional[Dict] = None, join_by: str = " "
     ) -> List[Number]:
@@ -91,6 +129,45 @@ class TokenClassificationEvaluator(Evaluator):
             all_preds.append(preds)
 
         return all_preds
+
+
+    """
+    def _compute_predictions(
+        self, pipe: "Pipeline", inputs, label_mapping: Optional[Dict] = None, join_by: str = " "
+    ) -> List[Number]:
+        all_preds = []
+
+        for data in inputs:
+            inp = join_by.join(data)
+            res = pipe(inp)
+
+            # BatchEncoding.word_ids may be wrong (as we joined words with " "), so let's populate it ourselves
+            token_to_word_id = []
+            for j, word in enumerate(data):
+                preprocessed_inputs = pipe.preprocess(word)
+                n_tokens = len([k for k in preprocessed_inputs.word_ids(0) if k != None])  # exclude None
+                token_to_word_id.extend([j] * n_tokens)
+
+            # the pipeline may give as output labeled tokens that are part of the same word, keep track
+            # of the indexing to match the true labels on words
+            index_tokens_word_start = []
+
+            for j, word_index in enumerate(token_to_word_id):
+                if j == 0:
+                    index_tokens_word_start.append(j)
+                elif word_index != token_to_word_id[j - 1]:
+                    index_tokens_word_start.append(j)
+
+            # keep only predictions that correspond to the beginning of a word
+            if label_mapping:
+                preds = [label_mapping[res[index]["entity"]] for index in index_tokens_word_start]
+            else:
+                preds = [res[index]["entity"] for index in index_tokens_word_start]
+
+            all_preds.append(preds)
+
+        return all_preds
+    """
 
     def compute(
         self,
@@ -209,7 +286,16 @@ class TokenClassificationEvaluator(Evaluator):
         elif isinstance(metric, str):
             metric = load(metric)
 
+
         # Prepare reference.
+        data = data.map(
+            partial(self._tokenize_and_align_labels, tokenizer=pipe.tokenizer, input_column=input_column),
+            batched=True,
+            num_proc=None,
+            load_from_cache_file=True,
+            desc="Running tokenizer on dataset",
+        )
+
         features = data.features
 
         # If the labels are of type ClassLabel, they are already integers and we have the map stored somewhere.
