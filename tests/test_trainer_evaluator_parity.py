@@ -39,13 +39,15 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             f" --task_name sst2"
             f" --do_eval"
             f" --max_seq_length 9999999999"  # rely on tokenizer.model_max_length for max_length
-            f" --output_dir {self.dir_path}/textclassification_sst2_transformers"
+            f" --output_dir {os.path.join(self.dir_path, 'textclassification_sst2_transformers')}"
             f" --max_eval_samples 200",
             shell=True,
             cwd=os.path.join(self.dir_path, "transformers"),
         )
 
-        with open(f"{self.dir_path}/textclassification_sst2_transformers/eval_results.json", "r") as f:
+        with open(
+            f"{os.path.join(self.dir_path, 'textclassification_sst2_transformers', 'eval_results.json')}", "r"
+        ) as f:
             transformers_results = json.load(f)
 
         raw_datasets = load_dataset("glue", "sst2")
