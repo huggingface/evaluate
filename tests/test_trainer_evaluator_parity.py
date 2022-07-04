@@ -45,7 +45,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             f" --do_eval"
             f" --max_seq_length 9999999999"  # rely on tokenizer.model_max_length for max_length
             f" --output_dir {os.path.join(self.dir_path, 'textclassification_sst2_transformers')}"
-            f" --max_eval_samples 200",
+            f" --max_eval_samples 80",
             shell=True,
             cwd=os.path.join(self.dir_path, "transformers"),
         )
@@ -55,8 +55,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         ) as f:
             transformers_results = json.load(f)
 
-        raw_datasets = load_dataset("glue", "sst2")
-        eval_dataset = raw_datasets["validation"].select([i for i in range(200)])
+        eval_dataset = load_dataset("glue", "sst2", split="validation[:80]")
 
         model = AutoModelForSequenceClassification.from_pretrained(model_name)
         tokenizer = AutoTokenizer.from_pretrained(model_name)
