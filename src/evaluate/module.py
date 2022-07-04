@@ -735,7 +735,7 @@ class Comparison(EvaluationModule):
     """A Comparison is the base class and common API for all comparisons.
 
     Args:
-        config_name (``str``): This is used to define a hash specific to a  comparison computation script and prevents the comparison's data
+        config_name (``str``): This is used to define a hash specific to a comparison computation script and prevents the comparison's data
             to be overridden when the  comparison loading script is modified.
         keep_in_memory (:obj:`bool`): keep all predictions and references in memory. Not possible in distributed settings.
         cache_dir (``str``): Path to a directory in which temporary prediction/references data will be stored.
