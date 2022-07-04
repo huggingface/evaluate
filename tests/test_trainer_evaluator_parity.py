@@ -1,6 +1,7 @@
 import json
 import os
 import shutil
+import stat
 import subprocess
 import tempfile
 import unittest
@@ -10,6 +11,15 @@ from datasets import load_dataset
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 
 from evaluate import evaluator
+
+
+def onerror(func, path, exc_info):
+    # Is the error an access error?
+    if not os.access(path, os.W_OK):
+        os.chmod(path, stat.S_IWUSR)
+        func(path)
+    else:
+        raise
 
 
 class TestEvaluatorTrainerParity(unittest.TestCase):
@@ -27,7 +37,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         )
 
     def tearDown(self):
-        shutil.rmtree(self.dir_path)
+        shutil.rmtree(self.dir_path, onerror=onerror)
 
     def test_text_classification_parity(self):
         model_name = "howey/bert-base-uncased-sst2"
