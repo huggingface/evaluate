@@ -26,17 +26,25 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             cwd=self.dir_path,
         )
 
+        print("after git clone", self.dir_path)
+
+
+
     def tearDown(self):
         shutil.rmtree(self.dir_path)
 
     def test_text_classification_parity(self):
         model_name = "howey/bert-base-uncased-sst2"
 
+        print("self.dir_path", self.dir_path)
+
         subprocess.run(
             "git sparse-checkout set examples/pytorch/text-classification",
             shell=True,
             cwd=os.path.join(self.dir_path, "transformers"),
         )
+
+        print("after sparse-checkout", os.path.join(self.dir_path, "transformers"))
 
         subprocess.run(
             f"python3 examples/pytorch/text-classification/run_glue.py"
@@ -49,6 +57,9 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             shell=True,
             cwd=os.path.join(self.dir_path, "transformers"),
         )
+
+        print("after run_glue.py", os.listdir(self.dir_path))
+        print("after run_glue.py", os.path.join(self.dir_path, 'textclassification_sst2_transformers'))
 
         with open(
             f"{os.path.join(self.dir_path, 'textclassification_sst2_transformers', 'eval_results.json')}", "r"
