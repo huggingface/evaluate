@@ -6,11 +6,21 @@ import subprocess
 import tempfile
 import unittest
 
+import numpy as np
+import torch
 import transformers
 from datasets import load_dataset
-from transformers import AutoModelForSequenceClassification, AutoModelForImageClassification, AutoFeatureExtractor, AutoTokenizer, pipeline
+from transformers import (
+    AutoFeatureExtractor,
+    AutoModelForImageClassification,
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+    Trainer,
+    TrainingArguments,
+    pipeline,
+)
 
-from evaluate import evaluator
+from evaluate import evaluator, load
 
 
 def onerror(func, path, exc_info):
@@ -38,7 +48,6 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
     def tearDown(self):
         shutil.rmtree(self.dir_path, onerror=onerror)
-
 
     def test_text_classification_parity(self):
         model_name = "philschmid/tiny-bert-sst2-distilled"
@@ -86,39 +95,48 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["accuracy"])
 
     def test_image_classification_parity(self):
-        model_name = "nateraw/vit-base-beans"
+        # we can not compare to the Pytorch transformers example, that uses custom preprocessing on the images
+        model_name = "douwekiela/resnet-18-finetuned-dogfood"
+        dataset_name = "beans"
+        max_eval_samples = 120
 
-        subprocess.run(
-            "git sparse-checkout set examples/pytorch/image-classification",
-            shell=True,
-            cwd=os.path.join(self.dir_path, "transformers"),
+        raw_dataset = load_dataset(dataset_name, split="validation")
+        eval_dataset = raw_dataset.select(range(max_eval_samples))
+
+        feature_extractor = AutoFeatureExtractor.from_pretrained(model_name)
+        model = AutoModelForImageClassification.from_pretrained(model_name)
+
+        def collate_fn(examples):
+            pixel_values = torch.stack(
+                [torch.tensor(feature_extractor(example["image"])["pixel_values"][0]) for example in examples]
+            )
+            labels = torch.tensor([example["labels"] for example in examples])
+            return {"pixel_values": pixel_values, "labels": labels}
+
+        metric = load("accuracy")
+        trainer = Trainer(
+            model=model,
+            args=TrainingArguments(
+                output_dir=os.path.join(self.dir_path, "imageclassification_beans_transformers"),
+                remove_unused_columns=False,
+            ),
+            train_dataset=None,
+            eval_dataset=eval_dataset,
+            compute_metrics=lambda p: metric.compute(
+                predictions=np.argmax(p.predictions, axis=1), references=p.label_ids
+            ),
+            tokenizer=None,
+            data_collator=collate_fn,
         )
 
-        subprocess.run(
-            f"python examples/pytorch/image-classification/run_image_classification.py"
-            f" --model_name_or_path {model_name}"
-            f" --dataset_name beans"
-            f" --do_eval"
-            f" --remove_unused_columns False"
-            f" --seed 42"
-            f" --output_dir {os.path.join(self.dir_path, 'imageclassification_beans_transformers')}"
-            f" --max_eval_samples 100",
-            shell=True,
-            cwd=os.path.join(self.dir_path, "transformers"),
-        )
+        metrics = trainer.evaluate()
+        trainer.save_metrics("eval", metrics)
 
         with open(
             f"{os.path.join(self.dir_path, 'imageclassification_beans_transformers', 'eval_results.json')}", "r"
         ) as f:
             transformers_results = json.load(f)
 
-
-        raw_dataset = load_dataset("beans")
-        eval_dataset = raw_dataset["validation"].shuffle(seed=42).select(range(100))
-
-
-        model = AutoModelForImageClassification.from_pretrained(model_name)
-        feature_extractor = AutoFeatureExtractor.from_pretrained(model_name)
         pipe = pipeline(task="image-classification", model=model, feature_extractor=feature_extractor)
 
         e = evaluator(task="image-classification")

@@ -26,7 +26,7 @@ SCRIPTS_VERSION = "main" if version.parse(__version__).is_devrelease else __vers
 
 del version
 
-from .evaluator import Evaluator, TextClassificationEvaluator, ImageClassificationEvaluator, evaluator
+from .evaluator import Evaluator, ImageClassificationEvaluator, TextClassificationEvaluator, evaluator
 from .hub import push_to_hub
 from .info import ComparisonInfo, EvaluationModuleInfo, MeasurementInfo, MetricInfo
 from .inspect import inspect_evaluation_module, list_evaluation_modules
