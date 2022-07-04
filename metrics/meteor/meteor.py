@@ -141,7 +141,8 @@ class Meteor(evaluate.EvaluationModule):
                     for ref, pred in zip(references, predictions)
                 ]
         else:
-            if any(isinstance(el, list) for el in references):
+            multiple_refs = isinstance(references[0], list)
+            if multiple_refs:
                 scores = [
                     meteor_score.meteor_score(
                         [[word_tokenize(ref) for ref in group] for group in references][0],
