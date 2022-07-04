@@ -51,7 +51,7 @@ class ImageClassificationEvaluator(Evaluator):
         super().__init__(task, default_metric_name=default_metric_name)
 
     def _compute_predictions(self, pipe: "Pipeline", inputs, label_mapping: Dict[str, Number] = None) -> List[Number]:
-        predictions = pipe(inputs, truncation=True)
+        predictions = pipe(inputs)
 
         pred_label = [max(pred, key=lambda x: x["score"])["label"] for pred in predictions]
         return [label_mapping[pred] if label_mapping is not None else pred for pred in pred_label]
