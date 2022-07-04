@@ -40,7 +40,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         shutil.rmtree(self.dir_path, onerror=onerror)
 
     def test_text_classification_parity(self):
-        model_name = "howey/bert-base-uncased-sst2"
+        model_name = "philschmid/tiny-bert-sst2-distilled"
 
         subprocess.run(
             "git sparse-checkout set examples/pytorch/text-classification",
@@ -78,7 +78,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             metric="accuracy",
             input_column="sentence",
             label_column="label",
-            label_mapping={"LABEL_0": 0, "LABEL_1": 1},
+            label_mapping={"negative": 0, "positive": 1},
             strategy="simple",
         )
 
