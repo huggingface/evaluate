@@ -125,7 +125,7 @@ class ImageClassificationEvaluator(Evaluator):
         >>>     metric="accuracy",
         >>>     input_column="image",
         >>>     label_column="labels",
-        >>>     label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
+        >>>     label_mapping={'angular_leaf_spot': 0, 'bean_rust': 1, 'healthy': 2},
         >>>     strategy="bootstrap",
         >>>     n_resamples=10,
         >>>     random_state=0
