@@ -5,6 +5,7 @@ import subprocess
 import tempfile
 import unittest
 
+import transformers
 from datasets import load_dataset
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 
@@ -15,8 +16,12 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
     def setUp(self):
         self.dir_path = tempfile.mkdtemp("evaluator_trainer_parity_test")
 
+        transformers_version = transformers.__version__
+        branch = ""
+        if not transformers_version.endswith(".dev0"):
+            branch = f"--branch v{transformers_version}"
         subprocess.run(
-            "git clone --depth 3 --filter=blob:none --sparse https://github.com/huggingface/transformers",
+            f"git clone --depth 3 --filter=blob:none --sparse {branch} https://github.com/huggingface/transformers",
             shell=True,
             cwd=self.dir_path,
         )
@@ -45,9 +50,6 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             cwd=os.path.join(self.dir_path, "transformers"),
         )
 
-        print(os.listdir(self.dir_path))
-        print("---")
-        print(os.listdir(os.path.join(self.dir_path, "textclassification_sst2_transformers")))
         with open(
             f"{os.path.join(self.dir_path, 'textclassification_sst2_transformers', 'eval_results.json')}", "r"
         ) as f:
