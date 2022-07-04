@@ -13,8 +13,7 @@
 # limitations under the License.
 
 from abc import ABC, abstractmethod
-from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 # Lint as: python3
 from datasets import Dataset, load_dataset

@@ -12,17 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import ABC, abstractmethod
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-from unittest import result
 
 # Lint as: python3
-from datasets import Dataset, load_dataset
+from datasets import Dataset
 
 
 try:
-    from transformers import FeatureExtractionMixin, Pipeline, PreTrainedModel, TFPreTrainedModel, pipeline
+    from transformers import FeatureExtractionMixin, Pipeline, PreTrainedModel, TFPreTrainedModel
 
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
@@ -30,7 +28,6 @@ except ImportError:
 
 from typing_extensions import Literal
 
-from ..loading import load
 from ..module import EvaluationModule
 from ..utils.logging import get_logger
 from .base import Evaluator
