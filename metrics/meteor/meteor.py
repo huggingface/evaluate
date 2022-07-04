@@ -122,7 +122,7 @@ class Meteor(evaluate.EvaluationModule):
     def _compute(self, predictions, references, alpha=0.9, beta=3, gamma=0.5):
         if NLTK_VERSION >= version.Version("3.6.5"):
         # the version of METEOR in NLTK version 3.6.5 and earlier expect tokenized inputs    
-            if any(isinstance(el, list) for el in references):
+            if isinstance(references[0], list):
                 scores = [
                     meteor_score.meteor_score(
                         [word_tokenize(ref) for ref in refs],
