@@ -1,4 +1,3 @@
- 
 # Copyright 2022 The HuggingFace Datasets Authors and the TensorFlow Datasets Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -26,12 +25,17 @@ except ImportError:
 from typing import Dict, List
 
 from .base import Evaluator
+from .image_classification import ImageClassificationEvaluator
 from .text_classification import TextClassificationEvaluator
 
 
 SUPPORTED_EVALUATOR_TASKS = {
     "text-classification": {
         "implementation": TextClassificationEvaluator,
+        "default_metric_name": "accuracy",
+    },
+    "image-classification": {
+        "implementation": ImageClassificationEvaluator,
         "default_metric_name": "accuracy",
     },
 }
