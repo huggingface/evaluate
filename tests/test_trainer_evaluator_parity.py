@@ -1,7 +1,6 @@
 import json
 import os
 import shutil
-import stat
 import subprocess
 import tempfile
 import unittest
@@ -23,15 +22,6 @@ from transformers import (
 from evaluate import evaluator, load
 
 
-def onerror(func, path, exc_info):
-    # Is the error an access error?
-    if not os.access(path, os.W_OK):
-        os.chmod(path, stat.S_IWUSR)
-        func(path)
-    else:
-        raise
-
-
 class TestEvaluatorTrainerParity(unittest.TestCase):
     def setUp(self):
         self.dir_path = tempfile.mkdtemp("evaluator_trainer_parity_test")
@@ -47,7 +37,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         )
 
     def tearDown(self):
-        shutil.rmtree(self.dir_path, onerror=onerror)
+        shutil.rmtree(self.dir_path, ignore_errors=True)
 
     def test_text_classification_parity(self):
         model_name = "philschmid/tiny-bert-sst2-distilled"
