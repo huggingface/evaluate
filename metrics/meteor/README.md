@@ -42,9 +42,9 @@ METEOR is based on a generalized concept of unigram matching between the machine
 
 METEOR has two mandatory arguments:
 
-`predictions`: a list of predictions to score. Each prediction should be a string with tokens separated by spaces.
+`predictions`: a `list` of predictions to score. Each prediction should be a string with tokens separated by spaces.
 
-`references`: a list of references for each prediction. Each reference should be a string with tokens separated by spaces.
+`references`: a `list` of references (in the case of one `reference` per `prediction`), or a `list` of `lists` of references (in the case of multiple `references` per `prediction`. Each reference should be a string with tokens separated by spaces.
 
 It also has several optional parameters:
 
@@ -65,7 +65,10 @@ Refer to the [METEOR paper](https://aclanthology.org/W05-0909.pdf) for more info
 
 ## Output values
 
-The metric outputs a dictionary containing the METEOR score. Its values range from 0 to 1. 
+The metric outputs a dictionary containing the METEOR score. Its values range from 0 to 1, e.g.:
+```
+{'meteor': 0.9999142661179699}
+```
 
 
 ### Values from popular papers
@@ -74,34 +77,34 @@ The [METEOR paper](https://aclanthology.org/W05-0909.pdf) does not report METEOR
 
 ## Examples 
 
-Maximal values :
+One `reference` per `prediction`:
 
 ```python
 >>> meteor = evaluate.load('meteor')
 >>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
->>> references = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
+>>> reference = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
+>>> results = meteor.compute(predictions=predictions, references=reference)
+>>> print(round(results['meteor'], 2))
+1.0
+```
+
+Multiple `references` per `prediction`:
+
+```python
+>>> meteor = evaluate.load('meteor')
+>>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
+>>> references = [['It is a guide to action that ensures that the military will forever heed Party commands', 'It is the guiding principle which guarantees the military forces always being under the command of the Party', 'It is the practical guide for the army always to heed the directions of the party']]
 >>> results = meteor.compute(predictions=predictions, references=references)
 >>> print(round(results['meteor'], 2))
 1.0
 ```
 
-Minimal values:
+Multiple `references` per `prediction`, partial match:
 
 ```python
 >>> meteor = evaluate.load('meteor')
 >>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
->>> references = ["Hello world"]
->>> results = meteor.compute(predictions=predictions, references=references)
->>> print(round(results['meteor'], 2))
-0.0
-```
-
-Partial match:
-
-```python
->>> meteor = evaluate.load('meteor')
->>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
->>> references = ["It is a guide to action that ensures that the military will forever heed Party commands"]
+>>> references = [['It is a guide to action that ensures that the military will forever heed Party commands', 'It is the guiding principle which guarantees the military forces always being under the command of the Party', 'It is the practical guide for the army always to heed the directions of the party']]
 >>> results = meteor.compute(predictions=predictions, references=references)
 >>> print(round(results['meteor'], 2))
 0.69
