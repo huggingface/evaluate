@@ -33,9 +33,10 @@ logger = get_logger(__name__)
 
 @dataclass
 class EvaluationModuleInfo:
-    """Information about a metric.
+    """Base class to store fnformation about an evaluation used for `MetricInfo`, `ComparisonInfo`,
+    and `MeasurementInfo`.
 
-    `EvaluationModuleInfo` documents a metric, including its name, version, and features.
+    `EvaluationModuleInfo` documents an evaluation, including its name, version, and features.
     See the constructor arguments and properties for a full list.
 
     Note: Not all fields are known on construction and may be updated later.
@@ -52,10 +53,10 @@ class EvaluationModuleInfo:
     reference_urls: List[str] = field(default_factory=list)
     streamable: bool = False
     format: Optional[str] = None
-    module_type: str = "metric"
+    module_type: str = "metric"  # deprecate this in the future
 
     # Set later by the builder
-    metric_name: Optional[str] = None
+    module_name: Optional[str] = None
     config_name: Optional[str] = None
     experiment_id: Optional[str] = None
 
@@ -98,3 +99,42 @@ class EvaluationModuleInfo:
     def from_dict(cls, metric_info_dict: dict) -> "EvaluationModuleInfo":
         field_names = {f.name for f in dataclasses.fields(cls)}
         return cls(**{k: v for k, v in metric_info_dict.items() if k in field_names})
+
+
+@dataclass
+class MetricInfo(EvaluationModuleInfo):
+    """Information about a metric.
+
+    `EvaluationModuleInfo` documents a metric, including its name, version, and features.
+    See the constructor arguments and properties for a full list.
+
+    Note: Not all fields are known on construction and may be updated later.
+    """
+
+    module_type: str = "metric"
+
+
+@dataclass
+class ComparisonInfo(EvaluationModuleInfo):
+    """Information about a comparison.
+
+    `EvaluationModuleInfo` documents a comparison, including its name, version, and features.
+    See the constructor arguments and properties for a full list.
+
+    Note: Not all fields are known on construction and may be updated later.
+    """
+
+    module_type: str = "comparison"
+
+
+@dataclass
+class MeasurementInfo(EvaluationModuleInfo):
+    """Information about a measurement.
+
+    `EvaluationModuleInfo` documents a measurement, including its name, version, and features.
+    See the constructor arguments and properties for a full list.
+
+    Note: Not all fields are known on construction and may be updated later.
+    """
+
+    module_type: str = "measurement"

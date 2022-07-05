@@ -103,7 +103,7 @@ def precision_at_10(en_sentvecs, in_sentvecs):
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class IndicGlue(evaluate.EvaluationModule):
+class IndicGlue(evaluate.Metric):
     def _info(self):
         if self.config_name not in [
             "wnli",
@@ -126,7 +126,7 @@ class IndicGlue(evaluate.EvaluationModule):
                 '"cvit-mkb-clsr", "iitp-mr", "iitp-pr", "actsa-sc", "md", '
                 '"wiki-ner"]'
             )
-        return evaluate.EvaluationModuleInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

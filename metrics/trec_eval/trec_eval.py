@@ -68,11 +68,11 @@ Examples:
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class TRECEval(evaluate.EvaluationModule):
+class TRECEval(evaluate.Metric):
     """Compute TREC evaluation scores."""
 
     def _info(self):
-        return evaluate.EvaluationModuleInfo(
+        return evaluate.MetricInfo(
             module_type="metric",
             description=_DESCRIPTION,
             citation=_CITATION,

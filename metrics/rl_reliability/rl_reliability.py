@@ -82,14 +82,14 @@ Examples:
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class RLReliability(evaluate.EvaluationModule):
+class RLReliability(evaluate.Metric):
     """Computes the RL Reliability Metrics."""
 
     def _info(self):
         if self.config_name not in ["online", "offline"]:
             raise KeyError("""You should supply a configuration name selected in '["online", "offline"]'""")
 
-        return evaluate.EvaluationModuleInfo(
+        return evaluate.MetricInfo(
             module_type="metric",
             description=_DESCRIPTION,
             citation=_CITATION,
