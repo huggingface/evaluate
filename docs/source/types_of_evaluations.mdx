@@ -1,0 +1,35 @@
+# Types of Evaluations in 🤗 Evaluate
+
+The goal of the 🤗 Evaluate library is to support different types of evaluation, depending on different goals, datasets and models.
+
+Here are the types of evaluations that are currently supported with a few examples for each:
+
+## Metrics
+A metric measures the performance of a model on a given dataset. This is often based on an existing ground truth (i.e. a set of references), but there are also *referenceless metrics* which allow evaluating generated text by leveraging a pretrained model such as [GPT-2](https://huggingface.co/gpt2).
+
+Examples of metrics include:
+- [Accuracy](https://huggingface.co/metrics/accuracy) : the proportion of correct predictions among the total number of cases processed.
+- [Exact Match](https://huggingface.co/metrics/exact_match): the rate at which the input predicted strings exactly match their references.
+- [Mean Intersection over union (IoUO)](https://huggingface.co/metrics/mean_iou): the area of overlap between the predicted segmentation of an image and the ground truth divided by the area of union between the predicted segmentation and the ground truth.
+
+Metrics are often used to track model performance on benchmark datasets, and to report progress on tasks such as [machine translation](https://huggingface.co/tasks/translation) and [image classification](https://huggingface.co/tasks/image-classification).
+
+## Comparisons
+
+Comparisons can be useful to compare the performance of two or more models on a single test dataset.
+
+For instance, the [McNemar Test](https://github.com/huggingface/evaluate/tree/main/comparisons/mcnemar) is a paired nonparametric statistical hypothesis test that takes the predictions of two models and compares them, aiming to measure whether the models's predictions diverge or not. The p value it outputs, which ranges from `0.0` to `1.0`, indicates the difference between the two models' predictions, with a lower p value indicating a more significant difference.
+
+Comparisons have yet to be systematically used when comparing and reporting model performance, however they are useful tools to go beyond simply comparing leaderboard scores and for getting more information on the way model prediction differ.
+
+## Measurements
+
+In the 🤗 Evaluate library, measurements are tools for gaining more insights on datasets and model predictions.
+
+For instance, in the case of datasets, it can be useful to calculate the [average word length](https://github.com/huggingface/evaluate/tree/main/measurements/word_length) of a dataset's entries, and how it is distributed -- this can help when choosing the maximum input length for [Tokenizer](https://huggingface.co/docs/transformers/main_classes/tokenizer).
+
+In the case of model predictions, it can help to calculate the average [perplexity](https://huggingface.co/metrics/perplexity) of model predictions using different models such as [GPT-2](https://huggingface.co/gpt2) and [BERT](https://huggingface.co/bert-base-uncased), which can indicate the quality of generated text when no reference is available.
+
+All three types of evaluation supported by the 🤗 Evaluate library are meant to be mutually complementary, and help our community carry out more mindful and responsible evaluation.
+
+We will continue adding more types of metrics, measurements and comparisons in coming months, and are counting on community involvement (via [PRs](https://github.com/huggingface/evaluate/compare) and [issues](https://github.com/huggingface/evaluate/issues/new/choose)) to make the library as extensive and inclusive as possible!

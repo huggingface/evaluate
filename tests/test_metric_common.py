@@ -27,7 +27,7 @@ import pytest
 from absl.testing import parameterized
 
 import evaluate
-from evaluate import load_metric
+from evaluate import load
 
 from .utils import for_all_test_methods, local, slow
 
@@ -41,62 +41,79 @@ _on_windows = os.name == "nt"
 
 def skip_if_metric_requires_fairseq(test_case):
     @wraps(test_case)
-    def wrapper(self, metric_name):
-        if not _has_fairseq and metric_name in REQUIRE_FAIRSEQ:
+    def wrapper(self, evaluation_module_name, evaluation_module_type):
+        if not _has_fairseq and evaluation_module_name in REQUIRE_FAIRSEQ:
             self.skipTest('"test requires Fairseq"')
         else:
-            test_case(self, metric_name)
+            test_case(self, evaluation_module_name, evaluation_module_type)
 
     return wrapper
 
 
 def skip_on_windows_if_not_windows_compatible(test_case):
     @wraps(test_case)
-    def wrapper(self, metric_name):
-        if _on_windows and metric_name in UNSUPPORTED_ON_WINDOWS:
+    def wrapper(self, evaluation_module_name, evaluation_module_type):
+        if _on_windows and evaluation_module_name in UNSUPPORTED_ON_WINDOWS:
             self.skipTest('"test not supported on Windows"')
         else:
-            test_case(self, metric_name)
+            test_case(self, evaluation_module_name, evaluation_module_type)
 
     return wrapper
 
 
-def get_local_metric_names():
+def get_local_module_names():
     metrics = [metric_dir.split(os.sep)[-2] for metric_dir in glob.glob("./metrics/*/")]
-    return [{"testcase_name": x, "metric_name": x} for x in metrics if x != "gleu"]  # gleu is unfinished
+    comparisons = [metric_dir.split(os.sep)[-2] for metric_dir in glob.glob("./comparisons/*/")]
+    measurements = [metric_dir.split(os.sep)[-2] for metric_dir in glob.glob("./measurements/*/")]
+
+    evaluation_modules = metrics + comparisons + measurements
+    evaluation_module_types = (
+        ["metric"] * len(metrics) + ["comparison"] * len(comparisons) + ["measurement"] * len(measurements)
+    )
+
+    return [
+        {"testcase_name": f"{t}_{x}", "evaluation_module_name": x, "evaluation_module_type": t}
+        for x, t in zip(evaluation_modules, evaluation_module_types)
+        if x != "gleu"  # gleu is unfinished
+    ]
 
 
-@parameterized.named_parameters(get_local_metric_names())
+@parameterized.named_parameters(get_local_module_names())
 @for_all_test_methods(skip_if_metric_requires_fairseq, skip_on_windows_if_not_windows_compatible)
 @local
-class LocalMetricTest(parameterized.TestCase):
+class LocalModuleTest(parameterized.TestCase):
     INTENSIVE_CALLS_PATCHER = {}
-    metric_name = None
+    evaluation_module_name = None
+    evaluation_module_type = None
 
-    def test_load_metric(self, metric_name):
+    def test_load(self, evaluation_module_name, evaluation_module_type):
         doctest.ELLIPSIS_MARKER = "[...]"
-        metric_module = importlib.import_module(
-            evaluate.load.metric_module_factory(os.path.join("metrics", metric_name)).module_path
+        evaluation_module = importlib.import_module(
+            evaluate.loading.evaluation_module_factory(
+                os.path.join(evaluation_module_type + "s", evaluation_module_name), module_type=evaluation_module_type
+            ).module_path
         )
-        metric = evaluate.load.import_main_class(metric_module.__name__, dataset=False)
+        evaluation_instance = evaluate.loading.import_main_class(evaluation_module.__name__)
         # check parameters
-        parameters = inspect.signature(metric._compute).parameters
+        parameters = inspect.signature(evaluation_instance._compute).parameters
         self.assertTrue(all([p.kind != p.VAR_KEYWORD for p in parameters.values()]))  # no **kwargs
         # run doctest
-        with self.patch_intensive_calls(metric_name, metric_module.__name__):
-            with self.use_local_metrics():
+        with self.patch_intensive_calls(evaluation_module_name, evaluation_module.__name__):
+            with self.use_local_metrics(evaluation_module_type):
                 try:
-                    results = doctest.testmod(metric_module, verbose=True, raise_on_error=True)
+                    results = doctest.testmod(evaluation_module, verbose=True, raise_on_error=True)
                 except doctest.UnexpectedException as e:
                     raise e.exc_info[1]  # raise the exception that doctest caught
         self.assertEqual(results.failed, 0)
         self.assertGreater(results.attempted, 1)
 
     @slow
-    def test_load_real_metric(self, metric_name):
+    def test_load_real_metric(self, evaluation_module_name, evaluation_module_type):
         doctest.ELLIPSIS_MARKER = "[...]"
         metric_module = importlib.import_module(
-            evaluate.load.metric_module_factory(os.path.join("metrics", metric_name)).module_path
+            evaluate.loading.evaluation_module_factory(
+                os.path.join(evaluation_module_type, evaluation_module_name)
+            ).module_path
         )
         # run doctest
         with self.use_local_metrics():
@@ -105,27 +122,27 @@ class LocalMetricTest(parameterized.TestCase):
         self.assertGreater(results.attempted, 1)
 
     @contextmanager
-    def patch_intensive_calls(self, metric_name, module_name):
-        if metric_name in self.INTENSIVE_CALLS_PATCHER:
-            with self.INTENSIVE_CALLS_PATCHER[metric_name](module_name):
+    def patch_intensive_calls(self, evaluation_module_name, module_name):
+        if evaluation_module_name in self.INTENSIVE_CALLS_PATCHER:
+            with self.INTENSIVE_CALLS_PATCHER[evaluation_module_name](module_name):
                 yield
         else:
             yield
 
     @contextmanager
-    def use_local_metrics(self):
-        def load_local_metric(metric_name, *args, **kwargs):
-            return load_metric(os.path.join("metrics", metric_name), *args, **kwargs)
+    def use_local_metrics(self, evaluation_module_type):
+        def load_local_metric(evaluation_module_name, *args, **kwargs):
+            return load(os.path.join(evaluation_module_type + "s", evaluation_module_name), *args, **kwargs)
 
-        with patch("evaluate.load_metric") as mock_load_metric:
-            mock_load_metric.side_effect = load_local_metric
+        with patch("evaluate.load") as mock_load:
+            mock_load.side_effect = load_local_metric
             yield
 
     @classmethod
-    def register_intensive_calls_patcher(cls, metric_name):
+    def register_intensive_calls_patcher(cls, evaluation_module_name):
         def wrapper(patcher):
             patcher = contextmanager(patcher)
-            cls.INTENSIVE_CALLS_PATCHER[metric_name] = patcher
+            cls.INTENSIVE_CALLS_PATCHER[evaluation_module_name] = patcher
             return patcher
 
         return wrapper
@@ -135,7 +152,7 @@ class LocalMetricTest(parameterized.TestCase):
 # --------------------------------
 
 
-@LocalMetricTest.register_intensive_calls_patcher("bleurt")
+@LocalModuleTest.register_intensive_calls_patcher("bleurt")
 def patch_bleurt(module_name):
     import tensorflow.compat.v1 as tf
     from bleurt.score import Predictor
@@ -153,7 +170,7 @@ def patch_bleurt(module_name):
         yield
 
 
-@LocalMetricTest.register_intensive_calls_patcher("bertscore")
+@LocalModuleTest.register_intensive_calls_patcher("bertscore")
 def patch_bertscore(module_name):
     import torch
 
@@ -169,7 +186,7 @@ def patch_bertscore(module_name):
         yield
 
 
-@LocalMetricTest.register_intensive_calls_patcher("comet")
+@LocalModuleTest.register_intensive_calls_patcher("comet")
 def patch_comet(module_name):
     def load_from_checkpoint(model_path):
         class Model:
@@ -190,7 +207,7 @@ def patch_comet(module_name):
 
 
 def test_seqeval_raises_when_incorrect_scheme():
-    metric = load_metric(os.path.join("metrics", "seqeval"))
+    metric = load(os.path.join("metrics", "seqeval"))
     wrong_scheme = "ERROR"
     error_message = f"Scheme should be one of [IOB1, IOB2, IOE1, IOE2, IOBES, BILOU], got {wrong_scheme}"
     with pytest.raises(ValueError, match=re.escape(error_message)):

@@ -7,8 +7,8 @@ jobs:
     run_evaluate_tests:
         working_directory: ~/evaluate
         docker:
-            - image: cimg/python:3.6
-        resource_class: medium
+            - image: cimg/python:3.7
+        resource_class: large
         steps:
             - checkout
             - run: sudo apt-get -y update
@@ -17,7 +17,7 @@ jobs:
             - run: source venv/bin/activate
             - run: pip install .[tests]
             - run: pip install -r additional-tests-requirements.txt --no-deps
-            - run: HF_ALLOW_CODE_EVAL=1 python -m pytest -d --tx 2*popen//python=python3.6 --dist loadfile -sv ./tests/
+            - run: HF_ALLOW_CODE_EVAL=1 python -m pytest -d --tx 2*popen//python=python3.7 --dist loadfile -sv ./tests/
 
     run_evaluate_tests_WIN:
         working_directory: ~/evaluate
@@ -41,7 +41,7 @@ jobs:
     check_code_quality:
         working_directory: ~/evaluate
         docker:
-            - image: circleci/python:3.6
+            - image: circleci/python:3.7
         resource_class: medium
         parallelism: 1
         steps:

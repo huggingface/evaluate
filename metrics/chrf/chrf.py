@@ -95,7 +95,7 @@ Examples:
     Example 1--a simple example of calculating chrF:
         >>> prediction = ["The relationship between cats and dogs is not exactly friendly.", "a good bookshop is just a genteel black hole that knows how to read."]
         >>> reference = [["The relationship between dogs and cats is not exactly friendly."], ["A good bookshop is just a genteel Black Hole that knows how to read."]]
-        >>> chrf = evaluate.load_metric("chrf")
+        >>> chrf = evaluate.load("chrf")
         >>> results = chrf.compute(predictions=prediction, references=reference)
         >>> print(results)
         {'score': 84.64214891738334, 'char_order': 6, 'word_order': 0, 'beta': 2}
@@ -103,7 +103,7 @@ Examples:
     Example 2--the same example, but with the argument word_order=2, to calculate chrF++ instead of chrF:
         >>> prediction = ["The relationship between cats and dogs is not exactly friendly.", "a good bookshop is just a genteel black hole that knows how to read."]
         >>> reference = [["The relationship between dogs and cats is not exactly friendly."], ["A good bookshop is just a genteel Black Hole that knows how to read."]]
-        >>> chrf = evaluate.load_metric("chrf")
+        >>> chrf = evaluate.load("chrf")
         >>> results = chrf.compute(predictions=prediction,
         ...                         references=reference,
         ...                         word_order=2)
@@ -113,7 +113,7 @@ Examples:
     Example 3--the same chrF++ example as above, but with `lowercase=True` to normalize all case:
         >>> prediction = ["The relationship between cats and dogs is not exactly friendly.", "a good bookshop is just a genteel black hole that knows how to read."]
         >>> reference = [["The relationship between dogs and cats is not exactly friendly."], ["A good bookshop is just a genteel Black Hole that knows how to read."]]
-        >>> chrf = evaluate.load_metric("chrf")
+        >>> chrf = evaluate.load("chrf")
         >>> results = chrf.compute(predictions=prediction,
         ...                         references=reference,
         ...                         word_order=2,
@@ -136,12 +136,20 @@ class ChrF(evaluate.Metric):
             citation=_CITATION,
             homepage="https://github.com/mjpost/sacreBLEU#chrf--chrf",
             inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": datasets.Value("string", id="sequence"),
-                    "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
-                }
-            ),
+            features=[
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
+                    }
+                ),
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Value("string", id="sequence"),
+                    }
+                ),
+            ],
             codebase_urls=["https://github.com/mjpost/sacreBLEU#chrf--chrf"],
             reference_urls=[
                 "https://github.com/m-popovic/chrF",
@@ -159,6 +167,10 @@ class ChrF(evaluate.Metric):
         whitespace: bool = False,
         eps_smoothing: bool = False,
     ):
+        # if only one reference is provided make sure we still use list of lists
+        if isinstance(references[0], str):
+            references = [[ref] for ref in references]
+
         references_per_prediction = len(references[0])
         if any(len(refs) != references_per_prediction for refs in references):
             raise ValueError("Sacrebleu requires the same number of references for each prediction")

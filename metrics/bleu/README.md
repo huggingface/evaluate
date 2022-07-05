@@ -1,3 +1,25 @@
+---
+title: BLEU
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  BLEU (Bilingual Evaluation Understudy) is an algorithm for evaluating the quality of text which has been machine-translated from one natural language to another.
+  Quality is considered to be the correspondence between a machine's output and that of a human: "the closer a machine translation is to a professional human translation, the better it is"
+  – this is the central idea behind BLEU. BLEU was one of the first metrics to claim a high correlation with human judgements of quality, and remains one of the most popular automated and inexpensive metrics.
+
+  Scores are calculated for individual translated segments—generally sentences—by comparing them with a set of good quality reference translations.
+  Those scores are then averaged over the whole corpus to reach an estimate of the translation's overall quality.
+  Neither intelligibility nor grammatical correctness are not taken into account.
+---
+
 # Metric Card for BLEU
 
 
@@ -19,7 +41,7 @@ This metric takes as input a list of predicted sentences and a list of lists of 
 ...     ["hello there general kenobi", "hello there !"],
 ...     ["foo bar foobar"]
 ... ]
->>> bleu = evaluate.load_metric("bleu")
+>>> bleu = evaluate.load("bleu")
 >>> results = bleu.compute(predictions=predictions, references=references)
 >>> print(results)
 {'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.1666666666666667, 'translation_length': 7, 'reference_length': 6}
@@ -65,7 +87,7 @@ Example where each prediction has 1 reference:
 ...     ["hello there general kenobi"],
 ...     ["foo bar foobar"]
 ... ]
->>> bleu = evaluate.load_metric("bleu")
+>>> bleu = evaluate.load("bleu")
 >>> results = bleu.compute(predictions=predictions, references=references)
 >>> print(results)
 {'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.0, 'translation_length': 7, 'reference_length': 7}
@@ -81,7 +103,7 @@ Example where the second prediction has 2 references:
 ...     [["hello there general kenobi"], ["hello there!"]],
 ...     [["foo bar foobar"]]
 ... ]
->>> bleu = evaluate.load_metric("bleu")
+>>> bleu = evaluate.load("bleu")
 >>> results = bleu.compute(predictions=predictions, references=references)
 >>> print(results)
 {'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.1666666666666667, 'translation_length': 7, 'reference_length': 6}
@@ -89,7 +111,7 @@ Example where the second prediction has 2 references:
 
 Example with the word tokenizer from NLTK:
 ```python
->>> bleu = evaluate.load_metric("bleu")
+>>> bleu = evaluate.load("bleu")
 >>> from nltk.tokenize import word_tokenize
 >>> predictions = [
 ...     ["hello there general kenobi",

@@ -96,14 +96,24 @@ def head_hf_s3(
     )
 
 
-def hf_github_url(path: str, name: str, dataset=True, revision: Optional[str] = None) -> str:
+def hf_github_url(path: str, name: str, module_type: str, revision: Optional[str] = None) -> str:
     from .. import SCRIPTS_VERSION
 
     revision = revision or os.getenv("HF_SCRIPTS_VERSION", SCRIPTS_VERSION)
-    if dataset:
-        return config.REPO_DATASETS_URL.format(revision=revision, path=path, name=name)
-    else:
+
+    if re.match(r"\d*\.\d*\.\d*", revision):  # revision is version number (three digits separated by full stops)
+        revision = "v" + revision  # tagging convention on evaluate repository starts with v
+
+    if module_type == "metric":
         return config.REPO_METRICS_URL.format(revision=revision, path=path, name=name)
+    elif module_type == "comparison":
+        return config.REPO_COMPARISONS_URL.format(revision=revision, path=path, name=name)
+    elif module_type == "measurement":
+        return config.REPO_MEASUREMENTS_URL.format(revision=revision, path=path, name=name)
+    else:
+        raise TypeError(
+            f"The evaluation module type {module_type} is not supported. Should be one of 'metric', 'comparison', 'measurement'"
+        )
 
 
 def hf_hub_url(path: str, name: str, revision: Optional[str] = None) -> str:

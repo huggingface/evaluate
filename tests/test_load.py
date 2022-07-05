@@ -6,11 +6,11 @@ from unittest import TestCase
 import pytest
 
 import evaluate
-from evaluate.load import (
-    CachedMetricModuleFactory,
-    GithubMetricModuleFactory,
-    HubMetricModuleFactory,
-    LocalMetricModuleFactory,
+from evaluate.loading import (
+    CachedEvaluationModuleFactory,
+    GithubEvaluationModuleFactory,
+    HubEvaluationModuleFactory,
+    LocalEvaluationModuleFactory,
 )
 from evaluate.utils.file_utils import DownloadConfig
 
@@ -23,13 +23,13 @@ METRIC_LOADING_SCRIPT_NAME = "__dummy_metric1__"
 
 METRIC_LOADING_SCRIPT_CODE = """
 import evaluate
-from evaluate import MetricInfo
+from evaluate import EvaluationModuleInfo
 from datasets import Features, Value
 
-class __DummyMetric1__(evaluate.Metric):
+class __DummyMetric1__(evaluate.EvaluationModule):
 
     def _info(self):
-        return MetricInfo(features=Features({"predictions": Value("int"), "references": Value("int")}))
+        return EvaluationModuleInfo(features=Features({"predictions": Value("int"), "references": Value("int")}))
 
     def _compute(self, predictions, references):
         return {"__dummy_metric1__": sum(int(p == r) for p, r in zip(predictions, references))}
@@ -56,29 +56,35 @@ class ModuleFactoryTest(TestCase):
         self.hf_modules_cache = tempfile.mkdtemp()
         self.cache_dir = tempfile.mkdtemp()
         self.download_config = DownloadConfig(cache_dir=self.cache_dir)
-        self.dynamic_modules_path = evaluate.load.init_dynamic_modules(
+        self.dynamic_modules_path = evaluate.loading.init_dynamic_modules(
             name="test_datasets_modules_" + os.path.basename(self.hf_modules_cache),
             hf_modules_cache=self.hf_modules_cache,
         )
 
     def test_GithubMetricModuleFactory_with_internal_import(self):
         # "squad_v2" requires additional imports (internal)
-        factory = GithubMetricModuleFactory(
-            "squad_v2", download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
+        factory = GithubEvaluationModuleFactory(
+            "squad_v2",
+            module_type="metric",
+            download_config=self.download_config,
+            dynamic_modules_path=self.dynamic_modules_path,
         )
         module_factory_result = factory.get_module()
         assert importlib.import_module(module_factory_result.module_path) is not None
 
     def test_GithubMetricModuleFactory_with_external_import(self):
         # "bleu" requires additional imports (external from github)
-        factory = GithubMetricModuleFactory(
-            "bleu", download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
+        factory = GithubEvaluationModuleFactory(
+            "bleu",
+            module_type="metric",
+            download_config=self.download_config,
+            dynamic_modules_path=self.dynamic_modules_path,
         )
         module_factory_result = factory.get_module()
         assert importlib.import_module(module_factory_result.module_path) is not None
 
     def test_HubDatasetModuleFactoryWithScript(self):
-        factory = HubMetricModuleFactory(
+        factory = HubEvaluationModuleFactory(
             SAMPLE_METRIC_IDENTIFIER,
             download_config=self.download_config,
             dynamic_modules_path=self.dynamic_modules_path,
@@ -88,7 +94,7 @@ class ModuleFactoryTest(TestCase):
 
     def test_LocalMetricModuleFactory(self):
         path = os.path.join(self._metric_loading_script_dir, f"{METRIC_LOADING_SCRIPT_NAME}.py")
-        factory = LocalMetricModuleFactory(
+        factory = LocalEvaluationModuleFactory(
             path, download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
         )
         module_factory_result = factory.get_module()
@@ -96,13 +102,13 @@ class ModuleFactoryTest(TestCase):
 
     def test_CachedMetricModuleFactory(self):
         path = os.path.join(self._metric_loading_script_dir, f"{METRIC_LOADING_SCRIPT_NAME}.py")
-        factory = LocalMetricModuleFactory(
+        factory = LocalEvaluationModuleFactory(
             path, download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
         )
         module_factory_result = factory.get_module()
         for offline_mode in OfflineSimulationMode:
             with offline(offline_mode):
-                factory = CachedMetricModuleFactory(
+                factory = CachedEvaluationModuleFactory(
                     METRIC_LOADING_SCRIPT_NAME,
                     dynamic_modules_path=self.dynamic_modules_path,
                 )

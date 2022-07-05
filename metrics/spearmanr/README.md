@@ -1,3 +1,32 @@
+---
+title: Spearman Correlation Coefficient Metric 
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  The Spearman rank-order correlation coefficient is a measure of the
+  relationship between two datasets. Like other correlation coefficients,
+  this one varies between -1 and +1 with 0 implying no correlation.
+  Positive correlations imply that as data in dataset x increases, so
+  does data in dataset y. Negative correlations imply that as x increases,
+  y decreases. Correlations of -1 or +1 imply an exact monotonic relationship.
+  
+  Unlike the Pearson correlation, the Spearman correlation does not
+  assume that both datasets are normally distributed.
+  
+  The p-value roughly indicates the probability of an uncorrelated system
+  producing datasets that have a Spearman correlation at least as extreme
+  as the one computed from these datasets. The p-values are not entirely
+  reliable but are probably reasonable for datasets larger than 500 or so.
+---
+
 # Metric Card for Spearman Correlation Coefficient Metric (spearmanr)
 
 
@@ -22,7 +51,7 @@ reliable but are probably reasonable for datasets larger than 500 or so.
 At minimum, this metric only requires a `list` of predictions and a `list` of references:
 
 ```python
->>> spearmanr_metric = evaluate.load_metric("spearmanr")
+>>> spearmanr_metric = evaluate.load("spearmanr")
 >>> results = spearmanr_metric.compute(references=[1, 2, 3, 4, 5], predictions=[10, 9, 2.5, 6, 4])
 >>> print(results)
 {'spearmanr': -0.7}
@@ -59,7 +88,7 @@ The p-values can take on any value from `0` to `1`, inclusive.
 ### Examples
 A basic example:
 ```python
->>> spearmanr_metric = evaluate.load_metric("spearmanr")
+>>> spearmanr_metric = evaluate.load("spearmanr")
 >>> results = spearmanr_metric.compute(references=[1, 2, 3, 4, 5], predictions=[10, 9, 2.5, 6, 4])
 >>> print(results)
 {'spearmanr': -0.7}
@@ -67,7 +96,7 @@ A basic example:
 
 The same example, but that also returns the pvalue:
 ```python
->>> spearmanr_metric = evaluate.load_metric("spearmanr")
+>>> spearmanr_metric = evaluate.load("spearmanr")
 >>> results = spearmanr_metric.compute(references=[1, 2, 3, 4, 5], predictions=[10, 9, 2.5, 6, 4], return_pvalue=True)
 >>> print(results)
 {'spearmanr': -0.7, 'spearmanr_pvalue': 0.1881204043741873

@@ -1,3 +1,38 @@
+---
+title: WER
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  Word error rate (WER) is a common metric of the performance of an automatic speech recognition system.
+  
+  The general difficulty of measuring performance lies in the fact that the recognized word sequence can have a different length from the reference word sequence (supposedly the correct one). The WER is derived from the Levenshtein distance, working at the word level instead of the phoneme level. The WER is a valuable tool for comparing different systems as well as for evaluating improvements within one system. This kind of measurement, however, provides no details on the nature of translation errors and further work is therefore required to identify the main source(s) of error and to focus any research effort.
+  
+  This problem is solved by first aligning the recognized word sequence with the reference (spoken) word sequence using dynamic string alignment. Examination of this issue is seen through a theory called the power law that states the correlation between perplexity and word error rate.
+  
+  Word error rate can then be computed as:
+  
+  WER = (S + D + I) / N = (S + D + I) / (S + D + C)
+  
+  where
+  
+  S is the number of substitutions,
+  D is the number of deletions,
+  I is the number of insertions,
+  C is the number of correct words,
+  N is the number of words in the reference (N=S+D+C).
+  
+  This value indicates the average number of errors per reference word. The lower the value, the better the
+  performance of the ASR system with a WER of 0 being a perfect score.
+---
+
 # Metric Card for WER
 
 ## Metric description
@@ -30,8 +65,8 @@ The metric takes two inputs: references (a list of references for each speech in
 
 
 ```python
-from evaluate import load_metric
-wer = load_metric("wer")
+from evaluate import load
+wer = load("wer")
 wer_score = wer.compute(predictions=predictions, references=references)
 ```
 ## Output values
@@ -59,8 +94,8 @@ See the leaderboards for [LibriSpeech](https://paperswithcode.com/sota/speech-re
 Perfect match between prediction and reference:
 
 ```python
-from evaluate import load_metric
-wer = load_metric("wer")
+from evaluate import load
+wer = load("wer")
 predictions = ["hello world", "good night moon"]
 references = ["hello world", "good night moon"]
 wer_score = wer.compute(predictions=predictions, references=references)
@@ -71,8 +106,8 @@ print(wer_score)
 Partial match between prediction and reference:
 
 ```python
-from evaluate import load_metric
-wer = load_metric("wer")
+from evaluate import load
+wer = load("wer")
 predictions = ["this is the prediction", "there is an other sample"]
 references = ["this is the reference", "there is another one"]
 wer_score = wer.compute(predictions=predictions, references=references)
@@ -83,8 +118,8 @@ print(wer_score)
 No match between prediction and reference:
 
 ```python
-from evaluate import load_metric
-wer = load_metric("wer")
+from evaluate import load
+wer = load("wer")
 predictions = ["hello world", "good night moon"]
 references = ["hi everyone", "have a great day"]
 wer_score = wer.compute(predictions=predictions, references=references)
@@ -102,7 +137,7 @@ WER is a valuable tool for comparing different systems as well as for evaluating
 @inproceedings{woodard1982,
 author = {Woodard, J.P. and Nelson, J.T.,
 year = {1982},
-journal = Ẅorkshop on standardisation for speech I/O technology, Naval Air Development Center, Warminster, PA},
+journal = {Workshop on standardisation for speech I/O technology, Naval Air Development Center, Warminster, PA},
 title = {An information theoretic measure of speech recognition performance}
 }
 ```

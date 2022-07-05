@@ -57,7 +57,7 @@ _KWARGS_DESCRIPTION = """
 Computes BLEU score of translated segments against one or more references.
 Args:
     predictions: list of translations to score.
-    references: list of lists of references for each translation.
+    references: list of lists of or just a list of references for each translation.
     tokenizer : approach used for tokenizing `predictions` and `references`.
         The default tokenizer is `tokenizer_13a`, a minimal tokenization approach that is equivalent to `mteval-v13a`, used by WMT.
         This can be replaced by any function that takes a string as input and returns a list of tokens as output.
@@ -77,7 +77,7 @@ Examples:
     ...     ["hello there general kenobi", "hello there!"],
     ...     ["foo bar foobar"]
     ... ]
-    >>> bleu = evaluate.load_metric("bleu")
+    >>> bleu = evaluate.load("bleu")
     >>> results = bleu.compute(predictions=predictions, references=references)
     >>> print(results["bleu"])
     1.0
@@ -91,12 +91,20 @@ class Bleu(evaluate.Metric):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": datasets.Value("string", id="sequence"),
-                    "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
-                }
-            ),
+            features=[
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
+                    }
+                ),
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Value("string", id="sequence"),
+                    }
+                ),
+            ],
             codebase_urls=["https://github.com/tensorflow/nmt/blob/master/nmt/scripts/bleu.py"],
             reference_urls=[
                 "https://en.wikipedia.org/wiki/BLEU",
@@ -105,6 +113,10 @@ class Bleu(evaluate.Metric):
         )
 
     def _compute(self, predictions, references, tokenizer=Tokenizer13a(), max_order=4, smooth=False):
+        # if only one reference is provided make sure we still use list of lists
+        if isinstance(references[0], str):
+            references = [[ref] for ref in references]
+
         references = [[tokenizer(r) for r in ref] for ref in references]
         predictions = [tokenizer(p) for p in predictions]
         score = compute_bleu(

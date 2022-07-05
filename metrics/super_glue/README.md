@@ -1,3 +1,19 @@
+---
+title: SuperGLUE
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  SuperGLUE (https://super.gluebenchmark.com/) is a new benchmark styled after GLUE with a new set of more difficult language understanding tasks, improved resources, and a new public leaderboard.
+---
+
 # Metric Card for SuperGLUE
 
 ## Metric description
@@ -32,8 +48,8 @@ Format of `references`:
 - otherwise: list of reference labels
 
 ```python
-from evaluate import load_metric
-super_glue_metric = load_metric('super_glue', 'copa') 
+from evaluate import load
+super_glue_metric = load('super_glue', 'copa') 
 predictions = [0, 1]
 references = [0, 1]
 results = super_glue_metric.compute(predictions=predictions, references=references)
@@ -58,8 +74,8 @@ For more recent model performance, see the [dataset leaderboard](https://super.g
 Maximal values for the COPA subset (which outputs `accuracy`):
 
 ```python
-from evaluate import load_metric
-super_glue_metric = load_metric('super_glue', 'copa')  # any of ["copa", "rte", "wic", "wsc", "wsc.fixed", "boolq", "axg"]
+from evaluate import load
+super_glue_metric = load('super_glue', 'copa')  # any of ["copa", "rte", "wic", "wsc", "wsc.fixed", "boolq", "axg"]
 predictions = [0, 1]
 references = [0, 1]
 results = super_glue_metric.compute(predictions=predictions, references=references)
@@ -70,8 +86,8 @@ print(results)
 Minimal values for the MultiRC subset (which outputs `pearson` and `spearmanr`):
 
 ```python
-from evaluate import load_metric
-super_glue_metric = load_metric('super_glue', 'multirc')
+from evaluate import load
+super_glue_metric = load('super_glue', 'multirc')
 predictions = [{'idx': {'answer': 0, 'paragraph': 0, 'question': 0}, 'prediction': 0}, {'idx': {'answer': 1, 'paragraph': 2, 'question': 3}, 'prediction': 1}]
 references = [1,0]
 results = super_glue_metric.compute(predictions=predictions, references=references)
@@ -82,8 +98,8 @@ print(results)
 Partial match for the COLA subset (which outputs `matthews_correlation`) 
 
 ```python
-from evaluate import load_metric
-super_glue_metric = load_metric('super_glue', 'axb')
+from evaluate import load
+super_glue_metric = load('super_glue', 'axb')
 references = [0, 1]
 predictions = [1,1]
 results = super_glue_metric.compute(predictions=predictions, references=references)

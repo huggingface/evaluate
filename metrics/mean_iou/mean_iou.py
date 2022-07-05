@@ -62,7 +62,7 @@ Examples:
 
     >>> import numpy as np
 
-    >>> mean_iou = evaluate.load_metric("mean_iou")
+    >>> mean_iou = evaluate.load("mean_iou")
 
     >>> # suppose one has 3 different segmentation maps predicted
     >>> predicted_1 = np.array([[1, 2], [3, 4], [5, 255]])

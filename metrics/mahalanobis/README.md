@@ -1,3 +1,25 @@
+---
+title: Mahalanobis Distance
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  Compute the Mahalanobis Distance
+  
+  Mahalonobis distance is the distance between a point and a distribution.
+  And not between two distinct points. It is effectively a multivariate equivalent of the Euclidean distance.
+  It was introduced by Prof. P. C. Mahalanobis in 1936
+  and has been used in various statistical applications ever since
+  [source: https://www.machinelearningplus.com/statistics/mahalanobis-distance/]
+---
+
 # Metric Card for Mahalanobis Distance
 
 ## Metric Description
@@ -9,7 +31,7 @@ It is often used in multivariate anomaly detection, classification on highly imb
 At minimum, this metric requires two `list`s of datapoints: 
 
 ```python
->>> mahalanobis_metric = evaluate.load_metric("mahalanobis")
+>>> mahalanobis_metric = evaluate.load("mahalanobis")
 >>> results = mahalanobis_metric.compute(reference_distribution=[[0, 1], [1, 0]], X=[[0, 1]])
 ```
 
@@ -31,7 +53,7 @@ At minimum, this metric requires two `list`s of datapoints:
 ### Example
 
 ```python
->>> mahalanobis_metric = evaluate.load_metric("mahalanobis")
+>>> mahalanobis_metric = evaluate.load("mahalanobis")
 >>> results = mahalanobis_metric.compute(reference_distribution=[[0, 1], [1, 0]], X=[[0, 1]])
 >>> print(results)
 {'mahalanobis': array([0.5])}

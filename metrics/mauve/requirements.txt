@@ -1,0 +1,5 @@
+git+https://github.com/huggingface/evaluate@a45df1eb9996eec64ec3282ebe554061cb366388
+datasets~=2.0
+faiss-cpu
+sklearn
+mauve-text

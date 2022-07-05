@@ -1,3 +1,20 @@
+---
+title: MAE
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  Mean Absolute Error (MAE) is the mean of the magnitude of difference between the predicted and actual
+  values.
+---
+
 # Metric Card for MAE
 
 
@@ -12,7 +29,7 @@ Mean Absolute Error (MAE) is the mean of the magnitude of difference between the
 At minimum, this metric requires predictions and references as inputs.
 
 ```python
->>> mae_metric = evaluate.load_metric("mae")
+>>> mae_metric = evaluate.load("mae")
 >>> predictions = [2.5, 0.0, 2, 8]
 >>> references = [3, -0.5, 2, 7]
 >>> results = mae_metric.compute(predictions=predictions, references=references)
@@ -55,7 +72,7 @@ If `multioutput="raw_values"`:
 
 Example with the `uniform_average` config:
 ```python
->>> mae_metric = evaluate.load_metric("mae")
+>>> mae_metric = evaluate.load("mae")
 >>> predictions = [2.5, 0.0, 2, 8]
 >>> references = [3, -0.5, 2, 7]
 >>> results = mae_metric.compute(predictions=predictions, references=references)
@@ -65,7 +82,7 @@ Example with the `uniform_average` config:
 
 Example with multi-dimensional lists, and the `raw_values` config:
 ```python
->>> mae_metric = evaluate.load_metric("mae", "multilist")
+>>> mae_metric = evaluate.load("mae", "multilist")
 >>> predictions = [[0.5, 1], [-1, 1], [7, -6]]
 >>> references = [[0, 2], [-1, 2], [8, -5]]
 >>> results = mae_metric.compute(predictions=predictions, references=references)

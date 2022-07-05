@@ -15,9 +15,15 @@ logger = get_logger(__name__)
 S3_METRICS_BUCKET_PREFIX = "https://s3.amazonaws.com/datasets.huggingface.co/datasets/metrics"
 CLOUDFRONT_METRICS_DISTRIB_PREFIX = "https://cdn-datasets.huggingface.co/datasets/metric"
 REPO_METRICS_URL = "https://raw.githubusercontent.com/huggingface/evaluate/{revision}/metrics/{path}/{name}"
+REPO_MEASUREMENTS_URL = "https://raw.githubusercontent.com/huggingface/evaluate/{revision}/measurements/{path}/{name}"
+REPO_COMPARISONS_URL = "https://raw.githubusercontent.com/huggingface/evaluate/{revision}/comparisons/{path}/{name}"
+
+# Evaluation module types
+EVALUATION_MODULE_TYPES = ["metric", "comparison", "measurement"]
 
 # Hub
 HF_ENDPOINT = os.environ.get("HF_ENDPOINT", "https://huggingface.co")
+HF_LIST_ENDPOINT = HF_ENDPOINT + "/api/spaces?filter={type}"
 HUB_EVALUATE_URL = HF_ENDPOINT + "/spaces/{path}/resolve/{revision}/{name}"
 HUB_DEFAULT_VERSION = "main"
 

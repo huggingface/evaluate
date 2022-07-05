@@ -1,0 +1,114 @@
+# Using the `evaluator` with custom models
+
+The evaluator is designed to work with `transformer` pipelines out-of-the-box. However, in many cases you might have a model or pipeline that's not part of the `transformer` ecosystem. You can still use `evaluator` to easily compute metrics them. In this guide we show how to do this for a Scikit-Learn [pipeline](https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html#sklearn.pipeline.Pipeline) and a Spacy [pipeline](https://spacy.io). Let's start with the Scikit-Learn case.
+
+## Scikit-Learn
+
+First we need to train a model. We'll train a simple text classifier on the [IMDb dataset](https://huggingface.co/datasets/imdb), so let's start by downloading the dataset:
+
+```py
+from datasets import load_dataset
+
+ds = load_dataset("imdb")
+```
+
+Then we can build a simple TF-IDF preprocessor and Naive Bayes classifier wrapped in a `Pipeline`:
+
+```py
+from sklearn.pipeline import Pipeline
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.feature_extraction.text import TfidfTransformer
+from sklearn.feature_extraction.text import CountVectorizer
+
+text_clf = Pipeline([
+        ('vect', CountVectorizer()),
+        ('tfidf', TfidfTransformer()),
+        ('clf', MultinomialNB()),
+])
+
+text_clf.fit(ds["train"]["text"], ds["train"]["label"])
+```
+
+Following the convention in the `TextClassificationPipeline` of `transformers` our pipeline should be callable and return a list of dictionaries. In addition we use the `task` attribute to check if the pipeline is compatible with the `evaluator`. We can write a small wrapper class for that purpose:
+
+```py
+class ScikitEvalPipeline:
+    def __init__(self, pipeline):
+        self.pipeline = pipeline
+        self.task = "text-classification"
+
+    def __call__(self, input_texts, **kwargs):
+        return [{"label": p} for p in self.pipeline.predict(input_texts)]
+
+pipe = ScikitEvalPipeline(text_clf)
+```
+
+We can now pass this `pipeline` to the `evaluator`:
+
+```py
+from evaluate import evaluator
+
+eval = evaluator("text-classification")
+eval.compute(pipe, ds["test"], "accuracy")
+
+>>> {'accuracy': 0.82956}
+```
+
+Implementing that simple wrapper is all that's needed to use any model from any framework with the `evaluator`. In the `__call__` you can implement all logic necessary for efficient forward passes through your model.
+
+## Spacy
+
+We'll use the `polarity` feature of the `spacytextblob` project to get a simple sentiment analyzer. First you'll need to install the project and download the resources:
+
+```bash
+pip install spacytextblob
+python -m textblob.download_corpora
+python -m spacy download en_core_web_sm
+```
+
+Then we can simply load the `nlp` pipeline and add the `spacytextblob` pipeline:
+```py
+import spacy
+
+nlp = spacy.load('en_core_web_sm')
+nlp.add_pipe('spacytextblob')
+```
+
+This snippet shows how we can use the `polarity` feature added with `spacytextblob` to get the sentiment of a text:
+
+```py
+texts = ["This movie is horrible", "This movie is awesome"]
+results = nlp.pipe(texts)
+
+for txt, res in zip(texts, results):
+    print(f"{text} | Polarity: {res._.blob.polarity}")
+```
+
+Now we can wrap it in a simple wrapper class like in the Scikit-Learn example before. It just has to return a list of dictionaries with the predicted lables. If the polarity is larger than 0 we'll predict positive sentiment and negative otherwise:
+
+```py
+class SpacyEvalPipeline:
+    def __init__(self, nlp):
+        self.nlp = nlp
+        self.task = "text-classification"
+
+    def __call__(self, input_texts, **kwargs):
+        results =[]
+        for p in self.nlp.pipe(input_texts):
+            if p._.blob.polarity>=0:
+                results.append({"label": 1})
+            else:
+                results.append({"label": 0})
+        return results
+
+pipe = SpacyEvalPipeline(nlp)
+```
+
+That class is compatible with the `evaluator` and we can use the same instance from the previous examlpe along with the IMDb test set:
+
+```py
+eval.compute(pipe, ds["test"], "accuracy")
+>>> {'accuracy': 0.6914}
+```
+
+This will take a little longer than the Scikit-Learn example but after roughly 10-15min you will have the evaluation results!

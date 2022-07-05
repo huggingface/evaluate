@@ -1,3 +1,21 @@
+---
+title: Code Eval
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  This metric implements the evaluation harness for the HumanEval problem solving dataset
+  described in the paper "Evaluating Large Language Models Trained on Code"
+  (https://arxiv.org/abs/2107.03374).
+---
+
 # Metric Card for Code Eval
 
 ## Metric description
@@ -22,8 +40,8 @@ The Code Eval metric calculates how good are predictions given a set of referenc
 `timeout`: The maximum time taken to produce a prediction before it is considered a "timeout". The default value is `3.0` (i.e. 3 seconds).
 
 ```python
-from evaluate import load_metric
-code_eval = load_metric("code_eval")
+from evaluate import load
+code_eval = load("code_eval")
 test_cases = ["assert add(2,3)==5"]
 candidates = [["def add(a,b): return a*b", "def add(a, b): return a+b"]]
 pass_at_k, results = code_eval.compute(references=test_cases, predictions=candidates, k=[1, 2])
@@ -54,8 +72,8 @@ The [original CODEX paper](https://arxiv.org/pdf/2107.03374.pdf) reported that t
 Full match at `k=1`:
 
 ```python
-from evaluate import load_metric
-code_eval = load_metric("code_eval")
+from evaluate import load
+code_eval = load("code_eval")
 test_cases = ["assert add(2,3)==5"]
 candidates = [["def add(a, b): return a+b"]]
 pass_at_k, results = code_eval.compute(references=test_cases, predictions=candidates, k=[1])
@@ -66,8 +84,8 @@ print(pass_at_k)
 No match for k = 1:
 
 ```python
-from evaluate import load_metric
-code_eval = load_metric("code_eval")
+from evaluate import load
+code_eval = load("code_eval")
 test_cases = ["assert add(2,3)==5"]
 candidates = [["def add(a,b): return a*b"]]
 pass_at_k, results = code_eval.compute(references=test_cases, predictions=candidates, k=[1])
@@ -78,8 +96,8 @@ print(pass_at_k)
 Partial match at k=1, full match at k=2:
 
 ```python
-from evaluate import load_metric
-code_eval = load_metric("code_eval")
+from evaluate import load
+code_eval = load("code_eval")
 test_cases = ["assert add(2,3)==5"]
 candidates = [["def add(a, b): return a+b", "def add(a,b): return a*b"]]
 pass_at_k, results = code_eval.compute(references=test_cases, predictions=candidates, k=[1, 2])

@@ -108,7 +108,7 @@ Examples:
 
     >>> predictions = ["this is the prediction", "there is an other sample"]
     >>> references = ["this is the reference", "there is another one"]
-    >>> cer = evaluate.load_metric("cer")
+    >>> cer = evaluate.load("cer")
     >>> cer_score = cer.compute(predictions=predictions, references=references)
     >>> print(cer_score)
     0.34146341463414637

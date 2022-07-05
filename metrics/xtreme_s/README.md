@@ -1,3 +1,20 @@
+---
+title: XTREME-S
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  XTREME-S is a benchmark to evaluate universal cross-lingual speech representations in many languages.
+  XTREME-S covers four task families: speech recognition, classification, speech-to-text translation and retrieval.
+---
+
 # Metric Card for XTREME-S
 
 
@@ -15,7 +32,7 @@ There are two steps: (1) loading the XTREME-S metric relevant to the subset of t
 
 
 ```python
->>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'mls')
+>>> xtreme_s_metric = evaluate.load('xtreme_s', 'mls')
 ```
 
 2. **Calculating the metric**: the metric takes two inputs : 
@@ -59,7 +76,7 @@ The [original XTREME-S paper](https://arxiv.org/pdf/2203.10752.pdf) reported ave
 For the `mls` subset (which outputs `wer` and `cer`):
 
 ```python
->>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'mls')  
+>>> xtreme_s_metric = evaluate.load('xtreme_s', 'mls')  
 >>> references = ["it is sunny here", "paper and pen are essentials"]
 >>> predictions = ["it's sunny", "paper pen are essential"]
 >>> results = xtreme_s_metric.compute(predictions=predictions, references=references)
@@ -70,7 +87,7 @@ For the `mls` subset (which outputs `wer` and `cer`):
 For the `covost2` subset (which outputs `bleu`):
 
 ```python
->>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'covost2')
+>>> xtreme_s_metric = evaluate.load('xtreme_s', 'covost2')
 >>> references = ["bonjour paris", "il est necessaire de faire du sport de temps en temp"]
 >>> predictions = ["bonjour paris", "il est important de faire du sport souvent"]
 >>> results = xtreme_s_metric.compute(predictions=predictions, references=references)
@@ -81,7 +98,7 @@ For the `covost2` subset (which outputs `bleu`):
 For the `fleurs-lang_id` subset (which outputs `accuracy`):
 
 ```python
->>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'fleurs-lang_id')
+>>> xtreme_s_metric = evaluate.load('xtreme_s', 'fleurs-lang_id')
 >>> references = [0, 1, 0, 0, 1]
 >>> predictions = [0, 1, 1, 0, 0]
 >>> results = xtreme_s_metric.compute(predictions=predictions, references=references)
@@ -92,7 +109,7 @@ For the `fleurs-lang_id` subset (which outputs `accuracy`):
 For the `minds14` subset (which outputs `f1` and `accuracy`):
 
 ```python
->>> xtreme_s_metric = evaluate.load_metric('xtreme_s', 'minds14')
+>>> xtreme_s_metric = evaluate.load('xtreme_s', 'minds14')
 >>> references = [0, 1, 0, 0, 1]
 >>> predictions = [0, 1, 1, 0, 0]
 >>> results = xtreme_s_metric.compute(predictions=predictions, references=references)

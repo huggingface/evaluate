@@ -17,10 +17,11 @@
 
 from typing import Optional
 
-import huggingface_hub
-from datasets.utils import DownloadConfig
+import requests
+from datasets import DownloadConfig
 
-from .load import metric_module_factory
+from .config import EVALUATION_MODULE_TYPES, HF_LIST_ENDPOINT
+from .loading import evaluation_module_factory
 from .utils.logging import get_logger
 
 
@@ -31,41 +32,88 @@ class SplitsNotFoundError(ValueError):
     pass
 
 
-def list_metrics(with_community_metrics=True, with_details=False):
-    """List all the metrics script available on the Hugging Face Hub.
+def list_evaluation_modules(module_type=None, include_community=True, with_details=False):
+    """List all evaluation modules available on the Hugging Face Hub.
 
     Args:
-        with_community_metrics (:obj:`bool`, optional, default ``True``): Include the community provided metrics.
-        with_details (:obj:`bool`, optional, default ``False``): Return the full details on the metrics instead of only the short name.
+        module_type (`str`, *optional*, default `None`): Type of evaluation modules to list. Has to be one of `'metric'`, `'comparison'`, or `'measurement'`. If `None`, all types are listed.
+        include_community (`bool`, *optional*, default `True`): Include community modules in the list.
+        with_details (`bool`, *optional*, default `False`): Return the full details on the metrics instead of only the ID.
+
+    Returns:
+        `List[Union[str, dict]]`
     """
-    metrics = huggingface_hub.list_metrics()
-    if not with_community_metrics:
-        metrics = [metric for metric in metrics if "/" not in metric.id]
-    if not with_details:
-        metrics = [metric.id for metric in metrics]
-    return metrics
+
+    if module_type is None:
+        evaluations_list = []
+        for module_type in EVALUATION_MODULE_TYPES:
+            evaluations_list.extend(
+                _list_evaluation_modules_type(
+                    module_type, include_community=include_community, with_details=with_details
+                )
+            )
+    else:
+        if module_type not in EVALUATION_MODULE_TYPES:
+            raise ValueError(f"Invalid module type '{module_type}'. Has to be one of {EVALUATION_MODULE_TYPES}.")
+        evaluations_list = _list_evaluation_modules_type(
+            module_type, include_community=include_community, with_details=with_details
+        )
+    return evaluations_list
 
 
-def inspect_metric(path: str, local_path: str, download_config: Optional[DownloadConfig] = None, **download_kwargs):
+def _list_evaluation_modules_type(module_type, include_community=True, with_details=False):
+
+    r = requests.get(HF_LIST_ENDPOINT.format(type=module_type))
+    r.raise_for_status()
+    d = r.json()
+
+    if not include_community:
+        d = [element for element in d if element["id"].split("/")[0] == f"evaluate-{module_type}"]
+
+    # remove namespace for canonical modules and add community tag
+    for element in d:
+        if element["id"].split("/")[0] == f"evaluate-{module_type}":
+            element["id"] = element["id"].split("/")[1]
+            element["community"] = False
+        else:
+            element["community"] = True
+
+    if with_details:
+        return [
+            {
+                "name": element["id"],
+                "type": module_type,
+                "community": element["community"],
+                "likes": element.get("likes", 0),
+            }
+            for element in d
+        ]
+    else:
+        return [element["id"] for element in d]
+
+
+def inspect_evaluation_module(
+    path: str, local_path: str, download_config: Optional[DownloadConfig] = None, **download_kwargs
+):
     r"""
-    Allow inspection/modification of a metric script by copying it on local drive at local_path.
+    Allow inspection/modification of a evaluation script by copying it on local drive at local_path.
 
     Args:
-        path (``str``): path to the dataset processing script with the dataset builder. Can be either:
+        path (``str``): path to the evaluation script. Can be either:
 
-            - a local path to processing script or the directory containing the script (if the script has the same name as the directory),
-                e.g. ``'./dataset/squad'`` or ``'./dataset/squad/squad.py'``
-            - a dataset identifier on the Hugging Face Hub (list all available datasets and ids with ``datasets.list_datasets()``)
-                e.g. ``'squad'``, ``'glue'`` or ``'openai/webtext'``
+            - a local path to script or the directory containing the script (if the script has the same name as the directory),
+                e.g. ``'./metrics/accuracy'`` or ``'./metrics/accuracy/accuracy.py'``
+            - a dataset identifier on the Hugging Face Hub (list all available datasets and ids with ``evaluate.list_evaluation_modules()``)
+                e.g. ``'accuracy'``, ``'bleu'`` or ``'word_length'``
         local_path (``str``): path to the local folder to copy the datset script to.
         download_config (Optional ``datasets.DownloadConfig``: specific download configuration parameters.
         **download_kwargs: optional attributes for DownloadConfig() which will override the attributes in download_config if supplied.
     """
-    metric_module = metric_module_factory(
+    evaluation_module = evaluation_module_factory(
         path, download_config=download_config, force_local_path=local_path, **download_kwargs
     )
     print(
         f"The processing scripts for metric {path} can be inspected at {local_path}. "
-        f"The main class is in {metric_module.module_path}. "
-        f"You can modify this processing scripts and use it with `evaluate.load_metric({local_path})`."
+        f"The main class is in {evaluation_module.module_path}. "
+        f"You can modify this processing scripts and use it with `evaluate.load({local_path})`."
     )

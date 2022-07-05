@@ -1,3 +1,24 @@
+---
+title: ROC AUC
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  This metric computes the area under the curve (AUC) for the Receiver Operating Characteristic Curve (ROC). The return values represent how well the model used is predicting the correct classes, based on the input data. A score of `0.5` means that the model is predicting exactly at chance, i.e. the model's predictions are correct at the same rate as if the predictions were being decided by the flip of a fair coin or the roll of a fair die. A score above `0.5` indicates that the model is doing better than chance, while a score below `0.5` indicates that the model is doing worse than chance.
+  
+  This metric has three separate use cases:
+  - binary: The case in which there are only two different label classes, and each example gets only one label. This is the default implementation.
+  - multiclass: The case in which there can be more than two different label classes, but each example still gets only one label.
+  - multilabel: The case in which there can be more than two different label classes, and each example can have more than one label.
+---
+
 # Metric Card for ROC AUC
 
 
@@ -13,7 +34,7 @@ This metric has three separate use cases:
 ## How to Use
 At minimum, this metric requires references and prediction scores:
 ```python
->>> roc_auc_score = evaluate.load_metric("roc_auc")
+>>> roc_auc_score = evaluate.load("roc_auc")
 >>> refs = [1, 0, 1, 1, 0, 0]
 >>> pred_scores = [0.5, 0.2, 0.99, 0.3, 0.1, 0.7]
 >>> results = roc_auc_score.compute(references=refs, prediction_scores=pred_scores)
@@ -24,11 +45,11 @@ At minimum, this metric requires references and prediction scores:
 The default implementation of this metric is the **binary** implementation. If employing the **multiclass** or **multilabel** use cases, the keyword `"multiclass"` or `"multilabel"` must be specified when loading the metric:
 - In the **multiclass** case, the metric is loaded with:
     ```python
-    >>> roc_auc_score = evaluate.load_metric("roc_auc", "multiclass")
+    >>> roc_auc_score = evaluate.load("roc_auc", "multiclass")
     ```
 - In the **multilabel** case, the metric is loaded with:
     ```python
-    >>> roc_auc_score = evaluate.load_metric("roc_auc", "multilabel")
+    >>> roc_auc_score = evaluate.load("roc_auc", "multilabel")
     ```
 
 See the [Examples Section Below](#examples_section) for more extensive examples.
@@ -77,7 +98,7 @@ ROC AUC scores can take on any value between `0` and `1`, inclusive.
 ### <a name="examples_section"></a>Examples
 Example 1, the **binary** use case:
 ```python
->>> roc_auc_score = evaluate.load_metric("roc_auc")
+>>> roc_auc_score = evaluate.load("roc_auc")
 >>> refs = [1, 0, 1, 1, 0, 0]
 >>> pred_scores = [0.5, 0.2, 0.99, 0.3, 0.1, 0.7]
 >>> results = roc_auc_score.compute(references=refs, prediction_scores=pred_scores)
@@ -87,7 +108,7 @@ Example 1, the **binary** use case:
 
 Example 2, the **multiclass** use case:
 ```python
->>> roc_auc_score = evaluate.load_metric("roc_auc", "multiclass")
+>>> roc_auc_score = evaluate.load("roc_auc", "multiclass")
 >>> refs = [1, 0, 1, 2, 2, 0]
 >>> pred_scores = [[0.3, 0.5, 0.2],
 ...                 [0.7, 0.2, 0.1],
@@ -104,7 +125,7 @@ Example 2, the **multiclass** use case:
 
 Example 3, the **multilabel** use case:
 ```python
->>> roc_auc_score = evaluate.load_metric("roc_auc", "multilabel")
+>>> roc_auc_score = evaluate.load("roc_auc", "multilabel")
 >>> refs = [[1, 1, 0],
 ...         [1, 1, 0],
 ...         [0, 1, 0],

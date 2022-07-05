@@ -1,4 +1,18 @@
-# Metric Card for FrugalScore
+---
+title: 
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  FrugalScore is a reference-based metric for NLG models evaluation. It is based on a distillation approach that allows to learn a fixed, low cost version of any expensive NLG metric, while retaining most of its original performance.
+---
 
 
 ## Metric Description
@@ -11,7 +25,7 @@ The FrugalScore models are obtained by continuing the pretraining of small model
 When loading FrugalScore, you can indicate the model you wish to use to compute the score. The default model is `moussaKam/frugalscore_tiny_bert-base_bert-score`, and a full list of models can be found in the [Limitations and bias](#Limitations-and-bias) section.
 
 ```python
->>> frugalscore = evaluate.load_metric("frugalscore", "moussaKam/frugalscore_medium_bert-base_mover-score")
+>>> frugalscore = evaluate.load("frugalscore", "moussaKam/frugalscore_medium_bert-base_mover-score")
 ```
 
 FrugalScore calculates how good are the predictions given some references, based on a set of scores.
@@ -49,7 +63,7 @@ The [original FrugalScore paper](https://arxiv.org/abs/2110.08559) reported that
 Maximal values (exact match between `references` and `predictions`): 
 
 ```python
->>> frugalscore = evaluate.load_metric("frugalscore")
+>>> frugalscore = evaluate.load("frugalscore")
 >>> results = frugalscore.compute(predictions=['hello world'], references=['hello world'])
 >>> print(results)
 {'scores': [0.9891098]}
@@ -58,7 +72,7 @@ Maximal values (exact match between `references` and `predictions`):
 Partial values: 
 
 ```python
->>> frugalscore = evaluate.load_metric("frugalscore")
+>>> frugalscore = evaluate.load("frugalscore")
 >>> results = frugalscore.compute(predictions=['hello world'], references=['hugging face'])
 >>> print(results)
 {'scores': [0.42482382]}

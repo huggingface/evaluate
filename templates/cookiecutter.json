@@ -1,7 +1,9 @@
 {
-    "metric_name": "Awesome Metric",
-    "metric_description": "This new metric is designed to solve this great ML task and is crafted with a lot of care and love.",
-    "metric_slug": "{{ cookiecutter.metric_name|lower|replace(' ', '_') }}",
-    "metric_class_name": "{{ cookiecutter.metric_name|replace(' ', '') }}",
+    "module_name": "Awesome Module",
+    "module_type": "module",
+    "module_description": "This new module is designed to solve this great ML task and is crafted with a lot of care and love.",
+    "module_slug": "{{ cookiecutter.module_name|lower|replace(' ', '_') }}",
+    "module_class_name": "{{ cookiecutter.module_name|replace(' ', '') }}",
+    "namespace": "",
     "dataset_name": ""
 }

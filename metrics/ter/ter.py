@@ -88,7 +88,7 @@ Examples:
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"],
         ...             ["Your jokes are...", "...TERrible"]]
-        >>> ter = evaluate.load_metric("ter")
+        >>> ter = evaluate.load("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         case_sensitive=True)
@@ -100,7 +100,7 @@ Examples:
         ...                     "what about this sentence?"]
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"]]
-        >>> ter = evaluate.load_metric("ter")
+        >>> ter = evaluate.load("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         case_sensitive=True)
@@ -112,7 +112,7 @@ Examples:
         ...                     "what about this sentence?"]
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"]]
-        >>> ter = evaluate.load_metric("ter")
+        >>> ter = evaluate.load("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         normalized=True,
@@ -125,7 +125,7 @@ Examples:
         ...                     "what about this sentence?"]
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"]]
-        >>> ter = evaluate.load_metric("ter")
+        >>> ter = evaluate.load("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         ignore_punct=True,
@@ -140,7 +140,7 @@ Examples:
         >>> references = [["does this sentence match", "does this sentence match!?!"],
         ...             ["wHaT aBoUt ThIs SeNtEnCe?", "wHaT aBoUt ThIs SeNtEnCe?"],
         ...             ["Your jokes are...", "...TERrible"]]
-        >>> ter = evaluate.load_metric("ter")
+        >>> ter = evaluate.load("ter")
         >>> results = ter.compute(predictions=predictions,
         ...                         references=references,
         ...                         ignore_punct=True,
@@ -163,12 +163,20 @@ class Ter(evaluate.Metric):
             citation=_CITATION,
             homepage="http://www.cs.umd.edu/~snover/tercom/",
             inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": datasets.Value("string", id="sequence"),
-                    "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
-                }
-            ),
+            features=[
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
+                    }
+                ),
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Value("string", id="sequence"),
+                    }
+                ),
+            ],
             codebase_urls=["https://github.com/mjpost/sacreBLEU#ter"],
             reference_urls=[
                 "https://github.com/jhclark/tercom",
@@ -184,6 +192,10 @@ class Ter(evaluate.Metric):
         support_zh_ja_chars: bool = False,
         case_sensitive: bool = False,
     ):
+        # if only one reference is provided make sure we still use list of lists
+        if isinstance(references[0], str):
+            references = [[ref] for ref in references]
+
         references_per_prediction = len(references[0])
         if any(len(refs) != references_per_prediction for refs in references):
             raise ValueError("Sacrebleu requires the same number of references for each prediction")

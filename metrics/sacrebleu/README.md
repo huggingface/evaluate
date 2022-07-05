@@ -1,3 +1,23 @@
+---
+title: SacreBLEU
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  SacreBLEU provides hassle-free computation of shareable, comparable, and reproducible BLEU scores.
+  Inspired by Rico Sennrich's `multi-bleu-detok.perl`, it produces the official WMT scores but works with plain text.
+  It also knows all the standard test sets and handles downloading, processing, and tokenization for you.
+  
+  See the [README.md] file at https://github.com/mjpost/sacreBLEU for more information.
+---
+
 # Metric Card for SacreBLEU
 
 
@@ -14,7 +34,7 @@ This metric takes a set of predictions and a set of references as input, along w
 >>> predictions = ["hello there general kenobi", "foo bar foobar"]
 >>> references = [["hello there general kenobi", "hello there !"],
 ...                 ["foo bar foobar", "foo bar foobar"]]
->>> sacrebleu = evaluate.load_metric("sacrebleu")
+>>> sacrebleu = evaluate.load("sacrebleu")
 >>> results = sacrebleu.compute(predictions=predictions, 
 ...                             references=references)
 >>> print(list(results.keys()))
@@ -68,7 +88,7 @@ The score can take any value between `0.0` and `100.0`, inclusive.
 ...                 "on our way to ankh morpork"]
 >>> references = [["hello there general kenobi", "hello there !"],
 ...                 ["goodbye ankh morpork", "ankh morpork"]]
->>> sacrebleu = evaluate.load_metric("sacrebleu")
+>>> sacrebleu = evaluate.load("sacrebleu")
 >>> results = sacrebleu.compute(predictions=predictions, 
 ...                             references=references)
 >>> print(list(results.keys()))

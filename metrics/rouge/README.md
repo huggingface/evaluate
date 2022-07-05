@@ -1,3 +1,26 @@
+---
+title: ROUGE
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  ROUGE, or Recall-Oriented Understudy for Gisting Evaluation, is a set of metrics and a software package used for
+  evaluating automatic summarization and machine translation software in natural language processing.
+  The metrics compare an automatically produced summary or translation against a reference or a set of references (human-produced) summary or translation.
+  
+  Note that ROUGE is case insensitive, meaning that upper case letters are treated the same way as lower case letters.
+  
+  This metrics is a wrapper around Google Research reimplementation of ROUGE:
+  https://github.com/google-research/google-research/tree/master/rouge
+---
+
 # Metric Card for ROUGE
 
 ## Metric Description
@@ -10,17 +33,13 @@ This metrics is a wrapper around the [Google Research reimplementation of ROUGE]
 ## How to Use
 At minimum, this metric takes as input a list of predictions and a list of references:
 ```python
->>> rouge = evaluate.load_metric('rouge')
+>>> rouge = evaluate.load('rouge')
 >>> predictions = ["hello there", "general kenobi"]
 >>> references = ["hello there", "general kenobi"]
 >>> results = rouge.compute(predictions=predictions,
 ...                         references=references)
->>> print(list(results.keys()))
-['rouge1', 'rouge2', 'rougeL', 'rougeLsum']
->>> print(results["rouge1"])
-AggregateScore(low=Score(precision=1.0, recall=1.0, fmeasure=1.0), mid=Score(precision=1.0, recall=1.0, fmeasure=1.0), high=Score(precision=1.0, recall=1.0, fmeasure=1.0))
->>> print(results["rouge1"].mid.fmeasure)
-1.0
+>>> print(results)
+{'rouge1': 1.0, 'rouge2': 1.0, 'rougeL': 1.0, 'rougeLsum': 1.0}
 ```
 
 ### Inputs
@@ -39,18 +58,18 @@ AggregateScore(low=Score(precision=1.0, recall=1.0, fmeasure=1.0), mid=Score(pre
 - **use_stemmer** (`boolean`): If `True`, uses Porter stemmer to strip word suffixes. Defaults to `False`.
 
 ### Output Values
-The output is a dictionary with one entry for each rouge type in the input list `rouge_types`. If `use_aggregator=False`, each dictionary entry is a list of Score objects, with one score for each sentence. Each Score object includes the `precision`, `recall`, and `fmeasure`. E.g. if `rouge_types=['rouge1', 'rouge2']` and `use_aggregator=False`, the output is:
+The output is a dictionary with one entry for each rouge type in the input list `rouge_types`. If `use_aggregator=False`, each dictionary entry is a list of scores, with one score for each sentence. E.g. if `rouge_types=['rouge1', 'rouge2']` and `use_aggregator=False`, the output is:
 
 ```python
-{'rouge1': [Score(precision=1.0, recall=0.5, fmeasure=0.6666666666666666), Score(precision=1.0, recall=1.0, fmeasure=1.0)], 'rouge2': [Score(precision=0.0, recall=0.0, fmeasure=0.0), Score(precision=1.0, recall=1.0, fmeasure=1.0)]}
+{'rouge1': [0.6666666666666666, 1.0], 'rouge2': [0.0, 1.0]}
 ```
 
 If `rouge_types=['rouge1', 'rouge2']` and `use_aggregator=True`, the output is of the following format:
 ```python
-{'rouge1': AggregateScore(low=Score(precision=1.0, recall=1.0, fmeasure=1.0), mid=Score(precision=1.0, recall=1.0, fmeasure=1.0), high=Score(precision=1.0, recall=1.0, fmeasure=1.0)), 'rouge2': AggregateScore(low=Score(precision=1.0, recall=1.0, fmeasure=1.0), mid=Score(precision=1.0, recall=1.0, fmeasure=1.0), high=Score(precision=1.0, recall=1.0, fmeasure=1.0))}
+{'rouge1': 1.0, 'rouge2': 1.0}
 ```
 
-The `precision`, `recall`, and `fmeasure` values all have a range of 0 to 1.
+The ROUGE values are in the range of 0 to 1.
 
 
 #### Values from Popular Papers
@@ -59,20 +78,21 @@ The `precision`, `recall`, and `fmeasure` values all have a range of 0 to 1.
 ### Examples
 An example without aggregation:
 ```python
->>> rouge = evaluate.load_metric('rouge')
+>>> rouge = evaluate.load('rouge')
 >>> predictions = ["hello goodbye", "ankh morpork"]
 >>> references = ["goodbye", "general kenobi"]
 >>> results = rouge.compute(predictions=predictions,
-...                         references=references)
+...                         references=references,
+...                         use_aggregator=False)
 >>> print(list(results.keys()))
 ['rouge1', 'rouge2', 'rougeL', 'rougeLsum']
 >>> print(results["rouge1"])
-[Score(precision=0.5, recall=0.5, fmeasure=0.5), Score(precision=0.0, recall=0.0, fmeasure=0.0)]
+[0.5, 0.0]
 ```
 
 The same example, but with aggregation:
 ```python
->>> rouge = evaluate.load_metric('rouge')
+>>> rouge = evaluate.load('rouge')
 >>> predictions = ["hello goodbye", "ankh morpork"]
 >>> references = ["goodbye", "general kenobi"]
 >>> results = rouge.compute(predictions=predictions,
@@ -81,12 +101,12 @@ The same example, but with aggregation:
 >>> print(list(results.keys()))
 ['rouge1', 'rouge2', 'rougeL', 'rougeLsum']
 >>> print(results["rouge1"])
-AggregateScore(low=Score(precision=0.0, recall=0.0, fmeasure=0.0), mid=Score(precision=0.25, recall=0.25, fmeasure=0.25), high=Score(precision=0.5, recall=0.5, fmeasure=0.5))
+0.25
 ```
 
 The same example, but only calculating `rouge_1`:
 ```python
->>> rouge = evaluate.load_metric('rouge')
+>>> rouge = evaluate.load('rouge')
 >>> predictions = ["hello goodbye", "ankh morpork"]
 >>> references = ["goodbye", "general kenobi"]
 >>> results = rouge.compute(predictions=predictions,
@@ -96,7 +116,7 @@ The same example, but only calculating `rouge_1`:
 >>> print(list(results.keys()))
 ['rouge1']
 >>> print(results["rouge1"])
-AggregateScore(low=Score(precision=0.0, recall=0.0, fmeasure=0.0), mid=Score(precision=0.25, recall=0.25, fmeasure=0.25), high=Score(precision=0.5, recall=0.5, fmeasure=0.5))
+0.25
 ```
 
 ## Limitations and Bias

@@ -1,3 +1,23 @@
+---
+title: XNLI
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  XNLI is a subset of a few thousand examples from MNLI which has been translated
+  into a 14 different languages (some low-ish resource). As with MNLI, the goal is
+  to predict textual entailment (does sentence A imply/contradict/neither sentence
+  B) and is a classification task (given two sentences, predict one of three
+  labels).
+---
+
 # Metric Card for XNLI
 
 ## Metric description
@@ -11,8 +31,8 @@ As with MNLI, the task is to predict textual entailment (does sentence A imply/c
 The XNLI metric is computed based on the `predictions` (a list of predicted labels) and the `references` (a list of ground truth labels).
 
 ```python
-from evaluate import load_metric
-xnli_metric = load_metric("xnli")
+from evaluate import load
+xnli_metric = load("xnli")
 predictions = [0, 1]
 references = [0, 1]
 results = xnli_metric.compute(predictions=predictions, references=references)
@@ -32,8 +52,8 @@ For more recent model performance, see the [dataset leaderboard](https://papersw
 Maximal values:
 
 ```python
->>> from evaluate import load_metric
->>> xnli_metric = load_metric("xnli")
+>>> from evaluate import load
+>>> xnli_metric = load("xnli")
 >>> predictions = [0, 1]
 >>> references = [0, 1]
 >>> results = xnli_metric.compute(predictions=predictions, references=references)
@@ -44,8 +64,8 @@ Maximal values:
 Minimal values:
 
 ```python
->>> from evaluate import load_metric
->>> xnli_metric = load_metric("xnli")
+>>> from evaluate import load
+>>> xnli_metric = load("xnli")
 >>> predictions = [1, 0]
 >>> references = [0, 1]
 >>> results = xnli_metric.compute(predictions=predictions, references=references)
@@ -56,8 +76,8 @@ Minimal values:
 Partial match:
 
 ```python
->>> from evaluate import load_metric
->>> xnli_metric = load_metric("xnli")
+>>> from evaluate import load
+>>> xnli_metric = load("xnli")
 >>> predictions = [1, 0, 1]
 >>> references = [1, 0, 0]
 >>> results = xnli_metric.compute(predictions=predictions, references=references)

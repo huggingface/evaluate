@@ -1,3 +1,21 @@
+---
+title: Precision
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  Precision is the fraction of correctly labeled positive examples out of all of the examples that were labeled as positive. It is computed via the equation:
+  Precision = TP / (TP + FP)
+  where TP is the True positives (i.e. the examples correctly labeled as positive) and FP is the False positive examples (i.e. the examples incorrectly labeled as positive).
+---
+
 # Metric Card for Precision
 
 
@@ -13,7 +31,7 @@ where TP is the True positives (i.e. the examples correctly labeled as positive)
 At minimum, precision takes as input a list of predicted labels, `predictions`, and a list of output labels, `references`.
 
 ```python
->>> precision_metric = evaluate.load_metric("precision")
+>>> precision_metric = evaluate.load("precision")
 >>> results = precision_metric.compute(references=[0, 1], predictions=[0, 1])
 >>> print(results)
 {'precision': 1.0}
@@ -59,7 +77,7 @@ Output Example(s):
 
 Example 1-A simple binary example
 ```python
->>> precision_metric = evaluate.load_metric("precision")
+>>> precision_metric = evaluate.load("precision")
 >>> results = precision_metric.compute(references=[0, 1, 0, 1, 0], predictions=[0, 0, 1, 1, 0])
 >>> print(results)
 {'precision': 0.5}
@@ -67,7 +85,7 @@ Example 1-A simple binary example
 
 Example 2-The same simple binary example as in Example 1, but with `pos_label` set to `0`.
 ```python
->>> precision_metric = evaluate.load_metric("precision")
+>>> precision_metric = evaluate.load("precision")
 >>> results = precision_metric.compute(references=[0, 1, 0, 1, 0], predictions=[0, 0, 1, 1, 0], pos_label=0)
 >>> print(round(results['precision'], 2))
 0.67
@@ -75,7 +93,7 @@ Example 2-The same simple binary example as in Example 1, but with `pos_label` s
 
 Example 3-The same simple binary example as in Example 1, but with `sample_weight` included.
 ```python
->>> precision_metric = evaluate.load_metric("precision")
+>>> precision_metric = evaluate.load("precision")
 >>> results = precision_metric.compute(references=[0, 1, 0, 1, 0], predictions=[0, 0, 1, 1, 0], sample_weight=[0.9, 0.5, 3.9, 1.2, 0.3])
 >>> print(results)
 {'precision': 0.23529411764705882}

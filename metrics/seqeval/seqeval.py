@@ -88,7 +88,7 @@ Examples:
 
     >>> predictions = [['O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
     >>> references = [['O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
-    >>> seqeval = evaluate.load_metric("seqeval")
+    >>> seqeval = evaluate.load("seqeval")
     >>> results = seqeval.compute(predictions=predictions, references=references)
     >>> print(list(results.keys()))
     ['MISC', 'PER', 'overall_precision', 'overall_recall', 'overall_f1', 'overall_accuracy']

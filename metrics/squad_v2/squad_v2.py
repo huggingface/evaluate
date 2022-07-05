@@ -80,7 +80,7 @@ Examples:
 
     >>> predictions = [{'prediction_text': '1976', 'id': '56e10a3be3433e1400422b22', 'no_answer_probability': 0.}]
     >>> references = [{'answers': {'answer_start': [97], 'text': ['1976']}, 'id': '56e10a3be3433e1400422b22'}]
-    >>> squad_v2_metric = evaluate.load_metric("squad_v2")
+    >>> squad_v2_metric = evaluate.load("squad_v2")
     >>> results = squad_v2_metric.compute(predictions=predictions, references=references)
     >>> print(results)
     {'exact': 100.0, 'f1': 100.0, 'total': 1, 'HasAns_exact': 100.0, 'HasAns_f1': 100.0, 'HasAns_total': 1, 'best_exact': 100.0, 'best_exact_thresh': 0.0, 'best_f1': 100.0, 'best_f1_thresh': 0.0}

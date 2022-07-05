@@ -1,3 +1,23 @@
+---
+title: CUAD
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  This metric wrap the official scoring script for version 1 of the Contract Understanding Atticus Dataset (CUAD).
+
+  Contract Understanding Atticus Dataset (CUAD) v1 is a corpus of more than 13,000 labels in 510 
+  commercial legal contracts that have been manually labeled to identify 41 categories of important
+  clauses that lawyers look for when reviewing contracts in connection with corporate transactions.
+---
+
 # Metric Card for CUAD
 
 ## Metric description
@@ -25,8 +45,8 @@ The CUAD metric takes two inputs :
  Note that `answer_start` values are not taken into account to compute the metric.
 
 ```python
-from evaluate import load_metric
-cuad_metric = load_metric("cuad")
+from evaluate import load
+cuad_metric = load("cuad")
 predictions = [{'prediction_text': ['The seller:', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.'], 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
 references = [{'answers': {'answer_start': [143, 49], 'text': ['The seller:', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.']}, 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
 results = cuad_metric.compute(predictions=predictions, references=references)
@@ -57,8 +77,8 @@ For more recent model performance, see the [dataset leaderboard](https://papersw
 Maximal values :
 
 ```python
-from evaluate import load_metric
-cuad_metric = load_metric("cuad")
+from evaluate import load
+cuad_metric = load("cuad")
 predictions = [{'prediction_text': ['The seller:', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.'], 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
 references = [{'answers': {'answer_start': [143, 49], 'text': ['The seller:', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.']}, 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
 results = cuad_metric.compute(predictions=predictions, references=references)
@@ -69,8 +89,8 @@ print(results)
 Minimal values:
 
 ```python
-from evaluate import load_metric
-cuad_metric = load_metric("cuad")
+from evaluate import load
+cuad_metric = load("cuad")
 predictions = [{'prediction_text': ['The Company appoints the Distributor as an exclusive distributor of Products in the Market, subject to the terms and conditions of this Agreement.'], 'id': 'LIMEENERGYCO_09_09_1999-EX-10-DISTRIBUTOR AGREEMENT__Exclusivity_0'}]
 references = [{'answers': {'answer_start': [143], 'text': 'The seller'}, 'id': 'LIMEENERGYCO_09_09_1999-EX-10-DISTRIBUTOR AGREEMENT__Exclusivity_0'}]
 results = cuad_metric.compute(predictions=predictions, references=references)
@@ -81,8 +101,8 @@ print(results)
 Partial match: 
 
 ```python
-from evaluate import load_metric
-cuad_metric = load_metric("cuad")
+from evaluate import load
+cuad_metric = load("cuad")
 predictions = [{'prediction_text': ['The seller:', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.'], 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
 predictions = [{'prediction_text': ['The Company appoints the Distributor as an exclusive distributor of Products in the Market, subject to the terms and conditions of this Agreement.', 'The buyer/End-User: Shenzhen LOHAS Supply Chain Management Co., Ltd.'], 'id': 'LohaCompanyltd_20191209_F-1_EX-10.16_11917878_EX-10.16_Supply Agreement__Parties'}]
 results = cuad_metric.compute(predictions=predictions, references=references)

@@ -17,7 +17,7 @@
 # pylint: enable=line-too-long
 # pylint: disable=g-import-not-at-top,g-bad-import-order,wrong-import-position
 
-__version__ = "0.0.1.dev0"
+__version__ = "0.1.3.dev0"
 
 from packaging import version
 
@@ -26,9 +26,12 @@ SCRIPTS_VERSION = "main" if version.parse(__version__).is_devrelease else __vers
 
 del version
 
-from .info import MetricInfo
-from .inspect import inspect_metric, list_metrics
-from .load import load_metric
-from .metric import Metric
+from .evaluator import Evaluator, ImageClassificationEvaluator, TextClassificationEvaluator, evaluator
+from .hub import push_to_hub
+from .info import ComparisonInfo, EvaluationModuleInfo, MeasurementInfo, MetricInfo
+from .inspect import inspect_evaluation_module, list_evaluation_modules
+from .loading import load
+from .module import CombinedEvaluations, Comparison, EvaluationModule, Measurement, Metric
+from .saving import save
 from .utils import *
 from .utils import gradio, logging

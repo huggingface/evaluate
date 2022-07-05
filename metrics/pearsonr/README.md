@@ -1,3 +1,21 @@
+---
+title: Pearson Correlation Coefficient 
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  Pearson correlation coefficient and p-value for testing non-correlation.
+  The Pearson correlation coefficient measures the linear relationship between two datasets. The calculation of the p-value relies on the assumption that each dataset is normally distributed. Like other correlation coefficients, this one varies between -1 and +1 with 0 implying no correlation. Correlations of -1 or +1 imply an exact linear relationship. Positive correlations imply that as x increases, so does y. Negative correlations imply that as x increases, y decreases.
+  The p-value roughly indicates the probability of an uncorrelated system producing datasets that have a Pearson correlation at least as extreme as the one computed from these datasets.
+---
+
 # Metric Card for Pearson Correlation Coefficient (pearsonr)
 
 
@@ -13,7 +31,7 @@ The p-value roughly indicates the probability of an uncorrelated system producin
 This metric takes a list of predictions and a list of references as input
 
 ```python
->>> pearsonr_metric = evaluate.load_metric("pearsonr")
+>>> pearsonr_metric = evaluate.load("pearsonr")
 >>> results = pearsonr_metric.compute(predictions=[10, 9, 2.5, 6, 4], references=[1, 2, 3, 4, 5])
 >>> print(round(results['pearsonr']), 2)
 ['-0.74']
@@ -46,7 +64,7 @@ Output Example(s):
 
 Example 1-A simple example using only predictions and references.
 ```python
->>> pearsonr_metric = evaluate.load_metric("pearsonr")
+>>> pearsonr_metric = evaluate.load("pearsonr")
 >>> results = pearsonr_metric.compute(predictions=[10, 9, 2.5, 6, 4], references=[1, 2, 3, 4, 5])
 >>> print(round(results['pearsonr'], 2))
 -0.74
@@ -54,7 +72,7 @@ Example 1-A simple example using only predictions and references.
 
 Example 2-The same as Example 1, but that also returns the `p-value`.
 ```python
->>> pearsonr_metric = evaluate.load_metric("pearsonr")
+>>> pearsonr_metric = evaluate.load("pearsonr")
 >>> results = pearsonr_metric.compute(predictions=[10, 9, 2.5, 6, 4], references=[1, 2, 3, 4, 5], return_pvalue=True)
 >>> print(sorted(list(results.keys())))
 ['p-value', 'pearsonr']

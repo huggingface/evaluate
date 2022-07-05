@@ -1,3 +1,36 @@
+---
+title: CER
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  Character error rate (CER) is a common metric of the performance of an automatic speech recognition system.
+  
+  CER is similar to Word Error Rate (WER), but operates on character instead of word. Please refer to docs of WER for further information.
+  
+  Character error rate can be computed as:
+  
+  CER = (S + D + I) / N = (S + D + I) / (S + D + C)
+  
+  where
+  
+  S is the number of substitutions,
+  D is the number of deletions,
+  I is the number of insertions,
+  C is the number of correct characters,
+  N is the number of characters in the reference (N=S+D+C).
+  
+  CER's output is not always a number between 0 and 1, in particular when there is a high number of insertions. This value is often associated to the percentage of characters that were incorrectly predicted. The lower the value, the better the
+  performance of the ASR system with a CER of 0 being a perfect score.
+---
+
 # Metric Card for CER
 
 ## Metric description
@@ -26,8 +59,8 @@ where
 The metric takes two inputs: references (a list of references for each speech input) and predictions (a list of transcriptions to score).
 
 ```python
-from evaluate import load_metric
-cer = load_metric("cer")
+from evaluate import load
+cer = load("cer")
 cer_score = cer.compute(predictions=predictions, references=references)
 ```
 ## Output values
@@ -54,8 +87,8 @@ Multilingual datasets such as [Common Voice](https://huggingface.co/datasets/com
 Perfect match between prediction and reference:
 
 ```python
-from evaluate import load_metric
-cer = load_metric("cer")
+from evaluate import load
+cer = load("cer")
 predictions = ["hello world", "good night moon"]
 references = ["hello world", "good night moon"]
 cer_score = cer.compute(predictions=predictions, references=references)
@@ -66,8 +99,8 @@ print(cer_score)
 Partial match between prediction and reference:
 
 ```python
-from evaluate import load_metric
-cer = load_metric("cer")
+from evaluate import load
+cer = load("cer")
 predictions = ["this is the prediction", "there is an other sample"]
 references = ["this is the reference", "there is another one"]
 cer_score = cer.compute(predictions=predictions, references=references)
@@ -78,8 +111,8 @@ print(cer_score)
 No match between prediction and reference:
 
 ```python
-from evaluate import load_metric
-cer = load_metric("cer")
+from evaluate import load
+cer = load("cer")
 predictions = ["hello"]
 references = ["gracias"]
 cer_score = cer.compute(predictions=predictions, references=references)
@@ -90,8 +123,8 @@ print(cer_score)
 CER above 1 due to insertion errors:
 
 ```python
-from evaluate import load_metric
-cer = load_metric("cer")
+from evaluate import load
+cer = load("cer")
 predictions = ["hello world"]
 references = ["hello"]
 cer_score = cer.compute(predictions=predictions, references=references)

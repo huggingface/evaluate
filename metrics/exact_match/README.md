@@ -1,3 +1,19 @@
+---
+title: Exact Match
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  Returns the rate at which the input predicted strings exactly match their references, ignoring any strings input as part of the regexes_to_ignore list.
+---
+
 # Metric Card for Exact Match
 
 
@@ -15,8 +31,8 @@ The exact match score of a set of predictions is the sum of all of the individua
 ## How to Use
 At minimum, this metric takes as input predictions and references:
 ```python
->>> from datasets import load_metric
->>> exact_match_metric = load_metric("exact_match")
+>>> from evaluate import load
+>>> exact_match_metric = load("exact_match")
 >>> results = exact_match_metric.compute(predictions=predictions, references=references)
 ```
 
@@ -33,10 +49,10 @@ At minimum, this metric takes as input predictions and references:
 This metric outputs a dictionary with one value: the average exact match score.
 
 ```python
-{'exact_match': 100.0}
+{'exact_match': 1.0}
 ```
 
-This metric's range is 0-100, inclusive. Here, 0.0 means no prediction/reference pairs were matches, while 100.0 means they all were.
+This metric's range is 0-1, inclusive. Here, 0.0 means no prediction/reference pairs were matches, while 1.0 means they all were.
 
 #### Values from Popular Papers
 The exact match metric is often included in other metrics, such as SQuAD. For example, the [original SQuAD paper](https://nlp.stanford.edu/pubs/rajpurkar2016squad.pdf) reported an Exact Match score of 40.0%. They also report that the human performance Exact Match score on the dataset was 80.3%.
@@ -44,53 +60,53 @@ The exact match metric is often included in other metrics, such as SQuAD. For ex
 ### Examples
 Without including any regexes to ignore:
 ```python
->>> exact_match = evaluate.load_metric("exact_match")
+>>> exact_match = evaluate.load("exact_match")
 >>> refs = ["the cat", "theater", "YELLING", "agent007"]
 >>> preds = ["cat?", "theater", "yelling", "agent"]
 >>> results = exact_match.compute(references=refs, predictions=preds)
->>> print(round(results["exact_match"], 1))
-25.0
+>>> print(round(results["exact_match"], 2))
+0.25
 ```
 
 Ignoring regexes "the" and "yell", as well as ignoring case and punctuation:
 ```python
->>> exact_match = evaluate.load_metric("exact_match")
+>>> exact_match = evaluate.load("exact_match")
 >>> refs = ["the cat", "theater", "YELLING", "agent007"]
 >>> preds = ["cat?", "theater", "yelling", "agent"]
 >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell"], ignore_case=True, ignore_punctuation=True)
->>> print(round(results["exact_match"], 1))
-50.0
+>>> print(round(results["exact_match"], 2))
+0.5
 ```
 Note that in the example above, because the regexes are ignored before the case is normalized, "yell" from "YELLING" is not deleted.
 
 Ignoring "the", "yell", and "YELL", as well as ignoring case and punctuation:
 ```python
->>> exact_match = evaluate.load_metric("exact_match")
+>>> exact_match = evaluate.load("exact_match")
 >>> refs = ["the cat", "theater", "YELLING", "agent007"]
 >>> preds = ["cat?", "theater", "yelling", "agent"]
 >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell", "YELL"], ignore_case=True, ignore_punctuation=True)
->>> print(round(results["exact_match"], 1))
-75.0
+>>> print(round(results["exact_match"], 2))
+0.75
 ```
 
 Ignoring "the", "yell", and "YELL", as well as ignoring case, punctuation, and numbers:
 ```python
->>> exact_match = evaluate.load_metric("exact_match")
+>>> exact_match = evaluate.load("exact_match")
 >>> refs = ["the cat", "theater", "YELLING", "agent007"]
 >>> preds = ["cat?", "theater", "yelling", "agent"]
 >>> results = exact_match.compute(references=refs, predictions=preds, regexes_to_ignore=["the ", "yell", "YELL"], ignore_case=True, ignore_punctuation=True, ignore_numbers=True)
->>> print(round(results["exact_match"], 1))
-100.0
+>>> print(round(results["exact_match"], 2))
+1.0
 ```
 
 An example that includes sentences:
 ```python
->>> exact_match = evaluate.load_metric("exact_match")
+>>> exact_match = evaluate.load("exact_match")
 >>> refs = ["The cat sat on the mat.", "Theaters are great.", "It's like comparing oranges and apples."]
 >>> preds = ["The cat sat on the mat?", "Theaters are great.", "It's like comparing apples and oranges."]
 >>> results = exact_match.compute(references=refs, predictions=preds)
->>> print(round(results["exact_match"], 1))
-33.3
+>>> print(round(results["exact_match"], 2))
+0.33
 ```
 
 

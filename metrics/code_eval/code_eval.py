@@ -76,7 +76,7 @@ Returns:
     pass_at_k: dict with pass rates for each k
     results: dict with granular results of each unittest
 Examples:
-    >>> code_eval = evaluate.load_metric("code_eval")
+    >>> code_eval = evaluate.load("code_eval")
     >>> test_cases = ["assert add(2,3)==5"]
     >>> candidates = [["def add(a,b): return a*b", "def add(a, b): return a+b"]]
     >>> pass_at_k, results = code_eval.compute(references=test_cases, predictions=candidates, k=[1, 2])

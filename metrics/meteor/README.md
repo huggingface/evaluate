@@ -1,3 +1,34 @@
+---
+title: METEOR
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  METEOR, an automatic metric for machine translation evaluation
+  that is based on a generalized concept of unigram matching between the
+  machine-produced translation and human-produced reference translations.
+  Unigrams can be matched based on their surface forms, stemmed forms,
+  and meanings; furthermore, METEOR can be easily extended to include more
+  advanced matching strategies. Once all generalized unigram matches
+  between the two strings have been found, METEOR computes a score for
+  this matching using a combination of unigram-precision, unigram-recall, and
+  a measure of fragmentation that is designed to directly capture how
+  well-ordered the matched words in the machine translation are in relation
+  to the reference.
+  
+  METEOR gets an R correlation value of 0.347 with human evaluation on the Arabic
+  data and 0.331 on the Chinese data. This is shown to be an improvement on
+  using simply unigram-precision, unigram-recall and their harmonic F1
+  combination.
+---
+
 # Metric Card for METEOR
 
 ## Metric description
@@ -26,7 +57,7 @@ It also has several optional parameters:
 Refer to the [METEOR paper](https://aclanthology.org/W05-0909.pdf) for more information about parameter values and ranges.
 
 ```python
->>> meteor = evaluate.load_metric('meteor')
+>>> meteor = evaluate.load('meteor')
 >>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
 >>> references = ["It is a guide to action that ensures that the military will forever heed Party commands"]
 >>> results = meteor.compute(predictions=predictions, references=references)
@@ -46,7 +77,7 @@ The [METEOR paper](https://aclanthology.org/W05-0909.pdf) does not report METEOR
 Maximal values :
 
 ```python
->>> meteor = evaluate.load_metric('meteor')
+>>> meteor = evaluate.load('meteor')
 >>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
 >>> references = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
 >>> results = meteor.compute(predictions=predictions, references=references)
@@ -57,7 +88,7 @@ Maximal values :
 Minimal values:
 
 ```python
->>> meteor = evaluate.load_metric('meteor')
+>>> meteor = evaluate.load('meteor')
 >>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
 >>> references = ["Hello world"]
 >>> results = meteor.compute(predictions=predictions, references=references)
@@ -68,7 +99,7 @@ Minimal values:
 Partial match:
 
 ```python
->>> meteor = evaluate.load_metric('meteor')
+>>> meteor = evaluate.load('meteor')
 >>> predictions = ["It is a guide to action which ensures that the military always obeys the commands of the party"]
 >>> references = ["It is a guide to action that ensures that the military will forever heed Party commands"]
 >>> results = meteor.compute(predictions=predictions, references=references)

@@ -1,3 +1,22 @@
+---
+title: COMET
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  Crosslingual Optimized Metric for Evaluation of Translation (COMET) is an open-source framework used to train Machine Translation metrics that achieve high levels of correlation with different types of human judgments (HTER, DA's or MQM).
+  With the release of the framework the authors also released fully trained models that were used to compete in the WMT20 Metrics Shared Task achieving SOTA in that years competition.
+  
+  See the [README.md] file at https://unbabel.github.io/COMET/html/models.html for more information.
+---
+
 # Metric Card for COMET
 
 ## Metric description
@@ -9,15 +28,15 @@ Crosslingual Optimized Metric for Evaluation of Translation (COMET) is an open-s
 COMET takes 3 lists of strings as input: `sources` (a list of source sentences), `predictions` (a list of candidate translations) and `references` (a list of reference translations).
 
 ```python
-from evaluate import load_metric
-comet_metric = load_metric('comet')
+from evaluate import load
+comet_metric = load('comet')
 source = ["Dem Feuer konnte Einhalt geboten werden", "Schulen und Kindergärten wurden eröffnet."]
 hypothesis = ["The fire could be stopped", "Schools and kindergartens were open"]
 reference = ["They were able to control the fire.", "Schools and kindergartens opened"]
 comet_score = comet_metric.compute(predictions=hypothesis, references=reference, sources=source)
 ```
 
-It has several configurations, named after the COMET model to be used. It will default to `wmt20-comet-da` (previously known as `wmt-large-da-estimator-1719`). Alternate models that can be chosen include `wmt20-comet-qe-da`, `wmt21-comet-mqm`, `wmt21-cometinho-da`, `wmt21-comet-qe-mqm` and `emnlp20-comet-rank`.
+It has several configurations, named after the COMET model to be used. It will default to `wmt20-comet-da` (previously known as `wmt-large-da-estimator-1719`). Alternate models that can be chosen include `wmt20-comet-qe-da`, `wmt21-comet-mqm`, `wmt21-cometinho-da`, `wmt21-comet-qe-mqm` and `emnlp20-comet-rank`. Notably, a distilled model is also available, which is 80% smaller and 2.128x faster while performing close to non-distilled alternatives. You can use it with the identifier `eamt22-cometinho-da`. This version, called Cometinho, was elected as [the best paper](https://aclanthology.org/2022.eamt-1.9) at the annual European conference on machine translation.
 
 It also has several optional arguments:
 
@@ -44,8 +63,8 @@ The [original COMET paper](https://arxiv.org/pdf/2009.09025.pdf) reported averag
 Full match:
 
 ```python
-from evaluate import load_metric
-comet_metric = load_metric('comet') 
+from evaluate import load
+comet_metric = load('comet') 
 source = ["Dem Feuer konnte Einhalt geboten werden", "Schulen und Kindergärten wurden eröffnet."]
 hypothesis = ["They were able to control the fire.", "Schools and kindergartens opened"]
 reference = ["They were able to control the fire.", "Schools and kindergartens opened"]
@@ -57,8 +76,8 @@ print([round(v, 1) for v in results["scores"]])
 Partial match:
 
 ```python
-from evaluate import load_metric
-comet_metric = load_metric('comet') 
+from evaluate import load
+comet_metric = load('comet') 
 source = ["Dem Feuer konnte Einhalt geboten werden", "Schulen und Kindergärten wurden eröffnet."]
 hypothesis = ["The fire could be stopped", "Schools and kindergartens were open"]
 reference = ["They were able to control the fire", "Schools and kindergartens opened"]
@@ -70,8 +89,8 @@ print([round(v, 2) for v in results["scores"]])
 No match:
 
 ```python
-from evaluate import load_metric
-comet_metric = load_metric('comet') 
+from evaluate import load
+comet_metric = load('comet') 
 source = ["Dem Feuer konnte Einhalt geboten werden", "Schulen und Kindergärten wurden eröffnet."]
 hypothesis = ["The girl went for a walk", "The boy was sleeping"]
 reference = ["They were able to control the fire", "Schools and kindergartens opened"]
@@ -119,7 +138,29 @@ Also, calculating the COMET metric involves downloading the model from which fea
    publisher = "Association for Computational Linguistics",
    url = "https://www.aclweb.org/anthology/2020.emnlp-main.213",
    pages = "2685--2702",
+}
+```
 
+For the distilled version:
+
+```bibtex
+@inproceedings{rei-etal-2022-searching,
+    title = "Searching for {COMETINHO}: The Little Metric That Could",
+    author = "Rei, Ricardo  and
+      Farinha, Ana C  and
+      de Souza, Jos{\'e} G.C.  and
+      Ramos, Pedro G.  and
+      Martins, Andr{\'e} F.T.  and
+      Coheur, Luisa  and
+      Lavie, Alon",
+    booktitle = "Proceedings of the 23rd Annual Conference of the European Association for Machine Translation",
+    month = jun,
+    year = "2022",
+    address = "Ghent, Belgium",
+    publisher = "European Association for Machine Translation",
+    url = "https://aclanthology.org/2022.eamt-1.9",
+    pages = "61--70",
+}
 ```
 
 ## Further References

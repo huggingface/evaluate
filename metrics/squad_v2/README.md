@@ -1,3 +1,28 @@
+---
+title: SQuAD v2
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  This metric wrap the official scoring script for version 2 of the Stanford Question Answering Dataset (SQuAD).
+
+  Stanford Question Answering Dataset (SQuAD) is a reading comprehension dataset, consisting of questions posed by
+  crowdworkers on a set of Wikipedia articles, where the answer to every question is a segment of text, or span,
+  from the corresponding reading passage, or the question might be unanswerable.
+
+  SQuAD2.0 combines the 100,000 questions in SQuAD1.1 with over 50,000 unanswerable questions 
+  written adversarially by crowdworkers to look similar to answerable ones.
+  To do well on SQuAD2.0, systems must not only answer questions when possible, but also
+  determine when no answer is supported by the paragraph and abstain from answering.
+---
+
 # Metric Card for SQuAD v2
 
 ## Metric description
@@ -22,8 +47,8 @@ The metric takes two files or two lists - one representing model predictions and
 *  `'no_answer_threshold'`: the probability threshold to decide that a question has no answer.
 
 ```python
-from evaluate import load_metric
-squad_metric = load_metric("squad_v2")
+from evaluate import load
+squad_metric = load("squad_v2")
 results = squad_metric.compute(predictions=predictions, references=references)
 ```
 ## Output values
@@ -61,8 +86,8 @@ For more recent model performance, see the [dataset leaderboard](https://papersw
 Maximal values for both exact match and F1 (perfect match):
 
 ```python
-from evaluate import load_metric
-squad_v2_ metric = load_metric("squad_v2")
+from evaluate import load
+squad_v2_ metric = load("squad_v2")
 predictions = [{'prediction_text': '1976', 'id': '56e10a3be3433e1400422b22', 'no_answer_probability': 0.}]
 references = [{'answers': {'answer_start': [97], 'text': ['1976']}, 'id': '56e10a3be3433e1400422b22'}]
 results = squad_v2_metric.compute(predictions=predictions, references=references)
@@ -73,8 +98,8 @@ results
 Minimal values for both exact match and F1 (no match):
 
 ```python
-from evaluate import load_metric
-squad_metric = load_metric("squad_v2")
+from evaluate import load
+squad_metric = load("squad_v2")
 predictions = [{'prediction_text': '1999', 'id': '56e10a3be3433e1400422b22', 'no_answer_probability': 0.}]
 references = [{'answers': {'answer_start': [97], 'text': ['1976']}, 'id': '56e10a3be3433e1400422b22'}]
 results = squad_v2_metric.compute(predictions=predictions, references=references)
@@ -85,8 +110,8 @@ results
 Partial match (2 out of 3 answers correct) : 
 
 ```python
-from evaluate import load_metric
-squad_metric = load_metric("squad_v2")
+from evaluate import load
+squad_metric = load("squad_v2")
 predictions = [{'prediction_text': '1976', 'id': '56e10a3be3433e1400422b22', 'no_answer_probability': 0.}, {'prediction_text': 'Beyonce', 'id': '56d2051ce7d4791d0090260b', 'no_answer_probability': 0.},  {'prediction_text': 'climate change', 'id': '5733b5344776f419006610e1', 'no_answer_probability': 0.}]
 references = [{'answers': {'answer_start': [97], 'text': ['1976']}, 'id': '56e10a3be3433e1400422b22'}, {'answers': {'answer_start': [233], 'text': ['Beyoncé and Bruno Mars']}, 'id': '56d2051ce7d4791d0090260b'}, {'answers': {'answer_start': [891], 'text': ['climate change']}, 'id': '5733b5344776f419006610e1'}]
 results = squad_v2_metric.compute(predictions=predictions, references=references)

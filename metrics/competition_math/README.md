@@ -1,3 +1,20 @@
+---
+title: Competition MATH
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
+  This metric is used to assess performance on the Mathematics Aptitude Test of Heuristics (MATH) dataset.
+  It first canonicalizes the inputs (e.g., converting "1/2" to "\frac{1}{2}") and then computes accuracy.
+---
+
 # Metric Card for Competition MATH
 
 ## Metric description
@@ -16,8 +33,8 @@ This metric takes two arguments:
 
 
 ```python
->>> from evaluate import load_metric
->>> math = load_metric("competition_math")
+>>> from evaluate import load
+>>> math = load("competition_math")
 >>> references = ["\\frac{1}{2}"]
 >>> predictions = ["1/2"]
 >>> results = math.compute(references=references, predictions=predictions)
@@ -40,8 +57,8 @@ More recent progress on the dataset can be found on the [dataset leaderboard](ht
 Maximal values (full match):
 
 ```python
->>> from evaluate import load_metric
->>> math = load_metric("competition_math")
+>>> from evaluate import load
+>>> math = load("competition_math")
 >>> references = ["\\frac{1}{2}"]
 >>> predictions = ["1/2"]
 >>> results = math.compute(references=references, predictions=predictions)
@@ -52,8 +69,8 @@ Maximal values (full match):
 Minimal values (no match):
 
 ```python
->>> from evaluate import load_metric
->>> math = load_metric("competition_math")
+>>> from evaluate import load
+>>> math = load("competition_math")
 >>> references = ["\\frac{1}{2}"]
 >>> predictions = ["3/4"]
 >>> results = math.compute(references=references, predictions=predictions)
@@ -64,8 +81,8 @@ Minimal values (no match):
 Partial match:
 
 ```python
->>> from evaluate import load_metric
->>> math = load_metric("competition_math")
+>>> from evaluate import load
+>>> math = load("competition_math")
 >>> references = ["\\frac{1}{2}","\\frac{3}{4}"]
 >>> predictions = ["1/5", "3/4"]
 >>> results = math.compute(references=references, predictions=predictions)

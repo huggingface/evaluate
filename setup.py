@@ -1,5 +1,5 @@
 # Lint as: python3
-""" HuggingFace/Datasets is an open library of datasets.
+""" HuggingFace/Evaluate is an open library for evaluation.
 
 Note:
 
@@ -13,7 +13,7 @@ To create the package for pypi.
 0. Prerequisites:
    - Dependencies:
      - twine: "pip install twine"
-   - Create an account in (and join the 'datasets' project):
+   - Create an account in (and join the 'evaluate' project):
      - PyPI: https://pypi.org/
      - Test PyPI: https://test.pypi.org/
 
@@ -24,7 +24,7 @@ To create the package for pypi.
 2. Commit these changes: "git commit -m 'Release: VERSION'"
 
 3. Add a tag in git to mark the release: "git tag VERSION -m 'Add tag VERSION for pypi'"
-   Push the tag to remote: git push --tags origin master
+   Push the tag to remote: git push --tags origin main
 
 4. Build both the sources and the wheel. Do not change anything in setup.py between
    creating the wheel and the source distribution (obviously).
@@ -44,7 +44,7 @@ To create the package for pypi.
    Check that you can install it in a virtualenv/notebook by running:
    pip install huggingface_hub fsspec aiohttp
    pip install -U tqdm
-   pip install -i https://testpypi.python.org/pypi datasets
+   pip install -i https://testpypi.python.org/pypi evaluate
 
 6. Upload the final version to actual pypi:
    twine upload dist/* -r pypi
@@ -73,8 +73,6 @@ REQUIRED_PKGS = [
     "requests>=2.19.0",
     # progress bars in download and scripts
     "tqdm>=4.62.1",
-    # dataclasses for Python versions that don't have it
-    "dataclasses;python_version<'3.7'",
     # for fast hashing
     "xxhash",
     # for better multiprocessing
@@ -85,15 +83,22 @@ REQUIRED_PKGS = [
     # minimum 2021.05.0 to have the AbstractArchiveFileSystem
     "fsspec[http]>=2021.05.0",
     # To get datasets from the Datasets Hub on huggingface.co
-    "huggingface_hub>=0.1.0,<1.0.0",
+    "huggingface-hub>=0.7.0",
     # Utilities from PyPA to e.g., compare versions
     "packaging",
     "responses<0.19",
+
 ]
 
 TEMPLATE_REQUIRE = [
     # to populate metric template
     "cookiecutter"
+]
+
+EVALUATOR_REQUIRE = [
+   "transformers",
+   # for bootstrap computations in Evaluator
+   "scipy>=1.7.1",
 ]
 
 TESTS_REQUIRE = [
@@ -109,12 +114,15 @@ TESTS_REQUIRE = [
     "bert_score>=0.3.6",
     "rouge_score",
     "sacrebleu",
+    "sacremoses",
     "scipy",
     "seqeval",
     "scikit-learn",
     "jiwer",
     "sentencepiece",  # for bleurt
+    "transformers", # for evaluator
     "mauve-text",
+    "trectools",
     # to speed up pip backtracking
     "toml>=0.10.1",
     "requests_file>=1.5.1",
@@ -122,8 +130,6 @@ TESTS_REQUIRE = [
     "texttable>=1.6.3",
     "Werkzeug>=1.0.1",
     "six~=1.15.0",
-    # metadata validation
-    "importlib_resources;python_version<'3.7'",
 ]
 
 QUALITY_REQUIRE = ["black~=22.0", "flake8>=3.8.3", "isort>=5.0.0", "pyyaml>=5.3.1"]
@@ -141,12 +147,13 @@ EXTRAS_REQUIRE = {
         "s3fs",
     ],
     "template": TEMPLATE_REQUIRE,
+    "evaluator": EVALUATOR_REQUIRE
 }
 
 setup(
     name="evaluate",
-    version="0.0.1.dev0",  # expected format is one of x.y.z.dev0, or x.y.z.rc1 or x.y.z (no to dashes, yes to dots)
-    description="HuggingFace community-driven open-source library of datasets",
+    version="0.1.3.dev0",  # expected format is one of x.y.z.dev0, or x.y.z.rc1 or x.y.z (no to dashes, yes to dots)
+    description="HuggingFace community-driven open-source library of evaluation",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
     author="HuggingFace Inc.",
@@ -159,6 +166,7 @@ setup(
     entry_points={"console_scripts": ["evaluate-cli=evaluate.commands.evaluate_cli:main"]},
     install_requires=REQUIRED_PKGS,
     extras_require=EXTRAS_REQUIRE,
+    python_requires=">=3.7.0",
     classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
@@ -167,13 +175,12 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
-    keywords="metrics machine learning evaluate",
+    keywords="metrics machine learning evaluate evaluation",
     zip_safe=False,  # Required for mypy to find the py.typed file
 )

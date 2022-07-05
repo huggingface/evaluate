@@ -97,8 +97,11 @@ def launch_gradio_widget(metric):
         raise error
 
     local_path = Path(sys.path[0])
-
-    (feature_names, feature_types) = zip(*metric.features.items())
+    # if there are several input types, use first as default.
+    if isinstance(metric.features, list):
+        (feature_names, feature_types) = zip(*metric.features[0].items())
+    else:
+        (feature_names, feature_types) = zip(*metric.features.items())
     gradio_input_types = infer_gradio_input_types(feature_types)
 
     def compute(data):
@@ -108,7 +111,7 @@ def launch_gradio_widget(metric):
         fn=compute,
         inputs=gr.inputs.Dataframe(
             headers=feature_names,
-            col_width=len(feature_names),
+            col_count=len(feature_names),
             row_count=2,
             datatype=json_to_string_type(gradio_input_types),
         ),
