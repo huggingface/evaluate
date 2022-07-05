@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 # Lint as: python3
 from datasets import Dataset
