@@ -70,10 +70,6 @@ class Evaluator(ABC):
         self.task = task
         self.default_metric_name = default_metric_name
 
-    @abstractmethod
-    def _compute_predictions(self, pipe: "Pipeline", inputs, **predictions_parameters: Dict):
-        raise NotImplementedError()
-
     @staticmethod
     def _compute_confidence_interval(
         predictions,
