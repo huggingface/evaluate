@@ -101,6 +101,6 @@ if __name__ == "__main__":
         if (evaluate_lib_path/dir).exists():
             for module_path in (evaluate_lib_path/dir).iterdir():
                 if module_path.is_dir():
-                    push_module_to_hub(module_path, type, token, commit_hash, tag=tag)
+                    push_module_to_hub(module_path, type, token, commit_hash, tag=git_tag)
         else:
             logger.warning(f"No folder {str(evaluate_lib_path/dir)} for {type} found.")
