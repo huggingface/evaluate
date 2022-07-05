@@ -48,13 +48,6 @@ class TextClassificationEvaluator(Evaluator):
     def __init__(self, task="text-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
-    def _compute_predictions(self, pipe: "Pipeline", inputs, label_mapping: Dict[str, Number] = None) -> List[Number]:
-        predictions = pipe(inputs, truncation=True)
-        return [
-            label_mapping[element["label"]] if label_mapping is not None else element["label"]
-            for element in predictions
-        ]
-
     def compute(
         self,
         model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
@@ -136,11 +129,16 @@ class TextClassificationEvaluator(Evaluator):
 
         metric = self.prepare_metric(metric)
 
-        references = data[label_column]
-        predictions = self._compute_predictions(pipe, data[input_column], label_mapping=label_mapping)
+        # Compute predictions
+        predictions = pipe(data[input_column], truncation=True)
+        predictions = [
+            label_mapping[element["label"]] if label_mapping is not None else element["label"]
+            for element in predictions
+        ]
 
+        # Compute metrics from references and predictions
         result = self.core_compute(
-            references=references,
+            references=data[label_column],
             predictions=predictions,
             metric=metric,
             strategy=strategy,

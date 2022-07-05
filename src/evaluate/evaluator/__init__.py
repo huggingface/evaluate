@@ -57,6 +57,7 @@ def check_task(task: str) -> Dict:
         task (`str`):
             The task defining which evaluator will be returned. Currently accepted tasks are:
             - `"text-classification"` (alias `"sentiment-analysis"` available)
+            - `"image-classification"`
     Returns:
         task_defaults: `dict`, contains the implementasion class of a give Evaluator and the default metric name.
     """
@@ -72,12 +73,13 @@ def check_task(task: str) -> Dict:
 def evaluator(task: str = None) -> Evaluator:
     """
     Utility factory method to build an [`Evaluator`].
-    Evaluators encapsulate a task and a default metric name. They leverate `pipeline` functionalify from `transformers`
+    Evaluators encapsulate a task and a default metric name. They leverage `pipeline` functionalify from `transformers`
     to simplify the evaluation of multiple combinations of models, datasets and metrics for a given task.
     Args:
         task (`str`):
             The task defining which evaluator will be returned. Currently accepted tasks are:
             - `"text-classification"` (alias `"sentiment-analysis"` available): will return a [`TextClassificationEvaluator`].
+            - `"image-classification"`: will return a [`ImageClassificationEvaluator`].
     Returns:
         [`Evaluator`]: An evaluator suitable for the task.
     Examples:
