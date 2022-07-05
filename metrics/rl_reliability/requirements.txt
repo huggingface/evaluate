@@ -1,4 +1,4 @@
-evaluate==0.1.0
+git+https://github.com/huggingface/evaluate@a45df1eb9996eec64ec3282ebe554061cb366388
 datasets~=2.0
 git+https://github.com/google-research/rl-reliability-metrics
 scipy
