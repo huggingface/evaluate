@@ -26,6 +26,7 @@ from typing import Dict, List
 
 from .base import Evaluator
 from .image_classification import ImageClassificationEvaluator
+from .question_answering import QuestionAnsweringEvaluator
 from .text_classification import TextClassificationEvaluator
 
 
@@ -37,6 +38,10 @@ SUPPORTED_EVALUATOR_TASKS = {
     "image-classification": {
         "implementation": ImageClassificationEvaluator,
         "default_metric_name": "accuracy",
+    },
+    "question-answering": {
+        "implementation": QuestionAnsweringEvaluator,
+        "default_metric_name": "squad",
     },
 }
 
@@ -56,8 +61,9 @@ def check_task(task: str) -> Dict:
     Args:
         task (`str`):
             The task defining which evaluator will be returned. Currently accepted tasks are:
-            - `"text-classification"` (alias `"sentiment-analysis"` available)
             - `"image-classification"`
+            - `"question-answering"`
+            - `"text-classification"` (alias `"sentiment-analysis"` available)
     Returns:
         task_defaults: `dict`, contains the implementasion class of a give Evaluator and the default metric name.
     """
@@ -78,8 +84,9 @@ def evaluator(task: str = None) -> Evaluator:
     Args:
         task (`str`):
             The task defining which evaluator will be returned. Currently accepted tasks are:
-            - `"text-classification"` (alias `"sentiment-analysis"` available): will return a [`TextClassificationEvaluator`].
             - `"image-classification"`: will return a [`ImageClassificationEvaluator`].
+            - `"question-answering"`: will return a [`QuestionAnsweringEvaluator`].
+            - `"text-classification"` (alias `"sentiment-analysis"` available): will return a [`TextClassificationEvaluator`].
     Returns:
         [`Evaluator`]: An evaluator suitable for the task.
     Examples:

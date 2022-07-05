@@ -12,6 +12,7 @@ from datasets import load_dataset
 from transformers import (
     AutoFeatureExtractor,
     AutoModelForImageClassification,
+    AutoModelForQuestionAnswering,
     AutoModelForSequenceClassification,
     AutoTokenizer,
     Trainer,
@@ -141,3 +142,45 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         )
 
         self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["accuracy"])
+
+    def test_question_answering_parity(self):
+        model_name = "mrm8488/bert-tiny-finetuned-squadv2"
+
+        subprocess.run(
+            "git sparse-checkout set examples/pytorch/question-answering",
+            shell=True,
+            cwd=os.path.join(self.dir_path, "transformers"),
+        )
+
+        subprocess.run(
+            f"python examples/pytorch/question-answering/run_qa.py"
+            f" --model_name_or_path {model_name}"
+            f" --dataset_name squad"
+            f" --do_eval"
+            f" --output_dir {os.path.join(self.dir_path, 'questionanswering_squad_transformers')}"
+            f" --max_eval_samples 100"
+            f" --max_seq_length 384",
+            shell=True,
+            cwd=os.path.join(self.dir_path, "transformers"),
+        )
+
+        with open(
+            f"{os.path.join(self.dir_path, 'questionanswering_squad_transformers', 'eval_results.json')}", "r"
+        ) as f:
+            transformers_results = json.load(f)
+
+        eval_dataset = load_dataset("squad", split="validation[:100]")
+
+        model = AutoModelForQuestionAnswering.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+        pipe = pipeline(task="question-answering", model=model, tokenizer=tokenizer)
+
+        e = evaluator(task="question-answering")
+        evaluator_results = e.compute(
+            model_or_pipeline=pipe,
+            data=eval_dataset,
+            metric="squad",
+            strategy="simple",
+        )
+
+        self.assertEqual(transformers_results["eval_f1"], evaluator_results["eval_f1"])
