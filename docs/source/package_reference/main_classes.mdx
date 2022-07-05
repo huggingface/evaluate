@@ -2,10 +2,24 @@
 
 ## EvaluationModuleInfo
 
+The base class `EvaluationModuleInfo` implements a the logic for the subclasses `MetricInfo`, `ComparisonInfo`, and `MeasurementInfo`.
+
 [[autodoc]] evaluate.EvaluationModuleInfo
+
+[[autodoc]] evaluate.MetricInfo
+
+[[autodoc]] evaluate.ComparisonInfo
+
+[[autodoc]] evaluate.MeasurementInfo
 
 ## EvaluationModule
 
-The base class `Metric` implements a Metric backed by one or several [`Dataset`].
+The base class `EvaluationModule` implements a the logic for the subclasses `Metric`, `Comparison`, and `Measurement`.
 
 [[autodoc]] evaluate.EvaluationModule
+
+[[autodoc]] evaluate.Metric
+
+[[autodoc]] evaluate.Comparison
+
+[[autodoc]] evaluate.Measurement

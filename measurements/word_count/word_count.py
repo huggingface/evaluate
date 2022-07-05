@@ -39,12 +39,12 @@ Examples:
 _CITATION = ""
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class WordCount(evaluate.EvaluationModule):
+class WordCount(evaluate.Measurement):
     """This measurement returns the total number of words and the number of unique words
      in the input string(s)."""
 
     def _info(self):
-        return evaluate.EvaluationModuleInfo(
+        return evaluate.MeasurementInfo(
             # This is the description that will appear on the modules page.
             module_type="measurement",
             description=_DESCRIPTION,

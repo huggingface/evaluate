@@ -85,9 +85,9 @@ Examples:
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Perplexity(evaluate.EvaluationModule):
+class Perplexity(evaluate.Metric):
     def _info(self):
-        return evaluate.EvaluationModuleInfo(
+        return evaluate.MetricInfo(
             module_type="metric",
             description=_DESCRIPTION,
             citation=_CITATION,

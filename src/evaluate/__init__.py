@@ -28,10 +28,10 @@ del version
 
 from .evaluator import Evaluator, TextClassificationEvaluator, evaluator
 from .hub import push_to_hub
-from .info import EvaluationModuleInfo
+from .info import ComparisonInfo, EvaluationModuleInfo, MeasurementInfo, MetricInfo
 from .inspect import inspect_evaluation_module, list_evaluation_modules
 from .loading import load
-from .module import CombinedEvaluations, EvaluationModule, combine
+from .module import CombinedEvaluations, Comparison, EvaluationModule, Measurement, Metric
 from .saving import save
 from .utils import *
 from .utils import gradio, logging

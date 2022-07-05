@@ -719,6 +719,69 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                 raise TypeError(f"Expected type str but got {type(obj)}.")
 
 
+class Metric(EvaluationModule):
+    """A Metric is the base class and common API for all metrics.
+
+    Args:
+        config_name (``str``): This is used to define a hash specific to a metric computation script and prevents the metric's data
+            to be overridden when the metric loading script is modified.
+        keep_in_memory (:obj:`bool`): keep all predictions and references in memory. Not possible in distributed settings.
+        cache_dir (``str``): Path to a directory in which temporary prediction/references data will be stored.
+            The data directory should be located on a shared file-system in distributed setups.
+        num_process (``int``): specify the total number of nodes in a distributed settings.
+            This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
+        process_id (``int``): specify the id of the current process in a distributed setup (between 0 and num_process-1)
+            This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
+        seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`evaluate.Metric.compute` is run.
+        experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
+            This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
+        max_concurrent_cache_files (``int``): Max number of concurrent metric cache files (default 10000).
+        timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
+    """
+
+
+class Comparison(EvaluationModule):
+    """A Comparison is the base class and common API for all comparisons.
+
+    Args:
+        config_name (``str``): This is used to define a hash specific to a comparison computation script and prevents the comparison's data
+            to be overridden when the  comparison loading script is modified.
+        keep_in_memory (:obj:`bool`): keep all predictions and references in memory. Not possible in distributed settings.
+        cache_dir (``str``): Path to a directory in which temporary prediction/references data will be stored.
+            The data directory should be located on a shared file-system in distributed setups.
+        num_process (``int``): specify the total number of nodes in a distributed settings.
+            This is useful to compute  comparisons in distributed setups (in particular non-additive comparisons).
+        process_id (``int``): specify the id of the current process in a distributed setup (between 0 and num_process-1)
+            This is useful to compute  comparisons in distributed setups (in particular non-additive comparisons).
+        seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`evaluate.Comparison.compute` is run.
+        experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
+            This is useful to compute  comparisons in distributed setups (in particular non-additive comparisons).
+        max_concurrent_cache_files (``int``): Max number of concurrent comparison cache files (default 10000).
+        timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
+    """
+
+
+class Measurement(EvaluationModule):
+    """A Measurement is the base class and common API for all measurements.
+
+    Args:
+        config_name (``str``): This is used to define a hash specific to a measurement computation script and prevents the measurement's data
+            to be overridden when the measurement loading script is modified.
+        keep_in_memory (:obj:`bool`): keep all predictions and references in memory. Not possible in distributed settings.
+        cache_dir (``str``): Path to a directory in which temporary prediction/references data will be stored.
+            The data directory should be located on a shared file-system in distributed setups.
+        num_process (``int``): specify the total number of nodes in a distributed settings.
+            This is useful to compute measurements in distributed setups (in particular non-additive measurements).
+        process_id (``int``): specify the id of the current process in a distributed setup (between 0 and num_process-1)
+            This is useful to compute measurements in distributed setups (in particular non-additive measurements).
+        seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`evaluate.Measurement.compute` is run.
+        experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
+            This is useful to compute measurements in distributed setups (in particular non-additive measurements).
+        max_concurrent_cache_files (``int``): Max number of concurrent measurement cache files (default 10000).
+        timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
+    """
+
+
 class CombinedEvaluations:
     def __init__(self, evaluation_modules, force_prefix=False):
         from .loading import load  # avoid circular imports

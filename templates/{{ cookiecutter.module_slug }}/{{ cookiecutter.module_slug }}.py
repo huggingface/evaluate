@@ -58,14 +58,14 @@ BAD_WORDS_URL = "http://url/to/external/resource/bad_words.txt"
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class {{ cookiecutter.module_class_name }}(evaluate.EvaluationModule):
+class {{ cookiecutter.module_class_name }}(evaluate.{{ cookiecutter.module_type | capitalize}}):
     """TODO: Short description of my evaluation module."""
 
     def _info(self):
         # TODO: Specifies the evaluate.EvaluationModuleInfo object
-        return evaluate.EvaluationModuleInfo(
+        return evaluate.{{ cookiecutter.module_type | capitalize}}Info(
             # This is the description that will appear on the modules page.
-            module_type="{{ cookiecutter.module_type }}",
+            module_type="{{ cookiecutter.module_type}}",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
