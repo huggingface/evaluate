@@ -275,7 +275,10 @@ class Evaluator(ABC):
         """Compute and return metrics."""
         result = metric.compute(**metric_inputs, **self.METRIC_KWARGS)
 
-        if strategy == "bootstrap":
+        latency = perf_counter() - start_time
+        throughput = len(predictions) / latency
+
+        if "bootstrap" in strategy:
             metric_keys = result.keys()
             bootstrap_dict = self._compute_confidence_interval(
                 metric,
@@ -288,6 +291,10 @@ class Evaluator(ABC):
             for key in metric_keys:
                 bootstrap_dict[key]["score"] = result[key]
 
-            return bootstrap_dict
+            result = bootstrap_dict
+
+        if "perf" in strategy:
+            result["latency"] = latency
+            result["throughput"] = throughput
 
         return result

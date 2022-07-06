@@ -54,12 +54,17 @@ class ImageClassificationEvaluator(Evaluator):
                 Argument can be used to overwrite a default feature extractor if `model_or_pipeline` represents a model for
                 which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
                 this argument.
-            strategy: (`Literal["simple", "bootstrap"]`, defaults to "simple"):
+            strategy: (`Literal["simple", "bootstrap", "perf"]` or `List[Literal["simple", "bootstrap", "perf"]]`,
+            defaults to "simple"):
                 specifies the evaluation strategy. Possible values are:
                 - `"simple"` - we evaluate the metric and return the scores.
                 - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each
                 of the returned metric keys, using `scipy`'s `bootstrap` method
                 https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html.
+                - `"perf"` - on top of computing the metric scores, we calculate the performence metrics -
+                `latency`, equivalent to the evaluation runtime in seconds and `throughput` - an average number of
+                evaluation samples per second.
+                - Alternatively, one can provide a list of strategies defined above.
             confidence_level (`float`, defaults to `0.95`):
                 The `confidence_level` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
             n_resamples (`int`, defaults to `9999`):
