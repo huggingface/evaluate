@@ -160,6 +160,53 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.68326, 5)
         self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.24595, 5)
 
+    def test_perf(self):
+        data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
+        model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
+        tokenizer = AutoTokenizer.from_pretrained(self.default_model)
+
+        results = self.evaluator.compute(
+            model_or_pipeline=model,
+            data=data,
+            metric="accuracy",
+            tokenizer=tokenizer,
+            input_column=self.input_column,
+            label_column=self.label_column,
+            label_mapping=self.label_mapping,
+            strategy="perf",
+            n_resamples=10,
+            random_state=0,
+        )
+        self.assertAlmostEqual(results["accuracy"], 0.666666, 5)
+        self.assertTrue("latency" in results)
+        self.assertTrue("throughput" in results)
+        self.assertAlmostEqual(results["throughput"], len(data) / results["latency"], 5)
+
+    def test_bootstrap_and_perf(self):
+        data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
+        model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
+        tokenizer = AutoTokenizer.from_pretrained(self.default_model)
+
+        results = self.evaluator.compute(
+            model_or_pipeline=model,
+            data=data,
+            metric="accuracy",
+            tokenizer=tokenizer,
+            input_column=self.input_column,
+            label_column=self.label_column,
+            label_mapping=self.label_mapping,
+            strategy=["bootstrap", "perf"],
+            n_resamples=10,
+            random_state=0,
+        )
+        self.assertAlmostEqual(results["accuracy"]["score"], 0.666666, 5)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][0], 0.33333, 5)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.68326, 5)
+        self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.24595, 5)
+        self.assertTrue("latency" in results)
+        self.assertTrue("throughput" in results)
+        self.assertAlmostEqual(results["throughput"], len(data) / results["latency"], 5)
+
 
 class TestImageClassificationEvaluator(TestCase):
     def setUp(self):
