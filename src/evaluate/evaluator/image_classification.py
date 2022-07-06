@@ -46,7 +46,7 @@ class ImageClassificationEvaluator(Evaluator):
             data (`str` or `Dataset`, defaults to `None`):
                 Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
                 name, and load it. Otherwise we assume it represents a pre-loaded dataset.
-            metric (`str` or `EvaluationModule`, defaults to `None`
+            metric (`str` or `EvaluationModule`, defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
             feature_extractor: (`str` or `FeatureExtractionMixin`, *optional*, defaults to `None`):
