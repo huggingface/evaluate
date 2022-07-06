@@ -123,7 +123,7 @@ class Meteor(evaluate.Metric):
         multiple_refs = isinstance(references[0], list)
         if NLTK_VERSION >= version.Version("3.6.5"):
             # the version of METEOR in NLTK version 3.6.5 and earlier expect tokenized inputs
-            if isinstance(references[0], list):
+            if multiple_refs:
                 scores = [
                     meteor_score.meteor_score(
                         [word_tokenize(ref) for ref in refs],
