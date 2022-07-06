@@ -297,4 +297,5 @@ class Evaluator(ABC):
             result["latency"] = latency
             result["throughput"] = throughput
 
+        print(result)
         return result
