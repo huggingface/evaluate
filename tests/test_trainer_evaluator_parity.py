@@ -173,7 +173,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         model = AutoModelForQuestionAnswering.from_pretrained(model_name)
         tokenizer = AutoTokenizer.from_pretrained(model_name)
-        pipe = pipeline(task="question-answering", model=model, tokenizer=tokenizer)
+        pipe = pipeline(task="question-answering", model=model, tokenizer=tokenizer, max_answer_len=30)
 
         e = evaluator(task="question-answering")
         evaluator_results = e.compute(
@@ -183,4 +183,5 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             strategy="simple",
         )
 
-        self.assertEqual(transformers_results["eval_f1"], evaluator_results["eval_f1"])
+        self.assertEqual(transformers_results["eval_f1"], evaluator_results["f1"])
+        self.assertEqual(transformers_results["eval_exact_match"], evaluator_results["exact_match"])
