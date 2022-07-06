@@ -142,7 +142,6 @@ class Meteor(evaluate.Metric):
                     for ref, pred in zip(references, predictions)
                 ]
         else:
-            multiple_refs = isinstance(references[0], list)
             if multiple_refs:
                 scores = [
                     meteor_score.meteor_score(
