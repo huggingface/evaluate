@@ -120,6 +120,7 @@ class Meteor(evaluate.Metric):
             nltk.download("omw-1.4")
 
     def _compute(self, predictions, references, alpha=0.9, beta=3, gamma=0.5):
+        multiple_refs = isinstance(references[0], list)
         if NLTK_VERSION >= version.Version("3.6.5"):
             # the version of METEOR in NLTK version 3.6.5 and earlier expect tokenized inputs
             if isinstance(references[0], list):
