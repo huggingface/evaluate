@@ -9,16 +9,7 @@ import numpy as np
 import torch
 import transformers
 from datasets import load_dataset
-from transformers import (
-    AutoFeatureExtractor,
-    AutoModelForImageClassification,
-    AutoModelForQuestionAnswering,
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
-    Trainer,
-    TrainingArguments,
-    pipeline,
-)
+from transformers import AutoFeatureExtractor, AutoModelForImageClassification, Trainer, TrainingArguments, pipeline
 
 from evaluate import evaluator, load
 
@@ -68,9 +59,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         eval_dataset = load_dataset("glue", "sst2", split="validation[:80]")
 
-        model = AutoModelForSequenceClassification.from_pretrained(model_name)
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        pipe = pipeline(task="text-classification", model=model, tokenizer=tokenizer)
+        pipe = pipeline(task="text-classification", model=model_name, tokenizer=model_name)
 
         e = evaluator(task="text-classification")
         evaluator_results = e.compute(
@@ -128,7 +117,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         ) as f:
             transformers_results = json.load(f)
 
-        pipe = pipeline(task="image-classification", model=model, feature_extractor=feature_extractor)
+        pipe = pipeline(task="image-classification", model=model_name, feature_extractor=model_name)
 
         e = evaluator(task="image-classification")
         evaluator_results = e.compute(
@@ -171,9 +160,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         eval_dataset = load_dataset("squad", split="validation[:100]")
 
-        model = AutoModelForQuestionAnswering.from_pretrained(model_name)
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        pipe = pipeline(task="question-answering", model=model, tokenizer=tokenizer, max_answer_len=30)
+        pipe = pipeline(task="question-answering", model=model_name, tokenizer=model_name, max_answer_len=30)
 
         e = evaluator(task="question-answering")
         evaluator_results = e.compute(

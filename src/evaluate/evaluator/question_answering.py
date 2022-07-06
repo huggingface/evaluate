@@ -12,11 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from numbers import Number
 from typing import Any, Callable, Dict, Optional, Tuple, Union
 
 # Lint as: python3
-from datasets import Dataset
+from datasets import Dataset, load_dataset
 
 
 try:
