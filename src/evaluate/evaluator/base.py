@@ -105,6 +105,12 @@ class Evaluator(ABC):
             }
         return bootstrap_dict
 
+    @staticmethod
+    def _compute_time_perf(start_time: float, end_time: float, num_samples: int) -> Dict[str, Any]:
+        latency = end_time - start_time
+        throughput = num_samples / latency
+        return {"latency": latency, "throughput": throughput}
+
     @abstractmethod
     def predictions_processor(self, *args, **kwargs):
         """
@@ -275,10 +281,7 @@ class Evaluator(ABC):
         """Compute and return metrics."""
         result = metric.compute(**metric_inputs, **self.METRIC_KWARGS)
 
-        latency = perf_counter() - start_time
-        throughput = len(predictions) / latency
-
-        if "bootstrap" in strategy:
+        if strategy == "bootstrap":
             metric_keys = result.keys()
             bootstrap_dict = self._compute_confidence_interval(
                 metric,
@@ -291,10 +294,6 @@ class Evaluator(ABC):
             for key in metric_keys:
                 bootstrap_dict[key]["score"] = result[key]
 
-            result = bootstrap_dict
-
-        if "perf" in strategy:
-            result["latency"] = latency
-            result["throughput"] = throughput
+            return bootstrap_dict
 
         return result

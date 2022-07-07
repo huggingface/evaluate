@@ -61,17 +61,17 @@ class TestTextClassificationEvaluator(TestCase):
         self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
 
     def test_pipe_init(self):
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             input_column="text",
             label_column="label",
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 1.0})
+        self.assertEqual(results["accuracy"], 1.0)
 
     def test_model_init(self):
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=self.default_model,
             data=self.data,
             metric="accuracy",
@@ -79,10 +79,10 @@ class TestTextClassificationEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 1.0})
+        self.assertEqual(results["accuracy"], 1.0)
         model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
         tokenizer = AutoTokenizer.from_pretrained(self.default_model)
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=model,
             data=self.data,
             metric="accuracy",
@@ -91,14 +91,14 @@ class TestTextClassificationEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 1.0})
+        self.assertEqual(results["accuracy"], 1.0)
 
     def test_class_init(self):
         evaluator = TextClassificationEvaluator()
         self.assertEqual(evaluator.task, "text-classification")
         self.assertIsNone(evaluator.default_metric_name)
 
-        scores = evaluator.compute(
+        results = evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric="f1",
@@ -106,20 +106,20 @@ class TestTextClassificationEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"f1": 1.0})
+        self.assertEqual(results["f1"], 1.0)
 
     def test_default_pipe_init(self):
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             data=self.data,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 1.0})
+        self.assertEqual(results["accuracy"], 1.0)
 
     def test_overwrite_default_metric(self):
         accuracy = load("accuracy")
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric=accuracy,
@@ -127,8 +127,8 @@ class TestTextClassificationEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 1.0})
-        scores = self.evaluator.compute(
+        self.assertEqual(results["accuracy"], 1.0)
+        results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric="accuracy",
@@ -136,7 +136,7 @@ class TestTextClassificationEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 1.0})
+        self.assertEqual(results["accuracy"], 1.0)
 
     def test_bootstrap(self):
         data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
@@ -173,7 +173,6 @@ class TestTextClassificationEvaluator(TestCase):
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
-            strategy="perf",
             n_resamples=10,
             random_state=0,
         )
@@ -195,7 +194,7 @@ class TestTextClassificationEvaluator(TestCase):
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
-            strategy=["bootstrap", "perf"],
+            strategy="bootstrap",
             n_resamples=10,
             random_state=0,
         )
@@ -224,17 +223,17 @@ class TestImageClassificationEvaluator(TestCase):
         self.label_mapping = AutoConfig.from_pretrained(self.default_model).label2id
 
     def test_pipe_init(self):
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             input_column="image",
             label_column="labels",
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 0})
+        self.assertEqual(results["accuracy"], 0)
 
     def test_model_init(self):
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=self.default_model,
             data=self.data,
             metric="accuracy",
@@ -242,10 +241,10 @@ class TestImageClassificationEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 0})
+        self.assertEqual(results["accuracy"], 0)
         model = AutoModelForImageClassification.from_pretrained(self.default_model)
         feature_extractor = AutoFeatureExtractor.from_pretrained(self.default_model)
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=model,
             data=self.data,
             metric="accuracy",
@@ -254,14 +253,14 @@ class TestImageClassificationEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 0})
+        self.assertEqual(results["accuracy"], 0)
 
     def test_class_init(self):
         evaluator = ImageClassificationEvaluator()
         self.assertEqual(evaluator.task, "image-classification")
         self.assertIsNone(evaluator.default_metric_name)
 
-        scores = evaluator.compute(
+        results = evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric="accuracy",
@@ -269,20 +268,20 @@ class TestImageClassificationEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 0})
+        self.assertEqual(results["accuracy"], 0)
 
     def test_default_pipe_init(self):
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             data=self.data,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 0})
+        self.assertEqual(results["accuracy"], 0)
 
     def test_overwrite_default_metric(self):
         accuracy = load("accuracy")
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric=accuracy,
@@ -290,8 +289,8 @@ class TestImageClassificationEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 0})
-        scores = self.evaluator.compute(
+        self.assertEqual(results["accuracy"], 0)
+        results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric="accuracy",
@@ -299,4 +298,4 @@ class TestImageClassificationEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 0})
+        self.assertEqual(results["accuracy"], 0)
