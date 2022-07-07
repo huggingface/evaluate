@@ -6,12 +6,7 @@ from unittest import TestCase
 import pytest
 
 import evaluate
-from evaluate.loading import (
-    CachedEvaluationModuleFactory,
-    GithubEvaluationModuleFactory,
-    HubEvaluationModuleFactory,
-    LocalEvaluationModuleFactory,
-)
+from evaluate.loading import CachedEvaluationModuleFactory, HubEvaluationModuleFactory, LocalEvaluationModuleFactory
 from evaluate.utils.file_utils import DownloadConfig
 
 from .utils import OfflineSimulationMode, offline
