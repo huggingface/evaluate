@@ -685,9 +685,8 @@ def evaluation_module_factory(
                 if module_type is None:
                     for current_type in ["metric", "comparison", "measurement"]:
                         try:
-                            return GithubEvaluationModuleFactory(
-                                path,
-                                current_type,
+                            return HubEvaluationModuleFactory(
+                                f"evaluate-{current_type}/{path}",
                                 revision=revision,
                                 download_config=download_config,
                                 download_mode=download_mode,
@@ -698,9 +697,8 @@ def evaluation_module_factory(
                     raise FileNotFoundError
                 # if module_type provided load specific module_type
                 else:
-                    return GithubEvaluationModuleFactory(
-                        path,
-                        module_type,
+                    return HubEvaluationModuleFactory(
+                        f"evaluate-{module_type}/{path}",
                         revision=revision,
                         download_config=download_config,
                         download_mode=download_mode,
