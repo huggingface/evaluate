@@ -68,6 +68,9 @@ def main():
     if args["module_type"] not in ["metric", "comparison", "measurement"]:
         raise ValueError("The module_type needs to be one of metric, comparison, or measurement")
 
+    if "-" in args["module_name"]:
+        raise ValueError("Hyphens ('-') are not allowed in module names.")
+
     output_dir = Path(args["output_dir"])
     organization = args["organization"]
     module_slug = args["module_name"].lower().replace(" ", "_")
