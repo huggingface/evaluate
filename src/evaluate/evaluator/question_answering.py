@@ -133,7 +133,7 @@ class QuestionAnsweringEvaluator(Evaluator):
             id_column (`str`, defaults to `"id"`):
                 the name of the column cointaing the identification field of the question and answer pair in the
                 dataset specified by `data`.
-            label_column (`str`, defaults to `"label"`):
+            label_column (`str`, defaults to `"answers"`):
                 the name of the column containing the answers in the dataset specified by `data`.
         Return:
             A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
