@@ -144,14 +144,14 @@ class QuestionAnsweringEvaluator(Evaluator):
         >>> from evaluate import evaluator
         >>> from datasets import Dataset, load_dataset
         >>> e = evaluator("question-answering")
-        >>> data =  Dataset.from_dict(load_dataset("squad")["validation"][:2])
+        >>> data = load_dataset("squad", split="validation[:2]")
         >>> results = e.compute(
         >>>     model_or_pipeline="mrm8488/bert-tiny-finetuned-squadv2",
         >>>     data=data,
         >>>     metric="squad",
         >>>     question_column="question",
         >>>     context_column="context",
-        >>>     label_column="questions",
+        >>>     label_column="answers",
         >>>     strategy="bootstrap",
         >>>     n_resamples=10,
         >>>     random_state=0
