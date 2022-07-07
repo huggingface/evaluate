@@ -61,10 +61,10 @@ class ModuleFactoryTest(TestCase):
             hf_modules_cache=self.hf_modules_cache,
         )
 
-    def test_GithubMetricModuleFactory_with_internal_import(self):
+    def test_HubEvaluationModuleFactory_with_internal_import(self):
         # "squad_v2" requires additional imports (internal)
-        factory = GithubEvaluationModuleFactory(
-            "squad_v2",
+        factory = HubEvaluationModuleFactory(
+            "evaluate-metric/squad_v2",
             module_type="metric",
             download_config=self.download_config,
             dynamic_modules_path=self.dynamic_modules_path,
@@ -72,10 +72,10 @@ class ModuleFactoryTest(TestCase):
         module_factory_result = factory.get_module()
         assert importlib.import_module(module_factory_result.module_path) is not None
 
-    def test_GithubMetricModuleFactory_with_external_import(self):
+    def test_HubEvaluationModuleFactory_with_external_import(self):
         # "bleu" requires additional imports (external from github)
-        factory = GithubEvaluationModuleFactory(
-            "bleu",
+        factory = HubEvaluationModuleFactory(
+            "evaluate-metric/bleu",
             module_type="metric",
             download_config=self.download_config,
             dynamic_modules_path=self.dynamic_modules_path,
@@ -83,7 +83,7 @@ class ModuleFactoryTest(TestCase):
         module_factory_result = factory.get_module()
         assert importlib.import_module(module_factory_result.module_path) is not None
 
-    def test_HubDatasetModuleFactoryWithScript(self):
+    def test_HubEvaluationModuleFactoryWithScript(self):
         factory = HubEvaluationModuleFactory(
             SAMPLE_METRIC_IDENTIFIER,
             download_config=self.download_config,
