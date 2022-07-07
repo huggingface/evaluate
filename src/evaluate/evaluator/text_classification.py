@@ -57,7 +57,7 @@ class TextClassificationEvaluator(Evaluator):
                 Argument can be used to overwrite a default tokenizer if `model_or_pipeline` represents a model for
                 which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
                 this argument.
-            strategy: (`Literal["simple", "bootstrap", "perf"]` or `List[Literal["simple", "bootstrap", "perf"]]`, defaults to "simple"):
+            strategy: (`Literal["simple", "bootstrap"]`, defaults to "simple"):
                 specifies the evaluation strategy. Possible values are:
                 - `"simple"` - we evaluate the metric and return the scores.
                 - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each
