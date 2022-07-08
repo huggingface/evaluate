@@ -35,6 +35,8 @@ try:
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
 
+from time import perf_counter
+
 from typing_extensions import Literal
 
 from ..loading import load
@@ -107,11 +109,17 @@ class Evaluator(ABC):
 
     @staticmethod
     def _compute_time_perf(start_time: float, end_time: float, num_samples: int) -> Dict[str, Any]:
+        """
+        A utility function computing time performance metrics:
+            - `latency` - pipeline inference runtime for the evaluation data in seconds,
+            - `throughput` - pipeline throughput in number of samples per second.
+        """
         latency = end_time - start_time
         throughput = num_samples / latency
         return {"latency": latency, "throughput": throughput}
 
     @abstractmethod
+<<<<<<< HEAD
     def predictions_processor(self, *args, **kwargs):
         """
         A core method of the `Evaluator` class, which processes the pipeline outputs for compatibility with the metric.
@@ -164,6 +172,16 @@ class Evaluator(ABC):
         result.update(metric_results)
 
         return result
+=======
+    def _compute_predictions(
+        self, pipe, data, input_column, label_mapping: Optional[Dict[str, Number]] = None, **kwargs
+    ):
+        raise NotImplementedError()
+
+    @abstractmethod
+    def _compute_references(self, data, label_column, **kwargs):
+        raise NotImplementedError()
+>>>>>>> refactor
 
     def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str):
         """
@@ -265,6 +283,7 @@ class Evaluator(ABC):
 
         return metric
 
+<<<<<<< HEAD
     def call_pipeline(self, pipe, *args, **kwargs):
         # todo: add performance metrics here
         return pipe(*args, **kwargs, **self.PIPELINE_KWARGS)
@@ -273,17 +292,125 @@ class Evaluator(ABC):
         self,
         metric: EvaluationModule,
         metric_inputs,
+=======
+    def compute(
+        self,
+        model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
+        data: Union[str, Dataset] = None,
+        metric: Union[str, EvaluationModule] = None,
+        preprocessor: Optional[Union[str, "PreTrainedTokenizer", "FeatureExtractionMixin"]] = None,
+>>>>>>> refactor
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
         random_state: Optional[int] = None,
+<<<<<<< HEAD
     ):
         """Compute and return metrics."""
         result = metric.compute(**metric_inputs, **self.METRIC_KWARGS)
+=======
+        input_column: str = "text",
+        label_column: str = "label",
+        label_mapping: Optional[Dict[str, Number]] = None,
+        **kwargs,
+    ) -> Tuple[Dict[str, float], Any]:
+        """
+        Compute the metric for a given pipeline and dataset combination.
+        Args:
+            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`, defaults to `None`):
+                If the argument in not specified, we initialize the default pipeline for the task (in this case
+                `text-classification` or its alias - `sentiment-analysis`). If the argument is of the type `str` or
+                is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
+                argument specifies a pre-initialized pipeline.
+            data (`str` or `Dataset`, defaults to `None`):
+                Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
+                name, and load it. Otherwise we assume it represents a pre-loaded dataset.
+            metric (`str` or `EvaluationModule`, defaults to `None`):
+                Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
+                load it. Otherwise we assume it represents a pre-loaded metric.
+            preprocessor (`str` or `PreTrainedTokenizerBase` or `FeatureExtractionMixin`, *optional*, defaults to `None`):
+                Argument can be used to overwrite a default preprocessor if `model_or_pipeline` represents a model for
+                which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
+                this argument.
+            strategy: (`Literal["simple", "bootstrap"]`, defaults to "simple"):
+                specifies the evaluation strategy. Possible values are:
+                - `"simple"` - we evaluate the metric and return the scores.
+                - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each
+                of the returned metric keys, using `scipy`'s `bootstrap` method
+                https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html.
+            confidence_level (`float`, defaults to `0.95`):
+                The `confidence_level` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
+            n_resamples (`int`, defaults to `9999`):
+                The `n_resamples` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
+            random_state (`int`, *optional*, defaults to `None`):
+                The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
+                debugging.
+            input_column (`str`, defaults to `"text"`):
+                the name of the column containing the text feature in the dataset specified by `data`.
+            label_column (`str`, defaults to `"label"`):
+                the name of the column containing the labels in the dataset specified by `data`.
+            label_mapping (`Dict[str, Number]`, *optional*, defaults to `None`):
+                We want to map class labels defined by the model in the pipeline to values consistent with those
+                defined in the `label_column` of the `data` dataset.
+        Return:
+            A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
+            `"simple"` strategy, the value is the metric score. For the `"bootstrap"` strategy, the value is a `Dict`
+            containing the score, the confidence interval and the standard error calculated for each metric key.
+        Examples:
+        ```python
+        >>> from evaluate import evaluator
+        >>> from datasets import Dataset, load_dataset
+        >>> e = evaluator("text-classification")
+        >>> data =  Dataset.from_dict(load_dataset("imdb")["test"][:2])
+        >>> results = e.compute(
+        >>>     model_or_pipeline="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
+        >>>     data=data,
+        >>>     metric="accuracy",
+        >>>     input_column="text",
+        >>>     label_column="label",
+        >>>     label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
+        >>>     strategy="bootstrap",
+        >>>     n_resamples=10,
+        >>>     random_state=0
+        >>> )
+        >>> e = evaluator("image-classification")
+        >>> data =  Dataset.from_dict(load_dataset("beans")["test"][:2])
+        >>> results = e.compute(
+        >>>     model_or_pipeline="nateraw/vit-base-beans",
+        >>>     data=data,
+        >>>     metric="accuracy",
+        >>>     input_column="image",
+        >>>     label_column="labels",
+        >>>     label_mapping={'angular_leaf_spot': 0, 'bean_rust': 1, 'healthy': 2},
+        >>>     strategy="bootstrap",
+        >>>     n_resamples=10,
+        >>>     random_state=0
+        >>> )
+        ```"""
+        data = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
+        pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, preprocessor=preprocessor)
+        metric = self.prepare_metric(metric)
+
+        # Compute predictions
+        start_time = perf_counter()
+        predictions = self._compute_predictions(pipe, data, input_column, label_mapping, **kwargs)
+        end_time = perf_counter()
+
+        # Compute references
+        references = self._compute_references(data, label_column, **kwargs)
+
+        # Compute evaluation results
+        result = metric.compute(predictions=predictions, references=references)
+>>>>>>> refactor
 
         if strategy == "bootstrap":
             metric_keys = result.keys()
             bootstrap_dict = self._compute_confidence_interval(
+<<<<<<< HEAD
+=======
+                predictions,
+                references,
+>>>>>>> refactor
                 metric,
                 metric_inputs,
                 metric_keys,
@@ -294,6 +421,7 @@ class Evaluator(ABC):
             for key in metric_keys:
                 bootstrap_dict[key]["score"] = result[key]
 
-            return bootstrap_dict
+            result = bootstrap_dict
 
+        result.update(self._compute_time_perf(start_time, end_time, len(predictions)))
         return result

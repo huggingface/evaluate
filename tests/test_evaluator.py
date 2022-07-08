@@ -14,6 +14,7 @@
 
 # Lint as: python3
 
+from time import sleep
 from unittest import TestCase
 
 from datasets import Dataset
@@ -34,6 +35,16 @@ class DummyTextClassificationPipeline:
         self.task = "text-classification"
 
     def __call__(self, text, **kwargs):
+        return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(text)]
+
+
+class DummyTextClassificationPipelinePerf:
+    def __init__(self):
+        self.task = "text-classification"
+
+    def __call__(self, text, **kwargs):
+        print("DummyTextClassificationPipelinePerf")
+        sleep(2)
         return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(text)]
 
 
@@ -86,7 +97,7 @@ class TestTextClassificationEvaluator(TestCase):
             model_or_pipeline=model,
             data=self.data,
             metric="accuracy",
-            tokenizer=tokenizer,
+            preprocessor=tokenizer,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
@@ -147,7 +158,7 @@ class TestTextClassificationEvaluator(TestCase):
             model_or_pipeline=model,
             data=data,
             metric="accuracy",
-            tokenizer=tokenizer,
+            preprocessor=tokenizer,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
@@ -169,7 +180,7 @@ class TestTextClassificationEvaluator(TestCase):
             model_or_pipeline=model,
             data=data,
             metric="accuracy",
-            tokenizer=tokenizer,
+            preprocessor=tokenizer,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
@@ -190,7 +201,7 @@ class TestTextClassificationEvaluator(TestCase):
             model_or_pipeline=model,
             data=data,
             metric="accuracy",
-            tokenizer=tokenizer,
+            preprocessor=tokenizer,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
@@ -248,7 +259,7 @@ class TestImageClassificationEvaluator(TestCase):
             model_or_pipeline=model,
             data=self.data,
             metric="accuracy",
-            feature_extractor=feature_extractor,
+            preprocessor=feature_extractor,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
@@ -299,3 +310,30 @@ class TestImageClassificationEvaluator(TestCase):
             label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 0)
+
+
+class TestEvaluatorPerf(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict({"label": [1, 0], "text": ["great movie", "horrible movie"]})
+        self.input_column = "text"
+        self.label_column = "label"
+        self.pipe = DummyTextClassificationPipelinePerf()
+        self.evaluator = evaluator("text-classification")
+        self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
+
+    def test_perf(self):
+        data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
+
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=data,
+            metric="accuracy",
+            input_column=self.input_column,
+            label_column=self.label_column,
+            label_mapping=self.label_mapping,
+        )
+        self.assertAlmostEqual(results["accuracy"], 0.666666, 5)
+        self.assertTrue("latency" in results)
+        self.assertTrue("throughput" in results)
+        self.assertAlmostEqual(results["throughput"], len(data) / results["latency"], 5)
+        self.assertAlmostEqual(results["latency"], 2, 1)
