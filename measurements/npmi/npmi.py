@@ -12,15 +12,29 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
+import datasets
+from evaluate import logging as logs
 import warnings
-from pathlib import Path
+import pyarrow as pa
 
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import MultiLabelBinarizer
 
 # Might be nice to print to log instead? Happens when we drop closed class.
+import evaluate
+
+
+_CITATION = """\
+
+"""
+
+_DESCRIPTION = """\
+"""
+
+_KWARGS_DESCRIPTION = """\
+"""
+
 warnings.filterwarnings(action="ignore", category=UserWarning)
 # When we divide by 0 in log
 np.seterr(divide="ignore")
@@ -28,53 +42,54 @@ np.seterr(divide="ignore")
 # treating inf values as NaN as well
 pd.set_option("use_inf_as_na", True)
 
-logs = logging.getLogger(__name__)
-logs.setLevel(logging.INFO)
-logs.propagate = False
-
-if not logs.handlers:
-
-    Path("./log_files").mkdir(exist_ok=True)
-
-    # Logging info to log file
-    file = logging.FileHandler("./log_files/npmi.log")
-    fileformat = logging.Formatter("%(asctime)s:%(message)s")
-    file.setLevel(logging.INFO)
-    file.setFormatter(fileformat)
-
-    # Logging debug messages to stream
-    stream = logging.StreamHandler()
-    streamformat = logging.Formatter("[data_measurements_tool] %(message)s")
-    stream.setLevel(logging.WARNING)
-    stream.setFormatter(streamformat)
-
-    logs.addHandler(file)
-    logs.addHandler(stream)
 
 _NUM_BATCHES = 500
 
+class nPMI(evaluate.Measurement):
+    def _info(self):
+        return evaluate.MeasurementInfo(
+            module_type="measurement",
+            description=_DESCRIPTION,
+            citation=_CITATION,
+            inputs_description=_KWARGS_DESCRIPTION,
+            features=datasets.Features(
+            {
+                "data": datasets.Value(dtype=pa.large_list()),
+            }
+        )
+            # TODO: Create docs for this.
+            #reference_urls=["https://huggingface.co/docs/..."],
+        )
 
-class nPMI:
-    # TODO: Expand beyond pairwise
-    def __init__(
-        self,
-        vocab_counts_df,
-        tokenized_df,
-        tokenized_col_name="tokenized_text",
-    ):
-        logs.info("Initiating npmi class.")
-        logs.info("vocab is")
-        logs.info(vocab_counts_df)
+    def _compute(self, data='', subgroup='', vocab_counts_df='', tokenized_col_name="tokenized_text", batch_size: int = 16, bool = True, device=None):
+        ##logs.INFO("Initiating npmi class.")
+        ##logs.INFO("vocab is")
+        ##logs.INFO(vocab_counts_df)
         self.vocab_counts_df = vocab_counts_df
-        logs.info("tokenized is")
-        self.tokenized_df = tokenized_df
-        logs.info(self.tokenized_df)
+        ##logs.INFO("tokenized is")
+        # TODO(meg): Let this just be lists instead.
+        self.tokenized_df = None #pd.DataFrame(input_texts)
+        #logs.INFO(self.tokenized_df)
         self.tokenized_col_name = tokenized_col_name
         # self.mlb_list holds num batches x num_sentences
         self.mlb_list = []
+        # Index of the subgroup word in the sparse vector
+        subgroup_idx = self.vocab_counts_df.index.get_loc(subgroup)
+        #logs.INFO("Calculating co-occurrences...")
+        df_coo = self.calc_cooccurrences(subgroup, subgroup_idx)
+        vocab_cooc_df = self.set_idx_cols(df_coo, subgroup)
+        #logs.INFO(vocab_cooc_df)
+        #logs.INFO("Calculating PMI...")
+        pmi_df = self.calc_PMI(vocab_cooc_df, subgroup)
+        #logs.INFO(pmi_df)
+        #logs.INFO("Calculating nPMI...")
+        npmi_df = self.calc_nPMI(pmi_df, vocab_cooc_df, subgroup)
+        #logs.INFO(npmi_df)
+        npmi_bias = npmi_df.max(axis=0) + abs(npmi_df.min(axis=0))
+        return {"bias":npmi_bias, "co-occurrences":vocab_cooc_df, "pmi":pmi_df, "npmi":npmi_df}
 
-    def binarize_words_in_sentence(self):
-        logs.info("Creating co-occurrence matrix for PMI calculations.")
+    def _binarize_words_in_sentence(self):
+        #logs.INFO("Creating co-occurrence matrix for PMI calculations.")
         batches = np.linspace(0, self.tokenized_df.shape[0], _NUM_BATCHES).astype(int)
         i = 0
         # Creates list of size (# batches x # sentences)
@@ -82,9 +97,9 @@ class nPMI:
             # Makes a sparse matrix (shape: # sentences x # words),
             # with the occurrence of each word per sentence.
             mlb = MultiLabelBinarizer(classes=self.vocab_counts_df.index)
-            logs.info(
-                "%s of %s sentence binarize batches." % (str(i), str(len(batches)))
-            )
+            #logs.INFO(
+            #    "%s of %s sentence binarize batches." % (str(i), str(len(batches)))
+            #)
             # Returns series: batch size x num_words
             mlb_series = mlb.fit_transform(
                 self.tokenized_df[self.tokenized_col_name][batches[i]:batches[i + 1]]
@@ -96,35 +111,35 @@ class nPMI:
         initialize = True
         coo_df = None
         # Big computation here!  Should only happen once.
-        logs.info(
-            "Approaching big computation! Here, we binarize all words in the sentences, making a sparse matrix of sentences."
-        )
+        #logs.INFO(
+        #    "Approaching big computation! Here, we binarize all words in the sentences, making a sparse matrix of sentences."
+        #)
         if not self.mlb_list:
-            self.binarize_words_in_sentence()
+            self._binarize_words_in_sentence()
         for batch_id in range(len(self.mlb_list)):
-            logs.info(
-                "%s of %s co-occurrence count batches"
-                % (str(batch_id), str(len(self.mlb_list)))
-            )
+            #logs.INFO(
+            #    "%s of %s co-occurrence count batches"
+            #    % (str(batch_id), str(len(self.mlb_list)))
+            #)
             # List of all the sentences (list of vocab) in that batch
             batch_sentence_row = self.mlb_list[batch_id]
             # Dataframe of # sentences in batch x vocabulary size
             sent_batch_df = pd.DataFrame(batch_sentence_row)
-            # logs.info('sent batch df is')
-            # logs.info(sent_batch_df)
+            # #logs.INFO('sent batch df is')
+            # #logs.INFO(sent_batch_df)
             # Subgroup counts per-sentence for the given batch
             subgroup_df = sent_batch_df[subgroup_idx]
             subgroup_df.columns = [subgroup]
             # Remove the sentences where the count of the subgroup is 0.
             # This way we have less computation & resources needs.
             subgroup_df = subgroup_df[subgroup_df > 0]
-            logs.info("Removing 0 counts, subgroup_df is")
-            logs.info(subgroup_df)
+            #logs.INFO("Removing 0 counts, subgroup_df is")
+            #logs.INFO(subgroup_df)
             mlb_subgroup_only = sent_batch_df[sent_batch_df[subgroup_idx] > 0]
-            logs.info("mlb subgroup only is")
-            logs.info(mlb_subgroup_only)
+            #logs.INFO("mlb subgroup only is")
+            #logs.INFO(mlb_subgroup_only)
             # Create cooccurrence matrix for the given subgroup and all words.
-            logs.info("Now we do the T.dot approach for co-occurrences")
+            #logs.INFO("Now we do the T.dot approach for co-occurrences")
             batch_coo_df = pd.DataFrame(mlb_subgroup_only.T.dot(subgroup_df))
 
             # Creates a batch-sized dataframe of co-occurrence counts.
@@ -133,77 +148,12 @@ class nPMI:
                 coo_df = batch_coo_df
             else:
                 coo_df = coo_df.add(batch_coo_df, fill_value=0)
-            logs.info("coo_df is")
-            logs.info(coo_df)
+            #logs.INFO("coo_df is")
+            #logs.INFO(coo_df)
             initialize = False
-        logs.info("Returning co-occurrence matrix")
-        logs.info(coo_df)
+        #logs.INFO("Returning co-occurrence matrix")
+        #logs.INFO(coo_df)
         return pd.DataFrame(coo_df)
-
-    @staticmethod
-    def calc_paired_metrics(subgroup_pair, subgroup_npmi_dict):
-        """
-        Calculates nPMI metrics between paired subgroups.
-        Special handling for a subgroup paired with itself.
-        :param subgroup_npmi_dict: vocab, pmi, and npmi for each subgroup.
-        :return:
-
-        Args:
-            subgroup_pair:
-        """
-        paired_results_dict = {"npmi": {}, "pmi": {}, "count": {}}
-        # Canonical ordering. This is done previously, but just in case...
-        subgroup1, subgroup2 = sorted(subgroup_pair)
-        vocab_cooc_df1, pmi_df1, npmi_df1 = subgroup_npmi_dict[subgroup1]
-        logs.info("vocab cooc")
-        logs.info(vocab_cooc_df1)
-        if subgroup1 == subgroup2:
-            shared_npmi_df = npmi_df1
-            shared_pmi_df = pmi_df1
-            shared_vocab_cooc_df = vocab_cooc_df1
-        else:
-            vocab_cooc_df2, pmi_df2, npmi_df2 = subgroup_npmi_dict[subgroup2]
-            logs.info("vocab cooc2")
-            logs.info(vocab_cooc_df2)
-            # Note that lsuffix and rsuffix should not come into play.
-            shared_npmi_df = npmi_df1.join(
-                npmi_df2, how="inner", lsuffix="1", rsuffix="2"
-            )
-            shared_pmi_df = pmi_df1.join(pmi_df2, how="inner", lsuffix="1", rsuffix="2")
-            shared_vocab_cooc_df = vocab_cooc_df1.join(
-                vocab_cooc_df2, how="inner", lsuffix="1", rsuffix="2"
-            )
-            shared_vocab_cooc_df = shared_vocab_cooc_df.dropna()
-            shared_vocab_cooc_df = shared_vocab_cooc_df[
-                shared_vocab_cooc_df.index.notnull()
-            ]
-            logs.info("shared npmi df")
-            logs.info(shared_npmi_df)
-            logs.info("shared vocab df")
-            logs.info(shared_vocab_cooc_df)
-        npmi_bias = (
-            shared_npmi_df[subgroup1 + "-npmi"] - shared_npmi_df[subgroup2 + "-npmi"]
-        )
-        paired_results_dict["npmi-bias"] = npmi_bias.dropna()
-        paired_results_dict["npmi"] = shared_npmi_df.dropna()
-        paired_results_dict["pmi"] = shared_pmi_df.dropna()
-        paired_results_dict["count"] = shared_vocab_cooc_df.dropna()
-        return paired_results_dict
-
-    def calc_metrics(self, subgroup):
-        # Index of the subgroup word in the sparse vector
-        subgroup_idx = self.vocab_counts_df.index.get_loc(subgroup)
-        logs.info("Calculating co-occurrences...")
-        df_coo = self.calc_cooccurrences(subgroup, subgroup_idx)
-        vocab_cooc_df = self.set_idx_cols(df_coo, subgroup)
-        logs.info(vocab_cooc_df)
-        logs.info("Calculating PMI...")
-        pmi_df = self.calc_PMI(vocab_cooc_df, subgroup)
-        logs.info(pmi_df)
-        logs.info("Calculating nPMI...")
-        npmi_df = self.calc_nPMI(pmi_df, vocab_cooc_df, subgroup)
-        logs.info(npmi_df)
-        return vocab_cooc_df, pmi_df, npmi_df
 
     def set_idx_cols(self, df_coo, subgroup):
         """
@@ -230,8 +180,8 @@ class nPMI:
         p_subgroup_g_word = (
             vocab_cooc_df[subgroup + "-count"] / self.vocab_counts_df["count"]
         )
-        logs.info("p_subgroup_g_word is")
-        logs.info(p_subgroup_g_word)
+        #logs.INFO("p_subgroup_g_word is")
+        #logs.INFO(p_subgroup_g_word)
         pmi_df = pd.DataFrame()
         pmi_df[subgroup + "-pmi"] = np.log(p_subgroup_g_word / subgroup_prob)
         # Note: A potentially faster solution for adding count, npmi,
