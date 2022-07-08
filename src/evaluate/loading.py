@@ -39,7 +39,6 @@ from .utils.file_utils import (
     DownloadConfig,
     cached_path,
     head_hf_s3,
-    hf_github_url,
     hf_hub_url,
     init_hf_modules,
     is_relative_path,
@@ -401,75 +400,6 @@ class _EvaluationModuleFactory:
         raise NotImplementedError
 
 
-class GithubEvaluationModuleFactory(_EvaluationModuleFactory):
-    """Get the module of a metric. The metric script is downloaded from GitHub."""
-
-    def __init__(
-        self,
-        name: str,
-        module_type: str,
-        revision: Optional[Union[str, Version]] = None,
-        download_config: Optional[DownloadConfig] = None,
-        download_mode: Optional[DownloadMode] = None,
-        dynamic_modules_path: Optional[str] = None,
-    ):
-        self.name = name
-        self.module_type = module_type
-        self.revision = revision
-        self.download_config = download_config or DownloadConfig()
-        self.download_mode = download_mode
-        self.dynamic_modules_path = dynamic_modules_path
-        assert self.name.count("/") == 0
-        increase_load_count(name, resource_type="metric")
-
-    def download_loading_script(self, revision: Optional[str]) -> str:
-        file_path = hf_github_url(
-            path=self.name, name=self.name + ".py", module_type=self.module_type, revision=revision
-        )
-        download_config = self.download_config.copy()
-        if download_config.download_desc is None:
-            download_config.download_desc = "Downloading builder script"
-        return cached_path(file_path, download_config=download_config)
-
-    def get_module(self) -> ImportableModule:
-        # get script and other files
-        revision = self.revision
-        try:
-            local_path = self.download_loading_script(revision)
-            revision = self.revision
-        except FileNotFoundError:
-            if revision is not None or os.getenv("HF_SCRIPTS_VERSION", None) is not None:
-                raise
-            else:
-                revision = "main"
-                local_path = self.download_loading_script(revision)
-                logger.warning(
-                    f"Couldn't find a directory or a metric named '{self.name}' in this version. "
-                    f"It was picked from the main branch on github instead."
-                )
-        imports = get_imports(local_path)
-        local_imports = _download_additional_modules(
-            name=self.name,
-            base_path=hf_github_url(path=self.name, name="", module_type=self.module_type, revision=revision),
-            imports=imports,
-            download_config=self.download_config,
-        )
-        # copy the script and the files in an importable directory
-        dynamic_modules_path = self.dynamic_modules_path if self.dynamic_modules_path else init_dynamic_modules()
-        module_path, hash = _create_importable_file(
-            local_path=local_path,
-            local_imports=local_imports,
-            additional_files=[],
-            dynamic_modules_path=dynamic_modules_path,
-            module_namespace=self.module_type,
-            name=self.name,
-            download_mode=self.download_mode,
-        )
-        # make the new module to be noticed by the import system
-        importlib.invalidate_caches()
-        return ImportableModule(module_path, hash)
-
-
 class LocalEvaluationModuleFactory(_EvaluationModuleFactory):
     """Get the module of a local metric. The metric script is loaded from a local script."""
 
@@ -685,9 +615,8 @@ def evaluation_module_factory(
                 if module_type is None:
                     for current_type in ["metric", "comparison", "measurement"]:
                         try:
-                            return GithubEvaluationModuleFactory(
-                                path,
-                                current_type,
+                            return HubEvaluationModuleFactory(
+                                f"evaluate-{current_type}/{path}",
                                 revision=revision,
                                 download_config=download_config,
                                 download_mode=download_mode,
@@ -698,9 +627,8 @@ def evaluation_module_factory(
                     raise FileNotFoundError
                 # if module_type provided load specific module_type
                 else:
-                    return GithubEvaluationModuleFactory(
-                        path,
-                        module_type,
+                    return HubEvaluationModuleFactory(
+                        f"evaluate-{module_type}/{path}",
                         revision=revision,
                         download_config=download_config,
                         download_mode=download_mode,
