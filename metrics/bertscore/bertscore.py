@@ -146,6 +146,12 @@ class BERTScore(evaluate.Metric):
 
         if isinstance(references[0], str):
             references = [[ref] for ref in references]
+
+        if idf:
+            idf_sents = [r for ref in references for r in ref]
+        else:
+            idf_sents = None
+
         get_hash = bert_score.utils.get_hash
         scorer = bert_score.BERTScorer
 
@@ -182,6 +188,7 @@ class BERTScore(evaluate.Metric):
                     nthreads=nthreads,
                     all_layers=all_layers,
                     idf=idf,
+                    idf_sents=idf_sents,
                     device=device,
                     lang=lang,
                     rescale_with_baseline=rescale_with_baseline,
