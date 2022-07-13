@@ -141,6 +141,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             cwd=os.path.join(self.dir_path, "transformers"),
         )
 
+        # test squad_v1-like dataset
         subprocess.run(
             f"python examples/pytorch/question-answering/run_qa.py"
             f" --model_name_or_path {model_name}"
@@ -172,3 +173,43 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         self.assertEqual(transformers_results["eval_f1"], evaluator_results["f1"])
         self.assertEqual(transformers_results["eval_exact_match"], evaluator_results["exact_match"])
+
+        # test squad_v2-like dataset
+        subprocess.run(
+            f"python examples/pytorch/question-answering/run_qa.py"
+            f" --model_name_or_path {model_name}"
+            f" --dataset_name squad_v2"
+            f" --version_2_with_negative"
+            f" --do_eval"
+            f" --output_dir {os.path.join(self.dir_path, 'questionanswering_squadv2_transformers')}"
+            f" --max_eval_samples 100"
+            f" --max_seq_length 384",
+            shell=True,
+            cwd=os.path.join(self.dir_path, "transformers"),
+        )
+
+        with open(
+            f"{os.path.join(self.dir_path, 'questionanswering_squadv2_transformers', 'eval_results.json')}", "r"
+        ) as f:
+            transformers_results = json.load(f)
+
+        eval_dataset = load_dataset("squad_v2", split="validation[:100]")
+
+        pipe = pipeline(
+            task="question-answering",
+            model=model_name,
+            tokenizer=model_name,
+            max_answer_len=30,
+            handle_impossible_answer=True,
+        )
+
+        e = evaluator(task="question-answering")
+        evaluator_results = e.compute(
+            model_or_pipeline=pipe,
+            data=eval_dataset,
+            metric="squad_v2",
+            strategy="simple",
+        )
+
+        self.assertEqual(transformers_results["eval_HasAns_f1"], evaluator_results["HasAns_f1"])
+        self.assertEqual(transformers_results["eval_NoAns_f1"], evaluator_results["NoAns_f1"])

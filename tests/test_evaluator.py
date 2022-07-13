@@ -63,7 +63,7 @@ class DummyQuestionAnsweringPipeline:
                 {"score": 0.95, "start": 31, "end": 39, "answer": "Felix"}
                 if i % 2 == 0
                 else {"score": 0.95, "start": 0, "end": 0, "answer": ""}
-                for i in len(question)
+                for i in range(len(question))
             ]
         else:
             return [{"score": 0.95, "start": 31, "end": 39, "answer": "Felix"} for _ in question]
@@ -304,27 +304,19 @@ class TestQuestionAnsweringEvaluator(TestCase):
         self.evaluator = evaluator("question-answering")
 
     def test_pipe_init(self):
+        # squad_v1-like dataset
         scores = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
         )
         self.assertDictEqual(scores, {"exact_match": 100.0, "f1": 100.0})
 
-        scores = self.evaluator.compute(model_or_pipeline=self.pipe_v2, data=self.data_v2, metric="squad_v2")
-        self.assertDictEqual(scores, {"exact_match": 100.0, "f1": 100.0})
-
     def test_model_init(self):
+        # squad_v1-like dataset
         scores = self.evaluator.compute(
             model_or_pipeline=self.default_model,
             data=self.data,
             metric="squad",
-        )
-        self.assertDictEqual(scores, {"exact_match": 0, "f1": 100 / 3})
-
-        scores = self.evaluator.compute(
-            model_or_pipeline=self.default_model,
-            data=self.data_v2,
-            metric="squad_v2",
         )
         self.assertDictEqual(scores, {"exact_match": 0, "f1": 100 / 3})
 
@@ -334,14 +326,6 @@ class TestQuestionAnsweringEvaluator(TestCase):
             model_or_pipeline=model,
             data=self.data,
             metric="squad",
-            tokenizer=tokenizer,
-        )
-        self.assertDictEqual(scores, {"exact_match": 0, "f1": 100 / 3})
-
-        scores = self.evaluator.compute(
-            model_or_pipeline=model,
-            data=self.data_v2,
-            metric="squad_v2",
             tokenizer=tokenizer,
         )
         self.assertDictEqual(scores, {"exact_match": 0, "f1": 100 / 3})
@@ -369,7 +353,9 @@ class TestQuestionAnsweringEvaluator(TestCase):
             data=self.data_v2,
             metric="squad_v2",
         )
-        self.assertDictEqual(scores, {"exact_match": 100.0, "f1": 100.0})
+        self.assertDictEqual(
+            {key: scores[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 100.0}
+        )
 
     def test_default_pipe_init(self):
         # squad_v1-like dataset
@@ -381,8 +367,11 @@ class TestQuestionAnsweringEvaluator(TestCase):
         # squad_v2-like dataset
         scores = self.evaluator.compute(
             data=self.data_v2,
+            metric="squad_v2",
         )
-        self.assertDictEqual(scores, {"exact_match": 100.0, "f1": 100.0})
+        self.assertDictEqual(
+            {key: scores[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 0.0}
+        )
 
     def test_overwrite_default_metric(self):
         # squad_v1-like dataset
@@ -398,21 +387,5 @@ class TestQuestionAnsweringEvaluator(TestCase):
             model_or_pipeline=self.pipe,
             data=self.data,
             metric="squad",
-        )
-        self.assertDictEqual(scores, {"exact_match": 100.0, "f1": 100.0})
-
-        # squad_v2-like dataset
-        squad = load("squad_v2")
-        scores = self.evaluator.compute(
-            model_or_pipeline=self.pipe_v2,
-            data=self.data_v2,
-            metric=squad,
-        )
-        self.assertDictEqual(scores, {"exact_match": 100.0, "f1": 100.0})
-
-        scores = self.evaluator.compute(
-            model_or_pipeline=self.pipe_v2,
-            data=self.data_v2,
-            metric="squad_v2",
         )
         self.assertDictEqual(scores, {"exact_match": 100.0, "f1": 100.0})
