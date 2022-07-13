@@ -72,9 +72,8 @@ class Evaluator(ABC):
 
     @staticmethod
     def _compute_confidence_interval(
-        predictions,
-        references,
-        metric: EvaluationModule,
+        metric,
+        metric_inputs,
         metric_keys: List[str],
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
@@ -84,14 +83,18 @@ class Evaluator(ABC):
         A utility function enabling the confidence interval calculation for metrics computed
         by the evaluator based on `scipy`'s `bootstrap` method.
         """
+
+        # bootstrap only works with functions that use args and no kwargs
+        def build_args_metric(metric, key, **kwargs):
+            def args_metric(*args):
+                return metric.compute(**{k: v for k, v in zip(kwargs.keys(), args)})[key]
+            return args_metric
+
         bootstrap_dict = {}
         for key in metric_keys:
             bs = bootstrap(
-                data=(predictions, references),
-                statistic=lambda predictions, references: metric.compute(
-                    predictions=predictions,
-                    references=references,
-                )[key],
+                data=list(metric_inputs.values()),
+                statistic=build_args_metric(metric, key, **metric_inputs),
                 paired=True,
                 vectorized=False,
                 confidence_level=confidence_level,
@@ -103,6 +106,13 @@ class Evaluator(ABC):
                 "standard_error": bs.standard_error,
             }
         return bootstrap_dict
+
+    @abstractmethod
+    def predictions_processor(self, *args, **kwargs):
+        """
+        A core method of the `Evaluator` class, which processes the pipeline outputs for compatibility with the metric.
+        """
+        raise NotImplementedError()
 
     @abstractmethod
     def compute(
@@ -121,7 +131,7 @@ class Evaluator(ABC):
         with the task specified by the `Evaluator`.
         """
         raise NotImplementedError()
-
+    
     def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str):
         """
         Prepare data.
@@ -218,25 +228,27 @@ class Evaluator(ABC):
 
         return metric
 
-    def core_compute(
+    def call_pipeline(self, pipe, *args, **kwargs):
+        # todo: add performance metrics here
+        return pipe(*args, **kwargs)
+
+    def compute_metric(
         self,
-        references: List,
-        predictions: List,
         metric: EvaluationModule,
+        metric_inputs,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
         random_state: Optional[int] = None,
     ):
         """Compute and return metrics."""
-        result = metric.compute(predictions=predictions, references=references)
+        result = metric.compute(**metric_inputs)
 
         if strategy == "bootstrap":
             metric_keys = result.keys()
-            bootstrap_dict = Evaluator._compute_confidence_interval(
-                predictions,
-                references,
+            bootstrap_dict = self._compute_confidence_interval(
                 metric,
+                metric_inputs,
                 metric_keys,
                 confidence_level,
                 n_resamples,

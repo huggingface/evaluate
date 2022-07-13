@@ -48,6 +48,13 @@ class TextClassificationEvaluator(Evaluator):
     def __init__(self, task="text-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
+    def predictions_processor(self,predictions, label_mapping):
+        predictions = [
+            label_mapping[element["label"]] if label_mapping is not None else element["label"]
+            for element in predictions
+        ]
+        return predictions
+
     def compute(
         self,
         model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
@@ -123,28 +130,28 @@ class TextClassificationEvaluator(Evaluator):
         >>>     random_state=0
         >>> )
         ```"""
+
+        result = {}
+
         data = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
+        metric_inputs = {"references": data[label_column]}
 
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, preprocessor=tokenizer)
-
         metric = self.prepare_metric(metric)
 
         # Compute predictions
-        predictions = pipe(data[input_column], truncation=True)
-        predictions = [
-            label_mapping[element["label"]] if label_mapping is not None else element["label"]
-            for element in predictions
-        ]
+        predictions = self.call_pipeline(pipe, data[input_column], truncation=True)
+        metric_inputs["predictions"] = self.predictions_processor(predictions, label_mapping)
 
         # Compute metrics from references and predictions
-        result = self.core_compute(
-            references=data[label_column],
-            predictions=predictions,
+        result.update(self.compute_metric(
             metric=metric,
+            metric_inputs=metric_inputs,
             strategy=strategy,
             confidence_level=confidence_level,
             n_resamples=n_resamples,
             random_state=random_state,
+            )
         )
 
         return result
