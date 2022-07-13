@@ -127,8 +127,8 @@ class ImageClassificationEvaluator(Evaluator):
         >>> )
         ```"""
 
-        result= {}
-        
+        result = {}
+
         data = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
         metric_inputs = {"references": data[label_column]}
 
@@ -139,15 +139,16 @@ class ImageClassificationEvaluator(Evaluator):
         # Compute predictions
         predictions = self.call_pipeline(pipe, data[input_column])
         metric_inputs["predictions"] = self.predictions_processor(predictions, label_mapping)
-        
+
         # Compute metrics from references and predictions
-        result.update(self.compute_metric(
-            metric=metric,
-            metric_inputs=metric_inputs,
-            strategy=strategy,
-            confidence_level=confidence_level,
-            n_resamples=n_resamples,
-            random_state=random_state,
+        result.update(
+            self.compute_metric(
+                metric=metric,
+                metric_inputs=metric_inputs,
+                strategy=strategy,
+                confidence_level=confidence_level,
+                n_resamples=n_resamples,
+                random_state=random_state,
             )
         )
 

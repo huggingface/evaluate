@@ -88,6 +88,7 @@ class Evaluator(ABC):
         def build_args_metric(metric, key, **kwargs):
             def args_metric(*args):
                 return metric.compute(**{k: v for k, v in zip(kwargs.keys(), args)})[key]
+
             return args_metric
 
         bootstrap_dict = {}
@@ -131,7 +132,7 @@ class Evaluator(ABC):
         with the task specified by the `Evaluator`.
         """
         raise NotImplementedError()
-    
+
     def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str):
         """
         Prepare data.
