@@ -85,7 +85,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         In this case, the answer text list should be `[]`.
         """
         original_num_rows = data.num_rows
-        nonempty_num_rows = data.filter(lambda x : len(x[label_column]["text"]) > 0).num_rows
+        nonempty_num_rows = data.filter(lambda x: len(x[label_column]["text"]) > 0).num_rows
         if original_num_rows > nonempty_num_rows:
             return True
         else:
@@ -188,7 +188,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         for i in range(len(_predictions)):
             pred = {"prediction_text": _predictions[i]["answer"], "id": data[i][id_column]}
             if squad_v2_schema:
-                pred["no_answer_probability"] = 0.
+                pred["no_answer_probability"] = 0.0
             predictions.append(pred)
 
         references = [{"id": element[id_column], "answers": element[label_column]} for element in data]
