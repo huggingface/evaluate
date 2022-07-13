@@ -37,10 +37,15 @@ logger = get_logger(__name__)
 
 class QuestionAnsweringEvaluator(Evaluator):
     """
-    Question answering evaluator.
+    Question answering evaluator. This evaluator handles
+    [**extractive** question answering](https://huggingface.co/docs/transformers/task_summary#extractive-question-answering),
+    where the answer to the question is extracted from a context.
+
     This question answering evaluator can currently be loaded from [`evaluator`] using the default task name
     `question-answering`.
-    Methods in this class assume a data format compatible with the [`QuestionAnsweringPipeline`].
+
+    Methods in this class assume a data format compatible with the
+    [`QuestionAnsweringPipeline`](https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.QuestionAnsweringPipeline).
     """
 
     def __init__(self, task="question-answering", default_metric_name=None):
@@ -169,9 +174,9 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         <Tip>
 
-        Datasets where the answer may be missing in the context are supported, for example SQuAD v2 dataset. If using transformers pipeline,
-        make sure to pass `handle_impossible_answer=True` as an argument to the pipeline.
-
+        Datasets where the answer may be missing in the context are supported, for example SQuAD v2 dataset. If using transformers pipeline
+        with models trained on this type of data, make sure to pass `handle_impossible_answer=True` as an argument to the pipeline.
+        
         </Tip>
 
         ```python
@@ -180,7 +185,11 @@ class QuestionAnsweringEvaluator(Evaluator):
         >>> from transformers import pipeline
         >>> e = evaluator("question-answering")
         >>> data = load_dataset("squad_v2", split="validation[:2]")
-        >>> pipe = pipeline(task="question-answering", model="sshleifer/mrm8488/bert-tiny-finetuned-squadv2", handle_impossible_answer=True)
+        >>> pipe = pipeline(
+        >>>     task="question-answering",
+        >>>     model="sshleifer/mrm8488/bert-tiny-finetuned-squadv2",
+        >>>     handle_impossible_answer=True
+        >>> )
         >>> results = e.compute(
         >>>     model_or_pipeline=pipe,
         >>>     data=data,
