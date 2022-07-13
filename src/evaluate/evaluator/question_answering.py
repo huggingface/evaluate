@@ -80,6 +80,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         return data
 
     def is_squad_v2_schema(self, data: Dataset, label_column: str = "answers"):
+        print(data)
         """
         Check if the provided dataset follows the squad v2 data schema, namely possible samples where the answer is not in the context.
         In this case, the answer text list should be `[]`.
