@@ -79,6 +79,18 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         return data
 
+    def is_squad_v2_schema(self, data: Dataset, label_column: str = "answers"):
+        """
+        Check if the provided dataset follows the squad v2 data schema, namely possible samples where the answer is not in the context.
+        In this case, the answer text list should be `[]`.
+        """
+        original_num_rows = data.num_rows
+        nonempty_num_rows = data.filter(lambda x : len(x[label_column]["text"]) > 0).num_rows
+        if original_num_rows > nonempty_num_rows:
+            return True
+        else:
+            return False
+
     def compute(
         self,
         model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
@@ -164,16 +176,20 @@ class QuestionAnsweringEvaluator(Evaluator):
             id_column=id_column,
             label_column=label_column,
         )
+        squad_v2_schema = self.is_squad_v2_schema(data=data, label_column=label_column)
 
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, preprocessor=tokenizer)
 
         metric = self.prepare_metric(metric)
 
         # Compute predictions
-        predictions = pipe(question=data[question_column], context=data[context_column], padding="max_length")
-        predictions = [
-            {"prediction_text": predictions[i]["answer"], "id": data[i][id_column]} for i in range(len(predictions))
-        ]
+        _predictions = pipe(question=data[question_column], context=data[context_column], padding="max_length")
+        predictions = []
+        for i in range(len(_predictions)):
+            pred = {"prediction_text": _predictions[i]["answer"], "id": data[i][id_column]}
+            if squad_v2_schema:
+                pred["no_answer_probability"] = 0.
+            predictions.append(pred)
 
         references = [{"id": element[id_column], "answers": element[label_column]} for element in data]
 
