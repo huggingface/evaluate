@@ -153,6 +153,7 @@ class QuestionAnsweringEvaluator(Evaluator):
             A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
             `"simple"` strategy, the value is the metric score. For the `"bootstrap"` strategy, the value is a `Dict`
             containing the score, the confidence interval and the standard error calculated for each metric key.
+
         Examples:
         ```python
         >>> from evaluate import evaluator
@@ -160,17 +161,33 @@ class QuestionAnsweringEvaluator(Evaluator):
         >>> e = evaluator("question-answering")
         >>> data = load_dataset("squad", split="validation[:2]")
         >>> results = e.compute(
-        >>>     model_or_pipeline="mrm8488/bert-tiny-finetuned-squadv2",
+        >>>     model_or_pipeline="sshleifer/tiny-distilbert-base-cased-distilled-squad",
         >>>     data=data,
         >>>     metric="squad",
-        >>>     question_column="question",
-        >>>     context_column="context",
-        >>>     label_column="answers",
-        >>>     strategy="bootstrap",
-        >>>     n_resamples=10,
-        >>>     random_state=0
         >>> )
-        ```"""
+        ```
+
+        <Tip>
+
+        Datasets where the answer may be missing in the context are supported, for example SQuAD v2 dataset. If using transformers pipeline,
+        make sure to pass `handle_impossible_answer=True` as an argument to the pipeline.
+
+        </Tip>
+
+        ```python
+        >>> from evaluate import evaluator
+        >>> from datasets import Dataset, load_dataset
+        >>> from transformers import pipeline
+        >>> e = evaluator("question-answering")
+        >>> data = load_dataset("squad_v2", split="validation[:2]")
+        >>> pipe = pipeline(task="question-answering", model="sshleifer/mrm8488/bert-tiny-finetuned-squadv2", handle_impossible_answer=True)
+        >>> results = e.compute(
+        >>>     model_or_pipeline=pipe,
+        >>>     data=data,
+        >>>     metric="squad_v2",
+        >>> )
+        ```
+        """
         data = self.prepare_data(
             data=data,
             question_column=question_column,
