@@ -12,28 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from numbers import Number
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Tuple
 
-# Lint as: python3
-from datasets import Dataset
-
-
-try:
-    from transformers import FeatureExtractionMixin, Pipeline, PreTrainedModel, TFPreTrainedModel
-
-    TRANSFORMERS_AVAILABLE = True
-except ImportError:
-    TRANSFORMERS_AVAILABLE = False
-
-from typing_extensions import Literal
-
-from ..module import EvaluationModule
-from ..utils.logging import get_logger
 from .base import Evaluator
-
-
-logger = get_logger(__name__)
 
 
 class ImageClassificationEvaluator(Evaluator):
@@ -49,22 +30,11 @@ class ImageClassificationEvaluator(Evaluator):
 
     def predictions_processor(self, predictions, label_mapping):
         pred_label = [max(pred, key=lambda x: x["score"])["label"] for pred in predictions]
-        return [label_mapping[pred] if label_mapping is not None else pred for pred in pred_label]
+        pred_label = [label_mapping[pred] if label_mapping is not None else pred for pred in pred_label]
 
-    def compute(
-        self,
-        model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
-        data: Union[str, Dataset] = None,
-        metric: Union[str, EvaluationModule] = None,
-        feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,
-        strategy: Literal["simple", "bootstrap"] = "simple",
-        confidence_level: float = 0.95,
-        n_resamples: int = 9999,
-        random_state: Optional[int] = None,
-        input_column: str = "image",
-        label_column: str = "labels",
-        label_mapping: Optional[Dict[str, Number]] = None,
-    ) -> Tuple[Dict[str, float], Any]:
+        return {"predictions": pred_label}
+
+    def compute(self, *args, **kwargs) -> Tuple[Dict[str, float], Any]:
         """
         Compute the metric for a given pipeline and dataset combination.
         Args:
@@ -127,29 +97,6 @@ class ImageClassificationEvaluator(Evaluator):
         >>> )
         ```"""
 
-        result = {}
-
-        data = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
-        metric_inputs = {"references": data[label_column]}
-
-        pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, preprocessor=feature_extractor)
-
-        metric = self.prepare_metric(metric)
-
-        # Compute predictions
-        predictions = self.call_pipeline(pipe, data[input_column])
-        metric_inputs["predictions"] = self.predictions_processor(predictions, label_mapping)
-
-        # Compute metrics from references and predictions
-        result.update(
-            self.compute_metric(
-                metric=metric,
-                metric_inputs=metric_inputs,
-                strategy=strategy,
-                confidence_level=confidence_level,
-                n_resamples=n_resamples,
-                random_state=random_state,
-            )
-        )
+        result = super().compute(*args, **kwargs)
 
         return result

@@ -13,7 +13,8 @@
 # limitations under the License.
 
 from abc import ABC, abstractmethod
-from typing import Any, Callable, Dict, List, Optional, Union
+from numbers import Number
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
 from datasets import Dataset, load_dataset
@@ -57,6 +58,9 @@ class Evaluator(ABC):
     different evaluators.
     Base class implementing evaluator operations.
     """
+
+    PIPELINE_KWARGS = {}
+    METRIC_KWARGS = {}
 
     def __init__(self, task: str, default_metric_name: str = None):
         if not TRANSFORMERS_AVAILABLE:
@@ -115,23 +119,50 @@ class Evaluator(ABC):
         """
         raise NotImplementedError()
 
-    @abstractmethod
     def compute(
         self,
         model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
         data: Union[str, Dataset] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,
+        feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
-        **compute_parameters: Dict,
-    ):
-        """
-        A core method of the `Evaluator` class, computes the metric value for a pipeline and dataset compatible
-        with the task specified by the `Evaluator`.
-        """
-        raise NotImplementedError()
+        random_state: Optional[int] = None,
+        input_column: str = "text",
+        label_column: str = "label",
+        label_mapping: Optional[Dict[str, Number]] = None,
+    ) -> Tuple[Dict[str, float], Any]:
+
+        result = {}
+
+        # Prepare inputs
+        metric_inputs, pipe_inputs = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
+        pipe = self.prepare_pipeline(
+            model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, feature_extractor=feature_extractor
+        )
+        metric = self.prepare_metric(metric)
+
+        # Compute predictions
+        predictions = self.call_pipeline(pipe, pipe_inputs)
+        predictions = self.predictions_processor(predictions, label_mapping)
+
+        metric_inputs.update(predictions)
+
+        # Compute metrics from references and predictions
+        metric_results = self.compute_metric(
+            metric=metric,
+            metric_inputs=metric_inputs,
+            strategy=strategy,
+            confidence_level=confidence_level,
+            n_resamples=n_resamples,
+            random_state=random_state,
+        )
+
+        result.update(metric_results)
+
+        return result
 
     def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str):
         """
@@ -145,8 +176,9 @@ class Evaluator(ABC):
                 the name of the column containing the text feature in the dataset specified by `data`.
             label_column (`str`, defaults to `"label"`):
                 the name of the column containing the labels in the dataset specified by `data`.
-        Return:
-            Loaded `datasets.Dataset`.
+        Returns:
+            `dict`:  metric inputs.
+            `list`:  pipeline inputs.
         """
         if data is None:
             raise ValueError(
@@ -162,12 +194,13 @@ class Evaluator(ABC):
                 f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
             )
 
-        return data
+        return {"references": data[label_column]}, data[input_column]
 
     def prepare_pipeline(
         self,
         model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"],
-        preprocessor: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,
+        tokenizer: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,
+        feature_extractor: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,
     ):
         """
         Prepare pipeline.
@@ -191,13 +224,15 @@ class Evaluator(ABC):
             or isinstance(model_or_pipeline, TFPreTrainedModel)
             or isinstance(model_or_pipeline, str)
         ):
-            pipe = pipeline(self.task, model=model_or_pipeline, tokenizer=preprocessor, feature_extractor=preprocessor)
+            pipe = pipeline(
+                self.task, model=model_or_pipeline, tokenizer=tokenizer, feature_extractor=feature_extractor
+            )
         else:
             if model_or_pipeline is None:
                 pipe = pipeline(self.task)
             else:
                 pipe = model_or_pipeline
-            if preprocessor is not None:
+            if tokenizer is not None and feature_extractor is not None:
                 logger.warning("Ignoring the value of the preprocessor argument (`tokenizer` or `feature_extractor`).")
         if pipe.task != self.task:
             raise ValueError(
@@ -231,7 +266,7 @@ class Evaluator(ABC):
 
     def call_pipeline(self, pipe, *args, **kwargs):
         # todo: add performance metrics here
-        return pipe(*args, **kwargs)
+        return pipe(*args, **kwargs, **self.PIPELINE_KWARGS)
 
     def compute_metric(
         self,
@@ -243,7 +278,7 @@ class Evaluator(ABC):
         random_state: Optional[int] = None,
     ):
         """Compute and return metrics."""
-        result = metric.compute(**metric_inputs)
+        result = metric.compute(**metric_inputs, **self.METRIC_KWARGS)
 
         if strategy == "bootstrap":
             metric_keys = result.keys()
