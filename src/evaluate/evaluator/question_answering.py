@@ -108,7 +108,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         for i in range(len(predictions)):
             pred = {"prediction_text": predictions[i]["answer"], "id": ids[i]}
             if squad_v2_schema:
-                pred["no_answer_probability"] = 0.0
+                pred["no_answer_probability"] = predictions[i]["score"]
             result.append(pred)
         return {"predictions": result}
 
