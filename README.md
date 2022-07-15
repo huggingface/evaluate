@@ -11,8 +11,8 @@
     <a href="https://github.com/huggingface/evaluate/blob/master/LICENSE">
         <img alt="GitHub" src="https://img.shields.io/github/license/huggingface/evaluate.svg?color=blue">
     </a>
-    <a href="https://huggingface.co/docs/evaluate/index.html">
-        <img alt="Documentation" src="https://img.shields.io/website/http/huggingface.co/docs/evaluate/index.html.svg?down_color=red&down_message=offline&up_message=online">
+    <a href="https://huggingface.co/docs/evaluate/index">
+        <img alt="Documentation" src="https://img.shields.io/website/http/huggingface.co/docs/evaluate/index.svg?down_color=red&down_message=offline&up_message=online">
     </a>
     <a href="https://github.com/huggingface/evaluate/releases">
         <img alt="GitHub release" src="https://img.shields.io/github/release/huggingface/evaluate.svg">
@@ -27,7 +27,7 @@
 It currently contains:
 
 - **implementations of dozens of popular metrics**: the existing metrics cover a variety of tasks spanning from NLP to Computer Vision, and include dataset-specific metrics for datasets. With a simple command like `accuracy = load("accuracy")`, get any of these metrics ready to use for evaluating a ML model in any framework (Numpy/Pandas/PyTorch/TensorFlow/JAX).
-- **includes comparisons and measurements**: comparisons are used to measure the difference between models and measurements are tools to evaluate datasets.
+- **comparisons and measurements**: comparisons are used to measure the difference between models and measurements are tools to evaluate datasets.
 - **an easy way of adding new evaluation modules to the 🤗 Hub**: you can create new evaluation modules and push them to a dedicated Space in the 🤗 Hub with `evaluate-cli create [metric name]`, which allows you to see easily compare different metrics and their outputs for the same sets of references and predictions.
 
 [🎓 **Documentation**](https://huggingface.co/docs/evaluate/)
@@ -75,4 +75,4 @@ See this [step-by-step guide](https://huggingface.co/docs/evaluate/creating_and_
 
 ## Credits
 
-Thanks to @marella for letting us use the `evaluate` namespace on PyPi previously used by his [library](https://github.com/marella/evaluate).
+Thanks to [@marella](https://github.com/marella) for letting us use the `evaluate` namespace on PyPi previously used by his [library](https://github.com/marella/evaluate).

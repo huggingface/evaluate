@@ -19,7 +19,7 @@ import datasets
 from nltk.translate import gleu_score
 
 import evaluate
-from evaluate import EvaluationModuleInfo
+from evaluate import MetricInfo
 
 from .tokenizer_13a import Tokenizer13a
 
@@ -125,9 +125,9 @@ Examples:
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class GoogleBleu(evaluate.EvaluationModule):
-    def _info(self) -> EvaluationModuleInfo:
-        return evaluate.EvaluationModuleInfo(
+class GoogleBleu(evaluate.Metric):
+    def _info(self) -> MetricInfo:
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,

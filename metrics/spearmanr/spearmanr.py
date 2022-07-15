@@ -97,9 +97,9 @@ _CITATION = r"""\
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Spearmanr(evaluate.EvaluationModule):
+class Spearmanr(evaluate.Metric):
     def _info(self):
-        return evaluate.EvaluationModuleInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
@@ -113,12 +113,8 @@ class Spearmanr(evaluate.EvaluationModule):
         )
 
     def _compute(self, predictions, references, return_pvalue=False):
+        results = spearmanr(references, predictions)
         if return_pvalue:
-            return {
-                "spearmanr": spearmanr(references, predictions)[0],
-                "spearmanr_pvalue": spearmanr(references, predictions)[1],
-            }
+            return {"spearmanr": results[0], "spearmanr_pvalue": results[1]}
         else:
-            return {
-                "spearmanr": spearmanr(references, predictions)[0],
-            }
+            return {"spearmanr": results[0]}

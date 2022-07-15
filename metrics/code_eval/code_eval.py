@@ -132,9 +132,9 @@ THE SOFTWARE."""
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class CodeEval(evaluate.EvaluationModule):
+class CodeEval(evaluate.Metric):
     def _info(self):
-        return evaluate.EvaluationModuleInfo(
+        return evaluate.MetricInfo(
             # This is the description that will appear on the metrics page.
             description=_DESCRIPTION,
             citation=_CITATION,

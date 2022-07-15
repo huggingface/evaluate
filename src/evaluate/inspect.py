@@ -18,7 +18,7 @@
 from typing import Optional
 
 import requests
-from datasets.utils import DownloadConfig
+from datasets import DownloadConfig
 
 from .config import EVALUATION_MODULE_TYPES, HF_LIST_ENDPOINT
 from .loading import evaluation_module_factory

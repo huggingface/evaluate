@@ -52,12 +52,12 @@ def get_hash(example):
     return hashlib.md5(example.strip().encode("utf-8")).hexdigest()
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class TextDuplicates(evaluate.EvaluationModule):
+class TextDuplicates(evaluate.Measurement):
     """This measurement returns the duplicate strings contained in the input(s)."""
 
     def _info(self):
-        # TODO: Specifies the evaluate.EvaluationModuleInfo object
-        return evaluate.EvaluationModuleInfo(
+        # TODO: Specifies the evaluate.MeasurementInfo object
+        return evaluate.MeasurementInfo(
             # This is the description that will appear on the modules page.
             module_type="measurement",
             description=_DESCRIPTION,

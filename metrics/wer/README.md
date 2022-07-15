@@ -137,7 +137,7 @@ WER is a valuable tool for comparing different systems as well as for evaluating
 @inproceedings{woodard1982,
 author = {Woodard, J.P. and Nelson, J.T.,
 year = {1982},
-journal = Ẅorkshop on standardisation for speech I/O technology, Naval Air Development Center, Warminster, PA},
+journal = {Workshop on standardisation for speech I/O technology, Naval Air Development Center, Warminster, PA},
 title = {An information theoretic measure of speech recognition performance}
 }
 ```

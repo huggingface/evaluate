@@ -68,6 +68,9 @@ def main():
     if args["module_type"] not in ["metric", "comparison", "measurement"]:
         raise ValueError("The module_type needs to be one of metric, comparison, or measurement")
 
+    if "-" in args["module_name"]:
+        raise ValueError("Hyphens ('-') are not allowed in module names.")
+
     output_dir = Path(args["output_dir"])
     organization = args["organization"]
     module_slug = args["module_name"].lower().replace(" ", "_")
@@ -95,7 +98,14 @@ def main():
         local_dir=output_dir / module_slug,
     )
 
-    cookiecutter("./templates", no_input=True, extra_context=args, output_dir=output_dir, overwrite_if_exists=True)
+    cookiecutter(
+        "https://github.com/huggingface/evaluate/",
+        directory="templates",
+        no_input=True,
+        extra_context=args,
+        output_dir=output_dir,
+        overwrite_if_exists=True,
+    )
 
     repo.git_add()
     repo.git_commit("add module default template")

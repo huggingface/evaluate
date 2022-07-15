@@ -83,18 +83,26 @@ Examples:
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Meteor(evaluate.EvaluationModule):
+class Meteor(evaluate.Metric):
     def _info(self):
-        return evaluate.EvaluationModuleInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": datasets.Value("string", id="sequence"),
-                    "references": datasets.Value("string", id="sequence"),
-                }
-            ),
+            features=[
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
+                    }
+                ),
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Value("string", id="sequence"),
+                    }
+                ),
+            ],
             codebase_urls=["https://github.com/nltk/nltk/blob/develop/nltk/translate/meteor_score.py"],
             reference_urls=[
                 "https://www.nltk.org/api/nltk.translate.html#module-nltk.translate.meteor_score",
@@ -112,17 +120,43 @@ class Meteor(evaluate.EvaluationModule):
             nltk.download("omw-1.4")
 
     def _compute(self, predictions, references, alpha=0.9, beta=3, gamma=0.5):
+        multiple_refs = isinstance(references[0], list)
         if NLTK_VERSION >= version.Version("3.6.5"):
-            scores = [
-                meteor_score.single_meteor_score(
-                    word_tokenize(ref), word_tokenize(pred), alpha=alpha, beta=beta, gamma=gamma
-                )
-                for ref, pred in zip(references, predictions)
-            ]
+            # the version of METEOR in NLTK version 3.6.5 and earlier expect tokenized inputs
+            if multiple_refs:
+                scores = [
+                    meteor_score.meteor_score(
+                        [word_tokenize(ref) for ref in refs],
+                        word_tokenize(pred),
+                        alpha=alpha,
+                        beta=beta,
+                        gamma=gamma,
+                    )
+                    for refs, pred in zip(references, predictions)
+                ]
+            else:
+                scores = [
+                    meteor_score.single_meteor_score(
+                        word_tokenize(ref), word_tokenize(pred), alpha=alpha, beta=beta, gamma=gamma
+                    )
+                    for ref, pred in zip(references, predictions)
+                ]
         else:
-            scores = [
-                meteor_score.single_meteor_score(ref, pred, alpha=alpha, beta=beta, gamma=gamma)
-                for ref, pred in zip(references, predictions)
-            ]
+            if multiple_refs:
+                scores = [
+                    meteor_score.meteor_score(
+                        [[word_tokenize(ref) for ref in group] for group in references][0],
+                        word_tokenize(pred),
+                        alpha=alpha,
+                        beta=beta,
+                        gamma=gamma,
+                    )
+                    for ref, pred in zip(references, predictions)
+                ]
+            else:
+                scores = [
+                    meteor_score.single_meteor_score(ref, pred, alpha=alpha, beta=beta, gamma=gamma)
+                    for ref, pred in zip(references, predictions)
+                ]
 
         return {"meteor": np.mean(scores)}

@@ -98,19 +98,27 @@ Examples:
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class BERTScore(evaluate.EvaluationModule):
+class BERTScore(evaluate.Metric):
     def _info(self):
-        return evaluate.EvaluationModuleInfo(
+        return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="https://github.com/Tiiiger/bert_score",
             inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": datasets.Value("string", id="sequence"),
-                    "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
-                }
-            ),
+            features=[
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
+                    }
+                ),
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Value("string", id="sequence"),
+                    }
+                ),
+            ],
             codebase_urls=["https://github.com/Tiiiger/bert_score"],
             reference_urls=[
                 "https://github.com/Tiiiger/bert_score",
@@ -135,6 +143,15 @@ class BERTScore(evaluate.EvaluationModule):
         baseline_path=None,
         use_fast_tokenizer=False,
     ):
+
+        if isinstance(references[0], str):
+            references = [[ref] for ref in references]
+
+        if idf:
+            idf_sents = [r for ref in references for r in ref]
+        else:
+            idf_sents = None
+
         get_hash = bert_score.utils.get_hash
         scorer = bert_score.BERTScorer
 
@@ -171,6 +188,7 @@ class BERTScore(evaluate.EvaluationModule):
                     nthreads=nthreads,
                     all_layers=all_layers,
                     idf=idf,
+                    idf_sents=idf_sents,
                     device=device,
                     lang=lang,
                     rescale_with_baseline=rescale_with_baseline,
@@ -190,19 +208,3 @@ class BERTScore(evaluate.EvaluationModule):
             "hashcode": hashcode,
         }
         return output_dict
-
-    def add_batch(self, predictions=None, references=None, **kwargs):
-        """Add a batch of predictions and references for the metric's stack."""
-        # References can be strings or lists of strings
-        # Let's change strings to lists of strings with one element
-        if references is not None:
-            references = [[ref] if isinstance(ref, str) else ref for ref in references]
-        super().add_batch(predictions=predictions, references=references, **kwargs)
-
-    def add(self, prediction=None, reference=None, **kwargs):
-        """Add one prediction and reference for the metric's stack."""
-        # References can be strings or lists of strings
-        # Let's change strings to lists of strings with one element
-        if isinstance(reference, str):
-            reference = [reference]
-        super().add(prediction=prediction, reference=reference, **kwargs)
