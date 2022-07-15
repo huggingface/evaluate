@@ -88,8 +88,6 @@ class ImageClassificationEvaluator(Evaluator):
         >>>     model_or_pipeline="nateraw/vit-base-beans",
         >>>     data=data,
         >>>     metric="accuracy",
-        >>>     input_column="image",
-        >>>     label_column="labels",
         >>>     label_mapping={'angular_leaf_spot': 0, 'bean_rust': 1, 'healthy': 2},
         >>>     strategy="bootstrap",
         >>>     n_resamples=10,

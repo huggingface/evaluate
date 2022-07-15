@@ -270,7 +270,7 @@ class Evaluator(ABC):
     def compute_metric(
         self,
         metric: EvaluationModule,
-        metric_inputs,
+        metric_inputs: Dict,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,

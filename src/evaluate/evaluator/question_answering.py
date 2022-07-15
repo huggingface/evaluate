@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
 from datasets import Dataset, load_dataset
@@ -82,7 +82,12 @@ class QuestionAnsweringEvaluator(Evaluator):
                 f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
             )
 
-        return data
+        metric_inputs = dict()
+        metric_inputs["references"] = [
+            {"id": element[id_column], "answers": element[label_column]} for element in data
+        ]
+
+        return metric_inputs, {"question": data[question_column], "context": data[context_column]}
 
     def is_squad_v2_schema(self, data: Dataset, label_column: str = "answers"):
         """
@@ -97,6 +102,15 @@ class QuestionAnsweringEvaluator(Evaluator):
             return True
         else:
             return False
+
+    def predictions_processor(self, predictions: List, squad_v2_schema: bool, ids: List):
+        result = []
+        for i in range(len(predictions)):
+            pred = {"prediction_text": predictions[i]["answer"], "id": ids[i]}
+            if squad_v2_schema:
+                pred["no_answer_probability"] = 0.0
+            result.append(pred)
+        return {"predictions": result}
 
     def compute(
         self,
@@ -116,16 +130,15 @@ class QuestionAnsweringEvaluator(Evaluator):
         """
         Compute the metric for a given pipeline and dataset combination.
         Args:
-            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`,
-            defaults to `None`):
+            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`, defaults to `None`):
                 If the argument in not specified, we initialize the default pipeline for the task (in this case
                 `question-answering`). If the argument is of the type `str` or
                 is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
                 argument specifies a pre-initialized pipeline.
-            data (`str` or `Dataset`, defaults to `None):
+            data (`str` or `Dataset`, defaults to `None`):
                 Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
                 name, and load it. Otherwise we assume it represents a pre-loaded dataset.
-            metric (`str` or `EvaluationModule`, defaults to `None`):"
+            metric (`str` or `EvaluationModule`, defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
             tokenizer: (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
@@ -176,7 +189,7 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         Datasets where the answer may be missing in the context are supported, for example SQuAD v2 dataset. If using transformers pipeline
         with models trained on this type of data, make sure to pass `handle_impossible_answer=True` as an argument to the pipeline.
-        
+
         </Tip>
 
         ```python
@@ -197,39 +210,37 @@ class QuestionAnsweringEvaluator(Evaluator):
         >>> )
         ```
         """
-        data = self.prepare_data(
+        result = {}
+
+        metric_inputs, pipe_inputs = self.prepare_data(
             data=data,
             question_column=question_column,
             context_column=context_column,
             id_column=id_column,
             label_column=label_column,
         )
+
         squad_v2_schema = self.is_squad_v2_schema(data=data, label_column=label_column)
 
-        pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, preprocessor=tokenizer)
+        pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer)
 
         metric = self.prepare_metric(metric)
 
-        # Compute predictions
-        _predictions = pipe(question=data[question_column], context=data[context_column], padding="max_length")
-        predictions = []
-        for i in range(len(_predictions)):
-            pred = {"prediction_text": _predictions[i]["answer"], "id": data[i][id_column]}
-            if squad_v2_schema:
-                pred["no_answer_probability"] = 0.0
-            predictions.append(pred)
+        predictions = self.call_pipeline(pipe, **pipe_inputs)
+        predictions = self.predictions_processor(predictions, squad_v2_schema=squad_v2_schema, ids=data[id_column])
 
-        references = [{"id": element[id_column], "answers": element[label_column]} for element in data]
+        metric_inputs.update(predictions)
 
         # Compute metrics from references and predictions
-        result = self.core_compute(
-            references=references,
-            predictions=predictions,
+        metric_results = self.compute_metric(
             metric=metric,
+            metric_inputs=metric_inputs,
             strategy=strategy,
             confidence_level=confidence_level,
             n_resamples=n_resamples,
             random_state=random_state,
         )
+
+        result.update(metric_results)
 
         return result

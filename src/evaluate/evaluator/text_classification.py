@@ -92,8 +92,6 @@ class TextClassificationEvaluator(Evaluator):
         >>>     model_or_pipeline="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
         >>>     data=data,
         >>>     metric="accuracy",
-        >>>     input_column="text",
-        >>>     label_column="label",
         >>>     label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
         >>>     strategy="bootstrap",
         >>>     n_resamples=10,

@@ -161,7 +161,9 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         eval_dataset = load_dataset("squad", split="validation[:100]")
 
-        pipe = pipeline(task="question-answering", model=model_name, tokenizer=model_name, max_answer_len=30)
+        pipe = pipeline(
+            task="question-answering", model=model_name, tokenizer=model_name, max_answer_len=30, padding="max_length"
+        )
 
         e = evaluator(task="question-answering")
         evaluator_results = e.compute(
@@ -211,5 +213,6 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             strategy="simple",
         )
 
+        self.assertEqual(transformers_results["eval_f1"], evaluator_results["f1"])
         self.assertEqual(transformers_results["eval_HasAns_f1"], evaluator_results["HasAns_f1"])
         self.assertEqual(transformers_results["eval_NoAns_f1"], evaluator_results["NoAns_f1"])
