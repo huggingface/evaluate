@@ -12,28 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from numbers import Number
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import Any, Dict, Tuple
 
-# Lint as: python3
-from datasets import Dataset
-
-
-try:
-    from transformers import Pipeline, PreTrainedModel, PreTrainedTokenizer, TFPreTrainedModel
-
-    TRANSFORMERS_AVAILABLE = True
-except ImportError:
-    TRANSFORMERS_AVAILABLE = False
-
-from typing_extensions import Literal
-
-from ..module import EvaluationModule
-from ..utils.logging import get_logger
 from .base import Evaluator
-
-
-logger = get_logger(__name__)
 
 
 class TextClassificationEvaluator(Evaluator):
@@ -45,23 +26,19 @@ class TextClassificationEvaluator(Evaluator):
     feature as input and a categorical label as output.
     """
 
+    PIPELINE_KWARGS = {"truncation": True}
+
     def __init__(self, task="text-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
-    def compute(
-        self,
-        model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
-        data: Union[str, Dataset] = None,
-        metric: Union[str, EvaluationModule] = None,
-        tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,
-        strategy: Literal["simple", "bootstrap"] = "simple",
-        confidence_level: float = 0.95,
-        n_resamples: int = 9999,
-        random_state: Optional[int] = None,
-        input_column: str = "text",
-        label_column: str = "label",
-        label_mapping: Optional[Dict[str, Number]] = None,
-    ) -> Tuple[Dict[str, float], Any]:
+    def predictions_processor(self, predictions, label_mapping):
+        predictions = [
+            label_mapping[element["label"]] if label_mapping is not None else element["label"]
+            for element in predictions
+        ]
+        return {"predictions": predictions}
+
+    def compute(self, *args, **kwargs) -> Tuple[Dict[str, float], Any]:
         """
         Compute the metric for a given pipeline and dataset combination.
         Args:
@@ -123,28 +100,7 @@ class TextClassificationEvaluator(Evaluator):
         >>>     random_state=0
         >>> )
         ```"""
-        data = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
 
-        pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, preprocessor=tokenizer)
-
-        metric = self.prepare_metric(metric)
-
-        # Compute predictions
-        predictions = pipe(data[input_column], truncation=True)
-        predictions = [
-            label_mapping[element["label"]] if label_mapping is not None else element["label"]
-            for element in predictions
-        ]
-
-        # Compute metrics from references and predictions
-        result = self.core_compute(
-            references=data[label_column],
-            predictions=predictions,
-            metric=metric,
-            strategy=strategy,
-            confidence_level=confidence_level,
-            n_resamples=n_resamples,
-            random_state=random_state,
-        )
+        result = super().compute(*args, **kwargs)
 
         return result
