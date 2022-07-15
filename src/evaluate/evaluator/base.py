@@ -28,15 +28,8 @@ except ImportError:
     SCIPY_AVAILABLE = False
 
 try:
-    from transformers import (
-        FeatureExtractionMixin,
-        Pipeline,
-        PreTrainedModel,
-        PreTrainedTokenizer,
-        PreTrainedTokenizerBase,
-        TFPreTrainedModel,
-        pipeline,
-    )
+    import transformers
+    from transformers import FeatureExtractionMixin, pipeline
 
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
@@ -121,10 +114,12 @@ class Evaluator(ABC):
 
     def compute(
         self,
-        model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
+        model_or_pipeline: Union[
+            str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
+        ] = None,
         data: Union[str, Dataset] = None,
         metric: Union[str, EvaluationModule] = None,
-        tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,
+        tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
@@ -198,9 +193,9 @@ class Evaluator(ABC):
 
     def prepare_pipeline(
         self,
-        model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"],
-        tokenizer: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,
-        feature_extractor: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,
+        model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"],  # noqa: F821
+        tokenizer: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,  # noqa: F821
+        feature_extractor: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,  # noqa: F821
     ):
         """
         Prepare pipeline.
@@ -220,9 +215,9 @@ class Evaluator(ABC):
             The initialized pipeline.
         """
         if (
-            isinstance(model_or_pipeline, PreTrainedModel)
-            or isinstance(model_or_pipeline, TFPreTrainedModel)
-            or isinstance(model_or_pipeline, str)
+            isinstance(model_or_pipeline, str)
+            or isinstance(model_or_pipeline, transformers.PreTrainedModel)
+            or isinstance(model_or_pipeline, transformers.TFPreTrainedModel)
         ):
             pipe = pipeline(
                 self.task, model=model_or_pipeline, tokenizer=tokenizer, feature_extractor=feature_extractor
