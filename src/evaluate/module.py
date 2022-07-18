@@ -15,6 +15,7 @@
 # Lint as: python3
 """ EvaluationModule base class."""
 import collections
+from copy import deepcopy
 import itertools
 import os
 import types
@@ -141,6 +142,10 @@ class EvaluationModuleInfoMixin:
     def module_type(self) -> str:
         return self._module_info.module_type
 
+    @property
+    def config(self) -> str:
+        return self._module_info.config
+
 
 class EvaluationModule(EvaluationModuleInfoMixin):
     """A EvaluationModule is the base class and common API for metrics, comparisons, and measurements.
@@ -181,6 +186,11 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         info.module_name = camelcase_to_snakecase(self.__class__.__name__)
         info.config_name = self.config_name
         info.experiment_id = experiment_id or "default_experiment"
+        if kwargs is None:
+            kwargs = {"name": self.config_name}
+        else:
+            kwargs.update({"name": self.config_name})
+        info.config.update(kwargs)
         EvaluationModuleInfoMixin.__init__(self, info)  # For easy access on low level
 
         # Safety checks on num_process and process_id
@@ -436,7 +446,12 @@ class EvaluationModule(EvaluationModuleInfoMixin):
 
             inputs = {input_name: self.data[input_name] for input_name in self._feature_names()}
             with temp_seed(self.seed):
-                output = self._compute(**inputs, **compute_kwargs)
+                config_state = deepcopy(self.config)
+                self.config.update(compute_kwargs)
+
+                output = self._compute(**inputs)
+                
+                self._module_info.config = config_state
 
             if self.buf_writer is not None:
                 self.buf_writer = None
