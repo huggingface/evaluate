@@ -68,6 +68,8 @@ class TestTextClassificationEvaluator(TestCase):
         self.input_column = "text"
         self.label_column = "label"
         self.pipe = DummyTextClassificationPipeline()
+        self.model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.default_model)
         self.evaluator = evaluator("text-classification")
         self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
 
@@ -91,13 +93,11 @@ class TestTextClassificationEvaluator(TestCase):
             label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 1.0)
-        model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
-        tokenizer = AutoTokenizer.from_pretrained(self.default_model)
         results = self.evaluator.compute(
-            model_or_pipeline=model,
+            model_or_pipeline=self.model,
             data=self.data,
             metric="accuracy",
-            tokenizer=tokenizer,
+            tokenizer=self.tokenizer,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
@@ -151,14 +151,12 @@ class TestTextClassificationEvaluator(TestCase):
 
     def test_bootstrap(self):
         data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
-        model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
-        tokenizer = AutoTokenizer.from_pretrained(self.default_model)
 
         results = self.evaluator.compute(
-            model_or_pipeline=model,
+            model_or_pipeline=self.model,
             data=data,
             metric="accuracy",
-            tokenizer=tokenizer,
+            tokenizer=self.tokenizer,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
@@ -173,14 +171,12 @@ class TestTextClassificationEvaluator(TestCase):
 
     def test_perf(self):
         data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
-        model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
-        tokenizer = AutoTokenizer.from_pretrained(self.default_model)
 
         results = self.evaluator.compute(
-            model_or_pipeline=model,
+            model_or_pipeline=self.model,
             data=data,
             metric="accuracy",
-            tokenizer=tokenizer,
+            tokenizer=self.tokenizer,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
@@ -194,14 +190,12 @@ class TestTextClassificationEvaluator(TestCase):
 
     def test_bootstrap_and_perf(self):
         data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
-        model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
-        tokenizer = AutoTokenizer.from_pretrained(self.default_model)
 
         results = self.evaluator.compute(
-            model_or_pipeline=model,
+            model_or_pipeline=self.model,
             data=data,
             metric="accuracy",
-            tokenizer=tokenizer,
+            tokenizer=self.tokenizer,
             input_column=self.input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping,
