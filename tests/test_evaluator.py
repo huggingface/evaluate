@@ -31,19 +31,13 @@ from evaluate import ImageClassificationEvaluator, TextClassificationEvaluator, 
 
 
 class DummyTextClassificationPipeline:
-    def __init__(self):
+    def __init__(self, sleep_time=None):
         self.task = "text-classification"
+        self.sleep_time = sleep_time
 
     def __call__(self, text, **kwargs):
-        return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(text)]
-
-
-class DummyTextClassificationPipelinePerf:
-    def __init__(self):
-        self.task = "text-classification"
-
-    def __call__(self, text, **kwargs):
-        sleep(2)
+        if self.sleep_time is not None:
+            sleep(self.sleep_time)
         return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(text)]
 
 
@@ -67,6 +61,7 @@ class TestTextClassificationEvaluator(TestCase):
         self.input_column = "text"
         self.label_column = "label"
         self.pipe = DummyTextClassificationPipeline()
+        self.perf_pipe = DummyTextClassificationPipeline(sleep_time=0.1)
         self.model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
         self.tokenizer = AutoTokenizer.from_pretrained(self.default_model)
         self.evaluator = evaluator("text-classification")
@@ -169,11 +164,9 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.24595, 5)
 
     def test_perf(self):
-        data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
-
         results = self.evaluator.compute(
-            model_or_pipeline=self.model,
-            data=data,
+            model_or_pipeline=self.perf_pipe,
+            data=self.data,
             metric="accuracy",
             tokenizer=self.tokenizer,
             input_column=self.input_column,
@@ -182,16 +175,15 @@ class TestTextClassificationEvaluator(TestCase):
             n_resamples=10,
             random_state=0,
         )
-        self.assertAlmostEqual(results["accuracy"], 0.666666, 5)
-        self.assertTrue("latency" in results)
-        self.assertTrue("throughput" in results)
-        self.assertAlmostEqual(results["throughput"], len(data) / results["latency"], 5)
+        self.assertEqual(results["accuracy"], 1.0)
+        self.assertAlmostEqual(results["latency"], 0.1, 1)
+        self.assertAlmostEqual(results["throughput"], len(self.data) / results["latency"], 5)
 
     def test_bootstrap_and_perf(self):
         data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
 
         results = self.evaluator.compute(
-            model_or_pipeline=self.model,
+            model_or_pipeline=self.perf_pipe,
             data=data,
             metric="accuracy",
             tokenizer=self.tokenizer,
@@ -203,11 +195,10 @@ class TestTextClassificationEvaluator(TestCase):
             random_state=0,
         )
         self.assertAlmostEqual(results["accuracy"]["score"], 0.666666, 5)
-        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][0], 0.33333, 5)
-        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.68326, 5)
-        self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.24595, 5)
-        self.assertTrue("latency" in results)
-        self.assertTrue("throughput" in results)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][0], 0.333333, 5)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.666666, 5)
+        self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.22498285, 5)
+        self.assertAlmostEqual(results["latency"], 0.1, 1)
         self.assertAlmostEqual(results["throughput"], len(data) / results["latency"], 5)
 
 
@@ -303,30 +294,3 @@ class TestImageClassificationEvaluator(TestCase):
             label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 0)
-
-
-class TestEvaluatorPerf(TestCase):
-    def setUp(self):
-        self.data = Dataset.from_dict({"label": [1, 0], "text": ["great movie", "horrible movie"]})
-        self.input_column = "text"
-        self.label_column = "label"
-        self.pipe = DummyTextClassificationPipelinePerf()
-        self.evaluator = evaluator("text-classification")
-        self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
-
-    def test_perf(self):
-        data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
-
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=data,
-            metric="accuracy",
-            input_column=self.input_column,
-            label_column=self.label_column,
-            label_mapping=self.label_mapping,
-        )
-        self.assertAlmostEqual(results["accuracy"], 0.666666, 5)
-        self.assertTrue("latency" in results)
-        self.assertTrue("throughput" in results)
-        self.assertAlmostEqual(results["throughput"], len(data) / results["latency"], 5)
-        self.assertAlmostEqual(results["latency"], 2, 1)

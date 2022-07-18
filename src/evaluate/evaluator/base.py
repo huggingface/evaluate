@@ -153,9 +153,7 @@ class Evaluator(ABC):
         metric = self.prepare_metric(metric)
 
         # Compute predictions
-        start_time = perf_counter()
-        predictions = self.call_pipeline(pipe, pipe_inputs)
-        end_time = perf_counter()
+        predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
         predictions = self.predictions_processor(predictions, label_mapping)
 
         metric_inputs.update(predictions)
@@ -171,7 +169,7 @@ class Evaluator(ABC):
         )
 
         result.update(metric_results)
-        result.update(self._compute_time_perf(start_time, end_time, len(pipe_inputs)))
+        result.update(perf_results)
 
         return result
 
@@ -276,8 +274,10 @@ class Evaluator(ABC):
         return metric
 
     def call_pipeline(self, pipe, *args, **kwargs):
-        # todo: add performance metrics here
-        return pipe(*args, **kwargs, **self.PIPELINE_KWARGS)
+        start_time = perf_counter()
+        pipe_output = pipe(*args, **kwargs, **self.PIPELINE_KWARGS)
+        end_time = perf_counter()
+        return pipe_output, self._compute_time_perf(start_time, end_time, len(pipe_output))
 
     def compute_metric(
         self,
