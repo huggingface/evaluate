@@ -29,7 +29,7 @@ except ImportError:
 
 try:
     import transformers
-    from transformers import FeatureExtractionMixin, pipeline
+    from transformers import pipeline
 
     TRANSFORMERS_AVAILABLE = True
 except ImportError:

@@ -12,25 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from abc import ABC, abstractmethod
-from functools import partial
-from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-# Lint as: python3
-from datasets import ClassLabel, Dataset, Sequence, load_dataset
-
-
-try:
-    from transformers import Pipeline, PreTrainedModel, PreTrainedTokenizer, TFPreTrainedModel, pipeline
-
-    TRANSFORMERS_AVAILABLE = True
-except ImportError:
-    TRANSFORMERS_AVAILABLE = False
-
+from datasets import ClassLabel, Dataset, Sequence
 from typing_extensions import Literal
 
-from ..loading import load
 from ..module import EvaluationModule
 from ..utils.logging import get_logger
 from .base import Evaluator
@@ -106,8 +92,8 @@ class TokenClassificationEvaluator(Evaluator):
         labels_are_int = isinstance(data.features[label_column].feature, ClassLabel)
         if labels_are_int:
             label_list = data.features[label_column].feature.names  # list of string labels
-            ref_to_labels = {i: label for i, label in enumerate(label_list)}
-            references = [[ref_to_labels[l] for l in label] for label in data[label_column]]
+            id_to_label = {i: label for i, label in enumerate(label_list)}
+            references = [[id_to_label[label_id] for label_id in label_ids] for label_ids in data[label_column]]
         elif data.features[label_column].feature.dtype.startswith("int"):
             raise NotImplementedError(
                 "References provided as int, but the reference column is not instanciated as a Sequence of ClassLabel."
@@ -131,7 +117,7 @@ class TokenClassificationEvaluator(Evaluator):
         pipe = super().prepare_pipeline(model_or_pipeline, tokenizer, feature_extractor)
 
         dummy_output = pipe(["2003 New York Gregory"], **self.PIPELINE_KWARGS)
-        if dummy_output[0][0]["start"] == None:
+        if dummy_output[0][0]["start"] is None:
             raise ValueError(
                 "TokenClassificationEvaluator supports only pipelines giving 'start' index as a pipeline output (got None)."
             )
