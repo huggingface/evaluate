@@ -196,6 +196,7 @@ class TokenClassificationEvaluator(Evaluator):
         >>>     model_or_pipeline="elastic/distilbert-base-uncased-finetuned-conll03-english",
         >>>     data=data,
         >>>     metric="seqeval",
+        >>>     join_by=" ",
         >>> )
         ```
 
