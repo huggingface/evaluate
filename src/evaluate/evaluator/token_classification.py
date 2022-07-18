@@ -33,11 +33,6 @@ class TokenClassificationEvaluator(Evaluator):
     `token-classification`.
 
     Methods in this class assume a data format compatible with the [`TokenClassificationPipeline`].
-
-    In particular, the following cases are not handled:
-    * models not splitting tokens by space (e.g. where `"he oh"` can be a token).
-    * datasets as https://huggingface.co/datasets/msra_ner , where tokens are provided ideogram by ideogram, and where a tokenizer may map several ideograms to a single token.
-    * datasets not providing the input and reference columns as a list of "words" as the conll2003 dataset.
     """
 
     PIPELINE_KWARGS = {"ignore_labels": []}
@@ -126,10 +121,12 @@ class TokenClassificationEvaluator(Evaluator):
 
     def compute(
         self,
-        model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
+        model_or_pipeline: Union[
+            str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"
+        ] = None,  # noqa: F821
         data: Union[str, Dataset] = None,
         metric: Union[str, EvaluationModule] = None,
-        tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,
+        tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
@@ -142,23 +139,22 @@ class TokenClassificationEvaluator(Evaluator):
         Compute the metric for a given pipeline and dataset combination.
 
         Args:
-            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`,
-            defaults to `None`):
+            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`, defaults to `None`):
                 If the argument in not specified, we initialize the default pipeline for the task (in this case
                 `token-classification`). If the argument is of the type `str` or
                 is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
                 argument specifies a pre-initialized pipeline.
-            data (`str` or `Dataset`, defaults to `None):
+            data (`str` or `Dataset`, defaults to `None`):
                 Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
                 name, and load it. Otherwise we assume it represents a pre-loaded dataset.
-            metric (`str` or `EvaluationModule`, defaults to `None`"
+            metric (`str` or `EvaluationModule`, defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
-            tokenizer: (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
+            tokenizer (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
                 Argument can be used to overwrite a default tokenizer if `model_or_pipeline` represents a model for
                 which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
                 this argument.
-            strategy: (`Literal["simple", "bootstrap"]`, defaults to "simple"):
+            strategy (`Literal["simple", "bootstrap"]`, defaults to "simple"):
                 specifies the evaluation strategy. Possible values are:
 
                 - `"simple"` - we evaluate the metric and return the scores.
@@ -187,6 +183,56 @@ class TokenClassificationEvaluator(Evaluator):
             A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
             `"simple"` strategy, the value is the metric score. For the `"bootstrap"` strategy, the value is a `Dict`
             containing the score, the confidence interval and the standard error calculated for each metric key.
+
+        The dataset input and label columns are expected to be formatted as a list of words and a list of labels respectively, following [conll2003 dataset](https://huggingface.co/datasets/conll2003). Datasets whose inputs are single strings, and labels are a list of offset are not supported.
+
+        Examples:
+        ```python
+        >>> from evaluate import evaluator
+        >>> from datasets import load_dataset
+        >>> task_evaluator = evaluator("token-classification")
+        >>> data = load_dataset("conll2003", split="validation[:2]")
+        >>> results = task_evaluator.compute(
+        >>>     model_or_pipeline="elastic/distilbert-base-uncased-finetuned-conll03-english",
+        >>>     data=data,
+        >>>     metric="seqeval",
+        >>> )
+        ```
+
+        <Tip>
+
+        For example, the following dataset is accepted by the evaluator:
+
+        ```
+        dataset = Dataset.from_dict(
+            mapping={
+                "tokens": [["New", "York", "is", "a", "city", "and", "Felix", "a", "person", "."]],
+                "ner_tags": [[1, 2, 0, 0, 0, 0, 3, 0, 0, 0]],
+            },
+            features=Features({
+                "tokens": Sequence(feature=Value(dtype="string")),
+                "ner_tags": Sequence(feature=ClassLabel(names=["O", "B-LOC", "I-LOC", "B-PER", "I-PER"])),
+                }),
+        )
+
+        </Tip>
+
+        <Tip warning={true}>
+
+        For example, the following dataset is **not** accepted by the evaluator:
+
+            dataset = Dataset.from_dict(
+            mapping={
+                "tokens": [["New York is a city and Felix a person."]],
+                "ner_tags": [[(0, 7, "LOC"), (23, 27, "PER")]],
+            },
+            features=Features({
+                "tokens": Sequence(feature=Value(dtype="string")),
+                "ner_tags": Sequence(feature=ClassLabel(names=["O", "B-LOC", "I-LOC", "B-PER", "I-PER"])),
+                }),
+        )
+
+        </Tip>
         """
         result = {}
 
