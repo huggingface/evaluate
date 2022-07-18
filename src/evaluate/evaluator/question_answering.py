@@ -222,6 +222,15 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         squad_v2_schema = self.is_squad_v2_schema(data=data, label_column=label_column)
 
+        if squad_v2_schema and metric.name == "squad":
+            logger.warn(
+                "The dataset has SQuAD v2 format but you are using the SQuAD metric. Consider passing the 'squad_v2' metric."
+            )
+        if not squad_v2_schema and metric.name == "squad_v2":
+            logger.warn(
+                "The dataset has SQuAD v1 format but you are using the SQuAD v2 metric. Consider passing the 'squad' metric."
+            )
+
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer)
 
         metric = self.prepare_metric(metric)
