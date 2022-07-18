@@ -17,12 +17,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from datasets import ClassLabel, Dataset, Sequence
 from typing_extensions import Literal
 
-from ..module import EvaluationModule
-from ..utils.logging import get_logger
 from .base import Evaluator
-
-
-logger = get_logger(__name__)
 
 
 class TokenClassificationEvaluator(Evaluator):
@@ -135,7 +130,7 @@ class TokenClassificationEvaluator(Evaluator):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
-        metric: Union[str, EvaluationModule] = None,
+        metric: Union[str, "EvaluationModule"] = None,  # noqa: F821
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
@@ -214,7 +209,7 @@ class TokenClassificationEvaluator(Evaluator):
 
         For example, the following dataset is accepted by the evaluator:
 
-        ```
+        ```python
         dataset = Dataset.from_dict(
             mapping={
                 "tokens": [["New", "York", "is", "a", "city", "and", "Felix", "a", "person", "."]],
@@ -225,6 +220,7 @@ class TokenClassificationEvaluator(Evaluator):
                 "ner_tags": Sequence(feature=ClassLabel(names=["O", "B-LOC", "I-LOC", "B-PER", "I-PER"])),
                 }),
         )
+        ```
 
         </Tip>
 
@@ -232,7 +228,8 @@ class TokenClassificationEvaluator(Evaluator):
 
         For example, the following dataset is **not** accepted by the evaluator:
 
-            dataset = Dataset.from_dict(
+        ```python
+        dataset = Dataset.from_dict(
             mapping={
                 "tokens": [["New York is a city and Felix a person."]],
                 "ner_tags": [[(0, 7, "LOC"), (23, 27, "PER")]],
@@ -242,6 +239,7 @@ class TokenClassificationEvaluator(Evaluator):
                 "ner_tags": Sequence(feature=ClassLabel(names=["O", "B-LOC", "I-LOC", "B-PER", "I-PER"])),
                 }),
         )
+        ```
 
         </Tip>
         """
