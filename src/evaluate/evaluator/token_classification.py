@@ -62,6 +62,16 @@ class TokenClassificationEvaluator(Evaluator):
         return {"predictions": preds}
 
     def words_to_offsets(self, words: List[str], join_by: str):
+        """
+        Convert a list of words to a list of offsets, where word are joined by `join_by`.
+
+        Args:
+            words (List[str]): List of words to get offsets from.
+            join_by (str): String to insert between words.
+
+        Returns:
+            List[Tuple[int, int]]: List of the characters (start index, end index) for each of the words.
+        """
         offsets = []
 
         start = 0
