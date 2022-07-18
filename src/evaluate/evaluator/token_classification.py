@@ -13,10 +13,9 @@
 # limitations under the License.
 
 from abc import ABC, abstractmethod
+from functools import partial
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
-
-from functools import partial
 
 # Lint as: python3
 from datasets import ClassLabel, Dataset, Sequence, load_dataset
@@ -58,7 +57,6 @@ class TokenClassificationEvaluator(Evaluator):
     def __init__(self, task="token-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
-
     # Tokenize all texts and align the labels with them.
     def _tokenize_and_align_labels(self, examples, tokenizer, input_column):
         tokenized_inputs = tokenizer(
@@ -92,7 +90,6 @@ class TokenClassificationEvaluator(Evaluator):
         tokenized_inputs["labels"] = labels
         """
         return tokenized_inputs
-
 
     def _compute_predictions(
         self, pipe: "Pipeline", inputs, label_mapping: Optional[Dict] = None, join_by: str = " "
@@ -129,7 +126,6 @@ class TokenClassificationEvaluator(Evaluator):
             all_preds.append(preds)
 
         return all_preds
-
 
     """
     def _compute_predictions(
@@ -285,7 +281,6 @@ class TokenClassificationEvaluator(Evaluator):
             metric = load(self.default_metric_name)
         elif isinstance(metric, str):
             metric = load(metric)
-
 
         # Prepare reference.
         data = data.map(

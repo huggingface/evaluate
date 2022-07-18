@@ -63,7 +63,7 @@ def check_task(task: str) -> Dict:
             The task defining which evaluator will be returned. Currently accepted tasks are:
             - `"image-classification"`
             - `"text-classification"` (alias `"sentiment-analysis"` available)
-	    - `"token-classification"`
+            - `"token-classification"`
     Returns:
         task_defaults: `dict`, contains the implementasion class of a give Evaluator and the default metric name.
     """
@@ -85,8 +85,8 @@ def evaluator(task: str = None) -> Evaluator:
         task (`str`):
             The task defining which evaluator will be returned. Currently accepted tasks are:
             - `"image-classification"`: will return a [`ImageClassificationEvaluator`].
-	    - `"text-classification"` (alias `"sentiment-analysis"` available): will return a [`TextClassificationEvaluator`].
-    	    - `"token-classification"`: will return a [`TokenClassificationEvaluator`].
+            - `"text-classification"` (alias `"sentiment-analysis"` available): will return a [`TextClassificationEvaluator`].
+            - `"token-classification"`: will return a [`TokenClassificationEvaluator`].
     Returns:
         [`Evaluator`]: An evaluator suitable for the task.
     Examples:
