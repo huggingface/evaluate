@@ -42,8 +42,7 @@ class TextClassificationEvaluator(Evaluator):
         """
         Compute the metric for a given pipeline and dataset combination.
         Args:
-            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`,
-            defaults to `None`):
+            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`, defaults to `None`):
                 If the argument in not specified, we initialize the default pipeline for the task (in this case
                 `text-classification` or its alias - `sentiment-analysis`). If the argument is of the type `str` or
                 is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
@@ -54,11 +53,11 @@ class TextClassificationEvaluator(Evaluator):
             metric (`str` or `EvaluationModule`, defaults to `None`):"
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
-            tokenizer: (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
+            tokenizer (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
                 Argument can be used to overwrite a default tokenizer if `model_or_pipeline` represents a model for
                 which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
                 this argument.
-            strategy: (`Literal["simple", "bootstrap"]`, defaults to "simple"):
+            strategy (`Literal["simple", "bootstrap"]`, defaults to "simple"):
                 specifies the evaluation strategy. Possible values are:
                 - `"simple"` - we evaluate the metric and return the scores.
                 - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each
