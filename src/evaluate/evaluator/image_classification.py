@@ -82,9 +82,9 @@ class ImageClassificationEvaluator(Evaluator):
         ```python
         >>> from evaluate import evaluator
         >>> from datasets import Dataset, load_dataset
-        >>> e = evaluator("image-classification")
+        >>> task_evaluator = evaluator("image-classification")
         >>> data = load_dataset("beans", split="test[:2]")
-        >>> results = e.compute(
+        >>> results = task_evaluator.compute(
         >>>     model_or_pipeline="nateraw/vit-base-beans",
         >>>     data=data,
         >>>     metric="accuracy",

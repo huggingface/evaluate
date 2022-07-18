@@ -86,9 +86,9 @@ class TextClassificationEvaluator(Evaluator):
         ```python
         >>> from evaluate import evaluator
         >>> from datasets import Dataset, load_dataset
-        >>> e = evaluator("text-classification")
+        >>> task_evaluator = evaluator("text-classification")
         >>> data = load_dataset("imdb", split="test[:2]")
-        >>> results = e.compute(
+        >>> results = task_evaluator.compute(
         >>>     model_or_pipeline="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
         >>>     data=data,
         >>>     metric="accuracy",

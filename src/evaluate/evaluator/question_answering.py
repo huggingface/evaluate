@@ -196,14 +196,14 @@ class QuestionAnsweringEvaluator(Evaluator):
         >>> from evaluate import evaluator
         >>> from datasets import Dataset, load_dataset
         >>> from transformers import pipeline
-        >>> e = evaluator("question-answering")
+        >>> task_evaluator = evaluator("question-answering")
         >>> data = load_dataset("squad_v2", split="validation[:2]")
         >>> pipe = pipeline(
         >>>     task="question-answering",
         >>>     model="sshleifer/mrm8488/bert-tiny-finetuned-squadv2",
         >>>     handle_impossible_answer=True
         >>> )
-        >>> results = e.compute(
+        >>> results = task_evaluator.compute(
         >>>     model_or_pipeline=pipe,
         >>>     data=data,
         >>>     metric="squad_v2",
