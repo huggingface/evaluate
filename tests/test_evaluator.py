@@ -43,7 +43,6 @@ class DummyTextClassificationPipelinePerf:
         self.task = "text-classification"
 
     def __call__(self, text, **kwargs):
-        print("DummyTextClassificationPipelinePerf")
         sleep(2)
         return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(text)]
 
