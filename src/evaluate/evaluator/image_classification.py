@@ -38,16 +38,15 @@ class ImageClassificationEvaluator(Evaluator):
         """
         Compute the metric for a given pipeline and dataset combination.
         Args:
-            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`,
-            defaults to `None`):
+            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`, defaults to `None`):
                 If the argument in not specified, we initialize the default pipeline for the task (in this case
                 `image-classification`. If the argument is of the type `str` or
                 is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
                 argument specifies a pre-initialized pipeline.
-            data (`str` or `Dataset`, defaults to `None):
+            data (`str` or `Dataset`, defaults to `None`):
                 Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
                 name, and load it. Otherwise we assume it represents a pre-loaded dataset.
-            metric (`str` or `EvaluationModule`, defaults to `None`"
+            metric (`str` or `EvaluationModule`, defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
             feature_extractor: (`str` or `FeatureExtractionMixin`, *optional*, defaults to `None`):

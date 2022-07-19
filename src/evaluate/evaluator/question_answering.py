@@ -235,7 +235,7 @@ class QuestionAnsweringEvaluator(Evaluator):
                 "The dataset has SQuAD v1 format but you are using the SQuAD v2 metric. Consider passing the 'squad' metric."
             )
 
-        predictions = self.call_pipeline(pipe, **pipe_inputs)
+        predictions, perf_results = self.call_pipeline(pipe, **pipe_inputs)
         predictions = self.predictions_processor(predictions, squad_v2_schema=squad_v2_schema, ids=data[id_column])
 
         metric_inputs.update(predictions)
@@ -251,5 +251,6 @@ class QuestionAnsweringEvaluator(Evaluator):
         )
 
         result.update(metric_results)
+        result.update(perf_results)
 
         return result
