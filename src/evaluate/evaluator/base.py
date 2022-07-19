@@ -35,6 +35,8 @@ try:
 except ImportError:
     TRANSFORMERS_AVAILABLE = False
 
+from time import perf_counter
+
 from typing_extensions import Literal
 
 from ..loading import load
@@ -105,6 +107,17 @@ class Evaluator(ABC):
             }
         return bootstrap_dict
 
+    @staticmethod
+    def _compute_time_perf(start_time: float, end_time: float, num_samples: int) -> Dict[str, Any]:
+        """
+        A utility function computing time performance metrics:
+            - `latency` - pipeline inference runtime for the evaluation data in seconds,
+            - `throughput` - pipeline throughput in the number of samples per second.
+        """
+        latency = end_time - start_time
+        throughput = num_samples / latency
+        return {"latency": latency, "throughput": throughput}
+
     @abstractmethod
     def predictions_processor(self, *args, **kwargs):
         """
@@ -140,7 +153,7 @@ class Evaluator(ABC):
         metric = self.prepare_metric(metric)
 
         # Compute predictions
-        predictions = self.call_pipeline(pipe, pipe_inputs)
+        predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
         predictions = self.predictions_processor(predictions, label_mapping)
 
         metric_inputs.update(predictions)
@@ -156,6 +169,7 @@ class Evaluator(ABC):
         )
 
         result.update(metric_results)
+        result.update(perf_results)
 
         return result
 
@@ -203,8 +217,7 @@ class Evaluator(ABC):
         Args:
             model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`,
             defaults to `None`):
-                If the argument in not specified, we initialize the default pipeline for the task (in this case
-                `text-classification` or its alias - `sentiment-analysis`). If the argument is of the type `str` or
+                If the argument in not specified, we initialize the default pipeline for the task. If the argument is of the type `str` or
                 is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
                 argument specifies a pre-initialized pipeline.
             preprocessor (`PreTrainedTokenizerBase` or `FeatureExtractionMixin`, *optional*, defaults to `None`):
@@ -260,13 +273,15 @@ class Evaluator(ABC):
         return metric
 
     def call_pipeline(self, pipe, *args, **kwargs):
-        # todo: add performance metrics here
-        return pipe(*args, **kwargs, **self.PIPELINE_KWARGS)
+        start_time = perf_counter()
+        pipe_output = pipe(*args, **kwargs, **self.PIPELINE_KWARGS)
+        end_time = perf_counter()
+        return pipe_output, self._compute_time_perf(start_time, end_time, len(pipe_output))
 
     def compute_metric(
         self,
         metric: EvaluationModule,
-        metric_inputs,
+        metric_inputs: Dict,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,

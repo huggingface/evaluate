@@ -29,6 +29,7 @@ del version
 from .evaluator import (
     Evaluator,
     ImageClassificationEvaluator,
+    QuestionAnsweringEvaluator,
     TextClassificationEvaluator,
     TokenClassificationEvaluator,
     evaluator,

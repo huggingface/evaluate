@@ -1,4 +1,4 @@
-# Copyright 2022 The HuggingFace Datasets Authors and the TensorFlow Datasets Authors.
+# Copyright 2022 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -47,10 +47,10 @@ class TextClassificationEvaluator(Evaluator):
                 `text-classification` or its alias - `sentiment-analysis`). If the argument is of the type `str` or
                 is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
                 argument specifies a pre-initialized pipeline.
-            data (`str` or `Dataset`, defaults to `None):
+            data (`str` or `Dataset`, defaults to `None`):
                 Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
                 name, and load it. Otherwise we assume it represents a pre-loaded dataset.
-            metric (`str` or `EvaluationModule`, defaults to `None`):"
+            metric (`str` or `EvaluationModule`, defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
             tokenizer (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
@@ -85,14 +85,12 @@ class TextClassificationEvaluator(Evaluator):
         ```python
         >>> from evaluate import evaluator
         >>> from datasets import Dataset, load_dataset
-        >>> e = evaluator("text-classification")
-        >>> data =  Dataset.from_dict(load_dataset("imdb")["test"][:2])
-        >>> results = e.compute(
+        >>> task_evaluator = evaluator("text-classification")
+        >>> data = load_dataset("imdb", split="test[:2]")
+        >>> results = task_evaluator.compute(
         >>>     model_or_pipeline="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
         >>>     data=data,
         >>>     metric="accuracy",
-        >>>     input_column="text",
-        >>>     label_column="label",
         >>>     label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
         >>>     strategy="bootstrap",
         >>>     n_resamples=10,
