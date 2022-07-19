@@ -179,8 +179,6 @@ class TestTextClassificationEvaluator(TestCase):
 
     def test_bootstrap(self):
         data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
-        model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
-        tokenizer = AutoTokenizer.from_pretrained(self.default_model)
 
         results = self.evaluator.compute(
             model_or_pipeline=self.model,
@@ -240,7 +238,7 @@ class TestImageClassificationEvaluator(TestCase):
     def setUp(self):
         self.data = Dataset.from_dict(
             {
-                "labels": [2, 2],
+                "label": [2, 2],
                 "image": [Image.new("RGB", (500, 500), (255, 255, 255)), Image.new("RGB", (500, 500), (170, 95, 170))],
             }
         )
@@ -257,7 +255,7 @@ class TestImageClassificationEvaluator(TestCase):
             label_column="label",
             label_mapping=self.label_mapping,
         )
-        self.assertEqual(scores, {"accuracy": 0})
+        self.assertEqual(results["accuracy"], 0)
 
     def test_model_init(self):
         results = self.evaluator.compute(
@@ -342,33 +340,33 @@ class TestQuestionAnsweringEvaluator(TestCase):
 
     def test_pipe_init(self):
         # squad_v1-like dataset
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
         )
-        self.assertEqual(scores["exact_match"], 100.0)
-        self.assertEqual(scores["f1"], 100.0)
+        self.assertEqual(results["exact_match"], 100.0)
+        self.assertEqual(results["f1"], 100.0)
 
     def test_model_init(self):
         # squad_v1-like dataset
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=self.default_model,
             data=self.data,
             metric="squad",
         )
-        self.assertEqual(scores["exact_match"], 0)
-        self.assertEqual(scores["f1"], 100 / 3)
+        self.assertEqual(results["exact_match"], 0)
+        self.assertEqual(results["f1"], 100 / 3)
 
         model = AutoModelForQuestionAnswering.from_pretrained(self.default_model)
         tokenizer = AutoTokenizer.from_pretrained(self.default_model)
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=model,
             data=self.data,
             metric="squad",
             tokenizer=tokenizer,
         )
-        self.assertEqual(scores["exact_match"], 0)
-        self.assertEqual(scores["f1"], 100 / 3)
+        self.assertEqual(results["exact_match"], 0)
+        self.assertEqual(results["f1"], 100 / 3)
 
     def test_class_init(self):
         # squad_v1-like dataset
@@ -376,63 +374,63 @@ class TestQuestionAnsweringEvaluator(TestCase):
         self.assertEqual(evaluator.task, "question-answering")
         self.assertIsNone(evaluator.default_metric_name)
 
-        scores = evaluator.compute(
+        results = evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric="squad",
         )
-        self.assertEqual(scores["exact_match"], 100.0)
-        self.assertEqual(scores["f1"], 100.0)
+        self.assertEqual(results["exact_match"], 100.0)
+        self.assertEqual(results["f1"], 100.0)
 
         # squad_v2-like dataset
         evaluator = QuestionAnsweringEvaluator()
         self.assertEqual(evaluator.task, "question-answering")
         self.assertIsNone(evaluator.default_metric_name)
 
-        scores = evaluator.compute(
+        results = evaluator.compute(
             model_or_pipeline=self.pipe_v2,
             data=self.data_v2,
             metric="squad_v2",
         )
         self.assertDictEqual(
-            {key: scores[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 100.0}
+            {key: results[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 100.0}
         )
 
     def test_default_pipe_init(self):
         # squad_v1-like dataset
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             data=self.data,
         )
-        self.assertEqual(scores["exact_match"], 100.0)
-        self.assertEqual(scores["f1"], 100.0)
+        self.assertEqual(results["exact_match"], 100.0)
+        self.assertEqual(results["f1"], 100.0)
 
         # squad_v2-like dataset
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             data=self.data_v2,
             metric="squad_v2",
         )
         self.assertDictEqual(
-            {key: scores[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 0.0}
+            {key: results[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 0.0}
         )
 
     def test_overwrite_default_metric(self):
         # squad_v1-like dataset
         squad = load("squad")
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric=squad,
         )
-        self.assertEqual(scores["exact_match"], 100.0)
-        self.assertEqual(scores["f1"], 100.0)
+        self.assertEqual(results["exact_match"], 100.0)
+        self.assertEqual(results["f1"], 100.0)
 
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric="squad",
         )
-        self.assertEqual(scores["exact_match"], 100.0)
-        self.assertEqual(scores["f1"], 100.0)
+        self.assertEqual(results["exact_match"], 100.0)
+        self.assertEqual(results["f1"], 100.0)
 
 
 class TestTokenClassificationEvaluator(TestCase):
@@ -456,55 +454,55 @@ class TestTokenClassificationEvaluator(TestCase):
         self.evaluator = evaluator("token-classification")
 
     def test_model_init(self):
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=self.default_model,
             data=self.data,
             metric="seqeval",
         )
-        self.assertEqual(scores["overall_accuracy"], 0.5)
+        self.assertEqual(results["overall_accuracy"], 0.5)
 
         model = AutoModelForTokenClassification.from_pretrained(self.default_model)
         tokenizer = AutoTokenizer.from_pretrained(self.default_model)
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=model,
             data=self.data,
             metric="seqeval",
             tokenizer=tokenizer,
         )
-        self.assertEqual(scores["overall_accuracy"], 0.5)
+        self.assertEqual(results["overall_accuracy"], 0.5)
 
     def test_class_init(self):
         evaluator = TokenClassificationEvaluator()
         self.assertEqual(evaluator.task, "token-classification")
         self.assertIsNone(evaluator.default_metric_name)
 
-        scores = evaluator.compute(
+        results = evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric="seqeval",
         )
-        self.assertEqual(scores["overall_accuracy"], 1.0)
+        self.assertEqual(results["overall_accuracy"], 1.0)
 
     def test_default_pipe_init(self):
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             data=self.data,
         )
-        self.assertEqual(scores["overall_accuracy"], 2 / 3)
+        self.assertEqual(results["overall_accuracy"], 2 / 3)
 
     def test_overwrite_default_metric(self):
         accuracy = load("seqeval")
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric=accuracy,
         )
-        self.assertEqual(scores["overall_accuracy"], 1.0)
-        scores = self.evaluator.compute(
+        self.assertEqual(results["overall_accuracy"], 1.0)
+        results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
             metric="seqeval",
         )
-        self.assertEqual(scores["overall_accuracy"], 1.0)
+        self.assertEqual(results["overall_accuracy"], 1.0)
 
     def test_wrong_task(self):
         self.assertRaises(KeyError, evaluator, "bad_task")

@@ -257,7 +257,7 @@ class TokenClassificationEvaluator(Evaluator):
         metric = self.prepare_metric(metric)
 
         # Compute predictions
-        predictions = self.call_pipeline(pipe, pipe_inputs)
+        predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
         predictions = self.predictions_processor(predictions, data[input_column], join_by)
 
         metric_inputs.update(predictions)
@@ -273,5 +273,6 @@ class TokenClassificationEvaluator(Evaluator):
         )
 
         result.update(metric_results)
+        result.update(perf_results)
 
         return result
