@@ -34,7 +34,7 @@ class ImageClassificationEvaluator(Evaluator):
 
         return {"predictions": pred_label}
 
-    def compute(self, *args, **kwargs) -> Tuple[Dict[str, float], Any]:
+    def compute(self, input_column: str = "image", *args, **kwargs) -> Tuple[Dict[str, float], Any]:
         """
         Compute the metric for a given pipeline and dataset combination.
         Args:
@@ -68,7 +68,7 @@ class ImageClassificationEvaluator(Evaluator):
                 debugging.
             input_column (`str`, defaults to `"image"`):
                 the name of the column containing the images as PIL ImageFile in the dataset specified by `data`.
-            label_column (`str`, defaults to `"labels"`):
+            label_column (`str`, defaults to `"label"`):
                 the name of the column containing the labels in the dataset specified by `data`.
             label_mapping (`Dict[str, Number]`, *optional*, defaults to `None`):
                 We want to map class labels defined by the model in the pipeline to values consistent with those
@@ -86,14 +86,12 @@ class ImageClassificationEvaluator(Evaluator):
         >>> results = task_evaluator.compute(
         >>>     model_or_pipeline="nateraw/vit-base-beans",
         >>>     data=data,
+        >>>     label_column="labels",
         >>>     metric="accuracy",
         >>>     label_mapping={'angular_leaf_spot': 0, 'bean_rust': 1, 'healthy': 2},
-        >>>     strategy="bootstrap",
-        >>>     n_resamples=10,
-        >>>     random_state=0
         >>> )
         ```"""
 
-        result = super().compute(*args, **kwargs)
+        result = super().compute(input_column=input_column, *args, **kwargs)
 
         return result
