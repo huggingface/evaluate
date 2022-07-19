@@ -203,8 +203,7 @@ class Evaluator(ABC):
         Args:
             model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`,
             defaults to `None`):
-                If the argument in not specified, we initialize the default pipeline for the task (in this case
-                `text-classification` or its alias - `sentiment-analysis`). If the argument is of the type `str` or
+                If the argument in not specified, we initialize the default pipeline for the task. If the argument is of the type `str` or
                 is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
                 argument specifies a pre-initialized pipeline.
             preprocessor (`PreTrainedTokenizerBase` or `FeatureExtractionMixin`, *optional*, defaults to `None`):
@@ -266,7 +265,7 @@ class Evaluator(ABC):
     def compute_metric(
         self,
         metric: EvaluationModule,
-        metric_inputs,
+        metric_inputs: Dict,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,

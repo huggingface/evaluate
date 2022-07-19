@@ -1,4 +1,4 @@
-# Copyright 2022 The HuggingFace Datasets Authors and the TensorFlow Datasets Authors.
+# Copyright 2022 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -82,14 +82,12 @@ class ImageClassificationEvaluator(Evaluator):
         ```python
         >>> from evaluate import evaluator
         >>> from datasets import Dataset, load_dataset
-        >>> e = evaluator("image-classification")
-        >>> data =  Dataset.from_dict(load_dataset("beans")["test"][:2])
-        >>> results = e.compute(
+        >>> task_evaluator = evaluator("image-classification")
+        >>> data = load_dataset("beans", split="test[:2]")
+        >>> results = task_evaluator.compute(
         >>>     model_or_pipeline="nateraw/vit-base-beans",
         >>>     data=data,
         >>>     metric="accuracy",
-        >>>     input_column="image",
-        >>>     label_column="labels",
         >>>     label_mapping={'angular_leaf_spot': 0, 'bean_rust': 1, 'healthy': 2},
         >>>     strategy="bootstrap",
         >>>     n_resamples=10,
