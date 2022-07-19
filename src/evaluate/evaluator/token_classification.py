@@ -36,20 +36,35 @@ class TokenClassificationEvaluator(Evaluator):
         super().__init__(task, default_metric_name=default_metric_name)
 
     def predictions_processor(self, predictions: List[List[Dict]], words: List[List[str]], join_by: str):
+        """
+        Transform the pipeline predictions into a list of predicted labels of the same length as the true labels.
+
+        Args:
+            predictions (List[List[Dict]]): List of pipeline predictions, where each token has been labeled.
+            words (List[List[str]]): Original input data to the pipeline, used to build predicted labels of the same length.
+            join_by (str): String to use to join two words. In English, it will typically be " ".
+
+        Returns:
+            Dict: a dictionary holding the predictions
+        """
         preds = []
 
+        # iterate over the data rows
         for i, prediction in enumerate(predictions):
             pred_processed = []
-            label_offsets = self.words_to_offsets(words[i], join_by)
+
+            # get a list of tuples giving the indexes of the start and end character of each word
+            words_offsets = self.words_to_offsets(words[i], join_by)
 
             token_index = 0
-            for label_offset in label_offsets:
-                while prediction[token_index]["start"] < label_offset[0]:
+            for word_offset in words_offsets:
+                # for each word, we may keep only the predicted label for the first token, discard the others
+                while prediction[token_index]["start"] < word_offset[0]:
                     token_index += 1
 
-                if prediction[token_index]["start"] > label_offset[0]:  # bad indexing
+                if prediction[token_index]["start"] > word_offset[0]:  # bad indexing
                     pred_processed.append("O")
-                elif prediction[token_index]["start"] == label_offset[0]:
+                elif prediction[token_index]["start"] == word_offset[0]:
                     pred_processed.append(prediction[token_index]["entity"])
 
             preds.append(pred_processed)
@@ -116,10 +131,12 @@ class TokenClassificationEvaluator(Evaluator):
     ):
         pipe = super().prepare_pipeline(model_or_pipeline, tokenizer, feature_extractor)
 
+        # check the pipeline outputs start characters in its predictions
         dummy_output = pipe(["2003 New York Gregory"], **self.PIPELINE_KWARGS)
         if dummy_output[0][0]["start"] is None:
             raise ValueError(
-                "TokenClassificationEvaluator supports only pipelines giving 'start' index as a pipeline output (got None)."
+                "TokenClassificationEvaluator supports only pipelines giving 'start' index as a pipeline output (got None). "
+                "Transformers pipelines with a slow tokenizer will raise this error."
             )
 
         return pipe
