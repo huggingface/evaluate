@@ -84,7 +84,7 @@ class TokenClassificationEvaluator(Evaluator):
             data.features[label_column], Sequence
         ):
             raise ValueError(
-                "TokenClassificationEvaluator expects the input and label columns to be provded as lists."
+                "TokenClassificationEvaluator expects the input and label columns to be provided as lists."
             )
 
         # If the labels are of type ClassLabel, they are already integers and we have the map stored somewhere.
