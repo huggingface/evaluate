@@ -23,11 +23,18 @@ from transformers import (
     AutoConfig,
     AutoFeatureExtractor,
     AutoModelForImageClassification,
+    AutoModelForQuestionAnswering,
     AutoModelForSequenceClassification,
     AutoTokenizer,
 )
 
-from evaluate import ImageClassificationEvaluator, TextClassificationEvaluator, evaluator, load
+from evaluate import (
+    ImageClassificationEvaluator,
+    QuestionAnsweringEvaluator,
+    TextClassificationEvaluator,
+    evaluator,
+    load,
+)
 
 
 class DummyTextClassificationPipeline:
@@ -47,6 +54,23 @@ class DummyImageClassificationPipeline:
 
     def __call__(self, images, **kwargs):
         return [[{"score": 0.9, "label": "yurt"}, {"score": 0.1, "label": "umbrella"}] for i, _ in enumerate(images)]
+
+
+class DummyQuestionAnsweringPipeline:
+    def __init__(self, v2: bool):
+        self.task = "question-answering"
+        self.v2 = v2
+
+    def __call__(self, question, context, **kwargs):
+        if self.v2:
+            return [
+                {"score": 0.95, "start": 31, "end": 39, "answer": "Felix"}
+                if i % 2 == 0
+                else {"score": 0.95, "start": 0, "end": 0, "answer": ""}
+                for i in range(len(question))
+            ]
+        else:
+            return [{"score": 0.95, "start": 31, "end": 39, "answer": "Felix"} for _ in question]
 
 
 class TestEvaluator(TestCase):
@@ -294,3 +318,115 @@ class TestImageClassificationEvaluator(TestCase):
             label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 0)
+
+
+class TestQuestionAnsweringEvaluator(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict(
+            {
+                "id": ["56be4db0acb8001400a502ec", "56be4db0acb8001400a502ed"],
+                "context": ["My name is Felix and I love cookies!", "Misa name is Felix and misa love cookies!"],
+                "answers": [{"text": ["Felix"], "answer_start": [11]}, {"text": ["Felix"], "answer_start": [13]}],
+                "question": ["What is my name?", "What is my name?"],
+            }
+        )
+        self.data_v2 = Dataset.from_dict(
+            {
+                "id": ["56be4db0acb8001400a502ec", "56be4db0acb8001400a502ed"],
+                "context": ["My name is Felix and I love cookies!", "Let's explore the city!"],
+                "answers": [{"text": ["Felix"], "answer_start": [11]}, {"text": [], "answer_start": []}],
+                "question": ["What is my name?", "What is my name?"],
+            }
+        )
+
+        self.default_model = "mrm8488/bert-tiny-finetuned-squadv2"
+        self.pipe = DummyQuestionAnsweringPipeline(v2=False)
+        self.pipe_v2 = DummyQuestionAnsweringPipeline(v2=True)
+        self.evaluator = evaluator("question-answering")
+
+    def test_pipe_init(self):
+        # squad_v1-like dataset
+        scores = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+        )
+        self.assertDictEqual(scores, {"exact_match": 100.0, "f1": 100.0})
+
+    def test_model_init(self):
+        # squad_v1-like dataset
+        scores = self.evaluator.compute(
+            model_or_pipeline=self.default_model,
+            data=self.data,
+            metric="squad",
+        )
+        self.assertDictEqual(scores, {"exact_match": 0, "f1": 100 / 3})
+
+        model = AutoModelForQuestionAnswering.from_pretrained(self.default_model)
+        tokenizer = AutoTokenizer.from_pretrained(self.default_model)
+        scores = self.evaluator.compute(
+            model_or_pipeline=model,
+            data=self.data,
+            metric="squad",
+            tokenizer=tokenizer,
+        )
+        self.assertDictEqual(scores, {"exact_match": 0, "f1": 100 / 3})
+
+    def test_class_init(self):
+        # squad_v1-like dataset
+        evaluator = QuestionAnsweringEvaluator()
+        self.assertEqual(evaluator.task, "question-answering")
+        self.assertIsNone(evaluator.default_metric_name)
+
+        scores = evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="squad",
+        )
+        self.assertDictEqual(scores, {"exact_match": 100.0, "f1": 100.0})
+
+        # squad_v2-like dataset
+        evaluator = QuestionAnsweringEvaluator()
+        self.assertEqual(evaluator.task, "question-answering")
+        self.assertIsNone(evaluator.default_metric_name)
+
+        scores = evaluator.compute(
+            model_or_pipeline=self.pipe_v2,
+            data=self.data_v2,
+            metric="squad_v2",
+        )
+        self.assertDictEqual(
+            {key: scores[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 100.0}
+        )
+
+    def test_default_pipe_init(self):
+        # squad_v1-like dataset
+        scores = self.evaluator.compute(
+            data=self.data,
+        )
+        self.assertDictEqual(scores, {"exact_match": 100.0, "f1": 100.0})
+
+        # squad_v2-like dataset
+        scores = self.evaluator.compute(
+            data=self.data_v2,
+            metric="squad_v2",
+        )
+        self.assertDictEqual(
+            {key: scores[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 0.0}
+        )
+
+    def test_overwrite_default_metric(self):
+        # squad_v1-like dataset
+        squad = load("squad")
+        scores = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric=squad,
+        )
+        self.assertDictEqual(scores, {"exact_match": 100.0, "f1": 100.0})
+
+        scores = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="squad",
+        )
+        self.assertDictEqual(scores, {"exact_match": 100.0, "f1": 100.0})

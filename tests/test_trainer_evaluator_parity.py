@@ -9,15 +9,7 @@ import numpy as np
 import torch
 import transformers
 from datasets import load_dataset
-from transformers import (
-    AutoFeatureExtractor,
-    AutoModelForImageClassification,
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
-    Trainer,
-    TrainingArguments,
-    pipeline,
-)
+from transformers import AutoFeatureExtractor, AutoModelForImageClassification, Trainer, TrainingArguments, pipeline
 
 from evaluate import evaluator, load
 
@@ -67,9 +59,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         eval_dataset = load_dataset("glue", "sst2", split="validation[:80]")
 
-        model = AutoModelForSequenceClassification.from_pretrained(model_name)
-        tokenizer = AutoTokenizer.from_pretrained(model_name)
-        pipe = pipeline(task="text-classification", model=model, tokenizer=tokenizer)
+        pipe = pipeline(task="text-classification", model=model_name, tokenizer=model_name)
 
         e = evaluator(task="text-classification")
         evaluator_results = e.compute(
@@ -127,7 +117,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         ) as f:
             transformers_results = json.load(f)
 
-        pipe = pipeline(task="image-classification", model=model, feature_extractor=feature_extractor)
+        pipe = pipeline(task="image-classification", model=model_name, feature_extractor=model_name)
 
         e = evaluator(task="image-classification")
         evaluator_results = e.compute(
@@ -141,3 +131,88 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         )
 
         self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["accuracy"])
+
+    def test_question_answering_parity(self):
+        model_name = "mrm8488/bert-tiny-finetuned-squadv2"
+
+        subprocess.run(
+            "git sparse-checkout set examples/pytorch/question-answering",
+            shell=True,
+            cwd=os.path.join(self.dir_path, "transformers"),
+        )
+
+        # test squad_v1-like dataset
+        subprocess.run(
+            f"python examples/pytorch/question-answering/run_qa.py"
+            f" --model_name_or_path {model_name}"
+            f" --dataset_name squad"
+            f" --do_eval"
+            f" --output_dir {os.path.join(self.dir_path, 'questionanswering_squad_transformers')}"
+            f" --max_eval_samples 100"
+            f" --max_seq_length 384",
+            shell=True,
+            cwd=os.path.join(self.dir_path, "transformers"),
+        )
+
+        with open(
+            f"{os.path.join(self.dir_path, 'questionanswering_squad_transformers', 'eval_results.json')}", "r"
+        ) as f:
+            transformers_results = json.load(f)
+
+        eval_dataset = load_dataset("squad", split="validation[:100]")
+
+        pipe = pipeline(
+            task="question-answering", model=model_name, tokenizer=model_name, max_answer_len=30, padding="max_length"
+        )
+
+        e = evaluator(task="question-answering")
+        evaluator_results = e.compute(
+            model_or_pipeline=pipe,
+            data=eval_dataset,
+            metric="squad",
+            strategy="simple",
+        )
+
+        self.assertEqual(transformers_results["eval_f1"], evaluator_results["f1"])
+        self.assertEqual(transformers_results["eval_exact_match"], evaluator_results["exact_match"])
+
+        # test squad_v2-like dataset
+        subprocess.run(
+            f"python examples/pytorch/question-answering/run_qa.py"
+            f" --model_name_or_path {model_name}"
+            f" --dataset_name squad_v2"
+            f" --version_2_with_negative"
+            f" --do_eval"
+            f" --output_dir {os.path.join(self.dir_path, 'questionanswering_squadv2_transformers')}"
+            f" --max_eval_samples 100"
+            f" --max_seq_length 384",
+            shell=True,
+            cwd=os.path.join(self.dir_path, "transformers"),
+        )
+
+        with open(
+            f"{os.path.join(self.dir_path, 'questionanswering_squadv2_transformers', 'eval_results.json')}", "r"
+        ) as f:
+            transformers_results = json.load(f)
+
+        eval_dataset = load_dataset("squad_v2", split="validation[:100]")
+
+        pipe = pipeline(
+            task="question-answering",
+            model=model_name,
+            tokenizer=model_name,
+            max_answer_len=30,
+            handle_impossible_answer=True,
+        )
+
+        e = evaluator(task="question-answering")
+        evaluator_results = e.compute(
+            model_or_pipeline=pipe,
+            data=eval_dataset,
+            metric="squad_v2",
+            strategy="simple",
+        )
+
+        self.assertEqual(transformers_results["eval_f1"], evaluator_results["f1"])
+        self.assertEqual(transformers_results["eval_HasAns_f1"], evaluator_results["HasAns_f1"])
+        self.assertEqual(transformers_results["eval_NoAns_f1"], evaluator_results["NoAns_f1"])
