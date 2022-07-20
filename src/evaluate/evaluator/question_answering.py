@@ -123,6 +123,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
+        device: int = None,
         random_state: Optional[int] = None,
         question_column: str = "question",
         context_column: str = "context",
@@ -227,7 +228,7 @@ class QuestionAnsweringEvaluator(Evaluator):
                 f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Auto-infered `squad_v2_format` to {squad_v2_format}."
             )
 
-        pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer)
+        pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
 
         metric = self.prepare_metric(metric)
 
