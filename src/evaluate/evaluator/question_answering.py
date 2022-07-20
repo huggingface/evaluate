@@ -172,7 +172,7 @@ class QuestionAnsweringEvaluator(Evaluator):
                 the name of the column containing the answers in the dataset specified by `data`.
             squad_v2_format (`bool`, *optional*, defaults to `None`):
                 whether the dataset follows the format of squad_v2 dataset where a question may have no answer in the context. If this parameter is not provided,
-                the format will be automatically infered.
+                the format will be automatically inferred.
         Return:
             A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
             `"simple"` strategy, the value is the metric score. For the `"bootstrap"` strategy, the value is a `Dict`
@@ -224,7 +224,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         if squad_v2_format is None:
             squad_v2_format = self.is_squad_v2_format(data=data, label_column=label_column)
             logger.warn(
-                f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Auto-infered `squad_v2_format` to {squad_v2_format}."
+                f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Automatically inferred `squad_v2_format` as {squad_v2_format}."
             )
 
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer)
