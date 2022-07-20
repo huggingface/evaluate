@@ -274,7 +274,7 @@ class TokenClassificationEvaluator(Evaluator):
         metric_inputs, pipe_inputs = self.prepare_data(
             data=data, input_column=input_column, label_column=label_column, join_by=join_by
         )
-        pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer)
+        pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
         metric = self.prepare_metric(metric)
 
         # Compute predictions
