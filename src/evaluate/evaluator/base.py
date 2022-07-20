@@ -111,8 +111,10 @@ class Evaluator(ABC):
     def _compute_time_perf(start_time: float, end_time: float, num_samples: int) -> Dict[str, Any]:
         """
         A utility function computing time performance metrics:
-            - `latency_in_seconds` - pipeline inference runtime for the evaluation data in seconds,
+            - `total_time_in_seconds` - pipeline inference runtime for the evaluation data in seconds,
             - `samples_per_second` - pipeline throughput in the number of samples per second.
+            - `latency_in_seconds` - pipeline inference runtime for the evaluation data in seconds per sample,
+            
         """
         latency = end_time - start_time
         throughput = num_samples / latency
