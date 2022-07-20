@@ -111,12 +111,18 @@ class Evaluator(ABC):
     def _compute_time_perf(start_time: float, end_time: float, num_samples: int) -> Dict[str, Any]:
         """
         A utility function computing time performance metrics:
-            - `latency` - pipeline inference runtime for the evaluation data in seconds,
-            - `throughput` - pipeline throughput in the number of samples per second.
+            - `latency_in_seconds` - pipeline inference runtime for the evaluation data in seconds,
+            - `samples_per_second` - pipeline throughput in the number of samples per second.
         """
         latency = end_time - start_time
         throughput = num_samples / latency
-        return {"latency": latency, "throughput": throughput}
+        latency_sample = 1.0 / throughput
+
+        return {
+            "total_time_in_seconds": latency,
+            "samples_per_second": throughput,
+            "latency_in_seconds": latency_sample,
+        }
 
     @abstractmethod
     def predictions_processor(self, *args, **kwargs):

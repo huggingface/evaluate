@@ -200,8 +200,10 @@ class TestTextClassificationEvaluator(TestCase):
             random_state=0,
         )
         self.assertEqual(results["accuracy"], 1.0)
-        self.assertAlmostEqual(results["latency"], 0.1, 1)
-        self.assertAlmostEqual(results["throughput"], len(self.data) / results["latency"], 5)
+        self.assertAlmostEqual(results["total_time_in_seconds"], 0.1, 1)
+        self.assertAlmostEqual(results["samples_per_second"], len(self.data) / results["total_time_in_seconds"], 5)
+        self.assertAlmostEqual(results["latency_in_seconds"], results["total_time_in_seconds"] / len(self.data), 5)
+
 
     def test_bootstrap_and_perf(self):
         data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
@@ -222,8 +224,10 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertAlmostEqual(results["accuracy"]["confidence_interval"][0], 0.333333, 5)
         self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.666666, 5)
         self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.22498285, 5)
-        self.assertAlmostEqual(results["latency"], 0.1, 1)
-        self.assertAlmostEqual(results["throughput"], len(data) / results["latency"], 5)
+        self.assertAlmostEqual(results["total_time_in_seconds"], 0.1, 1)
+        self.assertAlmostEqual(results["samples_per_second"], len(data) / results["total_time_in_seconds"], 5)
+        self.assertAlmostEqual(results["latency_in_seconds"], results["total_time_in_seconds"] / len(data), 5)
+
 
 
 class TestImageClassificationEvaluator(TestCase):
