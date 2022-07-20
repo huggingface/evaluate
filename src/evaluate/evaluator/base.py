@@ -126,6 +126,36 @@ class Evaluator(ABC):
             "latency_in_seconds": latency_sample,
         }
 
+    @staticmethod
+    def _infer_device() -> int:
+        """Helper function to check if GPU or CPU is available for inference."""
+        # try infer with torch first
+        try:
+            import torch
+
+            if torch.cuda.is_available():
+                device = 0  # first GPU
+            else:
+                device = -1  # CPU
+        except ImportError:
+            # if not available try TF
+            try:
+                import tensorflow as tf
+
+                if len(tf.config.list_physical_devices("GPU")) > 0:
+                    device = 0  # first GPU
+                else:
+                    device = -1  # CPU
+            except ImportError:
+                device = -1
+
+        if device == -1:
+            logger.info("No GPU found. The default device for pipeline inference is set to CPU.")
+        else:
+            logger.info("GPU found. The default device for pipeline inference is set to GPU (CUDA:0).")
+
+        return device
+
     @abstractmethod
     def predictions_processor(self, *args, **kwargs):
         """
@@ -145,6 +175,7 @@ class Evaluator(ABC):
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
+        device: int = None,
         random_state: Optional[int] = None,
         input_column: str = "text",
         label_column: str = "label",
@@ -156,7 +187,10 @@ class Evaluator(ABC):
         # Prepare inputs
         metric_inputs, pipe_inputs = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
         pipe = self.prepare_pipeline(
-            model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, feature_extractor=feature_extractor
+            model_or_pipeline=model_or_pipeline,
+            tokenizer=tokenizer,
+            feature_extractor=feature_extractor,
+            device=device,
         )
         metric = self.prepare_metric(metric)
 
@@ -218,6 +252,7 @@ class Evaluator(ABC):
         model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"],  # noqa: F821
         tokenizer: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,  # noqa: F821
         feature_extractor: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,  # noqa: F821
+        device: int = None,
     ):
         """
         Prepare pipeline.
@@ -235,17 +270,25 @@ class Evaluator(ABC):
         Returns:
             The initialized pipeline.
         """
+
+        if device is None:
+            device = self._infer_device()
+
         if (
             isinstance(model_or_pipeline, str)
             or isinstance(model_or_pipeline, transformers.PreTrainedModel)
             or isinstance(model_or_pipeline, transformers.TFPreTrainedModel)
         ):
             pipe = pipeline(
-                self.task, model=model_or_pipeline, tokenizer=tokenizer, feature_extractor=feature_extractor
+                self.task,
+                model=model_or_pipeline,
+                tokenizer=tokenizer,
+                feature_extractor=feature_extractor,
+                device=device,
             )
         else:
             if model_or_pipeline is None:
-                pipe = pipeline(self.task)
+                pipe = pipeline(self.task, device=device)
             else:
                 pipe = model_or_pipeline
             if tokenizer is not None and feature_extractor is not None:
