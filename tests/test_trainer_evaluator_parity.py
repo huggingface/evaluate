@@ -61,8 +61,8 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         pipe = pipeline(task="text-classification", model=model_name, tokenizer=model_name)
 
-        e = evaluator(task="text-classification")
-        evaluator_results = e.compute(
+        task_evaluator = evaluator(task="text-classification")
+        evaluator_results = task_evaluator.compute(
             model_or_pipeline=pipe,
             data=eval_dataset,
             metric="accuracy",
@@ -119,8 +119,8 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         pipe = pipeline(task="image-classification", model=model_name, feature_extractor=model_name)
 
-        e = evaluator(task="image-classification")
-        evaluator_results = e.compute(
+        task_evaluator = evaluator(task="image-classification")
+        evaluator_results = task_evaluator.compute(
             model_or_pipeline=pipe,
             data=eval_dataset,
             metric="accuracy",
@@ -133,7 +133,8 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["accuracy"])
 
     def test_question_answering_parity(self):
-        model_name = "mrm8488/bert-tiny-finetuned-squadv2"
+        model_name_v1 = "anas-awadalla/bert-tiny-finetuned-squad"
+        model_name_v2 = "mrm8488/bert-tiny-finetuned-squadv2"
 
         subprocess.run(
             "git sparse-checkout set examples/pytorch/question-answering",
@@ -144,7 +145,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         # test squad_v1-like dataset
         subprocess.run(
             f"python examples/pytorch/question-answering/run_qa.py"
-            f" --model_name_or_path {model_name}"
+            f" --model_name_or_path {model_name_v1}"
             f" --dataset_name squad"
             f" --do_eval"
             f" --output_dir {os.path.join(self.dir_path, 'questionanswering_squad_transformers')}"
@@ -162,11 +163,15 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         eval_dataset = load_dataset("squad", split="validation[:100]")
 
         pipe = pipeline(
-            task="question-answering", model=model_name, tokenizer=model_name, max_answer_len=30, padding="max_length"
+            task="question-answering",
+            model=model_name_v1,
+            tokenizer=model_name_v1,
+            max_answer_len=30,
+            padding="max_length",
         )
 
-        e = evaluator(task="question-answering")
-        evaluator_results = e.compute(
+        task_evaluator = evaluator(task="question-answering")
+        evaluator_results = task_evaluator.compute(
             model_or_pipeline=pipe,
             data=eval_dataset,
             metric="squad",
@@ -179,7 +184,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         # test squad_v2-like dataset
         subprocess.run(
             f"python examples/pytorch/question-answering/run_qa.py"
-            f" --model_name_or_path {model_name}"
+            f" --model_name_or_path {model_name_v2}"
             f" --dataset_name squad_v2"
             f" --version_2_with_negative"
             f" --do_eval"
@@ -199,18 +204,18 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         pipe = pipeline(
             task="question-answering",
-            model=model_name,
-            tokenizer=model_name,
+            model=model_name_v2,
+            tokenizer=model_name_v2,
             max_answer_len=30,
-            handle_impossible_answer=True,
         )
 
-        e = evaluator(task="question-answering")
-        evaluator_results = e.compute(
+        task_evaluator = evaluator(task="question-answering")
+        evaluator_results = task_evaluator.compute(
             model_or_pipeline=pipe,
             data=eval_dataset,
             metric="squad_v2",
             strategy="simple",
+            squad_v2_format=True,
         )
 
         self.assertEqual(transformers_results["eval_f1"], evaluator_results["f1"])
