@@ -359,7 +359,7 @@ class TestQuestionAnsweringEvaluator(TestCase):
 
         model = AutoModelForQuestionAnswering.from_pretrained(self.default_model)
         tokenizer = AutoTokenizer.from_pretrained(self.default_model)
-        scores = self.evaluator.compute(
+        results = self.evaluator.compute(
             model_or_pipeline=model,
             data=self.data,
             metric="squad",
