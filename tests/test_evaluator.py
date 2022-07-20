@@ -15,7 +15,7 @@
 # Lint as: python3
 
 from time import sleep
-from unittest import TestCase
+from unittest import TestCase, mock
 
 from datasets import Dataset
 from PIL import Image
@@ -29,6 +29,7 @@ from transformers import (
 )
 
 from evaluate import (
+    Evaluator,
     ImageClassificationEvaluator,
     QuestionAnsweringEvaluator,
     TextClassificationEvaluator,
@@ -76,6 +77,51 @@ class DummyQuestionAnsweringPipeline:
 class TestEvaluator(TestCase):
     def test_wrong_task(self):
         self.assertRaises(KeyError, evaluator, "bad_task")
+
+    def test_device_placement(self):
+        orig_import = __import__
+
+        pt_mock = mock.Mock()
+        tf_mock = mock.Mock()
+
+        # mock import of torch and tensorflow
+        def import_pt_tf_mock(name, *args):
+            if name == "torch":
+                if pt_available:
+                    return pt_mock
+                else:
+                    raise ImportError
+            if name == "tensorflow":
+                if tf_available:
+                    return tf_mock
+                else:
+                    raise ImportError
+            return orig_import(name, *args)
+
+        with mock.patch("builtins.__import__", side_effect=import_pt_tf_mock):
+            # neither pt or tf are available
+            pt_available = False
+            tf_available = False
+            self.assertEqual(Evaluator._infer_device(), -1)
+
+            # pt available but no GPU
+            pt_available = True
+            pt_mock.cuda.is_available.return_value = False
+            self.assertEqual(Evaluator._infer_device(), -1)
+
+            # pt available and GPU found
+            pt_mock.cuda.is_available.return_value = True
+            self.assertEqual(Evaluator._infer_device(), 0)
+
+            # tf available but no GPU
+            pt_available = False
+            tf_available = True
+            tf_mock.config.list_physical_devices.return_value = []
+            self.assertEqual(Evaluator._infer_device(), -1)
+
+            # tf available and GPU found
+            tf_mock.config.list_physical_devices.return_value = ["GPU:0", "GPU:1"]
+            self.assertEqual(Evaluator._infer_device(), 0)
 
 
 class TestTextClassificationEvaluator(TestCase):

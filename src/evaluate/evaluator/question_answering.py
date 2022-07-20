@@ -123,6 +123,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
+        device: int = None,
         random_state: Optional[int] = None,
         question_column: str = "question",
         context_column: str = "context",
@@ -158,6 +159,10 @@ class QuestionAnsweringEvaluator(Evaluator):
                 The `confidence_level` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
             n_resamples (`int`, defaults to `9999`):
                 The `n_resamples` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
+            device (`int`, defaults to `None`):
+                 Device ordinal for CPU/GPU support of the pipeline. Setting this to -1 will leverage CPU, a positive
+                 will run the model on the associated CUDA device ID. If`None` is provided it will be inferred and
+                 CUDA:0 used if available, CPU otherwise.
             random_state (`int`, *optional*, defaults to `None`):
                 The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
                 debugging.
@@ -227,7 +232,7 @@ class QuestionAnsweringEvaluator(Evaluator):
                 f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Automatically inferred `squad_v2_format` as {squad_v2_format}."
             )
 
-        pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer)
+        pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
 
         metric = self.prepare_metric(metric)
 
