@@ -152,6 +152,7 @@ class TokenClassificationEvaluator(Evaluator):
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
+        device: Optional[int] = None,
         random_state: Optional[int] = None,
         input_column: str = "tokens",
         label_column: str = "ner_tags",
