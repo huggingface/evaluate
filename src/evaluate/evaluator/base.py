@@ -273,11 +273,15 @@ class Evaluator(ABC):
             or isinstance(model_or_pipeline, transformers.TFPreTrainedModel)
         ):
             pipe = pipeline(
-                self.task, model=model_or_pipeline, tokenizer=tokenizer, feature_extractor=feature_extractor
+                self.task,
+                model=model_or_pipeline,
+                tokenizer=tokenizer,
+                feature_extractor=feature_extractor,
+                device=device,
             )
         else:
             if model_or_pipeline is None:
-                pipe = pipeline(self.task)
+                pipe = pipeline(self.task, device=device)
             else:
                 pipe = model_or_pipeline
             if tokenizer is not None and feature_extractor is not None:
