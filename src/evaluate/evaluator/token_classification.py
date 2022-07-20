@@ -128,8 +128,9 @@ class TokenClassificationEvaluator(Evaluator):
         model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"],  # noqa: F821
         tokenizer: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,  # noqa: F821
         feature_extractor: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,  # noqa: F821
+        device: int = None,
     ):
-        pipe = super().prepare_pipeline(model_or_pipeline, tokenizer, feature_extractor)
+        pipe = super().prepare_pipeline(model_or_pipeline, tokenizer, feature_extractor, device)
 
         # check the pipeline outputs start characters in its predictions
         dummy_output = pipe(["2003 New York Gregory"], **self.PIPELINE_KWARGS)
@@ -189,9 +190,9 @@ class TokenClassificationEvaluator(Evaluator):
             n_resamples (`int`, defaults to `9999`):
                 The `n_resamples` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
             device (`int`, defaults to `None`):
-                 Device ordinal for CPU/GPU support of the pipeline. Setting this to -1 will leverage CPU, a positive
-                 integer will run the model on the associated CUDA device ID. If`None` is provided it will be inferred and
-                 CUDA:0 used if available, CPU otherwise.
+                Device ordinal for CPU/GPU support of the pipeline. Setting this to -1 will leverage CPU, a positive
+                integer will run the model on the associated CUDA device ID. If`None` is provided it will be inferred and
+                CUDA:0 used if available, CPU otherwise.
             random_state (`int`, *optional*, defaults to `None`):
                 The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
                 debugging.
