@@ -131,24 +131,23 @@ class Evaluator(ABC):
         # try infer with torch first
         try:
             import torch
-            
+
             if torch.cuda.is_available():
-                device = 0 # first GPU
+                device = 0  # first GPU
             else:
-                device = -1 # CPU
+                device = -1  # CPU
         except ImportError:
             # if not available try TF
             try:
                 import tensorflow as tf
-                
-                if len(tf.config.list_physical_devices('GPU')) > 0:
-                    device = 0 # first GPU
+
+                if len(tf.config.list_physical_devices("GPU")) > 0:
+                    device = 0  # first GPU
                 else:
-                    device = -1 # CPU
+                    device = -1  # CPU
             except ImportError:
                 device = -1
         return device
-
 
     @abstractmethod
     def predictions_processor(self, *args, **kwargs):
@@ -181,7 +180,10 @@ class Evaluator(ABC):
         # Prepare inputs
         metric_inputs, pipe_inputs = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
         pipe = self.prepare_pipeline(
-            model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, feature_extractor=feature_extractor, device=device
+            model_or_pipeline=model_or_pipeline,
+            tokenizer=tokenizer,
+            feature_extractor=feature_extractor,
+            device=device,
         )
         metric = self.prepare_metric(metric)
 
@@ -243,7 +245,7 @@ class Evaluator(ABC):
         model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"],  # noqa: F821
         tokenizer: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,  # noqa: F821
         feature_extractor: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,  # noqa: F821
-        device: int = None
+        device: int = None,
     ):
         """
         Prepare pipeline.
