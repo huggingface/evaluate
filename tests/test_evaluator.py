@@ -361,7 +361,7 @@ class TestQuestionAnsweringEvaluator(TestCase):
             metric="squad",
         )
         self.assertEqual(scores["exact_match"], 0)
-        self.assertEqual(scores["f1"], 100 / 3)
+        self.assertEqual(scores["f1"], 0)
 
         model = AutoModelForQuestionAnswering.from_pretrained(self.default_model)
         tokenizer = AutoTokenizer.from_pretrained(self.default_model)
@@ -372,7 +372,7 @@ class TestQuestionAnsweringEvaluator(TestCase):
             tokenizer=tokenizer,
         )
         self.assertEqual(scores["exact_match"], 0)
-        self.assertEqual(scores["f1"], 100 / 3)
+        self.assertEqual(scores["f1"], 0)
 
     def test_class_init(self):
         # squad_v1-like dataset

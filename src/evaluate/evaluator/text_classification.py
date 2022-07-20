@@ -84,7 +84,7 @@ class TextClassificationEvaluator(Evaluator):
         Examples:
         ```python
         >>> from evaluate import evaluator
-        >>> from datasets import Dataset, load_dataset
+        >>> from datasets import load_dataset
         >>> task_evaluator = evaluator("text-classification")
         >>> data = load_dataset("imdb", split="test[:2]")
         >>> results = task_evaluator.compute(

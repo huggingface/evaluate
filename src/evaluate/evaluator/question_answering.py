@@ -48,6 +48,8 @@ class QuestionAnsweringEvaluator(Evaluator):
     [`QuestionAnsweringPipeline`](https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.QuestionAnsweringPipeline).
     """
 
+    PIPELINE_KWARGS = {"handle_impossible_answer": False}
+
     def __init__(self, task="question-answering", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
@@ -89,7 +91,7 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         return metric_inputs, {"question": data[question_column], "context": data[context_column]}
 
-    def is_squad_v2_schema(self, data: Dataset, label_column: str = "answers"):
+    def is_squad_v2_format(self, data: Dataset, label_column: str = "answers"):
         """
         Check if the provided dataset follows the squad v2 data schema, namely possible samples where the answer is not in the context.
         In this case, the answer text list should be `[]`.
@@ -103,11 +105,11 @@ class QuestionAnsweringEvaluator(Evaluator):
         else:
             return False
 
-    def predictions_processor(self, predictions: List, squad_v2_schema: bool, ids: List):
+    def predictions_processor(self, predictions: List, squad_v2_format: bool, ids: List):
         result = []
         for i in range(len(predictions)):
             pred = {"prediction_text": predictions[i]["answer"], "id": ids[i]}
-            if squad_v2_schema:
+            if squad_v2_format:
                 pred["no_answer_probability"] = predictions[i]["score"]
             result.append(pred)
         return {"predictions": result}
@@ -126,6 +128,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         context_column: str = "context",
         id_column: str = "id",
         label_column: str = "answers",
+        squad_v2_format: Optional[bool] = None,
     ) -> Tuple[Dict[str, float], Any]:
         """
         Compute the metric for a given pipeline and dataset combination.
@@ -167,6 +170,9 @@ class QuestionAnsweringEvaluator(Evaluator):
                 dataset specified by `data`.
             label_column (`str`, defaults to `"answers"`):
                 the name of the column containing the answers in the dataset specified by `data`.
+            squad_v2_format (`bool`, *optional*, defaults to `None`):
+                whether the dataset follows the format of squad_v2 dataset where a question may have no answer in the context. If this parameter is not provided,
+                the format will be automatically infered.
         Return:
             A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
             `"simple"` strategy, the value is the metric score. For the `"bootstrap"` strategy, the value is a `Dict`
@@ -176,9 +182,9 @@ class QuestionAnsweringEvaluator(Evaluator):
         ```python
         >>> from evaluate import evaluator
         >>> from datasets import load_dataset
-        >>> e = evaluator("question-answering")
+        >>> task_evaluator = evaluator("question-answering")
         >>> data = load_dataset("squad", split="validation[:2]")
-        >>> results = e.compute(
+        >>> results = task_evaluator.compute(
         >>>     model_or_pipeline="sshleifer/tiny-distilbert-base-cased-distilled-squad",
         >>>     data=data,
         >>>     metric="squad",
@@ -187,26 +193,21 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         <Tip>
 
-        Datasets where the answer may be missing in the context are supported, for example SQuAD v2 dataset. If using transformers pipeline
-        with models trained on this type of data, make sure to pass `handle_impossible_answer=True` as an argument to the pipeline.
+        Datasets where the answer may be missing in the context are supported, for example SQuAD v2 dataset. In this case, it is safer to pass `squad_v2_format=True` to
+        the compute() call.
 
         </Tip>
 
         ```python
         >>> from evaluate import evaluator
         >>> from datasets import load_dataset
-        >>> from transformers import pipeline
         >>> task_evaluator = evaluator("question-answering")
         >>> data = load_dataset("squad_v2", split="validation[:2]")
-        >>> pipe = pipeline(
-        >>>     task="question-answering",
-        >>>     model="sshleifer/mrm8488/bert-tiny-finetuned-squadv2",
-        >>>     handle_impossible_answer=True
-        >>> )
         >>> results = task_evaluator.compute(
-        >>>     model_or_pipeline=pipe,
+        >>>     model_or_pipeline="mrm8488/bert-tiny-finetuned-squadv2",
         >>>     data=data,
         >>>     metric="squad_v2",
+        >>>     squad_v2_format=True,
         >>> )
         ```
         """
@@ -220,23 +221,30 @@ class QuestionAnsweringEvaluator(Evaluator):
             label_column=label_column,
         )
 
-        squad_v2_schema = self.is_squad_v2_schema(data=data, label_column=label_column)
+        if squad_v2_format is None:
+            squad_v2_format = self.is_squad_v2_format(data=data, label_column=label_column)
+            logger.warn(
+                f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Auto-infered `squad_v2_format` to {squad_v2_format}."
+            )
 
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer)
 
         metric = self.prepare_metric(metric)
 
-        if squad_v2_schema and metric.name == "squad":
+        if squad_v2_format and metric.name == "squad":
             logger.warn(
                 "The dataset has SQuAD v2 format but you are using the SQuAD metric. Consider passing the 'squad_v2' metric."
             )
-        if not squad_v2_schema and metric.name == "squad_v2":
+        if not squad_v2_format and metric.name == "squad_v2":
             logger.warn(
                 "The dataset has SQuAD v1 format but you are using the SQuAD v2 metric. Consider passing the 'squad' metric."
             )
 
+        if squad_v2_format:
+            self.PIPELINE_KWARGS["handle_impossible_answer"] = True
+
         predictions, perf_results = self.call_pipeline(pipe, **pipe_inputs)
-        predictions = self.predictions_processor(predictions, squad_v2_schema=squad_v2_schema, ids=data[id_column])
+        predictions = self.predictions_processor(predictions, squad_v2_format=squad_v2_format, ids=data[id_column])
 
         metric_inputs.update(predictions)
 
