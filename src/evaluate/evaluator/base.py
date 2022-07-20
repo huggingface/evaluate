@@ -114,7 +114,7 @@ class Evaluator(ABC):
             - `total_time_in_seconds` - pipeline inference runtime for the evaluation data in seconds,
             - `samples_per_second` - pipeline throughput in the number of samples per second.
             - `latency_in_seconds` - pipeline inference runtime for the evaluation data in seconds per sample,
-            
+
         """
         latency = end_time - start_time
         throughput = num_samples / latency
