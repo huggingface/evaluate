@@ -127,7 +127,7 @@ class Evaluator(ABC):
         }
 
     @staticmethod
-    def _infer_device():
+    def _infer_device() -> int:
         """Helper function to check if GPU or CPU is available for inference."""
         # try infer with torch first
         try:
@@ -152,7 +152,7 @@ class Evaluator(ABC):
         if device == -1:
             logger.info("No GPU found. The default device for pipeline inference is set to CPU.")
         else:
-            logger.info("GPU found. The default device for pipeline inference is set to GPU (0).")
+            logger.info("GPU found. The default device for pipeline inference is set to GPU (CUDA:0).")
 
         return device
 
