@@ -42,13 +42,13 @@ pip install evaluate
 Run the following command to check if 🤗 Evaluate has been properly installed:
 
 ```bash
-python -c "import evaluate; print(evaluate.load('accuracy').compute(references=[1], predictions=[1]))"
+python -c "import evaluate; print(evaluate.load('exact_match').compute(references=['hello'], predictions=['hello']))"
 ```
 
 This should return:
 
 ```bash
-{'accuracy': 1.0}
+{'exact_match': 1.0}
 ```
 
 ## source
