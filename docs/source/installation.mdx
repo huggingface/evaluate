@@ -64,5 +64,5 @@ pip install -e .
 Again, you can check if 🤗 Evaluate has been properly installed with:
 
 ```bash
-python -c "import evaluate; print(evaluate.load('accuracy').compute(references=[1], predictions=[1]))"
+python -c "import evaluate; print(evaluate.load('exact_match').compute(references=['hello'], predictions=['hello']))"
 ```
