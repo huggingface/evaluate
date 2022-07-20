@@ -159,6 +159,10 @@ class QuestionAnsweringEvaluator(Evaluator):
                 The `confidence_level` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
             n_resamples (`int`, defaults to `9999`):
                 The `n_resamples` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
+            device (`int`, defaults to None):
+                 Device ordinal for CPU/GPU supports of pipeline. Setting this to -1 will leverage CPU, a positive
+                 will run the model on the associated CUDA device id. If none is provided it will be inferred and
+                 GPU:0 used if available, CPU otherwise.
             random_state (`int`, *optional*, defaults to `None`):
                 The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
                 debugging.
