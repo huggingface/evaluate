@@ -111,7 +111,7 @@ class TokenClassificationEvaluator(Evaluator):
             references = [[id_to_label[label_id] for label_id in label_ids] for label_ids in data[label_column]]
         elif data.features[label_column].feature.dtype.startswith("int"):
             raise NotImplementedError(
-                "References provided as int, but the reference column is not instanciated as a Sequence of ClassLabel."
+                "References provided as integers, but the reference column is not a Sequence of ClassLabels."
             )
         else:
             # In the event the labels are not a `Sequence[ClassLabel]`, we have already labels as strings
