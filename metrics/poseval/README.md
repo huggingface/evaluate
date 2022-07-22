@@ -92,7 +92,7 @@ Per type (e.g. `MISC`, `PER`, `LOC`,...):
 
 ## Limitations and bias
 
-In contrast to seqeval the poseval metric treats each token independantly and computes the classification report overal all concatenated sequences.
+In contrast to [seqeval](https://github.com/chakki-works/seqeval), the poseval metric treats each token independently and computes the classification report over all concatenated sequences..
 
 
 ## Citation
