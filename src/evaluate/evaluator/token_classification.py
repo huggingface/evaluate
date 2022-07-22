@@ -200,9 +200,6 @@ class TokenClassificationEvaluator(Evaluator):
                 the name of the column containing the tokens feature in the dataset specified by `data`.
             label_column (`str`, defaults to `"label"`):
                 the name of the column containing the labels in the dataset specified by `data`.
-            label_mapping (`Dict`, *optional*, defaults to `None`):
-                We want to map class labels defined by the model in the pipeline to values consistent with those
-                defined in the `label_column` of the `data` dataset.
             join_by (`str`, *optional*, defaults to `" "`):
                 This evaluator supports dataset whose input column is a list of words. This parameter specifies how to join
                 words to generate a string input. This is especially useful for languages that do not separate words by a space.

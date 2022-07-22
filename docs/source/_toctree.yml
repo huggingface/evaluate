@@ -13,6 +13,8 @@
     title: Choosing a metric for your task
   - local: creating_and_sharing
     title: Creating and sharing a new evaluation
+  - local: base_evaluator
+    title: Using the evaluator with transformers models
   - local: custom_evaluator
     title: Using the evaluator with any model
   title: "How-to guides"
