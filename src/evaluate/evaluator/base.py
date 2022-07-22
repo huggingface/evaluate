@@ -39,6 +39,7 @@ from time import perf_counter
 
 from typing_extensions import Literal
 
+from .utils import DatasetColumn
 from ..loading import load
 from ..module import EvaluationModule
 from ..utils.logging import get_logger
@@ -245,7 +246,7 @@ class Evaluator(ABC):
                 f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
             )
 
-        return {"references": data[label_column]}, data[input_column]
+        return {"references": data[label_column]}, DatasetColumn(data, input_column)
 
     def prepare_pipeline(
         self,
