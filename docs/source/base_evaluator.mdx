@@ -1,3 +1,4 @@
+# Using the evaluator with transformers models
 
 The `Evaluator` abstraction allows to evaluate models wrapped in a pipeline, responsible for handling all preprocessing and post-processing. Out-of-the-box, `Evaluator` supports transformers pipelines for the supported tasks, but custom pipelines can be passed, as showcased in [LINK].
 
@@ -111,8 +112,7 @@ models = [
     "dbmdz/electra-large-discriminator-finetuned-conll03-english",
     "gunghio/distilbert-base-multilingual-cased-finetuned-conll2003-ner",
     "philschmid/distilroberta-base-ner-conll2003",
-    "Jean-Baptiste/roberta-large-ner-english",
-    "ArBert/albert-base-v2-finetuned-ner",
+    "Jorgeutd/albert-base-v2-finetuned-ner",
 ]
 models.sort()
 
@@ -132,7 +132,6 @@ for model in tqdm(models):
     try:
         print(model)
         pipe = pipeline(task="token-classification", model=model, device=device)
-        label_mapping = pipe.model.config.label2id
 
         eval_results = task_evaluator.compute(
             model_or_pipeline=pipe, data=data, metric="seqeval", join_by=" "
@@ -156,14 +155,26 @@ Results:
 
 |   model                                                            |   overall_f1 |   overall_accuracy |   total_time_in_seconds |   samples_per_second |   latency_in_seconds |
 |:-------------------------------------------------------------------|-------------:|-------------------:|------------------------:|---------------------:|---------------------:|
-| ArBert/albert-base-v2-finetuned-ner                                |        0.000 |              0.000 |                   4.395 |              227.549 |                0.004 |
-| Jean-Baptiste/roberta-large-ner-english                            |        0.000 |              0.833 |                  11.494 |               87.003 |                0.011 |
-| dbmdz/bert-large-cased-finetuned-conll03-english                   |        0.962 |              0.881 |                  11.592 |               86.263 |                0.012 |
-| dbmdz/electra-large-discriminator-finetuned-conll03-english        |        0.965 |              0.881 |                  11.425 |               87.529 |                0.011 |
-| elastic/distilbert-base-uncased-finetuned-conll03-english          |        0.940 |              0.989 |                   2.344 |              426.634 |                0.002 |
-| gunghio/distilbert-base-multilingual-cased-finetuned-conll2003-ner |        0.947 |              0.991 |                   2.423 |              412.781 |                0.002 |
-| philschmid/distilroberta-base-ner-conll2003                        |        0.961 |              0.994 |                   2.536 |              394.374 |                0.003 |
-| xlm-roberta-large-finetuned-conll03-english                        |        0.969 |              0.882 |                  12.082 |               82.765 |                0.012 |
+| Jorgeutd/albert-base-v2-finetuned-ner                              |        0.941 |              0.989 |                   4.515 |              221.468 |                0.005 |
+| dbmdz/bert-large-cased-finetuned-conll03-english                   |        0.962 |              0.881 |                  11.648 |               85.850 |                0.012 |
+| dbmdz/electra-large-discriminator-finetuned-conll03-english        |        0.965 |              0.881 |                  11.456 |               87.292 |                0.011 |
+| elastic/distilbert-base-uncased-finetuned-conll03-english          |        0.940 |              0.989 |                   2.318 |              431.378 |                0.002 |
+| gunghio/distilbert-base-multilingual-cased-finetuned-conll2003-ner |        0.947 |              0.991 |                   2.376 |              420.873 |                0.002 |
+| philschmid/distilroberta-base-ner-conll2003                        |        0.961 |              0.994 |                   2.436 |              410.579 |                0.002 |
+| xlm-roberta-large-finetuned-conll03-english                        |        0.969 |              0.882 |                  11.996 |               83.359 |                0.012 |
+
+<Tip warning={true}>
+
+The sole results from the `Evaluator` should probably not be trusted to compare model performances. Outside of the architecture, many parameters may influence performances:
+
+* Hyperparameters used during training
+* Training data (some models may have been trained on more data than others)
+* Model size
+* Training time
+
+Moreover, the time performances should only be considered as a first proxy, as they include all the processing that goes on in the pipeline. This may include tokenizing, post-processing, that may be different depending on the model, and may not reflect the exact model time performances. Especially, depending on the usage of slow or fast tokenizers, the results may be signifiicantly impacted.
+
+</Tip>
 
 
 ## Evaluator task-specific arguments
@@ -172,7 +183,9 @@ Depending on the task, some task-specific arguments must be set. It is therefore
 
 As an example, pipelines for classification tasks may ouput a label as a string, as in sentiment analysis between `negative`, `neutral` and `positive` sentences. To map these predictions to an id, we need an argument `label_mapping` mapping strings to numbers. In the case of transformers models, you will typically want to pass `pipe.model.config.label2id`.
 
-However, beware that some models on the Hub have a label mapping that do not match with the dataset mapping! This may be that there is even no `label2id`, or that the labels are uninformative (`LABEL_0`, `LABEL_1`, etc.). In such case, it is best to inspect the dataset features in `data.features`, and to use if possible (Dataset.align_labels_with_mapping)[https://huggingface.co/docs/datasets/en/package_reference/main_classes#datasets.Dataset.align_labels_with_mapping] to align the dataset labels with the model's outputs.
+However, beware that some models on the Hub have a label mapping that do not match with the dataset mapping! This may be that there is even no `label2id`, or that the labels are uninformative (`LABEL_0`, `LABEL_1`, etc.), as for [this model](https://huggingface.co/ArBert/albert-base-v2-finetuned-ner/blob/main/config.json).
+
+In such case, it is best to inspect the dataset features in `data.features`, and, if possible, to use (Dataset.align_labels_with_mapping)[https://huggingface.co/docs/datasets/en/package_reference/main_classes#datasets.Dataset.align_labels_with_mapping] to align the dataset labels with the model's outputs.
 
 An other example is for `token-classification`, as in named entity recoginition (NER) or part of speech tagging (POS), where the common dataset structure assumes a list of words to be tagged as an input. Pipelines assume a single string as an input, and the list of word needs to be joined into a single string, using the `join_by` parameter, defaulting to `" "` for space-separated languages.
 
