@@ -12,3 +12,6 @@ class DatasetColumn(list):
 
     def __getitem__(self, i):
         return self.dataset[i][self.key]
+
+    def __iter__(self):
+        return (self.dataset[i][self.key] for i in range(len(self)))
