@@ -31,6 +31,7 @@ from .evaluator import (
     ImageClassificationEvaluator,
     QuestionAnsweringEvaluator,
     TextClassificationEvaluator,
+    TokenClassificationEvaluator,
     evaluator,
 )
 from .hub import push_to_hub

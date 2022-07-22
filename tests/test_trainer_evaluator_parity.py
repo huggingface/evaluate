@@ -221,3 +221,46 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         self.assertEqual(transformers_results["eval_f1"], evaluator_results["f1"])
         self.assertEqual(transformers_results["eval_HasAns_f1"], evaluator_results["HasAns_f1"])
         self.assertEqual(transformers_results["eval_NoAns_f1"], evaluator_results["NoAns_f1"])
+
+    def test_token_classification_parity(self):
+        model_name = "hf-internal-testing/tiny-bert-for-token-classification"
+        n_samples = 500
+
+        subprocess.run(
+            "git sparse-checkout set examples/pytorch/token-classification",
+            shell=True,
+            cwd=os.path.join(self.dir_path, "transformers"),
+        )
+
+        subprocess.run(
+            f"python examples/pytorch/token-classification/run_ner.py"
+            f" --model_name_or_path {model_name}"
+            f" --dataset_name conll2003"
+            f" --do_eval"
+            f" --output_dir {os.path.join(self.dir_path, 'tokenclassification_conll2003_transformers')}"
+            f" --max_eval_samples {n_samples}",
+            shell=True,
+            cwd=os.path.join(self.dir_path, "transformers"),
+        )
+
+        with open(
+            os.path.join(self.dir_path, "tokenclassification_conll2003_transformers", "eval_results.json"), "r"
+        ) as f:
+            transformers_results = json.load(f)
+
+        eval_dataset = load_dataset("conll2003", split=f"validation[:{n_samples}]")
+
+        pipe = pipeline(task="token-classification", model=model_name)
+
+        e = evaluator(task="token-classification")
+        evaluator_results = e.compute(
+            model_or_pipeline=pipe,
+            data=eval_dataset,
+            metric="seqeval",
+            input_column="tokens",
+            label_column="ner_tags",
+            strategy="simple",
+        )
+
+        self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["overall_accuracy"])
+        self.assertEqual(transformers_results["eval_f1"], evaluator_results["overall_f1"])

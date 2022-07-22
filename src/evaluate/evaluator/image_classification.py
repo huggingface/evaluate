@@ -49,11 +49,11 @@ class ImageClassificationEvaluator(Evaluator):
             metric (`str` or `EvaluationModule`, defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
-            feature_extractor: (`str` or `FeatureExtractionMixin`, *optional*, defaults to `None`):
+            feature_extractor (`str` or `FeatureExtractionMixin`, *optional*, defaults to `None`):
                 Argument can be used to overwrite a default feature extractor if `model_or_pipeline` represents a model for
                 which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
                 this argument.
-            strategy: (`Literal["simple", "bootstrap"]`, defaults to "simple"):
+            strategy (`Literal["simple", "bootstrap"]`, defaults to "simple"):
                 specifies the evaluation strategy. Possible values are:
                 - `"simple"` - we evaluate the metric and return the scores.
                 - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each

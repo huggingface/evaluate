@@ -29,7 +29,7 @@ except ImportError:
 
 try:
     import transformers
-    from transformers import FeatureExtractionMixin, pipeline
+    from transformers import pipeline
 
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
@@ -171,7 +171,7 @@ class Evaluator(ABC):
         data: Union[str, Dataset] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
-        feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,
+        feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
