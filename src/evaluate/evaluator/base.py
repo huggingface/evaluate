@@ -39,10 +39,10 @@ from time import perf_counter
 
 from typing_extensions import Literal
 
-from .utils import DatasetColumn
 from ..loading import load
 from ..module import EvaluationModule
 from ..utils.logging import get_logger
+from .utils import DatasetColumn
 
 
 logger = get_logger(__name__)

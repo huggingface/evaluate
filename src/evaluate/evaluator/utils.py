@@ -3,6 +3,7 @@ from datasets import Dataset
 
 class DatasetColumn(list):
     """Helper class to avoid loading a dataset column into memory when accessing it."""
+
     def __init__(self, dataset: Dataset, key: str):
         self.dataset = dataset
         self.key = key
