@@ -1,108 +1,130 @@
-# Using the evaluator with transformers models
+# Using the evaluator
 
-The `Evaluator` abstraction allows to evaluate models wrapped in a pipeline, responsible for handling all preprocessing and post-processing. Out-of-the-box, `Evaluator` supports transformers pipelines for the supported tasks, but custom pipelines can be passed, as showcased in [LINK].
+The `Evaluator` classes allow to evaluate a  triplet of model, dataset, and metric. The models wrapped in a pipeline, responsible for handling all preprocessing and post-processing and out-of-the-box, `Evaluator`s support transformers pipelines for the supported tasks, but custom pipelines can be passed, as showcased in the section [Using the `evaluator` with custom models](custom_evaluator).
 
 Currently supported tasks are:
-- `"image-classification"`: will use the [`ImageClassificationEvaluator`].
-- `"question-answering"`: will use the [`QuestionAnsweringEvaluator`].
-- `"text-classification"` (alias `"sentiment-analysis"` available): will use the [`TextClassificationEvaluator`].
+- `"text-classification"`: will use the [`TextClassificationEvaluator`].
 - `"token-classification"`: will use the [`TokenClassificationEvaluator`].
+- `"question-answering"`: will use the [`QuestionAnsweringEvaluator`].
+- `"image-classification"`: will use the [`ImageClassificationEvaluator`].
 
-Each task has its own set of requirements for the dataset format and pipeline output, make sure to check them out for your custom use case!
 
-## Using a model from the Hub
+Each task has its own set of requirements for the dataset format and pipeline output, make sure to check them out for your custom use case. Let's have a look at each one of them and see how you can use the evaluator to evalute a single or multiple of models, datasets, and metrics at the same time.
 
-Models from the Hugging Face Hub can be loaded out-of-the-box just given the namespace of the model on the Hub.
+## Text classification
 
-```python
+The text classification evaluator can be used to evaluate text models on classification datasets such as IMDb. Beside the model, data, and metric inputs it takes the following optional inputs:
+
+- `input_column="text"`: with this argument the column with the data for the pipeline can be specified.
+- `label_column="label"`: with this argument the column with the labels for the evaluation can be specified.
+- `label_mapping=None`: the label mapping aligns the labels in the pipeline output with the labels need for evaluation. E.g. the labels in `label_column` can be integers (`0`/`1`) whereas the pipeline can produce label names such as `"positive"`/`"negative"`. With that dictionary the pipeline outputs are mapped to the labels.
+
+By default the `"accuracy"` metric is computed.
+
+### Evaluate models on the Hub
+
+There are several ways to pass a model to the evaluator: you can pass the name of a model on the Hub, you can load a `transformers` model and pass it to the evaluator or you can pass an initialized `transformers.Pipeline`. Alternatively you can pass any callable function that behaves like a `pipeline` call for the task in any framework.
+
+So any of the following works:
+
+```py
 from datasets import load_dataset
 from evaluate import evaluator
-
-task_evaluator = evaluator("question-answering")
-
-data = load_dataset("squad", split="validation[:100]")
-eval_results = task_evaluator.compute(
-    model_or_pipeline="distilbert-base-uncased-distilled-squad",
-    data=data,
-    metric="squad"
-)
-```
-
-Results are as follow:
-
-```python
-{
-    'exact_match': 84.0,
-    'f1': 88.53333333333335,
-    'latency_in_seconds': 0.009725173320002795,
-    'samples_per_second': 102.82593092127149,
-    'total_time_in_seconds': 0.9725173320002796
-}
-```
-
-Note that evaluation results include both the requested metric, and information about the time it took to obtain predictions through the pipeline. These additional time metrics give an useful first information on model speed as inference.
-
-## Using a local model
-
-Local models respecting the format from `save_pretrained()` (LINK) can be used as well! In this case, the model needs to be loaded into a pipeline first:
-
-```python
-
-from datasets import load_dataset
-from evaluate import evaluator
-from transformers import pipeline, AutoModelForTokenClassification, AutoTokenizer
-
-model = AutoModelForTokenClassification.from_pretrained("/path/to/model/folder/")
-tokenizer = AutoTokenizer.from_pretrained("/path/to/model/folder/")
-
-pipe = pipeline(task="token-classification", model=model, tokenizer=tokenizer)
+from transformers import AutoModelForSequenceClassification, pipeline
 
 data = load_dataset("imdb", split="test").shuffle(seed=42).select(range(1000))
-
-task_evaluator = evaluator("text-classification")
-eval_results = task_evaluator.compute(
-    model_or_pipeline=pipe,
-    data=data,
-    metric="seqeval",
-    label_mapping=pipe.model.config.label2id
-)
-```
-
-## Combining several metrics
-
-The evaluator can perform evaluation on several metrics at once using `combine`.
-
-TODO use e.g. text-classification here?
-
-```python
-# TODO EXTEND
-from datasets import load_dataset
-from evaluate import evaluator
-
 task_evaluator = evaluator("text-classification")
 
-data = load_dataset("imdb", split="test").shuffle(seed=42).select(range(1000))
 eval_results = task_evaluator.compute(
     model_or_pipeline="lvwerra/distilbert-imdb",
     data=data,
-    metric="accuracy",
     label_mapping={"NEGATIVE": 0, "POSITIVE": 1}
 )
+
+model = AutoModelForSequenceClassification.from_pretrained("lvwerra/distilbert-imdb")
+
+eval_results = task_evaluator.compute(
+    model_or_pipeline=model,
+    data=data,
+    label_mapping={"NEGATIVE": 0, "POSITIVE": 1}
+)
+
+pipe = pipeline("text-classification", model="lvwerra/distilbert-imdb")
+
+eval_results = task_evaluator.compute(
+    model_or_pipeline=pipe,
+    data=data,
+    label_mapping={"NEGATIVE": 0, "POSITIVE": 1}
+)
+print(eval_results)
 ```
 
-## Benchmarking several models
+The results will always look as follows:
+
+```bash
+```
+The results will look as follows:
+```python
+{
+    'accuracy': 0.918,
+    'latency_in_seconds': 0.01274,
+    'samples_per_second': 78.887,
+    'total_time_in_seconds': 12.676
+}
+```
+
+Note that evaluation results include both the requested metric, and information about the time it took to obtain predictions through the pipeline. These additional time metrics give an useful first information on model speed for inference.
+
+### Evaluate multiple metrics
+
+With the [`combine`] function one can bundle several metrics into an object that behaves like a single metric. We can use this to evaluate several metrics at once in an evaluator:
+
+```python
+import evaluate
+
+eval_results = task_evaluator.compute(
+    model_or_pipeline="lvwerra/distilbert-imdb",
+    data=data,
+    metric=evaluate.combine(["accuracy", "recall", "precision", "f1"]),
+    label_mapping={"NEGATIVE": 0, "POSITIVE": 1}
+)
+print(eval_results)
+
+```
+The results will look as follows:
+```python
+{
+    'accuracy': 0.918,
+    'f1': 0.916,
+    'precision': 0.9147,
+    'recall': 0.9187,
+    'latency_in_seconds': 0.01274,
+    'samples_per_second': 78.887,
+    'total_time_in_seconds': 12.676
+}
+```
+
+Next let's have a look at token classification.
+
+## Token Classification
+
+With the token classification evaluator one can evaluate models for tasks such as NER or POS tagging. It has the following specific arguments:
+
+- `input_column="text"`: with this argument the column with the data for the pipeline can be specified.
+- `label_column="label"`: with this argument the column with the labels for the evaluation can be specified.
+- `label_mapping=None`: the label mapping aligns the labels in the pipeline output with the labels need for evaluation. E.g. the labels in `label_column` can be integers (`0`/`1`) whereas the pipeline can produce label names such as `"positive"`/`"negative"`. With that dictionary the pipeline outputs are mapped to the labels.
+- `join_by=" "`: While most datasets are already tokenized the pipeline expects a string. Thus the tokens need to be joined before passing to the pipeline. By default they are joined with a whitespace.
+
+Let's have a look how we can use the evaluator to benchmark several models.
+
+### Benchmarking several models
 
 Here is an example where several models can be compared thanks to the `Evaluator` in only a few lines of code, abstracting away the preprocessing, inference, postprocessing, metric computation:
 
 ```python
 import pandas as pd
-import torch
-import traceback
-from tabulate import tabulate
-
 from datasets import load_dataset
 from evaluate import evaluator
-from tqdm import tqdm
 from transformers import pipeline
 
 models = [
@@ -114,41 +136,20 @@ models = [
     "philschmid/distilroberta-base-ner-conll2003",
     "Jorgeutd/albert-base-v2-finetuned-ner",
 ]
-models.sort()
 
-device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
-
-data = load_dataset("conll2003", split="validation")
-
-num_samples = 1000
-if num_samples != "all":
-    data = data.shuffle(seed=42).select(range(num_samples))
-
+data = load_dataset("conll2003", split="validation").shuffle().select(1000)
 task_evaluator = evaluator("token-classification")
 
-full_results = []
-evaluated_models = []
-for model in tqdm(models):
-    try:
-        print(model)
-        pipe = pipeline(task="token-classification", model=model, device=device)
-
-        eval_results = task_evaluator.compute(
-            model_or_pipeline=pipe, data=data, metric="seqeval", join_by=" "
+results = []
+for model in models:
+    results.append(
+        task_evaluator.compute(
+            model_or_pipeline=model, data=data, metric="seqeval", join_by=" "
+            )
         )
 
-        full_results.append(eval_results)
-        evaluated_models.append(model)
-    except Exception as e:
-        print(model, e)
-        print(traceback.format_exc())
-
-df = pd.DataFrame(full_results, index=evaluated_models)
-df_filtered = df[["overall_f1", "overall_accuracy", "total_time_in_seconds", "samples_per_second", "latency_in_seconds"]]
-
-print(df_filtered)
-print("----")
-print(tabulate(df_filtered, tablefmt="pipe", headers="keys", floatfmt=".3f"))
+df = pd.DataFrame(results, index=models)
+df[["overall_f1", "overall_accuracy", "total_time_in_seconds", "samples_per_second", "latency_in_seconds"]]
 ```
 
 Results:
@@ -177,35 +178,78 @@ Moreover, the time performances should only be considered as a first proxy, as t
 </Tip>
 
 
-## Evaluator task-specific arguments
+## Question Answering
 
-Depending on the task, some task-specific arguments must be set. It is therefore best to check LINK for each task.
+With the token classification evaluator one can evaluate models for tasks such as NER or POS tagging. It has the following specific arguments:
 
-As an example, pipelines for classification tasks may ouput a label as a string, as in sentiment analysis between `negative`, `neutral` and `positive` sentences. To map these predictions to an id, we need an argument `label_mapping` mapping strings to numbers. In the case of transformers models, you will typically want to pass `pipe.model.config.label2id`.
 
-However, beware that some models on the Hub have a label mapping that do not match with the dataset mapping! This may be that there is even no `label2id`, or that the labels are uninformative (`LABEL_0`, `LABEL_1`, etc.), as for [this model](https://huggingface.co/ArBert/albert-base-v2-finetuned-ner/blob/main/config.json).
+- `question_column="question"`: the name of the column containing the question in the dataset 
+- `context_column="context"`: the name of the column containing the context
+- `id_column="id"`: the name of the column cointaing the identification field of the question and answer pair
+- `label_column="answers"`: the name of the column containing the answers
+- `squad_v2_format=None`: whether the dataset follows the format of squad_v2 dataset where a question may have no answer in the context. If this parameter is not provided, the format will be automatically inferred.
 
-In such case, it is best to inspect the dataset features in `data.features`, and, if possible, to use (Dataset.align_labels_with_mapping)[https://huggingface.co/docs/datasets/en/package_reference/main_classes#datasets.Dataset.align_labels_with_mapping] to align the dataset labels with the model's outputs.
+Let's have a look how we can evaluate QA models and compute confidence intervals at the same time.
 
-An other example is for `token-classification`, as in named entity recoginition (NER) or part of speech tagging (POS), where the common dataset structure assumes a list of words to be tagged as an input. Pipelines assume a single string as an input, and the list of word needs to be joined into a single string, using the `join_by` parameter, defaulting to `" "` for space-separated languages.
+### Confidence intervals
+Every evaluator comes with the options to compute confidence intervals using [bootstrapping](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html). Simply pass `strategy="bootstrap"` and set the number of resanmples with `n_resamples`.
 
-## Confidence intervals
+```python
+from datasets import load_dataset
+from evaluate import evaluator
 
-TODO https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html.
+task_evaluator = evaluator("question-answering")
 
-## Handling large datasets
+data = load_dataset("squad", split="validation[:1000]")
+eval_results = task_evaluator.compute(
+    model_or_pipeline="distilbert-base-uncased-distilled-squad",
+    data=data,
+    metric="squad",
+    strategy="bootstrap",
+    n_resamples=30
+)
+```
+
+Results include confidence intervals as well as error estimates as follows:
+
+```python
+{
+    'exact_match': 
+    {
+        'confidence_interval': (79.67, 84.54),
+        'score': 82.30,
+        'standard_error': 1.28
+    },
+    'f1': 
+    {
+        'confidence_interval': (85.30, 88.88),
+        'score': 87.23,
+        'standard_error': 0.97
+    },
+    'latency_in_seconds': 0.0085,
+    'samples_per_second': 117.31,
+    'total_time_in_seconds': 8.52
+ }
+```
+
+## Image classification
+
+With the image classification evaluator we can evaluate any image classifier. It uses the same keyword arguments at the text classifier:
+
+- `input_column="image"`: the name of the column containing the images as PIL ImageFile
+- `label_column="label"`: the name of the column containing the labels
+- `label_mapping=None`: We want to map class labels defined by the model in the pipeline to values consistent with those defined in the `label_column`
+
+Let's have a look at how can evaluate image classification models on large datasets.
+
+### Handling large datasets
 
 The evaluator can be used on large datasets! Below, an example shows how to use it on ImageNet-1k for image classification. Beware that this example will require to download ~150 GB.
 
 Without specifying a device, the default will be the first GPU if available, else CPU.
 
 ```python
-from datasets import load_dataset
-from evaluate import evaluator
-from transformers import pipeline
-
 data = load_dataset("imagenet-1k", split="validation", use_auth_token=True)
-data = data.shuffle(seed=42).select(range(500))
 
 pipe = pipeline(
     task="image-classification",
@@ -220,3 +264,5 @@ eval_results = task_evaluator.compute(
     label_mapping=pipe.model.config.label2id
 )
 ```
+
+Since we are using `datasets` to store data we make use of a technique called memory mappings. This means that the dataset is never fully loaded into memory which saves a lot of RAM. Running the above code only uses roughly 1.5 GB of RAM while the validation split is more than 30 GB big.
