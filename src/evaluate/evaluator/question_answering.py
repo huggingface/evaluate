@@ -30,6 +30,7 @@ from typing_extensions import Literal
 from ..module import EvaluationModule
 from ..utils.logging import get_logger
 from .base import Evaluator
+from .utils import DatasetColumn
 
 
 logger = get_logger(__name__)
@@ -89,7 +90,10 @@ class QuestionAnsweringEvaluator(Evaluator):
             {"id": element[id_column], "answers": element[label_column]} for element in data
         ]
 
-        return metric_inputs, {"question": data[question_column], "context": data[context_column]}
+        return metric_inputs, {
+            "question": DatasetColumn(data, question_column),
+            "context": DatasetColumn(data, context_column),
+        }
 
     def is_squad_v2_format(self, data: Dataset, label_column: str = "answers"):
         """
