@@ -1,4 +1,4 @@
-# Using the evaluator
+# Using the `evaluator`
 
 The `Evaluator` classes allow to evaluate a  triplet of model, dataset, and metric. The models wrapped in a pipeline, responsible for handling all preprocessing and post-processing and out-of-the-box, `Evaluator`s support transformers pipelines for the supported tasks, but custom pipelines can be passed, as showcased in the section [Using the `evaluator` with custom models](custom_evaluator).
 
@@ -35,12 +35,14 @@ from transformers import AutoModelForSequenceClassification, pipeline
 data = load_dataset("imdb", split="test").shuffle(seed=42).select(range(1000))
 task_evaluator = evaluator("text-classification")
 
+# 1. Pass a model name or path
 eval_results = task_evaluator.compute(
     model_or_pipeline="lvwerra/distilbert-imdb",
     data=data,
     label_mapping={"NEGATIVE": 0, "POSITIVE": 1}
 )
 
+# 2. Pass an instantiated model
 model = AutoModelForSequenceClassification.from_pretrained("lvwerra/distilbert-imdb")
 
 eval_results = task_evaluator.compute(
@@ -49,6 +51,7 @@ eval_results = task_evaluator.compute(
     label_mapping={"NEGATIVE": 0, "POSITIVE": 1}
 )
 
+# 3. Pass an instantiated pipeline 
 pipe = pipeline("text-classification", model="lvwerra/distilbert-imdb")
 
 eval_results = task_evaluator.compute(
@@ -59,15 +62,11 @@ eval_results = task_evaluator.compute(
 print(eval_results)
 ```
 
-The results will always look as follows:
-
-```bash
-```
 The results will look as follows:
 ```python
 {
     'accuracy': 0.918,
-    'latency_in_seconds': 0.01274,
+    'latency_in_seconds': 0.013,
     'samples_per_second': 78.887,
     'total_time_in_seconds': 12.676
 }
@@ -98,7 +97,7 @@ The results will look as follows:
     'f1': 0.916,
     'precision': 0.9147,
     'recall': 0.9187,
-    'latency_in_seconds': 0.01274,
+    'latency_in_seconds': 0.013,
     'samples_per_second': 78.887,
     'total_time_in_seconds': 12.676
 }
@@ -166,14 +165,7 @@ Results:
 
 <Tip warning={true}>
 
-The sole results from the `Evaluator` should probably not be trusted to compare model performances. Outside of the architecture, many parameters may influence performances:
-
-* Hyperparameters used during training
-* Training data (some models may have been trained on more data than others)
-* Model size
-* Training time
-
-Moreover, the time performances should only be considered as a first proxy, as they include all the processing that goes on in the pipeline. This may include tokenizing, post-processing, that may be different depending on the model, and may not reflect the exact model time performances. Especially, depending on the usage of slow or fast tokenizers, the results may be signifiicantly impacted.
+The time performances should be taken with a grain of salt: they include all the processing that goes on in the pipeline. This may include tokenizing, post-processing, that may be different depending on the model. Furthermore, it depends a lot on the hardware you are running the evaluation on and you may be able to improve the performance by optimizing things like the batch size.
 
 </Tip>
 
@@ -192,6 +184,7 @@ With the token classification evaluator one can evaluate models for tasks such a
 Let's have a look how we can evaluate QA models and compute confidence intervals at the same time.
 
 ### Confidence intervals
+
 Every evaluator comes with the options to compute confidence intervals using [bootstrapping](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html). Simply pass `strategy="bootstrap"` and set the number of resanmples with `n_resamples`.
 
 ```python
