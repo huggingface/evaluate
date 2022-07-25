@@ -178,6 +178,28 @@ A common way to overcome this issue is to fallback on single process evaluation.
 
 This solution allows 🤗 Evaluate to perform distributed predictions, which is important for evaluation speed in distributed settings. At the same time, you can also use complex non-additive metrics without wasting valuable GPU or CPU memory.
 
+## Combining several evaluations
+
+Often one wants to not only evaluate a single metric but a range of different metrics capturing different aspects of a model. E.g. for classification it is usually a good idea to compute F1-score, recall, and precision in addition to accuracy to get a better picture of model performance. Naturally, you can load a bunch of metrics and call them sequentially. However, a more convenient way is to use the `combine` function to bundle them together:
+
+
+```python
+>>> clf_metrics = evaluate.combine(["accuracy", "f1", "precision", "recall"])
+```
+
+The `combine` function accepts both the list of names of the metrics as well as an instantiated modules. The `compute` call then computes each metric:
+
+```python
+>>> clf_metrics.compute(predictions=[0, 1, 0], references=[0, 1, 1])
+
+{
+  'accuracy': 0.667,
+  'f1': 0.667,
+  'precision': 1.0,
+  'recall': 0.5
+}
+```
+
 ## Save and push to the Hub
 
 Saving and sharing evaluation results is an important step. We provide the [`evaluate.save`] function to easily save metrics results. You can either pass a specific filename or a directory. In the latter case, the results are saved in a file with an automatically created file name. Besides the directory or file name, the function takes any key-value pairs as inputs and stores them in a JSON file.
