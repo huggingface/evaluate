@@ -17,6 +17,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from datasets import ClassLabel, Dataset, Sequence
 from typing_extensions import Literal
 
+from evaluate.evaluator.utils import DatasetColumn
+
 from .base import Evaluator
 
 
@@ -119,7 +121,8 @@ class TokenClassificationEvaluator(Evaluator):
             references = data[label_column]
 
         metric_inputs = {"references": references}
-        pipeline_inputs = [join_by.join(element) for element in data[input_column]]
+        data = data.map(lambda x: {input_column: join_by.join(x[input_column])})
+        pipeline_inputs = DatasetColumn(data, input_column)
 
         return metric_inputs, pipeline_inputs
 
