@@ -183,14 +183,15 @@ This solution allows 🤗 Evaluate to perform distributed predictions, which is 
 Often one wants to not only evaluate a single metric but a range of different metrics capturing different aspects of a model. E.g. for classification it is usually a good idea to compute F1-score, recall, and precision in addition to accuracy to get a better picture of model performance. Naturally, you can load a bunch of metrics and call them sequentially. However, a more convenient way is to use the `combine` function to bundle them together:
 
 
-```
-clf_metrics = evaluate.combine(["accuracy", "f1", "precision", "recall"])
-clf.compute(predictions=[0, 1, 0], references=[0, 1, 1])
+```python
+>>> clf_metrics = evaluate.combine(["accuracy", "f1", "precision", "recall"])
 ```
 
 The `combine` function accepts both the list of names of the metrics as well as an instantiated modules. The `compute` call then computes each metric:
 
-```json
+```python
+>>> clf_metrics.compute(predictions=[0, 1, 0], references=[0, 1, 1])
+
 {
   'accuracy': 0.667,
   'f1': 0.667,
