@@ -10,13 +10,13 @@
   title: Tutorials
 - sections:
   - local: choosing_a_metric
-    title: Choosing a metric for your task
+    title: Choosing the right metric
   - local: creating_and_sharing
-    title: Creating and sharing a new evaluation
+    title: Add new evaluations
   - local: base_evaluator
-    title: Using the evaluator with transformers models
+    title: Using the evaluator
   - local: custom_evaluator
-    title: Using the evaluator with any model
+    title: Custom pipelines with the evaluator
   title: "How-to guides"
 - sections:
     - local: types_of_evaluations
