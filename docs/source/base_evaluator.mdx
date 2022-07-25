@@ -1,6 +1,6 @@
 # Using the `evaluator`
 
-The `Evaluator` classes allow to evaluate a  triplet of model, dataset, and metric. The models wrapped in a pipeline, responsible for handling all preprocessing and post-processing and out-of-the-box, `Evaluator`s support transformers pipelines for the supported tasks, but custom pipelines can be passed, as showcased in the section [Using the `evaluator` with custom models](custom_evaluator).
+The `Evaluator` classes allow to evaluate a  triplet of model, dataset, and metric. The models wrapped in a pipeline, responsible for handling all preprocessing and post-processing and out-of-the-box, `Evaluator`s support transformers pipelines for the supported tasks, but custom pipelines can be passed, as showcased in the section [Using the `evaluator` with custom pipelines](custom_evaluator).
 
 Currently supported tasks are:
 - `"text-classification"`: will use the [`TextClassificationEvaluator`].
@@ -61,6 +61,12 @@ eval_results = task_evaluator.compute(
 )
 print(eval_results)
 ```
+<Tip>
+
+Without specifying a device, the default for model inference will be the first GPU on the machine if one is available, and else CPU. If you want to use a specific device you can pass `device` to `compute` where -1 will use the GPU and a positive integer (starting with 0) will use the associated CUDA device.
+
+</Tip>
+
 
 The results will look as follows:
 ```python
@@ -72,11 +78,17 @@ The results will look as follows:
 }
 ```
 
-Note that evaluation results include both the requested metric, and information about the time it took to obtain predictions through the pipeline. These additional time metrics give an useful first information on model speed for inference.
+Note that evaluation results include both the requested metric, and information about the time it took to obtain predictions through the pipeline. 
+
+<Tip>
+
+The time performances can give useful indication on model speed for inference but should be taken with a grain of salt: they include all the processing that goes on in the pipeline. This may include tokenizing, post-processing, that may be different depending on the model. Furthermore, it depends a lot on the hardware you are running the evaluation on and you may be able to improve the performance by optimizing things like the batch size.
+
+</Tip>
 
 ### Evaluate multiple metrics
 
-With the [`combine`] function one can bundle several metrics into an object that behaves like a single metric. We can use this to evaluate several metrics at once in an evaluator:
+With the [`combine`] function one can bundle several metrics into an object that behaves like a single metric. We can use this to evaluate several metrics at once with the evaluator:
 
 ```python
 import evaluate
@@ -118,7 +130,7 @@ Let's have a look how we can use the evaluator to benchmark several models.
 
 ### Benchmarking several models
 
-Here is an example where several models can be compared thanks to the `Evaluator` in only a few lines of code, abstracting away the preprocessing, inference, postprocessing, metric computation:
+Here is an example where several models can be compared thanks to the `evaluator` in only a few lines of code, abstracting away the preprocessing, inference, postprocessing, metric computation:
 
 ```python
 import pandas as pd
@@ -143,7 +155,7 @@ results = []
 for model in models:
     results.append(
         task_evaluator.compute(
-            model_or_pipeline=model, data=data, metric="seqeval", join_by=" "
+            model_or_pipeline=model, data=data, metric="seqeval"
             )
         )
 
@@ -151,7 +163,7 @@ df = pd.DataFrame(results, index=models)
 df[["overall_f1", "overall_accuracy", "total_time_in_seconds", "samples_per_second", "latency_in_seconds"]]
 ```
 
-Results:
+The result is a table that looks like this:
 
 |   model                                                            |   overall_f1 |   overall_accuracy |   total_time_in_seconds |   samples_per_second |   latency_in_seconds |
 |:-------------------------------------------------------------------|-------------:|-------------------:|------------------------:|---------------------:|---------------------:|
@@ -163,16 +175,9 @@ Results:
 | philschmid/distilroberta-base-ner-conll2003                        |        0.961 |              0.994 |                   2.436 |              410.579 |                0.002 |
 | xlm-roberta-large-finetuned-conll03-english                        |        0.969 |              0.882 |                  11.996 |               83.359 |                0.012 |
 
-<Tip warning={true}>
-
-The time performances should be taken with a grain of salt: they include all the processing that goes on in the pipeline. This may include tokenizing, post-processing, that may be different depending on the model. Furthermore, it depends a lot on the hardware you are running the evaluation on and you may be able to improve the performance by optimizing things like the batch size.
-
-</Tip>
-
-
 ## Question Answering
 
-With the token classification evaluator one can evaluate models for tasks such as NER or POS tagging. It has the following specific arguments:
+With the question-answering evaluator one can evaluate models for QA without needing to worry about the complicated pre- and post-processing that's required for these models. It has the following specific arguments:
 
 
 - `question_column="question"`: the name of the column containing the question in the dataset 
@@ -238,8 +243,6 @@ Let's have a look at how can evaluate image classification models on large datas
 ### Handling large datasets
 
 The evaluator can be used on large datasets! Below, an example shows how to use it on ImageNet-1k for image classification. Beware that this example will require to download ~150 GB.
-
-Without specifying a device, the default will be the first GPU if available, else CPU.
 
 ```python
 data = load_dataset("imagenet-1k", split="validation", use_auth_token=True)
