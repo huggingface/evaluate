@@ -91,8 +91,8 @@ class TextClassificationEvaluator(Evaluator):
     def compute(
         self,
         model_or_pipeline: Union[
-            str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"
-        ] = None,  # noqa: F821
+            str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
+        ] = None,
         data: Union[str, Dataset] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
