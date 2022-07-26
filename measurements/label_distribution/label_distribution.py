@@ -36,13 +36,6 @@ Examples:
     >>> results = distribution.compute(data=data)
     >>> print(results)
     {'label_distribution': {'labels': [1, 0], 'fractions': [0.5714285714285714, 0.42857142857142855]}}
-
-    >>> from datasets import load_dataset
-    >>> imdb = load_dataset('imdb', split = 'test')
-    >>> distribution = evaluate.load("label_distribution")
-    >>> results = distribution.compute(data=imdb['label'], return_skew=True)
-    >>> print(results)
-    {'label_distribution': {'labels': [0, 1], 'fractions': [0.5, 0.5]}, 'label_skew': 0.0}
 """
 
 # TODO: Add BibTeX citation
