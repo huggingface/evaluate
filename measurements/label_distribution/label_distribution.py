@@ -31,13 +31,13 @@ Args:
 
 Returns:
     `label_distribution` (`dict`) :  a dictionary containing two sets of keys and values: `labels`, which includes the list of labels contained in the dataset, and `fractions`, which includes the fraction of each label.
-    `label_skew` (`scalar`)  (optional) : the asymmetry of the label distribution.
+    `label_skew` (`scalar`) : the asymmetry of the label distribution.
 Examples:
     >>> data = [1, 0, 1, 1, 0, 1, 0]
     >>> distribution = evaluate.load("label_distribution")
     >>> results = distribution.compute(data=data)
     >>> print(results)
-    {'label_distribution': {'labels': [1, 0], 'fractions': [0.5714285714285714, 0.42857142857142855]}}
+    {'label_distribution': {'labels': [1, 0], 'fractions': [0.5714285714285714, 0.42857142857142855]}, 'label_skew': -0.2886751345948127}
 """
 
 _CITATION = """\
