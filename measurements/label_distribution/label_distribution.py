@@ -40,7 +40,8 @@ Examples:
     {'label_distribution': {'labels': [1, 0], 'fractions': [0.5714285714285714, 0.42857142857142855]}}
 """
 
-_CITATION = "@ARTICLE{2020SciPy-NMeth,
+_CITATION = """\
+@ARTICLE{2020SciPy-NMeth,
   author  = {Virtanen, Pauli and Gommers, Ralf and Oliphant, Travis E. and
             Haberland, Matt and Reddy, Tyler and Cournapeau, David and
             Burovski, Evgeni and Peterson, Pearu and Weckesser, Warren and
@@ -62,7 +63,8 @@ _CITATION = "@ARTICLE{2020SciPy-NMeth,
   pages   = {261--272},
   adsurl  = {https://rdcu.be/b08Wh},
   doi     = {10.1038/s41592-019-0686-2},
-}"
+}
+"""
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
