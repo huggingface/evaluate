@@ -158,6 +158,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`evaluate.EvaluationModule.compute` is run.
         experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
             This is useful to compute module in distributed setups (in particular non-additive metrics like F1).
+        fingerprint (``str``): Used to fingerprint the evaluation module according to the hashed file contents.
         max_concurrent_cache_files (``int``): Max number of concurrent module cache files (default 10000).
         timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
     """
@@ -171,6 +172,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         process_id: int = 0,
         seed: Optional[int] = None,
         experiment_id: Optional[str] = None,
+        fingerprint: str = None,
         max_concurrent_cache_files: int = 10000,
         timeout: Union[int, float] = 100,
         **kwargs,
@@ -230,6 +232,9 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         # This is all the cache files on which we have a lock when we are in a distributed setting
         self.file_paths = None
         self.filelocks = None
+
+        # This fingerprints the evaluation module according to the hashed contents of the module code
+        self._fingerprint = fingerprint
 
     def __len__(self):
         """Return the number of examples (predictions or predictions/references pair)
