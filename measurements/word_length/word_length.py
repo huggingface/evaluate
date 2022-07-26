@@ -49,6 +49,7 @@ year={2020}
 }
 """
 
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class WordLength(evaluate.Measurement):
     """This measurement returns the average number of words in the input string(s)."""
@@ -62,13 +63,16 @@ class WordLength(evaluate.Measurement):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             # This defines the format of each prediction and reference
-            features=datasets.Features({
-                'data': datasets.Value('string'),
-            })
+            features=datasets.Features(
+                {
+                    "data": datasets.Value("string"),
+                }
+            ),
         )
 
     def _download_and_prepare(self, dl_manager):
         import nltk
+
         nltk.download("punkt")
 
     def _compute(self, data, tokenizer=word_tokenize):
