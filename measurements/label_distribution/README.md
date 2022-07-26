@@ -11,7 +11,7 @@ tags:
 - evaluate
 - measurement
 description: >-
-  Returns the label distribution of the input data.
+  Returns the label distribution and skew of the input data.
 ---
 
 # Measurement Card for Label Distribution
