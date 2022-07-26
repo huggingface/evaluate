@@ -70,7 +70,7 @@ class LabelDistribution(evaluate.Measurement):
             ]
         )
 
-    def _compute(self, data, return_skew = False):
+    def _compute(self, data):
         """Returns the fraction of each label present in the data"""
         c = Counter(data)
         label_distribution = {"labels" : [k for k in c.keys()], "fractions" : [f/len(data) for f in c.values()]}
