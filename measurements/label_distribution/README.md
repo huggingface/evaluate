@@ -92,3 +92,4 @@ While label distribution can be a useful signal for analyzing datasets and choos
 
 ## Further References
 - [Facing Imbalanced Data Recommendations for the Use of Performance Metrics](https://sites.pitt.edu/~jeffcohn/skew/PID2829477.pdf)
+- [Scipy Stats Skew Documentation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.skew.html#scipy-stats-skew)
