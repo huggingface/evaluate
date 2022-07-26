@@ -73,7 +73,6 @@ class LabelDistribution(evaluate.Measurement):
     def _compute(self, data, return_skew = False):
         """Returns the fraction of each label present in the data"""
         c = Counter(data)
-        #label_distribution = [(i, c[i] / len(data)) for i in c]
         label_distribution = {"labels" : [k for k in c.keys()], "fractions" : [f/len(data) for f in c.values()]}
         if return_skew == True:
             sr= pd.Series(data)
