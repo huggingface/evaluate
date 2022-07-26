@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import evaluate
-import datasets
-from collections import Counter
 import hashlib
+from collections import Counter
+
+import datasets
+
+import evaluate
+
 
 logger = evaluate.logging.get_logger(__name__)
 

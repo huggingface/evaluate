@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import evaluate
 import datasets
 from sklearn.feature_extraction.text import CountVectorizer
+
+import evaluate
+
 
 _DESCRIPTION = """
 Returns the total number of words, and the number of unique words in the input data.

@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from nltk import word_tokenize
-import evaluate
-import datasets
 from statistics import mean
+
+import datasets
+from nltk import word_tokenize
+
+import evaluate
 
 
 _DESCRIPTION = """
