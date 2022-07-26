@@ -42,19 +42,13 @@ from evaluate import load
 ### Output Values
 By default, this metric outputs a dictionary that contains :
 -**label_distribution** (`dict`) : a dictionary containing two sets of keys and values: `labels`, which includes the list of labels contained in the dataset, and `fractions`, which includes the fraction of each label.
-
-```python
-{'label_distribution': {'labels': [1, 0, 2], 'fractions': [0.1, 0.6, 0.3]}}
-```
-
-Optionally, using the `return_skew=True` flag, it can also return:
 -**label_skew** (`scalar`) : the asymmetry of the label distribution.
-
-If skewness is 0, the dataset is perfectly balanced; if it is less than -1 or greater than 1, the distribution is highly skewed; anything in between can be considered moderately skewed.
 
 ```python
 {'label_distribution': {'labels': [1, 0, 2], 'fractions': [0.1, 0.6, 0.3]}, 'label_skew': 0.7417688338666573}
 ```
+
+If skewness is 0, the dataset is perfectly balanced; if it is less than -1 or greater than 1, the distribution is highly skewed; anything in between can be considered moderately skewed.
 
 #### Values from Popular Papers
 
@@ -75,7 +69,7 @@ Calculating the label distribution of the test subset of the [IMDb dataset](http
 >>> from datasets import load_dataset
 >>> imdb = load_dataset('imdb', split = 'test')
 >>> distribution = evaluate.load("label_distribution")
->>> results = distribution.compute(data=imdb['label'], return_skew=True)
+>>> results = distribution.compute(data=imdb['label'])
 >>> print(results)
 {'label_distribution': {'labels': [0, 1], 'fractions': [0.5, 0.5]}, 'label_skew': 0.0}
 ```
