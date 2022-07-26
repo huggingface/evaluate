@@ -17,7 +17,7 @@ from collections import Counter
 
 import datasets
 import pandas as pd
-
+from scipy import stats
 import evaluate
 
 
@@ -62,13 +62,8 @@ class LabelDistribution(evaluate.Measurement):
         """Returns the fraction of each label present in the data"""
         c = Counter(data)
         label_distribution = {"labels": [k for k in c.keys()], "fractions": [f / len(data) for f in c.values()]}
-        if return_skew == True:
-            from scipy import stats  # place this at the top
-
-            if isinstance(data[0], str):
-                label2id = {label: id for id, label in enumerate(label_distribution["labels"])}
-                data = [label2id[d] for d in data]
-            skew = stats.skew(data)
-            return {"label_distribution": label_distribution, "label_skew": skew}
-        else:
-            return {"label_distribution": label_distribution}
+        if isinstance(data[0], str):
+            label2id = {label: id for id, label in enumerate(label_distribution["labels"])}
+            data = [label2id[d] for d in data]
+        skew = stats.skew(data)
+        return {"label_distribution": label_distribution, "label_skew": skew}
