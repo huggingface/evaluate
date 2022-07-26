@@ -13,10 +13,12 @@
 # limitations under the License.
 """Label Distribution Measurement."""
 
-import evaluate
-import datasets
 from collections import Counter
+
+import datasets
 import pandas as pd
+
+import evaluate
 
 
 _DESCRIPTION = """
@@ -41,6 +43,7 @@ Examples:
 # TODO: Add BibTeX citation
 _CITATION = "TODO"
 
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class LabelDistribution(evaluate.Measurement):
     def _info(self):
@@ -50,29 +53,22 @@ class LabelDistribution(evaluate.Measurement):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             features=[
-            datasets.Features(
-                {
-                    "data": datasets.Value("int32")
-                }
-                ),
-                datasets.Features(
-                    {
-                    "data": datasets.Value("string")
-                    }
-                ),
-            ]
+                datasets.Features({"data": datasets.Value("int32")}),
+                datasets.Features({"data": datasets.Value("string")}),
+            ],
         )
 
     def _compute(self, data):
         """Returns the fraction of each label present in the data"""
         c = Counter(data)
-        label_distribution = {"labels" : [k for k in c.keys()], "fractions" : [f/len(data) for f in c.values()]}
+        label_distribution = {"labels": [k for k in c.keys()], "fractions": [f / len(data) for f in c.values()]}
         if return_skew == True:
-            from scipy import stats # place this at the top
+            from scipy import stats  # place this at the top
+
             if isinstance(data[0], str):
                 label2id = {label: id for id, label in enumerate(label_distribution["labels"])}
                 data = [label2id[d] for d in data]
             skew = stats.skew(data)
             return {"label_distribution": label_distribution, "label_skew": skew}
         else:
-             return {"label_distribution": label_distribution}
+            return {"label_distribution": label_distribution}
