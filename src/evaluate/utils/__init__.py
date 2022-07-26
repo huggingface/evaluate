@@ -26,8 +26,11 @@ __all__ = [
     "parse_gradio_data",
     "parse_test_cases",
     "launch_gradio_widget",
+    "add_start_docstrings",
+    "add_end_docstrings",
 ]
 
+from .doc import add_end_docstrings, add_start_docstrings
 from .gradio import (
     infer_gradio_input_types,
     json_to_string_type,

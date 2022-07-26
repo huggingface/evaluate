@@ -29,11 +29,49 @@ from typing_extensions import Literal
 
 from ..module import EvaluationModule
 from ..utils.logging import get_logger
-from .base import Evaluator
+from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOCSTRING, Evaluator
 from .utils import DatasetColumn
 
 
 logger = get_logger(__name__)
+
+from ..utils import add_end_docstrings, add_start_docstrings
+
+
+TASK_DOCUMENTATION = r"""
+    Examples:
+    ```python
+    >>> from evaluate import evaluator
+    >>> from datasets import load_dataset
+    >>> task_evaluator = evaluator("question-answering")
+    >>> data = load_dataset("squad", split="validation[:2]")
+    >>> results = task_evaluator.compute(
+    >>>     model_or_pipeline="sshleifer/tiny-distilbert-base-cased-distilled-squad",
+    >>>     data=data,
+    >>>     metric="squad",
+    >>> )
+    ```
+
+    <Tip>
+
+    Datasets where the answer may be missing in the context are supported, for example SQuAD v2 dataset. In this case, it is safer to pass `squad_v2_format=True` to
+    the compute() call.
+
+    </Tip>
+
+    ```python
+    >>> from evaluate import evaluator
+    >>> from datasets import load_dataset
+    >>> task_evaluator = evaluator("question-answering")
+    >>> data = load_dataset("squad_v2", split="validation[:2]")
+    >>> results = task_evaluator.compute(
+    >>>     model_or_pipeline="mrm8488/bert-tiny-finetuned-squadv2",
+    >>>     data=data,
+    >>>     metric="squad_v2",
+    >>>     squad_v2_format=True,
+    >>> )
+    ```
+"""
 
 
 class QuestionAnsweringEvaluator(Evaluator):
@@ -118,6 +156,8 @@ class QuestionAnsweringEvaluator(Evaluator):
             result.append(pred)
         return {"predictions": result}
 
+    @add_start_docstrings(EVALUTOR_COMPUTE_START_DOCSTRING)
+    @add_end_docstrings(EVALUATOR_COMPUTE_RETURN_DOCSTRING, TASK_DOCUMENTATION)
     def compute(
         self,
         model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
@@ -136,89 +176,18 @@ class QuestionAnsweringEvaluator(Evaluator):
         squad_v2_format: Optional[bool] = None,
     ) -> Tuple[Dict[str, float], Any]:
         """
-        Compute the metric for a given pipeline and dataset combination.
-        Args:
-            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`, defaults to `None`):
-                If the argument in not specified, we initialize the default pipeline for the task (in this case
-                `question-answering`). If the argument is of the type `str` or
-                is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
-                argument specifies a pre-initialized pipeline.
-            data (`str` or `Dataset`, defaults to `None`):
-                Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
-                name, and load it. Otherwise we assume it represents a pre-loaded dataset.
-            metric (`str` or `EvaluationModule`, defaults to `None`):
-                Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
-                load it. Otherwise we assume it represents a pre-loaded metric.
-            tokenizer (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
-                Argument can be used to overwrite a default tokenizer if `model_or_pipeline` represents a model for
-                which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
-                this argument.
-            strategy (`Literal["simple", "bootstrap"]`, defaults to "simple"):
-                specifies the evaluation strategy. Possible values are:
-                - `"simple"` - we evaluate the metric and return the scores.
-                - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each
-                of the returned metric keys, using `scipy`'s `bootstrap` method
-                https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html.
-            confidence_level (`float`, defaults to `0.95`):
-                The `confidence_level` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
-            n_resamples (`int`, defaults to `9999`):
-                The `n_resamples` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
-            device (`int`, defaults to `None`):
-                 Device ordinal for CPU/GPU support of the pipeline. Setting this to -1 will leverage CPU, a positive
-                 will run the model on the associated CUDA device ID. If`None` is provided it will be inferred and
-                 CUDA:0 used if available, CPU otherwise.
-            random_state (`int`, *optional*, defaults to `None`):
-                The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
-                debugging.
-            question_column (`str`, defaults to `"question"`):
-                the name of the column containing the question in the dataset specified by `data`.
-            context_column (`str`, defaults to `"context"`):
-                the name of the column containing the context in the dataset specified by `data`.
-            id_column (`str`, defaults to `"id"`):
-                the name of the column cointaing the identification field of the question and answer pair in the
-                dataset specified by `data`.
-            label_column (`str`, defaults to `"answers"`):
-                the name of the column containing the answers in the dataset specified by `data`.
-            squad_v2_format (`bool`, *optional*, defaults to `None`):
-                whether the dataset follows the format of squad_v2 dataset where a question may have no answer in the context. If this parameter is not provided,
-                the format will be automatically inferred.
-        Return:
-            A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
-            `"simple"` strategy, the value is the metric score. For the `"bootstrap"` strategy, the value is a `Dict`
-            containing the score, the confidence interval and the standard error calculated for each metric key.
-
-        Examples:
-        ```python
-        >>> from evaluate import evaluator
-        >>> from datasets import load_dataset
-        >>> task_evaluator = evaluator("question-answering")
-        >>> data = load_dataset("squad", split="validation[:2]")
-        >>> results = task_evaluator.compute(
-        >>>     model_or_pipeline="sshleifer/tiny-distilbert-base-cased-distilled-squad",
-        >>>     data=data,
-        >>>     metric="squad",
-        >>> )
-        ```
-
-        <Tip>
-
-        Datasets where the answer may be missing in the context are supported, for example SQuAD v2 dataset. In this case, it is safer to pass `squad_v2_format=True` to
-        the compute() call.
-
-        </Tip>
-
-        ```python
-        >>> from evaluate import evaluator
-        >>> from datasets import load_dataset
-        >>> task_evaluator = evaluator("question-answering")
-        >>> data = load_dataset("squad_v2", split="validation[:2]")
-        >>> results = task_evaluator.compute(
-        >>>     model_or_pipeline="mrm8488/bert-tiny-finetuned-squadv2",
-        >>>     data=data,
-        >>>     metric="squad_v2",
-        >>>     squad_v2_format=True,
-        >>> )
-        ```
+        question_column (`str`, defaults to `"question"`):
+            the name of the column containing the question in the dataset specified by `data`.
+        context_column (`str`, defaults to `"context"`):
+            the name of the column containing the context in the dataset specified by `data`.
+        id_column (`str`, defaults to `"id"`):
+            the name of the column cointaing the identification field of the question and answer pair in the
+            dataset specified by `data`.
+        label_column (`str`, defaults to `"answers"`):
+            the name of the column containing the answers in the dataset specified by `data`.
+        squad_v2_format (`bool`, *optional*, defaults to `None`):
+            whether the dataset follows the format of squad_v2 dataset where a question may have no answer in the context. If this parameter is not provided,
+            the format will be automatically inferred.
         """
         result = {}
 

@@ -45,10 +45,10 @@ class DummyTextClassificationPipeline:
         self.task = "text-classification"
         self.sleep_time = sleep_time
 
-    def __call__(self, text, **kwargs):
+    def __call__(self, inputs, **kwargs):
         if self.sleep_time is not None:
             sleep(self.sleep_time)
-        return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(text)]
+        return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(inputs)]
 
 
 class DummyImageClassificationPipeline:
@@ -280,6 +280,60 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertAlmostEqual(results["total_time_in_seconds"], 0.1, 1)
         self.assertAlmostEqual(results["samples_per_second"], len(data) / results["total_time_in_seconds"], 5)
         self.assertAlmostEqual(results["latency_in_seconds"], results["total_time_in_seconds"] / len(data), 5)
+
+
+class TestTextClassificationEvaluatorTwoColumns(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict(
+            {
+                "label": [1, 0],
+                "premise": ["great car", "great movie"],
+                "hypothesis": ["great vehicle", "horrible movie"],
+            }
+        )
+        self.default_model = "prajjwal1/bert-tiny-mnli"
+        self.input_column = "premise"
+        self.input_column2 = "hypothesis"
+        self.label_column = "label"
+        self.pipe = DummyTextClassificationPipeline()
+        self.model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.default_model)
+        self.evaluator = evaluator("text-classification")
+        self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
+        self.label_mapping2 = {"LABEL_0": 0, "LABEL_1": 1, "LABEL_2": 2}
+
+    def test_pipe_init(self):
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            input_column=self.input_column,
+            input_column2=self.input_column2,
+            label_column="label",
+            label_mapping=self.label_mapping,
+        )
+        self.assertEqual(results["accuracy"], 1.0)
+
+    def test_model_init(self):
+        results = self.evaluator.compute(
+            model_or_pipeline=self.default_model,
+            data=self.data,
+            metric="accuracy",
+            input_column=self.input_column,
+            input_column2=self.input_column2,
+            label_column=self.label_column,
+            label_mapping=self.label_mapping2,
+        )
+        self.assertEqual(results["accuracy"], 1.0)
+        results = self.evaluator.compute(
+            model_or_pipeline=self.model,
+            data=self.data,
+            metric="accuracy",
+            input_column=self.input_column,
+            input_column2=self.input_column2,
+            tokenizer=self.tokenizer,
+            label_mapping=self.label_mapping2,
+        )
+        self.assertEqual(results["accuracy"], 1.0)
 
 
 class TestImageClassificationEvaluator(TestCase):
