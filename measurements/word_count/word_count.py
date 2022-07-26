@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import evaluate
 import datasets
 from sklearn.feature_extraction.text import CountVectorizer
+
+import evaluate
+
 
 _DESCRIPTION = """
 Returns the total number of words, and the number of unique words in the input data.
@@ -38,24 +40,27 @@ Examples:
 """
 _CITATION = ""
 
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class WordCount(evaluate.Measurement):
     """This measurement returns the total number of words and the number of unique words
-     in the input string(s)."""
+    in the input string(s)."""
 
     def _info(self):
         return evaluate.MeasurementInfo(
             # This is the description that will appear on the modules page.
             module_type="measurement",
             description=_DESCRIPTION,
-            citation = _CITATION,
+            citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features({
-                'data': datasets.Value('string'),
-            })
+            features=datasets.Features(
+                {
+                    "data": datasets.Value("string"),
+                }
+            ),
         )
 
-    def _compute(self, data, max_vocab = None):
+    def _compute(self, data, max_vocab=None):
         """Returns the number of unique words in the input data"""
         count_vectorizer = CountVectorizer(max_features=max_vocab)
         document_matrix = count_vectorizer.fit_transform(data)
