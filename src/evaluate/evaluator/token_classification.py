@@ -25,62 +25,62 @@ from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOC
 
 
 TASK_DOCUMENTATION = r"""
-        The dataset input and label columns are expected to be formatted as a list of words and a list of labels respectively, following [conll2003 dataset](https://huggingface.co/datasets/conll2003). Datasets whose inputs are single strings, and labels are a list of offset are not supported.
+    The dataset input and label columns are expected to be formatted as a list of words and a list of labels respectively, following [conll2003 dataset](https://huggingface.co/datasets/conll2003). Datasets whose inputs are single strings, and labels are a list of offset are not supported.
 
-        Examples:
-        ```python
-        >>> from evaluate import evaluator
-        >>> from datasets import load_dataset
-        >>> task_evaluator = evaluator("token-classification")
-        >>> data = load_dataset("conll2003", split="validation[:2]")
-        >>> results = task_evaluator.compute(
-        >>>     model_or_pipeline="elastic/distilbert-base-uncased-finetuned-conll03-english",
-        >>>     data=data,
-        >>>     metric="seqeval",
-        >>> )
-        ```
+    Examples:
+    ```python
+    >>> from evaluate import evaluator
+    >>> from datasets import load_dataset
+    >>> task_evaluator = evaluator("token-classification")
+    >>> data = load_dataset("conll2003", split="validation[:2]")
+    >>> results = task_evaluator.compute(
+    >>>     model_or_pipeline="elastic/distilbert-base-uncased-finetuned-conll03-english",
+    >>>     data=data,
+    >>>     metric="seqeval",
+    >>> )
+    ```
 
-        <Tip>
+    <Tip>
 
-        For example, the following dataset format is accepted by the evaluator:
+    For example, the following dataset format is accepted by the evaluator:
 
-        ```python
-        dataset = Dataset.from_dict(
-            mapping={
-                "tokens": [["New", "York", "is", "a", "city", "and", "Felix", "a", "person", "."]],
-                "ner_tags": [[1, 2, 0, 0, 0, 0, 3, 0, 0, 0]],
-            },
-            features=Features({
-                "tokens": Sequence(feature=Value(dtype="string")),
-                "ner_tags": Sequence(feature=ClassLabel(names=["O", "B-LOC", "I-LOC", "B-PER", "I-PER"])),
-                }),
-        )
-        ```
-
-        </Tip>
-
-        <Tip warning={true}>
-
-        For example, the following dataset format is **not** accepted by the evaluator:
-
-        ```python
-        dataset = Dataset.from_dict(
-            mapping={
-                "tokens": [["New York is a city and Felix a person."]],
-                "starts": [[0, 23]],
-                "ends": [[7, 27]],
-                "ner_tags": [["LOC", "PER"]],
-            },
-            features=Features({
-                "tokens": Value(dtype="string"),
-                "starts": Sequence(feature=Value(dtype="int32")),
-                "ends": Sequence(feature=Value(dtype="int32")),
-                "ner_tags": Sequence(feature=Value(dtype="string")),
+    ```python
+    dataset = Dataset.from_dict(
+        mapping={
+            "tokens": [["New", "York", "is", "a", "city", "and", "Felix", "a", "person", "."]],
+            "ner_tags": [[1, 2, 0, 0, 0, 0, 3, 0, 0, 0]],
+        },
+        features=Features({
+            "tokens": Sequence(feature=Value(dtype="string")),
+            "ner_tags": Sequence(feature=ClassLabel(names=["O", "B-LOC", "I-LOC", "B-PER", "I-PER"])),
             }),
-        )
-        ```
+    )
+    ```
 
-        </Tip>
+    </Tip>
+
+    <Tip warning={true}>
+
+    For example, the following dataset format is **not** accepted by the evaluator:
+
+    ```python
+    dataset = Dataset.from_dict(
+        mapping={
+            "tokens": [["New York is a city and Felix a person."]],
+            "starts": [[0, 23]],
+            "ends": [[7, 27]],
+            "ner_tags": [["LOC", "PER"]],
+        },
+        features=Features({
+            "tokens": Value(dtype="string"),
+            "starts": Sequence(feature=Value(dtype="int32")),
+            "ends": Sequence(feature=Value(dtype="int32")),
+            "ner_tags": Sequence(feature=Value(dtype="string")),
+        }),
+    )
+    ```
+
+    </Tip>
 """
 
 

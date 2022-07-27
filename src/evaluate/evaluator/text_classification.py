@@ -25,22 +25,22 @@ from .utils import DatasetColumnTextClassification
 
 
 TASK_DOCUMENTATION = r"""
-        Examples:
-        ```python
-        >>> from evaluate import evaluator
-        >>> from datasets import load_dataset
-        >>> task_evaluator = evaluator("text-classification")
-        >>> data = load_dataset("imdb", split="test[:2]")
-        >>> results = task_evaluator.compute(
-        >>>     model_or_pipeline="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
-        >>>     data=data,
-        >>>     metric="accuracy",
-        >>>     label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
-        >>>     strategy="bootstrap",
-        >>>     n_resamples=10,
-        >>>     random_state=0
-        >>> )
-        ```
+    Examples:
+    ```python
+    >>> from evaluate import evaluator
+    >>> from datasets import load_dataset
+    >>> task_evaluator = evaluator("text-classification")
+    >>> data = load_dataset("imdb", split="test[:2]")
+    >>> results = task_evaluator.compute(
+    >>>     model_or_pipeline="huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli",
+    >>>     data=data,
+    >>>     metric="accuracy",
+    >>>     label_mapping={"LABEL_0": 0.0, "LABEL_1": 1.0},
+    >>>     strategy="bootstrap",
+    >>>     n_resamples=10,
+    >>>     random_state=0
+    >>> )
+    ```
 """
 
 

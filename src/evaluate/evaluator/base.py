@@ -49,47 +49,47 @@ logger = get_logger(__name__)
 
 
 EVALUTOR_COMPUTE_START_DOCSTRING = r"""
-        Compute the metric for a given pipeline and dataset combination.
-        Args:
-            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`, defaults to `None`):
-                If the argument in not specified, we initialize the default pipeline for the task (in this case
-                `text-classification` or its alias - `sentiment-analysis`). If the argument is of the type `str` or
-                is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
-                argument specifies a pre-initialized pipeline.
-            data (`str` or `Dataset`, defaults to `None`):
-                Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
-                name, and load it. Otherwise we assume it represents a pre-loaded dataset.
-            metric (`str` or `EvaluationModule`, defaults to `None`):
-                Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
-                load it. Otherwise we assume it represents a pre-loaded metric.
-            tokenizer (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
-                Argument can be used to overwrite a default tokenizer if `model_or_pipeline` represents a model for
-                which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
-                this argument.
-            strategy (`Literal["simple", "bootstrap"]`, defaults to "simple"):
-                specifies the evaluation strategy. Possible values are:
-                - `"simple"` - we evaluate the metric and return the scores.
-                - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each
-                of the returned metric keys, using `scipy`'s `bootstrap` method
-                https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html.
-            confidence_level (`float`, defaults to `0.95`):
-                The `confidence_level` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
-            n_resamples (`int`, defaults to `9999`):
-                The `n_resamples` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
-            device (`int`, defaults to `None`):
-                Device ordinal for CPU/GPU support of the pipeline. Setting this to -1 will leverage CPU, a positive
-                integer will run the model on the associated CUDA device ID. If`None` is provided it will be inferred and
-                CUDA:0 used if available, CPU otherwise.
-            random_state (`int`, *optional*, defaults to `None`):
-                The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
-                debugging.
+    Compute the metric for a given pipeline and dataset combination.
+    Args:
+        model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`, defaults to `None`):
+            If the argument in not specified, we initialize the default pipeline for the task (in this case
+            `text-classification` or its alias - `sentiment-analysis`). If the argument is of the type `str` or
+            is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
+            argument specifies a pre-initialized pipeline.
+        data (`str` or `Dataset`, defaults to `None`):
+            Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
+            name, and load it. Otherwise we assume it represents a pre-loaded dataset.
+        metric (`str` or `EvaluationModule`, defaults to `None`):
+            Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
+            load it. Otherwise we assume it represents a pre-loaded metric.
+        tokenizer (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
+            Argument can be used to overwrite a default tokenizer if `model_or_pipeline` represents a model for
+            which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
+            this argument.
+        strategy (`Literal["simple", "bootstrap"]`, defaults to "simple"):
+            specifies the evaluation strategy. Possible values are:
+            - `"simple"` - we evaluate the metric and return the scores.
+            - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each
+            of the returned metric keys, using `scipy`'s `bootstrap` method
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html.
+        confidence_level (`float`, defaults to `0.95`):
+            The `confidence_level` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
+        n_resamples (`int`, defaults to `9999`):
+            The `n_resamples` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
+        device (`int`, defaults to `None`):
+            Device ordinal for CPU/GPU support of the pipeline. Setting this to -1 will leverage CPU, a positive
+            integer will run the model on the associated CUDA device ID. If`None` is provided it will be inferred and
+            CUDA:0 used if available, CPU otherwise.
+        random_state (`int`, *optional*, defaults to `None`):
+            The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
+            debugging.
 """
 
 EVALUATOR_COMPUTE_RETURN_DOCSTRING = r"""
-        Return:
-            A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
-            `"simple"` strategy, the value is the metric score. For the `"bootstrap"` strategy, the value is a `Dict`
-            containing the score, the confidence interval and the standard error calculated for each metric key.
+    Return:
+        A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
+        `"simple"` strategy, the value is the metric score. For the `"bootstrap"` strategy, the value is a `Dict`
+        containing the score, the confidence interval and the standard error calculated for each metric key.
 """
 
 
