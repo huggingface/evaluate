@@ -68,7 +68,7 @@ class TextClassificationEvaluator(Evaluator):
             raise ValueError(
                 f"Invalid `input_column` {input_column} specified. The dataset contains the following columns: {data.column_names}."
             )
-        if input_column2 != None and input_column2 not in data.column_names:
+        if input_column2 is not None and input_column2 not in data.column_names:
             raise ValueError(
                 f"Invalid `input_column2` {input_column2} specified. The dataset contains the following columns: {data.column_names}."
             )

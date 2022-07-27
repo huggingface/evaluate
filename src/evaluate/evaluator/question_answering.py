@@ -26,14 +26,13 @@ except ImportError:
 from typing_extensions import Literal
 
 from ..module import EvaluationModule
+from ..utils import add_end_docstrings, add_start_docstrings
 from ..utils.logging import get_logger
 from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOCSTRING, Evaluator
 from .utils import DatasetColumn
 
 
 logger = get_logger(__name__)
-
-from ..utils import add_end_docstrings, add_start_docstrings
 
 
 TASK_DOCUMENTATION = r"""
@@ -159,8 +158,8 @@ class QuestionAnsweringEvaluator(Evaluator):
     def compute(
         self,
         model_or_pipeline: Union[
-            str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"
-        ] = None,  # noqa: F821
+            str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
+        ] = None,
         data: Union[str, Dataset] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
