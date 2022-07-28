@@ -83,7 +83,7 @@ def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
             raise error
 
     if tag is not None:
-        repo.add_tag(tag)
+        repo.add_tag(tag, message="add evaluate tag", remote="origin")
     
     shutil.rmtree(repo_path)
 
@@ -96,11 +96,14 @@ if __name__ == "__main__":
     evaluate_lib_path = Path(os.getenv("EVALUATE_LIB_PATH"))
     commit_hash = os.getenv("GIT_HASH")
     git_tag = get_git_tag(evaluate_lib_path, commit_hash)
+    if git_tag is not None:
+        logger.info(f"Found tag: {git_tag}.")
 
     for type, dir in zip(evaluation_types, evaluation_paths):
         if (evaluate_lib_path/dir).exists():
             for module_path in (evaluate_lib_path/dir).iterdir():
                 if module_path.is_dir():
+                    logger.info(f"Updating: module {module_path.name}.")
                     push_module_to_hub(module_path, type, token, commit_hash, tag=git_tag)
         else:
             logger.warning(f"No folder {str(evaluate_lib_path/dir)} for {type} found.")
