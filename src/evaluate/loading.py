@@ -710,7 +710,7 @@ def load(
         cache_dir=cache_dir,
         keep_in_memory=keep_in_memory,
         experiment_id=experiment_id,
-        fingerprint=evaluation_module.hash,
+        hash=evaluation_module.hash,
         **init_kwargs,
     )
 
