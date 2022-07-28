@@ -234,7 +234,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         self.filelocks = None
 
         # This fingerprints the evaluation module according to the hashed contents of the module code
-        self._hash = git commit -am "Rename _hash
+        self._hash = hash
 
     def __len__(self):
         """Return the number of examples (predictions or predictions/references pair)
