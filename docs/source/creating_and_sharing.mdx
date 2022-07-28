@@ -19,12 +19,13 @@ huggingface-cli login
 All evaluation modules, be it metrics, comparisons, or measurements live on the 🤗 Hub in a [Space](https://huggingface.co/docs/hub/spaces) (see for example [Accuracy](https://huggingface.co/spaces/evaluate-metric/accuracy)). In principle, you could setup a new Space and add a new module following the same structure. However, we added a CLI that makes creating a new evaluation module much easier:
 
 ```bash
-evaluate-cli create "My Metric" module_type="metric"
+evaluate-cli create "My Metric" --module_type "metric"
 ```
 
 This will create a new Space on the 🤗 Hub, clone it locally, and populate it with a template. Instructions on how to fill the template will be displayed in the terminal, but are also explained here in more detail.
 
 For more information about Spaces, see the [Spaces documentation](https://huggingface.co/docs/hub/spaces).
+
 ## Module script
 
 The evaluation module script (the file with suffix `*.py`) is the core of the new module and includes all the code for computing the evaluation.
