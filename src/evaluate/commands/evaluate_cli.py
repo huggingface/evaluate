@@ -5,7 +5,9 @@ from pathlib import Path
 
 from cookiecutter.main import cookiecutter
 from huggingface_hub import HfApi, Repository, create_repo
+
 from evaluate.utils.logging import get_logger
+
 
 logger = get_logger(__name__)
 
@@ -88,7 +90,9 @@ def main():
     try:
         create_repo(namespace + "/" + module_slug, repo_type="space", space_sdk="gradio", private=args["private"])
     except Exception as exception:
-        logger.error(f"Could not create Space for module at hf.co/spaces/{namespace}/{module_slug}. Make sure this space does not exist already.")
+        logger.error(
+            f"Could not create Space for module at hf.co/spaces/{namespace}/{module_slug}. Make sure this space does not exist already."
+        )
         raise exception
     subprocess.run(
         f"git clone {repo_url}".split(),
