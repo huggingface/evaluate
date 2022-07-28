@@ -83,7 +83,7 @@ def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
             raise error
 
     if tag is not None:
-        repo.add_tag(tag)
+        repo.add_tag(tag, message="add evaluate tag", remote="origin")
     
     shutil.rmtree(repo_path)
 
