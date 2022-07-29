@@ -622,7 +622,7 @@ def evaluation_module_factory(
                                 download_mode=download_mode,
                                 dynamic_modules_path=dynamic_modules_path,
                             ).get_module()
-                        except FileNotFoundError:
+                        except ConnectionError:
                             pass
                     raise FileNotFoundError
                 # if module_type provided load specific module_type
@@ -647,14 +647,14 @@ def evaluation_module_factory(
             try:
                 return CachedEvaluationModuleFactory(path, dynamic_modules_path=dynamic_modules_path).get_module()
             except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
-                if not isinstance(e1, FileNotFoundError):
+                if not isinstance(e1, (ConnectionError, FileNotFoundError)):
                     raise e1 from None
                 raise FileNotFoundError(
-                    f"Couldn't find a metric script at {relative_to_absolute_path(combined_path)}. "
-                    f"Metric '{path}' doesn't exist on the Hugging Face Hub either."
+                    f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}. "
+                    f"Module '{path}' doesn't exist on the Hugging Face Hub either."
                 ) from None
     else:
-        raise FileNotFoundError(f"Couldn't find a metric script at {relative_to_absolute_path(combined_path)}.")
+        raise FileNotFoundError(f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}.")
 
 
 def load(
