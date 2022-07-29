@@ -647,7 +647,7 @@ def evaluation_module_factory(
             try:
                 return CachedEvaluationModuleFactory(path, dynamic_modules_path=dynamic_modules_path).get_module()
             except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
-                if not isinstance(e1, FileNotFoundError):
+                if not isinstance(e1, (ConnectionError, FileNotFoundError)):
                     raise e1 from None
                 raise FileNotFoundError(
                     f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}. "
