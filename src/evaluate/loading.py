@@ -678,7 +678,7 @@ def load(
         path (``str``):
             path to the evaluation processing script with the evaluation builder. Can be either:
                 - a local path to processing script or the directory containing the script (if the script has the same name as the directory),
-                    e.g. ``'./metrics/rouge'`` or ``'./metrics/rogue/rouge.py'``
+                    e.g. ``'./metrics/rouge'`` or ``'./metrics/rouge/rouge.py'``
                 - a evaluation module identifier on the HuggingFace evaluate repo e.g. ``'rouge'`` or ``'bleu'`` that are in either ``'metrics/'``,
                     ``'comparisons/'``, or ``'measurements/'`` depending on the provided ``module_type``.
         config_name (:obj:`str`, optional): selecting a configuration for the metric (e.g. the GLUE metric has a configuration for each subset)
@@ -701,8 +701,8 @@ def load(
     download_mode = DownloadMode(download_mode or DownloadMode.REUSE_DATASET_IF_EXISTS)
     evaluation_module = evaluation_module_factory(
         path, module_type=module_type, revision=revision, download_config=download_config, download_mode=download_mode
-    ).module_path
-    evaluation_cls = import_main_class(evaluation_module)
+    )
+    evaluation_cls = import_main_class(evaluation_module.module_path)
     evaluation_instance = evaluation_cls(
         config_name=config_name,
         process_id=process_id,
@@ -710,6 +710,7 @@ def load(
         cache_dir=cache_dir,
         keep_in_memory=keep_in_memory,
         experiment_id=experiment_id,
+        hash=evaluation_module.hash,
         **init_kwargs,
     )
 
