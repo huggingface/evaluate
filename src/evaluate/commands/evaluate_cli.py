@@ -6,6 +6,10 @@ from pathlib import Path
 from cookiecutter.main import cookiecutter
 from huggingface_hub import HfApi, Repository, create_repo
 
+from evaluate.utils.logging import get_logger
+
+
+logger = get_logger(__name__)
 
 INSTRUCTIONS = """\
 A new repository for your module "{module_name}" of type "{module_type}" has been created at {output_dir} and pushed to the Hugging Face Hub: {repo_url}.
@@ -83,7 +87,13 @@ def main():
     args["namespace"] = namespace
     repo_url = f"https://huggingface.co/spaces/{namespace}/{module_slug}"
 
-    create_repo(namespace + "/" + module_slug, repo_type="space", space_sdk="gradio", private=args["private"])
+    try:
+        create_repo(namespace + "/" + module_slug, repo_type="space", space_sdk="gradio", private=args["private"])
+    except Exception as exception:
+        logger.error(
+            f"Could not create Space for module at hf.co/spaces/{namespace}/{module_slug}. Make sure this space does not exist already."
+        )
+        raise exception
     subprocess.run(
         f"git clone {repo_url}".split(),
         stderr=subprocess.PIPE,

@@ -64,11 +64,11 @@ pip install evaluate
 # Adding a new evaluation module
 
 First install the necessary dependencies to create a new metric with the following command:
-```
+```bash
 pip install evaluate[template]
 ```
 Then you can get started with the following command which will create a new folder for your metric and display the necessary steps:
-```batch
+```bash
 evaluate-cli create "Awesome Metric"
 ```
 See this [step-by-step guide](https://huggingface.co/docs/evaluate/creating_and_sharing) in the documentation for detailed instructions.

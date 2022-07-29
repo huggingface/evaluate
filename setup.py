@@ -92,6 +92,8 @@ REQUIRED_PKGS = [
 TEMPLATE_REQUIRE = [
     # to populate metric template
     "cookiecutter"
+    # for the gradio widget
+    "gradio>=3.0.0"
 ]
 
 EVALUATOR_REQUIRE = [
