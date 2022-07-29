@@ -113,7 +113,7 @@ TESTS_REQUIRE = [
     "torch",
     # metrics dependencies
     "bert_score>=0.3.6",
-    "rouge_score<0.0.7",
+    "rouge_score",
     "sacrebleu",
     "sacremoses",
     "scipy",
