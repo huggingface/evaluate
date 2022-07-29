@@ -622,7 +622,7 @@ def evaluation_module_factory(
                                 download_mode=download_mode,
                                 dynamic_modules_path=dynamic_modules_path,
                             ).get_module()
-                        except FileNotFoundError:
+                        except ConnectionError:
                             pass
                     raise FileNotFoundError
                 # if module_type provided load specific module_type
