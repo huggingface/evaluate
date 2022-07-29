@@ -650,11 +650,11 @@ def evaluation_module_factory(
                 if not isinstance(e1, FileNotFoundError):
                     raise e1 from None
                 raise FileNotFoundError(
-                    f"Couldn't find a metric script at {relative_to_absolute_path(combined_path)}. "
-                    f"Metric '{path}' doesn't exist on the Hugging Face Hub either."
+                    f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}. "
+                    f"Module '{path}' doesn't exist on the Hugging Face Hub either."
                 ) from None
     else:
-        raise FileNotFoundError(f"Couldn't find a metric script at {relative_to_absolute_path(combined_path)}.")
+        raise FileNotFoundError(f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}.")
 
 
 def load(
