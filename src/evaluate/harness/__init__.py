@@ -46,7 +46,7 @@ class Harness:
                 json_filepath = path
                 return json.load(open(json_filepath))
             else:
-                raise FileNotFoundError(f"Couldn't find a metric script at {relative_to_absolute_path(path)}")
+                raise FileNotFoundError(f"Couldn't find a configuration file at {relative_to_absolute_path(path)}")
         # Load from a space on the Hub
         elif is_relative_path(path) and path.count("/") <= 1:
             json_filepath = cached_path(convert_hf_hub_path(os.path.join(path, "harness_config.json")))
