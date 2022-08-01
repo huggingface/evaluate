@@ -58,26 +58,22 @@ class TextClassificationEvaluator(Evaluator):
     def __init__(self, task="text-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
-    def prepare_data(self, data: Union[str, Dataset], input_column: str, input_column2: str, label_column: str):
+    def prepare_data(self, data: Union[str, Dataset], input_column: str, second_input_column: str, label_column: str):
         if data is None:
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
-        data = load_dataset(data) if isinstance(data, str) else data
-        if input_column not in data.column_names:
-            raise ValueError(
-                f"Invalid `input_column` {input_column} specified. The dataset contains the following columns: {data.column_names}."
-            )
-        if input_column2 is not None and input_column2 not in data.column_names:
-            raise ValueError(
-                f"Invalid `input_column2` {input_column2} specified. The dataset contains the following columns: {data.column_names}."
-            )
-        if label_column not in data.column_names:
-            raise ValueError(
-                f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
-            )
 
-        return {"references": data[label_column]}, DatasetColumnPair(data, input_column, input_column2)
+        self.check_required_columns(data, {"input_column": input_column, "label_column": label_column})
+
+        if second_input_column is not None:
+            self.check_required_columns(data, {"second_input_column": second_input_column})
+
+        data = load_dataset(data) if isinstance(data, str) else data
+
+        return {"references": data[label_column]}, DatasetColumnPair(
+            data, input_column, second_input_column, "text", "text_pair"
+        )
 
     def predictions_processor(self, predictions, label_mapping):
         predictions = [
@@ -103,7 +99,7 @@ class TextClassificationEvaluator(Evaluator):
         device: int = None,
         random_state: Optional[int] = None,
         input_column: str = "text",
-        input_column2: Optional[str] = None,
+        second_input_column: Optional[str] = None,
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
     ) -> Tuple[Dict[str, float], Any]:
@@ -124,7 +120,7 @@ class TextClassificationEvaluator(Evaluator):
 
         # Prepare inputs
         metric_inputs, pipe_inputs = self.prepare_data(
-            data=data, input_column=input_column, input_column2=input_column2, label_column=label_column
+            data=data, input_column=input_column, second_input_column=second_input_column, label_column=label_column
         )
         pipe = self.prepare_pipeline(
             model_or_pipeline=model_or_pipeline,

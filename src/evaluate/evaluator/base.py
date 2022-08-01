@@ -261,6 +261,23 @@ class Evaluator(ABC):
 
         return result
 
+    def check_required_columns(self, data: Union[str, Dataset], columns_names: Dict[str, str]):
+        """
+        Ensure the columns required for the evaluation are present in the dataset.
+
+        Args:
+            data (`str` or `Dataset`):
+                Specifies the dataset we will run evaluation on.
+            columns_names (`List[str]`):
+            List of column names to check in the dataset. The keys are the arguments to the compute() method,
+            while the values are the column names to check.
+        """
+        for input_name, column_name in columns_names.items():
+            if column_name not in data.column_names:
+                raise ValueError(
+                    f"Invalid `{input_name}` {column_name} specified. The dataset contains the following columns: {data.column_names}."
+                )
+
     def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str):
         """
         Prepare data.
@@ -282,14 +299,8 @@ class Evaluator(ABC):
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
         data = load_dataset(data) if isinstance(data, str) else data
-        if input_column not in data.column_names:
-            raise ValueError(
-                f"Invalid `input_column` {input_column} specified. The dataset contains the following columns: {data.column_names}."
-            )
-        if label_column not in data.column_names:
-            raise ValueError(
-                f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
-            )
+
+        self.check_required_columns(data, {"input_column": input_column, "label_column": label_column})
 
         return {"references": data[label_column]}, DatasetColumn(data, input_column)
 

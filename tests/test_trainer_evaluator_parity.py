@@ -111,7 +111,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             data=eval_dataset,
             metric="accuracy",
             input_column="premise",
-            input_column2="hypothesis",
+            second_input_column="hypothesis",
             label_column="label",
             label_mapping={"LABEL_0": 0, "LABEL_1": 1, "LABEL_2": 2},
         )

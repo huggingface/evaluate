@@ -19,10 +19,29 @@ class DatasetColumn(list):
 
 
 class DatasetColumnPair(list):
-    """Helper class to avoid loading a dataset column into memory when accessing it."""
+    """Helper class to avoid loading two dataset columns into memory when accessing it."""
 
-    def __init__(self, dataset: Dataset, first_key: str, second_key: str):
+    def __init__(
+        self,
+        dataset: Dataset,
+        first_col: str,
+        second_col: str,
+        first_key: str,
+        second_key: str,
+    ):
+        """
+        Args:
+            dataset (Dataset): dataset to build an iterator on
+            first_col (str): first column name to use in the dataset
+            second_col (str): second column name to use in the dataset
+            first_key (str): key name used for the first column in the returned dictionary
+            second_key (str): key name used for the second column in the returned dictionary
+        """
         self.dataset = dataset
+
+        self.first_col = first_col
+        self.second_col = second_col
+
         self.first_key = first_key
         self.second_key = second_key
 
@@ -30,10 +49,16 @@ class DatasetColumnPair(list):
         return len(self.dataset)
 
     def __getitem__(self, i):
-        return {"text": self.dataset[i][self.first_key], "text_pair": self.dataset[i][self.second_key] if self.second_key else None}
+        return {
+            self.first_key: self.dataset[i][self.first_col],
+            self.second_key: self.dataset[i][self.second_col] if self.second_col else None,
+        }
 
     def __iter__(self):
         return (
-            {"text": self.dataset[i][self.first_key], "text_pair": self.dataset[i][self.second_key] if self.second_key else None}
+            {
+                self.first_key: self.dataset[i][self.first_col],
+                self.second_key: self.dataset[i][self.second_col] if self.second_col else None,
+            }
             for i in range(len(self))
         )

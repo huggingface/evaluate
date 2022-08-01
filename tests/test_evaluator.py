@@ -293,7 +293,7 @@ class TestTextClassificationEvaluatorTwoColumns(TestCase):
         )
         self.default_model = "prajjwal1/bert-tiny-mnli"
         self.input_column = "premise"
-        self.input_column2 = "hypothesis"
+        self.second_input_column = "hypothesis"
         self.label_column = "label"
         self.pipe = DummyTextClassificationPipeline()
         self.model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
@@ -307,7 +307,7 @@ class TestTextClassificationEvaluatorTwoColumns(TestCase):
             model_or_pipeline=self.pipe,
             data=self.data,
             input_column=self.input_column,
-            input_column2=self.input_column2,
+            second_input_column=self.second_input_column,
             label_column="label",
             label_mapping=self.label_mapping,
         )
@@ -319,7 +319,7 @@ class TestTextClassificationEvaluatorTwoColumns(TestCase):
             data=self.data,
             metric="accuracy",
             input_column=self.input_column,
-            input_column2=self.input_column2,
+            second_input_column=self.second_input_column,
             label_column=self.label_column,
             label_mapping=self.label_mapping2,
         )
@@ -329,7 +329,7 @@ class TestTextClassificationEvaluatorTwoColumns(TestCase):
             data=self.data,
             metric="accuracy",
             input_column=self.input_column,
-            input_column2=self.input_column2,
+            second_input_column=self.second_input_column,
             tokenizer=self.tokenizer,
             label_mapping=self.label_mapping2,
         )

@@ -103,22 +103,16 @@ class QuestionAnsweringEvaluator(Evaluator):
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
         data = load_dataset(data) if isinstance(data, str) else data
-        if question_column not in data.column_names:
-            raise ValueError(
-                f"Invalid `question_column` {question_column} specified. The dataset contains the following columns: {data.column_names}."
-            )
-        if context_column not in data.column_names:
-            raise ValueError(
-                f"Invalid `context_column` {context_column} specified. The dataset contains the following columns: {data.column_names}."
-            )
-        if id_column not in data.column_names:
-            raise ValueError(
-                f"Invalid `id_column` {id_column} specified. The dataset contains the following columns: {data.column_names}."
-            )
-        if label_column not in data.column_names:
-            raise ValueError(
-                f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
-            )
+
+        self.check_required_columns(
+            data,
+            {
+                "question_column": question_column,
+                "context_column": context_column,
+                "id_column": id_column,
+                "label_column": label_column,
+            },
+        )
 
         metric_inputs = dict()
         metric_inputs["references"] = [
