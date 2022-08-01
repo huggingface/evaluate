@@ -21,7 +21,7 @@ from typing_extensions import Literal
 from ..module import EvaluationModule
 from ..utils import add_end_docstrings, add_start_docstrings
 from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOCSTRING, Evaluator
-from .utils import DatasetColumnTextClassification
+from .utils import DatasetColumnPair
 
 
 TASK_DOCUMENTATION = r"""
