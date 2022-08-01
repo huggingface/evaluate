@@ -185,8 +185,10 @@ class QuestionAnsweringEvaluator(Evaluator):
         label_column (`str`, defaults to `"answers"`):
             the name of the column containing the answers in the dataset specified by `data`.
         squad_v2_format (`bool`, *optional*, defaults to `None`):
-            whether the dataset follows the format of squad_v2 dataset where a question may have no answer in the context. If this parameter is not provided,
-            the format will be automatically inferred.
+            whether the dataset follows the format of squad_v2 dataset. This is the case when the provided dataset
+            has questions where the answer is not in the context, more specifically when are answers as
+            `{"text": [], "answer_start": []}` in the answer column. If all questions have at least one answer, this parameter
+            should be set to `False`. If this parameter is not provided, the format will be automatically inferred.
         """
         result = {}
 
@@ -220,9 +222,9 @@ class QuestionAnsweringEvaluator(Evaluator):
         if squad_v2_format:
             self.PIPELINE_KWARGS["handle_impossible_answer"] = True
 
+        # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, **pipe_inputs)
         predictions = self.predictions_processor(predictions, squad_v2_format=squad_v2_format, ids=data[id_column])
-
         metric_inputs.update(predictions)
 
         # Compute metrics from references and predictions

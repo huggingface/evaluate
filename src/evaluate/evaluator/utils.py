@@ -18,7 +18,7 @@ class DatasetColumn(list):
         return (self.dataset[i][self.key] for i in range(len(self)))
 
 
-class DatasetColumnTextClassification(list):
+class DatasetColumnPair(list):
     """Helper class to avoid loading a dataset column into memory when accessing it."""
 
     def __init__(self, dataset: Dataset, key: str, key2: str):

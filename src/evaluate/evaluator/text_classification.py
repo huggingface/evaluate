@@ -77,7 +77,7 @@ class TextClassificationEvaluator(Evaluator):
                 f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
             )
 
-        return {"references": data[label_column]}, DatasetColumnTextClassification(data, input_column, input_column2)
+        return {"references": data[label_column]}, DatasetColumnPair(data, input_column, input_column2)
 
     def predictions_processor(self, predictions, label_mapping):
         predictions = [
@@ -136,9 +136,7 @@ class TextClassificationEvaluator(Evaluator):
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
-
         predictions = self.predictions_processor(predictions, label_mapping)
-
         metric_inputs.update(predictions)
 
         # Compute metrics from references and predictions

@@ -247,7 +247,6 @@ class TokenClassificationEvaluator(Evaluator):
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
         predictions = self.predictions_processor(predictions, data[input_column], join_by)
-
         metric_inputs.update(predictions)
 
         # Compute metrics from references and predictions
