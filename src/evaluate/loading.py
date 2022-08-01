@@ -131,6 +131,15 @@ def convert_github_url(url_path: str) -> Tuple[str, Optional[str]]:
     return url_path, sub_directory
 
 
+def convert_hf_hub_path(path, branch="main"):
+    """Finds raw version of some file in the form {USER/REPO/FILE.FILETYPE}"""
+    repo_owner = path.split("/")[0]
+    repo_name = path.split("/")[1]
+    rest_of_file = "/".join(path.split("/")[2:])
+    url_path = f"https://huggingface.co/spaces/{repo_owner}/{repo_name}/raw/{branch}/{rest_of_file}"
+    return url_path
+
+
 def increase_load_count(name: str, resource_type: str):
     """Update the download count of a dataset or metric."""
     if not config.HF_EVALUATE_OFFLINE and config.HF_UPDATE_DOWNLOAD_COUNTS:
@@ -350,7 +359,7 @@ def _copy_script_and_other_resources_in_importable_dir(
             else:
                 raise OSError(f"Error with local import at {import_path}")
 
-        # Copy aditional files like dataset infos file if needed
+        # Copy additional files like dataset infos file if needed
         for file_name, original_path in additional_files:
             destination_additional_path = os.path.join(importable_subdirectory, file_name)
             if not os.path.exists(destination_additional_path) or not filecmp.cmp(
@@ -554,7 +563,7 @@ def evaluation_module_factory(
     """
     Download/extract/cache a metric module.
 
-    Metrics codes are cached inside the the dynamic modules cache to allow easy import (avoid ugly sys.path tweaks).
+    Metrics codes are cached inside the dynamic modules cache to allow easy import (avoid ugly sys.path tweaks).
 
     Args:
 
