@@ -110,7 +110,7 @@ class TextClassificationEvaluator(Evaluator):
         """
         input_column (`str`, *optional*, defaults to `"text"`):
             the name of the column containing the text feature in the dataset specified by `data`.
-        input_column2 (`str`, *optional*, defaults to `None`):
+        second_input_column (`str`, *optional*, defaults to `None`):
             the name of the second column containing the text features. This may be useful for classification tasks
             as MNLI, where two columns are used.
         label_column (`str`, defaults to `"label"`):
