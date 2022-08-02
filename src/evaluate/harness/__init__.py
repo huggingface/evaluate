@@ -30,7 +30,10 @@ class Harness:
 
     def __init__(self, config):
         self.config = config
-        self.tasks = self.config["tasks"]
+        self.tasks = []
+        for task_group in self.config['task_groups']:
+            for task in task_group['tasks']:
+                self.tasks.append(task_group['task_type'] + '/' + task['name'])
 
     @classmethod
     def from_json(cls, path):
@@ -54,24 +57,23 @@ class Harness:
         # TODO: handle caching of the config json file
         # TODO: should we handle "canonical" harnesses?
 
-    def run(self):
-        e = evaluator(self.config["task_type"])
-
-        logger.info(f"Running harness: {self.config['harness_name']} with tasks {self.tasks}")
-
+    def run(self, model_or_pipeline=None):
         results_all = {}
-        for task in self.tasks:
-            logger.info(f"Running task: {task['name']}")
+        for task_group in self.config['task_groups']:
+            e = evaluator(task_group['task_type'])
 
-            data = Dataset.from_dict(load_dataset(task['data'])["test"][:])
+            logger.info(f"Running harness: {self.config['harness_name']} with tasks {self.tasks}")
 
-            args_for_task = task["args_for_task"]
-            args_for_task["model_or_pipeline"] = self.config[
-                "model_or_pipeline"
-            ]  # TODO: allow for passing in arbitrary callable
-            args_for_task["data"] = data
+            for task in task_group["tasks"]:
+                logger.info(f"Running task: {task['name']}")
 
-            results = e.compute(**args_for_task)
+                data = Dataset.from_dict(load_dataset(task['data'])["test"][:])
 
-            results_all[task["name"]] = results
+                args_for_task = task["args_for_task"]
+                args_for_task["model_or_pipeline"] = self.config["model_or_pipeline"] or model_or_pipeline
+                args_for_task["data"] = data
+
+                results = e.compute(**args_for_task)
+
+                results_all[task["name"]] = results
         return results_all
