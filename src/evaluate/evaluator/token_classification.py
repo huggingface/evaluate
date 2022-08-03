@@ -161,7 +161,6 @@ class TokenClassificationEvaluator(Evaluator):
         input_column: str = "tokens",
         label_column: str = "ner_tags",
         join_by: Optional[str] = " ",
-        cache_if_possible=False
     ) -> Tuple[Dict[str, float], Any]:
         """
         Compute the metric for a given pipeline and dataset combination.
