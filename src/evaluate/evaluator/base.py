@@ -174,10 +174,13 @@ class Evaluator(ABC):
         raise NotImplementedError()
 
     def compute_canary(self, pipe, input_column, label_column):
-        canary = CanaryDataset(self.task, input_column, label_column)
-        _, canary_inputs = self.prepare_data(data=canary.data, input_column=input_column, label_column=label_column)
+        canary_data = CanaryDataset(self.task, input_column, label_column)
+        _, canary_inputs = self.prepare_data(data=canary_data.data, input_column=input_column, label_column=label_column)
         predictions, _ = self.call_pipeline(pipe, canary_inputs)
-        canary_scores = [x["score"] for x in predictions]
+        if self.task in ["text-classification", "sentiment-analysis"]:  # TODO: the number of different output signatures will get unwieldy fast
+            canary_scores = [x["score"] for x in predictions]
+        elif self.task == 'image-classification':
+            canary_scores = [x[0]['score'] + x[1]['score'] for x in predictions]
         self.canary_hash = hashlib.md5(dill.dumps(canary_scores)).hexdigest()
 
     def compute(

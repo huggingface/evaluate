@@ -16,7 +16,9 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
 from datasets import Dataset, load_dataset
-
+from tests.canary_test import CanaryDataset
+import hashlib
+import dill
 
 try:
     from transformers import Pipeline, PreTrainedModel, PreTrainedTokenizer, TFPreTrainedModel
@@ -118,6 +120,22 @@ class QuestionAnsweringEvaluator(Evaluator):
             result.append(pred)
         return {"predictions": result}
 
+    def compute_canary(self, pipe, input_columns, label_column):
+        canary_data = CanaryDataset(self.task, input_columns, label_column)
+        """
+        metric_inputs, pipe_inputs = self.prepare_data(
+            data=data,
+            question_column=question_column,
+            context_column=context_column,
+            id_column=id_column,
+            label_column=label_column,
+        )
+        """
+        _, canary_inputs = self.prepare_data(data=canary_data.data, question_column=input_columns[0], context_column=input_columns[1], id_column=input_columns[2], label_column=label_column)
+        predictions, _ = self.call_pipeline(pipe, canary_inputs)
+        canary_scores = [x[0]['score'] + x[1]['score'] for x in predictions]
+        self.canary_hash = hashlib.md5(dill.dumps(canary_scores)).hexdigest()
+
     def compute(
         self,
         model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
@@ -134,6 +152,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         id_column: str = "id",
         label_column: str = "answers",
         squad_v2_format: Optional[bool] = None,
+        cache_if_possible=False
     ) -> Tuple[Dict[str, float], Any]:
         """
         Compute the metric for a given pipeline and dataset combination.
@@ -237,6 +256,10 @@ class QuestionAnsweringEvaluator(Evaluator):
             )
 
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
+
+        # If try to use cache, test whether this exact pipe has been instantiated before
+        if cache_if_possible:
+            self.compute_canary(pipe, [question_column, context_column, id_column], label_column)
 
         metric = self.prepare_metric(metric)
 

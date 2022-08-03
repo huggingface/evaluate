@@ -78,7 +78,7 @@ class ImageClassificationEvaluator(Evaluator):
                 We want to map class labels defined by the model in the pipeline to values consistent with those
                 defined in the `label_column` of the `data` dataset.
         Return:
-            A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
+            A `Dict`. The keys represent metric keys calculated for the `metric` specified in function arguments. For the
             `"simple"` strategy, the value is the metric score. For the `"bootstrap"` strategy, the value is a `Dict`
             containing the score, the confidence interval and the standard error calculated for each metric key.
         Examples:
