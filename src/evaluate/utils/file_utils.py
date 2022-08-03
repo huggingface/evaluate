@@ -665,3 +665,23 @@ def readline(f: io.RawIOBase):
         if res.endswith(b"\n"):
             break
     return bytes(res)
+
+
+def cleanup_cache_files(cache_directory):
+    """Clean up all cached results files in the `evaluate` cache directory for some model.
+
+    Returns:
+        :obj:`int`: Number of removed files.
+    """
+    current_cache_files = [
+        os.path.join(cache_directory, file) for file in os.listdir(cache_directory) if "cache-" in file
+    ]  # TODO delete for specific model eval cache
+    if not current_cache_files:
+        return 0
+    logger.info(f"Listing files in {cache_directory}")
+    for file_path in current_cache_files:
+        logger.info(f"Removing {file_path}")
+        os.remove(file_path)
+    return len(
+        current_cache_files
+    )  # TODO: change this to delete per model cache as opposed to the entire results cache

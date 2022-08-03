@@ -12,12 +12,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import hashlib
+import os
 from abc import ABC, abstractmethod
 from numbers import Number
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
+import dill
+import pyarrow as pa
+import pyarrow.parquet as pq
+
 # Lint as: python3
 from datasets import Dataset, load_dataset
+
+from tests.canary_test import CanaryDataset
 
 
 try:
@@ -69,6 +77,7 @@ class Evaluator(ABC):
             )
         self.task = task
         self.default_metric_name = default_metric_name
+        self.cache_dir = f"{os.path.expanduser('~')}/.cache/huggingface/evaluate"
 
     @staticmethod
     def _compute_confidence_interval(
@@ -164,6 +173,13 @@ class Evaluator(ABC):
         """
         raise NotImplementedError()
 
+    def compute_canary(self, pipe, input_column, label_column):
+        canary = CanaryDataset(self.task, input_column, label_column)
+        _, canary_inputs = self.prepare_data(data=canary.data, input_column=input_column, label_column=label_column)
+        predictions, _ = self.call_pipeline(pipe, canary_inputs)
+        canary_scores = [x["score"] for x in predictions]
+        self.canary_hash = hashlib.md5(dill.dumps(canary_scores)).hexdigest()
+
     def compute(
         self,
         model_or_pipeline: Union[
@@ -181,6 +197,7 @@ class Evaluator(ABC):
         input_column: str = "text",
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
+        cache_if_possible=False,
     ) -> Tuple[Dict[str, float], Any]:
 
         result = {}
@@ -193,7 +210,23 @@ class Evaluator(ABC):
             feature_extractor=feature_extractor,
             device=device,
         )
+        # If try to use cache, test whether this exact pipe has been instantiated before
+        if cache_if_possible:
+            self.compute_canary(pipe, input_column, label_column)
+
         metric = self.prepare_metric(metric)
+
+        # Check if model, data, metric combination has already been computed and cached
+        cache_file_name = os.path.join(
+            self.cache_dir, f"cache-{self.canary_hash}-{data._fingerprint}-{metric._hash}" + ".parquet"
+        )
+
+        # Retrieve computed results from the cache if they already exist
+        if os.path.exists(cache_file_name):
+            logger.warning(f"Loading cached computed results at {cache_file_name}")
+            result_from_table = pa.Table.to_pydict(pq.read_table(cache_file_name))
+            result = {k: v[0] for (k, v) in result_from_table.items()}
+            return result
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
@@ -213,6 +246,12 @@ class Evaluator(ABC):
 
         result.update(metric_results)
         result.update(perf_results)
+
+        # Cache evaluation results.
+        #   These can be removed by calling evaluate.utils.file_utils.cleanup_cache_files(self.cache_dir)
+        logger.warning(f"Caching computed result to {cache_file_name}")
+        results_to_table = pa.Table.from_pydict({k: [v] for (k, v) in result.items()})
+        pa.parquet.write_table(results_to_table, cache_file_name)
 
         return result
 
