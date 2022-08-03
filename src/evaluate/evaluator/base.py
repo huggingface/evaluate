@@ -25,7 +25,7 @@ import pyarrow.parquet as pq
 # Lint as: python3
 from datasets import Dataset, load_dataset
 
-from tests.canary_test import CanaryDataset
+from evaluate.utils import canary
 
 
 try:
@@ -174,14 +174,10 @@ class Evaluator(ABC):
         raise NotImplementedError()
 
     def compute_canary(self, pipe, input_column, label_column):
-        canary_data = CanaryDataset(self.task, input_column, label_column)
+        canary_data = canary.CanaryDataset(self.task, input_column, label_column)
         _, canary_inputs = self.prepare_data(data=canary_data.data, input_column=input_column, label_column=label_column)
         predictions, _ = self.call_pipeline(pipe, canary_inputs)
-        if self.task in ["text-classification", "sentiment-analysis"]:  # TODO: the number of different output signatures will get unwieldy fast
-            canary_scores = [x["score"] for x in predictions]
-        elif self.task == 'image-classification':
-            canary_scores = [x[0]['score'] + x[1]['score'] for x in predictions]
-        self.canary_hash = hashlib.md5(dill.dumps(canary_scores)).hexdigest()
+        self.canary_hash = hashlib.md5(dill.dumps(predictions)).hexdigest()
 
     def compute(
         self,
@@ -213,7 +209,7 @@ class Evaluator(ABC):
             feature_extractor=feature_extractor,
             device=device,
         )
-        # If try to use cache, test whether this exact pipe has been instantiated before
+        # If `cache_if_possible` = True, test whether this exact pipe has been instantiated before
         if cache_if_possible:
             self.compute_canary(pipe, input_column, label_column)
 

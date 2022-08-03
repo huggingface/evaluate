@@ -6,9 +6,15 @@ from datasets import Dataset, load_dataset
 class CanaryDataset:
     def __init__(self, evaluator_task, input_columns, label_column):
         if evaluator_task in ["text-classification", "sentiment-analysis"]:
-            data = load_dataset("sst2")["test"][:2]
-            data[input_columns] = data.pop("sentence")
-            data[label_column] = data.pop("label")
+            data = {
+                "idx": [0, 1, 2],
+                input_columns: [
+                    "blue whales are so big",
+                    "the ocean is so vast",
+                    "shrimp are the most untrustworthy ocean creature",
+                ],
+                label_column: [1, 1, 0],
+            }
         elif evaluator_task == 'image-classification':
             data = load_dataset("beans", split="test")[:2]
             data[input_columns] = data.pop("image")
