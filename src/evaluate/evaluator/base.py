@@ -217,17 +217,17 @@ class Evaluator(ABC):
         if cache_if_possible:  # TODO: also check that canaries have been implemented for this task type
             self.compute_canary(pipe, input_column, label_column)
 
-        # Check if model, data, metric combination has already been computed and cached
-        cache_file_name = os.path.join(
-            self.cache_dir, f"cache-{self.canary_hash}-{data._fingerprint}-{metric._hash}" + ".parquet"
-        )
+            # Check if model, data, metric combination has already been computed and cached
+            cache_file_name = os.path.join(
+                self.cache_dir, f"cache-{self.canary_hash}-{data._fingerprint}-{metric._hash}" + ".parquet"
+            )
 
-        # Retrieve computed results from the cache if they already exist
-        if os.path.exists(cache_file_name):
-            logger.warning(f"Loading cached computed results at {cache_file_name}")
-            result_from_table = pa.Table.to_pydict(pq.read_table(cache_file_name))
-            result = {k: v[0] for (k, v) in result_from_table.items()}
-            return result
+            # Retrieve computed results from the cache if they already exist
+            if os.path.exists(cache_file_name):
+                logger.warning(f"Loading cached computed results at {cache_file_name}")
+                result_from_table = pa.Table.to_pydict(pq.read_table(cache_file_name))
+                result = {k: v[0] for (k, v) in result_from_table.items()}
+                return result
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
@@ -250,9 +250,10 @@ class Evaluator(ABC):
 
         # Cache evaluation results.
         #   These can be removed by calling evaluate.utils.file_utils.cleanup_cache_files(self.cache_dir)
-        logger.warning(f"Caching computed result to {cache_file_name}")
-        results_to_table = pa.Table.from_pydict({k: [v] for (k, v) in result.items()})
-        pa.parquet.write_table(results_to_table, cache_file_name)
+        if cache_if_possible:
+            logger.warning(f"Caching computed result to {cache_file_name}")
+            results_to_table = pa.Table.from_pydict({k: [v] for (k, v) in result.items()})
+            pa.parquet.write_table(results_to_table, cache_file_name)
 
         return result
 
