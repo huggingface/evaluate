@@ -15,7 +15,7 @@ class CanaryDataset:
                 ],
                 label_column: [1, 1, 0],
             }
-        elif evaluator_task == 'image-classification':
+        elif evaluator_task == "image-classification":
             data = load_dataset("beans", split="test")[:2]
             data[input_columns] = data.pop("image")
             data[label_column] = data.pop("labels")

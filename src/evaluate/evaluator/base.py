@@ -175,7 +175,9 @@ class Evaluator(ABC):
 
     def compute_canary(self, pipe, input_column, label_column):
         canary_data = canary.CanaryDataset(self.task, input_column, label_column)
-        _, canary_inputs = self.prepare_data(data=canary_data.data, input_column=input_column, label_column=label_column)
+        _, canary_inputs = self.prepare_data(
+            data=canary_data.data, input_column=input_column, label_column=label_column
+        )
         predictions, _ = self.call_pipeline(pipe, canary_inputs)
         self.canary_hash = hashlib.md5(dill.dumps(predictions)).hexdigest()
 
@@ -209,11 +211,11 @@ class Evaluator(ABC):
             feature_extractor=feature_extractor,
             device=device,
         )
-        # If `cache_if_possible` = True, test whether this exact pipe has been instantiated before
-        if cache_if_possible:
-            self.compute_canary(pipe, input_column, label_column)
-
         metric = self.prepare_metric(metric)
+
+        # If `cache_if_possible` = True, test whether this exact pipe has been instantiated before
+        if cache_if_possible:  # TODO: also check that canaries have been implemented for this task type
+            self.compute_canary(pipe, input_column, label_column)
 
         # Check if model, data, metric combination has already been computed and cached
         cache_file_name = os.path.join(
