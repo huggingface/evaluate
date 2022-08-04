@@ -55,7 +55,7 @@ def get_supported_tasks() -> List[str]:
     """
     Returns a list of supported task strings.
     """
-    return SUPPORTED_EVALUATOR_TASKS.keys()
+    return list(SUPPORTED_EVALUATOR_TASKS.keys())
 
 
 def check_task(task: str) -> Dict:
