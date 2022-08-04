@@ -1,4 +1,3 @@
 git+https://github.com/huggingface/evaluate@{COMMIT_PLACEHOLDER}
-datasets~=2.0
 torch
 transformers

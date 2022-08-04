@@ -1,2 +1,1 @@
 git+https://github.com/huggingface/evaluate.git@{COMMIT_PLACEHOLDER}
-datasets~=2.0
