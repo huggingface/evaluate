@@ -126,7 +126,7 @@ class QuestionAnsweringEvaluator(Evaluator):
             result.append(pred)
         return {"predictions": result}
 
-    def compute_canary(self, pipe, input_columns, label_column):
+    def compute_canary_hash(self, pipe, input_columns, label_column):
         canary_data = canary.CanaryDataset(self.task, input_columns, label_column)
         _, canary_inputs = self.prepare_data(
             data=canary_data.data,
@@ -274,9 +274,9 @@ class QuestionAnsweringEvaluator(Evaluator):
             self.PIPELINE_KWARGS["handle_impossible_answer"] = True
 
         # If `cache_if_possible` = True, test whether this exact pipe has been instantiated before
-        if cache_if_possible:  # TODO: also check that canaries have been implemented for this task type
+        if cache_if_possible:
             input_columns = [question_column, context_column, id_column]
-            self.compute_canary(pipe, input_columns, label_column)
+            self.compute_canary_hash(pipe, input_columns, label_column)
 
             # Check if model, data, metric combination has already been computed and cached
             cache_file_name = os.path.join(
@@ -311,8 +311,6 @@ class QuestionAnsweringEvaluator(Evaluator):
         # Cache evaluation results.
         #   These can be removed by calling evaluate.utils.file_utils.cleanup_cache_files(self.cache_dir)
         if cache_if_possible:
-            logger.warning(f"Caching computed result to {cache_file_name}")
-            results_to_table = pa.Table.from_pydict({k: [v] for (k, v) in result.items()})
-            pa.parquet.write_table(results_to_table, cache_file_name)
+            self.write_to_cache(cache_file_name, result)
 
         return result

@@ -173,7 +173,7 @@ class Evaluator(ABC):
         """
         raise NotImplementedError()
 
-    def compute_canary(self, pipe, input_column, label_column):
+    def compute_canary_hash(self, pipe, input_column, label_column):
         canary_data = canary.CanaryDataset(self.task, input_column, label_column)
         _, canary_inputs = self.prepare_data(
             data=canary_data.data, input_column=input_column, label_column=label_column
@@ -214,8 +214,8 @@ class Evaluator(ABC):
         metric = self.prepare_metric(metric)
 
         # If `cache_if_possible` = True, test whether this exact pipe has been instantiated before
-        if cache_if_possible:  # TODO: also check that canaries have been implemented for this task type
-            self.compute_canary(pipe, input_column, label_column)
+        if cache_if_possible:
+            self.compute_canary_hash(pipe, input_column, label_column)
 
             # Check if model, data, metric combination has already been computed and cached
             cache_file_name = os.path.join(
@@ -251,11 +251,15 @@ class Evaluator(ABC):
         # Cache evaluation results.
         #   These can be removed by calling evaluate.utils.file_utils.cleanup_cache_files(self.cache_dir)
         if cache_if_possible:
-            logger.warning(f"Caching computed result to {cache_file_name}")
-            results_to_table = pa.Table.from_pydict({k: [v] for (k, v) in result.items()})
-            pa.parquet.write_table(results_to_table, cache_file_name)
+            self.write_to_cache(cache_file_name, result)
 
         return result
+
+    @staticmethod
+    def write_to_cache(cache_file_name, result):
+        logger.warning(f"Caching computed result to {cache_file_name}")
+        results_to_table = pa.Table.from_pydict({k: [v] for (k, v) in result.items()})
+        pa.parquet.write_table(results_to_table, cache_file_name)
 
     def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str):
         """

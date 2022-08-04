@@ -154,7 +154,7 @@ class TokenClassificationEvaluator(Evaluator):
 
         return pipe
 
-    def compute_canary(self, pipe, input_column, label_column):
+    def compute_canary_hash(self, pipe, input_column, label_column):
         canary_data = canary.CanaryDataset(self.task, input_column[0], label_column)
         _, canary_inputs = self.prepare_data(
             data=canary_data.data, input_column=input_column[0], label_column=label_column, join_by=input_column[1]
@@ -296,9 +296,9 @@ class TokenClassificationEvaluator(Evaluator):
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
         metric = self.prepare_metric(metric)
 
-        if cache_if_possible:  # TODO: also check that canaries have been implemented for this task type
+        if cache_if_possible:
             input_columns = [input_column, join_by]
-            self.compute_canary(pipe, input_columns, label_column)
+            self.compute_canary_hash(pipe, input_columns, label_column)
 
             # Check if model, data, metric combination has already been computed and cached
             cache_file_name = os.path.join(
@@ -334,8 +334,6 @@ class TokenClassificationEvaluator(Evaluator):
         # Cache evaluation results.
         #   These can be removed by calling evaluate.utils.file_utils.cleanup_cache_files(self.cache_dir)
         if cache_if_possible:
-            logger.warning(f"Caching computed result to {cache_file_name}")
-            results_to_table = pa.Table.from_pydict({k: [v] for (k, v) in result.items()})
-            pa.parquet.write_table(results_to_table, cache_file_name)
+            self.write_to_cache(cache_file_name, result)
 
         return result
