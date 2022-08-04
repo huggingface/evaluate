@@ -93,7 +93,6 @@ class Rouge(evaluate.Metric):
                         "predictions": datasets.Value("string", id="sequence"),
                         "references": datasets.Sequence(datasets.Value("string", id="sequence")),
                     }
-                
                 ),
                 datasets.Features(
                     {
