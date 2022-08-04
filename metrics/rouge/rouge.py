@@ -87,12 +87,21 @@ class Rouge(evaluate.Metric):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": datasets.Value("string", id="sequence"),
-                    "references": datasets.Value("string", id="sequence"),
-                }
-            ),
+            features=[
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Sequence(datasets.Value("string", id="sequence")),
+                    }
+                
+                ),
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Value("string", id="sequence"),
+                    }
+                ),
+            ],
             codebase_urls=["https://github.com/google-research/google-research/tree/master/rouge"],
             reference_urls=[
                 "https://en.wikipedia.org/wiki/ROUGE_(metric)",
@@ -104,6 +113,8 @@ class Rouge(evaluate.Metric):
         if rouge_types is None:
             rouge_types = ["rouge1", "rouge2", "rougeL", "rougeLsum"]
 
+        multi_ref = isinstance(references[0], list)
+
         scorer = rouge_scorer.RougeScorer(rouge_types=rouge_types, use_stemmer=use_stemmer)
         if use_aggregator:
             aggregator = scoring.BootstrapAggregator()
@@ -111,7 +122,10 @@ class Rouge(evaluate.Metric):
             scores = []
 
         for ref, pred in zip(references, predictions):
-            score = scorer.score(ref, pred)
+            if multi_ref:
+                score = scorer.score_multi(ref, pred)
+            else:
+                score = scorer.score(ref, pred)
             if use_aggregator:
                 aggregator.add_scores(score)
             else:
