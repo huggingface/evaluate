@@ -172,6 +172,7 @@ class Evaluator(ABC):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
+        data_split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,  # noqa: F821
@@ -188,7 +189,7 @@ class Evaluator(ABC):
         result = {}
 
         # Prepare inputs
-        metric_inputs, pipe_inputs = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
+        metric_inputs, pipe_inputs = self.prepare_data(data=data, input_column=input_column, label_column=label_column, data_split=data_split)
         pipe = self.prepare_pipeline(
             model_or_pipeline=model_or_pipeline,
             tokenizer=tokenizer,
@@ -218,7 +219,7 @@ class Evaluator(ABC):
 
         return result
 
-    def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str):
+    def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str, **kwargs):
         """
         Prepare data.
 
@@ -239,8 +240,11 @@ class Evaluator(ABC):
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
         if isinstance(data, str):
-            split = choose_split(data)
-            logger.warning(f"Dataset split not defined! Automatically evaluating with split: {split.upper()}")
+            if not kwargs.get("data_split"):
+                split = choose_split(data)
+                logger.warning(f"Dataset split not defined! Automatically evaluating with split: {split.upper()}")
+            else:
+                split = kwargs['data_split']
             data = load_dataset(data)[split]
         if input_column not in data.column_names:
             raise ValueError(
