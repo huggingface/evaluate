@@ -19,6 +19,8 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 # Lint as: python3
 from datasets import Dataset, load_dataset
 
+from evaluate.evaluator.utils import choose_split
+
 
 try:
     from scipy.stats import bootstrap
@@ -236,7 +238,10 @@ class Evaluator(ABC):
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
-        data = load_dataset(data) if isinstance(data, str) else data
+        if isinstance(data, str):
+            split = choose_split(data)
+            logger.warning(f"Dataset split not defined! Automatically evaluating with split: {split.upper()}")
+            data = load_dataset(data)[split]
         if input_column not in data.column_names:
             raise ValueError(
                 f"Invalid `input_column` {input_column} specified. The dataset contains the following columns: {data.column_names}."

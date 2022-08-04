@@ -1,4 +1,6 @@
 from datasets import Dataset
+import ast
+import requests
 
 
 class DatasetColumn(list):
@@ -16,3 +18,14 @@ class DatasetColumn(list):
 
     def __iter__(self):
         return (self.dataset[i][self.key] for i in range(len(self)))
+
+
+def choose_split(data):
+    dataset_splits = requests.get(f"https://datasets-server.huggingface.co/splits?dataset={data}").text
+    available_splits = [split["split"] for split in ast.literal_eval(dataset_splits)['splits']]
+    if "test" in available_splits:
+        return "test"
+    elif "validation" in available_splits:
+        return "validation"
+    else:
+        return "train"
