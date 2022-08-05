@@ -2,4 +2,4 @@ git+https://github.com/huggingface/evaluate@a45df1eb9996eec64ec3282ebe554061cb36
 datasets~=2.0
 absl-py
 nltk
-rouge_score
+rouge_score>=0.1.2
