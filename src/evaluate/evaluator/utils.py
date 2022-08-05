@@ -21,8 +21,7 @@ class DatasetColumn(list):
 
 
 def choose_split(data):
-    dataset_splits = requests.get(f"https://datasets-server.huggingface.co/splits?dataset={data}").text
-    available_splits = [split["split"] for split in ast.literal_eval(dataset_splits)['splits']]
+    available_splits = get_dataset_split_names(data)
     if "test" in available_splits:
         return "test"
     elif "validation" in available_splits:
