@@ -61,12 +61,20 @@ class QuestionAnsweringEvaluator(Evaluator):
         context_column: str,
         id_column: str,
         label_column: str,
+        squad_v2_format: bool,
         data_split: str = None
     ):
         """Prepare data."""
         if isinstance(data, str):
             data_split = self.get_dataset_split(data, data_split)
             data = load_dataset(data, split=data_split)
+
+        if squad_v2_format is None:
+            squad_v2_format = self.is_squad_v2_format(data=data, label_column=label_column)
+            logger.warn(
+                f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Automatically inferred `squad_v2_format` as {squad_v2_format}."
+            )
+
         if data is None:
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
@@ -235,14 +243,9 @@ class QuestionAnsweringEvaluator(Evaluator):
             context_column=context_column,
             id_column=id_column,
             label_column=label_column,
+            squad_v2_format=squad_v2_format,
             data_split=data_split
         )
-
-        if squad_v2_format is None:
-            squad_v2_format = self.is_squad_v2_format(data=data, label_column=label_column)
-            logger.warn(
-                f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Automatically inferred `squad_v2_format` as {squad_v2_format}."
-            )
 
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
 
