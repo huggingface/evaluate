@@ -62,7 +62,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         id_column: str,
         label_column: str,
         squad_v2_format: bool,
-        data_split: str = None
+        data_split: str = None,
     ):
         """Prepare data."""
         if isinstance(data, str):
@@ -239,12 +239,12 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         metric_inputs, pipe_inputs = self.prepare_data(
             data=data,
+            data_split=data_split,
             question_column=question_column,
             context_column=context_column,
             id_column=id_column,
             label_column=label_column,
             squad_v2_format=squad_v2_format,
-            data_split=data_split
         )
 
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)

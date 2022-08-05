@@ -14,7 +14,7 @@
 
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from datasets import ClassLabel, Dataset, Sequence
+from datasets import ClassLabel, Dataset, Sequence, load_dataset
 from typing_extensions import Literal
 
 from evaluate.evaluator.utils import DatasetColumn
@@ -94,8 +94,19 @@ class TokenClassificationEvaluator(Evaluator):
 
         return offsets
 
-    def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str, join_by: str):
-        super().prepare_data(data, input_column, label_column)
+    # def postprocess_data(self, data):
+    #
+    #     return metric_inputs, pipeline_inputs
+    def prepare_data(
+        self, data: Union[str, Dataset], input_column: str, label_column: str, join_by: str, data_split: Optional[str]
+    ):
+        # super().prepare_data(data, input_column, label_column, data_split)
+
+        if isinstance(data, str):
+            data_split = self.get_dataset_split(data, data_split)
+            data = load_dataset(data, split=data_split)
+
+        self.data_with_original_input_column = data[input_column]
 
         if not isinstance(data.features[input_column], Sequence) or not isinstance(
             data.features[label_column], Sequence
@@ -123,7 +134,6 @@ class TokenClassificationEvaluator(Evaluator):
         metric_inputs = {"references": references}
         data = data.map(lambda x: {input_column: join_by.join(x[input_column])})
         pipeline_inputs = DatasetColumn(data, input_column)
-
         return metric_inputs, pipeline_inputs
 
     def prepare_pipeline(
@@ -151,6 +161,7 @@ class TokenClassificationEvaluator(Evaluator):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
+        data_split: str = None,
         metric: Union[str, "EvaluationModule"] = None,  # noqa: F821
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -273,14 +284,14 @@ class TokenClassificationEvaluator(Evaluator):
 
         # Prepare inputs
         metric_inputs, pipe_inputs = self.prepare_data(
-            data=data, input_column=input_column, label_column=label_column, join_by=join_by
+            data=data, data_split=data_split, input_column=input_column, label_column=label_column, join_by=join_by
         )
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
         metric = self.prepare_metric(metric)
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
-        predictions = self.predictions_processor(predictions, data[input_column], join_by)
+        predictions = self.predictions_processor(predictions, self.data_with_original_input_column, join_by)
 
         metric_inputs.update(predictions)
 
