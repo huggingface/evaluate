@@ -219,7 +219,14 @@ class Evaluator(ABC):
 
         return result
 
-    def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str, **kwargs):
+    @staticmethod
+    def get_dataset_split(data, data_split):
+        if data_split is None:
+            data_split = choose_split(data)
+            logger.warning(f"Dataset split not defined! Automatically evaluating with split: {data_split.upper()}")
+        return data_split
+
+    def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str, data_split: str = None):
         """
         Prepare data.
 
@@ -235,17 +242,14 @@ class Evaluator(ABC):
             `dict`:  metric inputs.
             `list`:  pipeline inputs.
         """
+        if isinstance(data, str):
+            data_split = self.get_dataset_split(data, data_split)
+        data = load_dataset(data, split=data_split)
         if data is None:
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
-        if isinstance(data, str):
-            if not kwargs.get("data_split"):
-                split = choose_split(data)
-                logger.warning(f"Dataset split not defined! Automatically evaluating with split: {split.upper()}")
-            else:
-                split = kwargs['data_split']
-            data = load_dataset(data)[split]
+
         if input_column not in data.column_names:
             raise ValueError(
                 f"Invalid `input_column` {input_column} specified. The dataset contains the following columns: {data.column_names}."
@@ -254,7 +258,6 @@ class Evaluator(ABC):
             raise ValueError(
                 f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
             )
-
         return {"references": data[label_column]}, DatasetColumn(data, input_column)
 
     def prepare_pipeline(
