@@ -249,11 +249,11 @@ class Evaluator(ABC):
         """
         if isinstance(data, str):
             data_split = self.get_dataset_split(data, data_split)
+            data = load_dataset(data, split=data_split)
         if data is None:
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
-        data = load_dataset(data, split=data_split)
         if input_column not in data.column_names:
             raise ValueError(
                 f"Invalid `input_column` {input_column} specified. The dataset contains the following columns: {data.column_names}."

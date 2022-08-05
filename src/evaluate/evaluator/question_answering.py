@@ -61,13 +61,16 @@ class QuestionAnsweringEvaluator(Evaluator):
         context_column: str,
         id_column: str,
         label_column: str,
+        data_split: str = None
     ):
         """Prepare data."""
+        if isinstance(data, str):
+            data_split = self.get_dataset_split(data, data_split)
+            data = load_dataset(data, split=data_split)
         if data is None:
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
-        data = load_dataset(data) if isinstance(data, str) else data
         if question_column not in data.column_names:
             raise ValueError(
                 f"Invalid `question_column` {question_column} specified. The dataset contains the following columns: {data.column_names}."
@@ -122,6 +125,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         self,
         model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"] = None,
         data: Union[str, Dataset] = None,
+        data_split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -146,6 +150,9 @@ class QuestionAnsweringEvaluator(Evaluator):
             data (`str` or `Dataset`, defaults to `None`):
                 Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
                 name, and load it. Otherwise we assume it represents a pre-loaded dataset.
+            data_split (`str`, default to None):
+                User-defined dataset split by name (e.g. train, validation, test). Supports slice-split (test[:n]).
+                If not defined and data is a `str` type, will automatically select the best one via `choose_split()`.
             metric (`str` or `EvaluationModule`, defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
@@ -228,6 +235,7 @@ class QuestionAnsweringEvaluator(Evaluator):
             context_column=context_column,
             id_column=id_column,
             label_column=label_column,
+            data_split=data_split
         )
 
         if squad_v2_format is None:
