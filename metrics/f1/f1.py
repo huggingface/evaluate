@@ -107,18 +107,21 @@ _CITATION = """
 @dataclass
 class F1Config(Config):
 
-    config_name: str = "default"
-    allowed_config_names: List[str] = field(default_factory=lambda: ["default", "multilabel"])
+    name: str = "default"
 
     pos_label: Union[str, int] = 1
     average: str = "binary"
-    labels: Optional[List[str]] = None
+    labels: List[str] = None
     sample_weight: List[float] = None
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class F1(evaluate.Metric):
-    def _info(self):
+
+    BUILDER_CLASS = F1Config()
+    ALLOWED_CONFIG_NAMES = ["default", "multilabel"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
@@ -134,8 +137,8 @@ class F1(evaluate.Metric):
                     "references": datasets.Value("int32"),
                 }
             ),
-            config=F1Config(),
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html"],
+            config=config
         )
 
     def _compute(self, predictions, references):

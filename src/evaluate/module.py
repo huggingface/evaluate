@@ -167,6 +167,8 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
     """
 
+    ALLOWED_CONFIG_NAMES = ["default"]
+
     def __init__(
         self,
         config_name: Optional[str] = None,
@@ -182,14 +184,18 @@ class EvaluationModule(EvaluationModuleInfoMixin):
     ):
         # prepare info
         self.config_name = config_name or "default"
-        info = self._info()
-        info.module_name = camelcase_to_snakecase(self.__class__.__name__)
-        info.config_name = self.config_name
-        info.experiment_id = experiment_id or "default_experiment"
+        if self.config_name not in self.ALLOWED_CONFIG_NAMES:
+            raise ValueError(f"The config name '{self.config_name}' not in list of allowed config names: {self.ALLOWED_CONFIG_NAMES}.")
         if kwargs is None:
             kwargs = {"name": self.config_name}
         else:
             kwargs.update({"name": self.config_name})
+        self.BUILDER_CLASS.update(kwargs)
+        info = self._info(self.BUILDER_CLASS)
+        info.module_name = camelcase_to_snakecase(self.__class__.__name__)
+        info.config_name = self.config_name
+        info.experiment_id = experiment_id or "default_experiment"
+
         info.config.update(kwargs)
         EvaluationModuleInfoMixin.__init__(self, info)  # For easy access on low level
 

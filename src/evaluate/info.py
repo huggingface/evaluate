@@ -36,23 +36,11 @@ class Config:
     """Base class to store the configuration used for the evaluation module."""
 
     name = "default"
-    allowed_names = ["default"]
-
-    def __post_init__(self):
-        self._validate_name()
 
     def update(self, config):
         for key, value in config.items():
             if hasattr(self, key):
                 setattr(self, key, value)
-        self._validate_name()
-
-    def _validate_name(self):
-        if self.name not in self.allowed_names:
-            raise ValueError(
-                f"The config name '{self.name}' is not in the list of allowed config names: {self.allowed_names}."
-            )
-
 
 @dataclass
 class EvaluationModuleInfo:
@@ -77,7 +65,7 @@ class EvaluationModuleInfo:
     streamable: bool = False
     format: Optional[str] = None
     module_type: str = "metric"  # deprecate this in the future
-    config: Optional[Config] = Config()
+    config: Optional[Config] = None
 
     # Set later by the builder
     module_name: Optional[str] = None
