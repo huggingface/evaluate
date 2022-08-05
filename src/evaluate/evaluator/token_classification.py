@@ -94,9 +94,6 @@ class TokenClassificationEvaluator(Evaluator):
 
         return offsets
 
-    # def postprocess_data(self, data):
-    #
-    #     return metric_inputs, pipeline_inputs
     def prepare_data(
         self, data: Union[str, Dataset], input_column: str, label_column: str, join_by: str, data_split: Optional[str]
     ):
