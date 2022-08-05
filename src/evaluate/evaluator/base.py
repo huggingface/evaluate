@@ -189,7 +189,9 @@ class Evaluator(ABC):
         result = {}
 
         # Prepare inputs
-        metric_inputs, pipe_inputs = self.prepare_data(data=data, input_column=input_column, label_column=label_column, data_split=data_split)
+        metric_inputs, pipe_inputs = self.prepare_data(
+            data=data, input_column=input_column, label_column=label_column, data_split=data_split
+        )
         pipe = self.prepare_pipeline(
             model_or_pipeline=model_or_pipeline,
             tokenizer=tokenizer,
@@ -231,25 +233,27 @@ class Evaluator(ABC):
         Prepare data.
 
         Args:
-            data (`str` or `Dataset`, defaults to `None):
+            data (`str` or `Dataset`, defaults to None):
                 Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
                 name, and load it. Otherwise we assume it represents a pre-loaded dataset.
             input_column (`str`, defaults to `"text"`):
                 the name of the column containing the text feature in the dataset specified by `data`.
             label_column (`str`, defaults to `"label"`):
                 the name of the column containing the labels in the dataset specified by `data`.
+            data_split (`str`, defaults to None):
+                User-defined dataset split by name (e.g. train, validation, test). Supports slice-split (test[:n]).
+                If not defined and data is a `str` type, will automatically select the best one via `choose_split()`.
         Returns:
             `dict`:  metric inputs.
             `list`:  pipeline inputs.
         """
         if isinstance(data, str):
             data_split = self.get_dataset_split(data, data_split)
-        data = load_dataset(data, split=data_split)
         if data is None:
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
-
+        data = load_dataset(data, split=data_split)
         if input_column not in data.column_names:
             raise ValueError(
                 f"Invalid `input_column` {input_column} specified. The dataset contains the following columns: {data.column_names}."
