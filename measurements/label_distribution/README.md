@@ -30,7 +30,6 @@ imbalance).
 The measurement takes a list of labels as input:
 
 ```python
-from evaluate import load
 >>> distribution = evaluate.load("label_distribution")
 >>> data = [1, 0, 2, 2, 0, 0, 0, 0, 0, 2]
 >>> results = distribution.compute(data=data)
