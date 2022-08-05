@@ -55,7 +55,7 @@ It can also deal with lists of references for each predictions:
 ### Inputs
 - **predictions** (`list`): list of predictions to score. Each prediction
         should be a string with tokens separated by spaces.
-- **references** (`list` or `list[list]`): list of reference for each prediction or a list of several predictions. Each
+- **references** (`list` or `list[list]`): list of reference for each prediction or a list of several references per prediction. Each
         reference should be a string with tokens separated by spaces.
 - **rouge_types** (`list`): A list of rouge types to calculate. Defaults to `['rouge1', 'rouge2', 'rougeL', 'rougeLsum']`.
     - Valid rouge types:
