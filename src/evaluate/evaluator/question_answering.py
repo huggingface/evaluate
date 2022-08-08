@@ -104,7 +104,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         return metric_inputs, {
             "question": DatasetColumn(data, question_column),
             "context": DatasetColumn(data, context_column),
-        }
+        }, data
 
     def is_squad_v2_format(self, data: Dataset, label_column: str = "answers"):
         """
@@ -237,7 +237,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         """
         result = {}
 
-        metric_inputs, pipe_inputs = self.prepare_data(
+        metric_inputs, pipe_inputs, data = self.prepare_data(
             data=data,
             data_split=data_split,
             question_column=question_column,

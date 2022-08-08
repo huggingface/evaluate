@@ -189,7 +189,7 @@ class Evaluator(ABC):
         result = {}
 
         # Prepare inputs
-        metric_inputs, pipe_inputs = self.prepare_data(
+        metric_inputs, pipe_inputs, _ = self.prepare_data(
             data=data, input_column=input_column, label_column=label_column, data_split=data_split
         )
         pipe = self.prepare_pipeline(
@@ -246,6 +246,7 @@ class Evaluator(ABC):
         Returns:
             `dict`:  metric inputs.
             `list`:  pipeline inputs.
+            `dataset`: Dataset object.
         """
         if isinstance(data, str):
             data_split = self.get_dataset_split(data, data_split)
@@ -262,7 +263,7 @@ class Evaluator(ABC):
             raise ValueError(
                 f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
             )
-        return {"references": data[label_column]}, DatasetColumn(data, input_column)
+        return {"references": data[label_column]}, DatasetColumn(data, input_column), data
 
     def prepare_pipeline(
         self,
