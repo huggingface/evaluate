@@ -71,7 +71,7 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         if squad_v2_format is None:
             squad_v2_format = self.is_squad_v2_format(data=data, label_column=label_column)
-            logger.warn(
+            logger.warning(
                 f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Automatically inferred `squad_v2_format` as {squad_v2_format}."
             )
 
@@ -101,10 +101,14 @@ class QuestionAnsweringEvaluator(Evaluator):
             {"id": element[id_column], "answers": element[label_column]} for element in data
         ]
 
-        return metric_inputs, {
-            "question": DatasetColumn(data, question_column),
-            "context": DatasetColumn(data, context_column),
-        }, data
+        return (
+            metric_inputs,
+            {
+                "question": DatasetColumn(data, question_column),
+                "context": DatasetColumn(data, context_column),
+            },
+            data,
+        )
 
     def is_squad_v2_format(self, data: Dataset, label_column: str = "answers"):
         """
@@ -252,11 +256,11 @@ class QuestionAnsweringEvaluator(Evaluator):
         metric = self.prepare_metric(metric)
 
         if squad_v2_format and metric.name == "squad":
-            logger.warn(
+            logger.warning(
                 "The dataset has SQuAD v2 format but you are using the SQuAD metric. Consider passing the 'squad_v2' metric."
             )
         if not squad_v2_format and metric.name == "squad_v2":
-            logger.warn(
+            logger.warning(
                 "The dataset has SQuAD v1 format but you are using the SQuAD v2 metric. Consider passing the 'squad' metric."
             )
 

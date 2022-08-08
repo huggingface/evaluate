@@ -14,7 +14,7 @@
 
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
-from datasets import ClassLabel, Dataset, Sequence, load_dataset
+from datasets import ClassLabel, Dataset, Sequence
 from typing_extensions import Literal
 
 from evaluate.evaluator.utils import DatasetColumn
@@ -99,10 +99,6 @@ class TokenClassificationEvaluator(Evaluator):
     ):
         _, _, data = super().prepare_data(data, input_column, label_column, data_split)
 
-        # if isinstance(data, str):
-        #     data_split = self.get_dataset_split(data, data_split)
-        #     data = load_dataset(data, split=data_split)
-        #
         if not isinstance(data.features[input_column], Sequence) or not isinstance(
             data.features[label_column], Sequence
         ):
