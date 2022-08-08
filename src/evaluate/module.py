@@ -559,7 +559,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                     self._enforce_nested_string_type(features, example)
                     features.encode_example(example)
                     return features
-                except ValueError:
+                except (ValueError, TypeError):
                     continue
         feature_strings = "\n".join([f"Feature option {i}: {feature}" for i, feature in enumerate(self.features)])
         error_msg = (
