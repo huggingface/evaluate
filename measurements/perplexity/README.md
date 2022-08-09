@@ -62,11 +62,11 @@ This metric's range is 0 and up. A lower score is better.
 ### Examples
 Calculating perplexity on input_texts defined here:
 ```python
-perplexity = evaluate.load("perplexity", module_type= "measurement")
-input_texts = ["lorem ipsum", "Happy Birthday!", "Bienvenue"]
+perplexity = evaluate.load("perplexity", module_type="measurement")
+data = ["lorem ipsum", "Happy Birthday!", "Bienvenue"]
 results = perplexity.compute(model_id='gpt2',
                              add_start_token=False,
-                             input_texts=input_texts)
+                             data=data)
 print(list(results.keys()))
 >>>['perplexities', 'mean_perplexity']
 print(round(results["mean_perplexity"], 2))
