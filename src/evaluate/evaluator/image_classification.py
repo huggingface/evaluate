@@ -12,12 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import hashlib
 from typing import Any, Dict, Tuple
 
-from .base import Evaluator
-from evaluate.utils import canary
-import hashlib
 import dill
+
+from evaluate.utils import canary
+
+from .base import Evaluator
 
 
 class ImageClassificationEvaluator(Evaluator):
