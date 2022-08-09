@@ -179,7 +179,8 @@ class Evaluator(ABC):
             data=canary_data.data, input_column=input_column, label_column=label_column
         )
         predictions, _ = self.call_pipeline(pipe, canary_inputs)
-        self.canary_hash = hashlib.md5(dill.dumps(predictions)).hexdigest()
+        if "score" in predictions[0].keys():  # Ensures `predictions` returns unique scores for each canary example
+            return hashlib.md5(dill.dumps(predictions)).hexdigest()
 
     def compute(
         self,
@@ -215,19 +216,23 @@ class Evaluator(ABC):
 
         # If `cache_if_possible` = True, test whether this exact pipe has been instantiated before
         if cache_if_possible:
-            self.compute_canary_hash(pipe, input_column, label_column)
+            canary_hash = self.compute_canary_hash(pipe, input_column, label_column)
+            if canary_hash is not None:
+                # Check if model, data, metric combination has already been computed and cached
+                cache_file_name = os.path.join(
+                    self.cache_dir, f"cache-{canary_hash}-{data._fingerprint}-{metric._hash}" + ".parquet"
+                )
 
-            # Check if model, data, metric combination has already been computed and cached
-            cache_file_name = os.path.join(
-                self.cache_dir, f"cache-{self.canary_hash}-{data._fingerprint}-{metric._hash}" + ".parquet"
-            )
-
-            # Retrieve computed results from the cache if they already exist
-            if os.path.exists(cache_file_name):
-                logger.warning(f"Loading cached computed results at {cache_file_name}")
-                result_from_table = pa.Table.to_pydict(pq.read_table(cache_file_name))
-                result = {k: v[0] for (k, v) in result_from_table.items()}
-                return result
+                # Retrieve computed results from the cache if they already exist
+                if os.path.exists(cache_file_name):
+                    logger.warning(f"Loading cached computed results at {cache_file_name}")
+                    result_from_table = pa.Table.to_pydict(pq.read_table(cache_file_name))
+                    result = {k: v[0] for (k, v) in result_from_table.items()}
+                    return result
+            else:
+                logger.warning(
+                    "This model or pipeline cannot be cached since its outputs do not conform to the expected format and a canary_hash cannot be computed."
+                )
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
@@ -250,7 +255,7 @@ class Evaluator(ABC):
 
         # Cache evaluation results.
         #   These can be removed by calling evaluate.utils.file_utils.cleanup_cache_files(self.cache_dir)
-        if cache_if_possible:
+        if cache_if_possible and canary_hash is not None:
             self.write_to_cache(cache_file_name, result)
 
         return result

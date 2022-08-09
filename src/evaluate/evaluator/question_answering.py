@@ -136,7 +136,7 @@ class QuestionAnsweringEvaluator(Evaluator):
             label_column=label_column,
         )
         predictions, _ = self.call_pipeline(pipe, canary_inputs)
-        self.canary_hash = hashlib.md5(dill.dumps(predictions)).hexdigest()
+        return hashlib.md5(dill.dumps(predictions)).hexdigest()
 
     def compute(
         self,
@@ -253,7 +253,7 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         if squad_v2_format is None:
             squad_v2_format = self.is_squad_v2_format(data=data, label_column=label_column)
-            logger.warn(
+            logger.warning(
                 f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Automatically inferred `squad_v2_format` as {squad_v2_format}."
             )
 
@@ -262,11 +262,11 @@ class QuestionAnsweringEvaluator(Evaluator):
         metric = self.prepare_metric(metric)
 
         if squad_v2_format and metric.name == "squad":
-            logger.warn(
+            logger.warning(
                 "The dataset has SQuAD v2 format but you are using the SQuAD metric. Consider passing the 'squad_v2' metric."
             )
         if not squad_v2_format and metric.name == "squad_v2":
-            logger.warn(
+            logger.warning(
                 "The dataset has SQuAD v1 format but you are using the SQuAD v2 metric. Consider passing the 'squad' metric."
             )
 
@@ -276,11 +276,11 @@ class QuestionAnsweringEvaluator(Evaluator):
         # If `cache_if_possible` = True, test whether this exact pipe has been instantiated before
         if cache_if_possible:
             input_columns = [question_column, context_column, id_column]
-            self.compute_canary_hash(pipe, input_columns, label_column)
+            canary_hash = self.compute_canary_hash(pipe, input_columns, label_column)
 
             # Check if model, data, metric combination has already been computed and cached
             cache_file_name = os.path.join(
-                self.cache_dir, f"cache-{self.canary_hash}-{data._fingerprint}-{metric._hash}" + ".parquet"
+                self.cache_dir, f"cache-{canary_hash}-{data._fingerprint}-{metric._hash}" + ".parquet"
             )
 
             # Retrieve computed results from the cache if they already exist
@@ -310,7 +310,7 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         # Cache evaluation results.
         #   These can be removed by calling evaluate.utils.file_utils.cleanup_cache_files(self.cache_dir)
-        if cache_if_possible:
+        if cache_if_possible and canary_hash:
             self.write_to_cache(cache_file_name, result)
 
         return result

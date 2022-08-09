@@ -160,7 +160,7 @@ class TokenClassificationEvaluator(Evaluator):
             data=canary_data.data, input_column=input_column[0], label_column=label_column, join_by=input_column[1]
         )
         predictions, _ = self.call_pipeline(pipe, canary_inputs)
-        self.canary_hash = hashlib.md5(dill.dumps(predictions)).hexdigest()
+        return hashlib.md5(dill.dumps(predictions)).hexdigest()
 
     def compute(
         self,
@@ -298,11 +298,11 @@ class TokenClassificationEvaluator(Evaluator):
 
         if cache_if_possible:
             input_columns = [input_column, join_by]
-            self.compute_canary_hash(pipe, input_columns, label_column)
+            canary_hash = self.compute_canary_hash(pipe, input_columns, label_column)
 
             # Check if model, data, metric combination has already been computed and cached
             cache_file_name = os.path.join(
-                self.cache_dir, f"cache-{self.canary_hash}-{data._fingerprint}-{metric._hash}" + ".parquet"
+                self.cache_dir, f"cache-{canary_hash}-{data._fingerprint}-{metric._hash}" + ".parquet"
             )
 
             # Retrieve computed results from the cache if they already exist
@@ -333,7 +333,7 @@ class TokenClassificationEvaluator(Evaluator):
 
         # Cache evaluation results.
         #   These can be removed by calling evaluate.utils.file_utils.cleanup_cache_files(self.cache_dir)
-        if cache_if_possible:
+        if cache_if_possible and canary_hash:
             self.write_to_cache(cache_file_name, result)
 
         return result

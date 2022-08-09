@@ -15,6 +15,9 @@
 from typing import Any, Dict, Tuple
 
 from .base import Evaluator
+from evaluate.utils import canary
+import hashlib
+import dill
 
 
 class ImageClassificationEvaluator(Evaluator):
@@ -33,6 +36,15 @@ class ImageClassificationEvaluator(Evaluator):
         pred_label = [label_mapping[pred] if label_mapping is not None else pred for pred in pred_label]
 
         return {"predictions": pred_label}
+
+    def compute_canary_hash(self, pipe, input_column, label_column):
+        canary_data = canary.CanaryDataset(self.task, input_column, label_column)
+        _, canary_inputs = self.prepare_data(
+            data=canary_data.data, input_column=input_column, label_column=label_column
+        )
+        predictions, _ = self.call_pipeline(pipe, canary_inputs)
+        if "score" in predictions[0][0].keys():  # Ensures `predictions` returns unique scores for each canary example
+            return hashlib.md5(dill.dumps(predictions)).hexdigest()
 
     def compute(self, input_column: str = "image", *args, **kwargs) -> Tuple[Dict[str, float], Any]:
         """
