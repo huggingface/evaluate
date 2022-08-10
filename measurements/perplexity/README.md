@@ -86,9 +86,9 @@ results = perplexity.compute(model_id='gpt2',
 print(list(results.keys()))
 >>>['perplexities', 'mean_perplexity']
 print(round(results["mean_perplexity"], 2))
->>>60.35
+>>>576.76
 print(round(results["perplexities"][0], 2))
->>>81.12
+>>>889.28
 ```
 
 ## Limitations and Bias
