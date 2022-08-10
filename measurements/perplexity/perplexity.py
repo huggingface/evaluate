@@ -180,7 +180,7 @@ class Perplexity(evaluate.Measurement):
             shift_labels = labels[..., 1:].contiguous()
             shift_attention_mask_batch = attn_mask[..., 1:].contiguous()
 
-            perplexity_batch = torch.exp2(
+            perplexity_batch = torch.exp(
                 (loss_fct(shift_logits.transpose(1, 2), shift_labels) * shift_attention_mask_batch).sum(1)
                 / shift_attention_mask_batch.sum(1)
             )
