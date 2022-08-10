@@ -78,9 +78,9 @@ Examples:
         >>> print(list(results.keys()))
         ['perplexities', 'mean_perplexity']
         >>> print(round(results["mean_perplexity"], 2)) # doctest: +SKIP
-        60.35
+        576.76
         >>> print(round(results["perplexities"][0], 2)) # doctest: +SKIP
-        81.12
+        889.28
 """
 
 
