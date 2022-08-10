@@ -20,9 +20,8 @@ class DatasetColumn(list):
 
 def choose_split(data):
     available_splits = get_dataset_split_names(data)
-    if "test" in available_splits:
-        return "test"
-    elif "validation" in available_splits:
-        return "validation"
-    else:
-        return "train"
+    preferred_split_order = ["test", "validation", "val", "valid", "train", "dev"]
+    for split in preferred_split_order:
+        if split in available_splits:
+            return split
+    raise ValueError("No dataset split defined! Pass an explicit value to the `data_split` kwarg.")
