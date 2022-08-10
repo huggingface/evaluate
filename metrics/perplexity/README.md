@@ -56,7 +56,7 @@ If one of the input texts is longer than the max input length of the model, then
 {'perplexities': [8.182524681091309, 33.42122268676758, 27.012239456176758], 'mean_perplexity': 22.871995608011883}
 ```
 
-This metric's range is 0 and up. A lower score is better.
+The range of this metric is [0, inf). A lower score is better.
 
 #### Values from Popular Papers
 
