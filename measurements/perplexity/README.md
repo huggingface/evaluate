@@ -35,13 +35,13 @@ The measurement takes a list of texts as input, as well as the name of the model
 ```python
 from evaluate import load
 perplexity = load("perplexity",  module_type= "measurement")
-results = perplexity.compute(input_texts=input_texts, model_id='gpt2')
+results = perplexity.compute(data=input_texts, model_id='gpt2')
 ```
 
 ### Inputs
 - **model_id** (str): model used for calculating Perplexity. NOTE: Perplexity can only be calculated for causal language models.
     - This includes models such as gpt2, causal variations of bert, causal versions of t5, and more (the full list can be found in the AutoModelForCausalLM documentation here: https://huggingface.co/docs/transformers/master/en/model_doc/auto#transformers.AutoModelForCausalLM )
-- **input_texts** (list of str): input text, each separate text snippet is one list entry.
+- **data** (list of str): input text, each separate text snippet is one list entry.
 - **batch_size** (int): the batch size to run texts through the model. Defaults to 16.
 - **add_start_token** (bool): whether to add the start token to the texts, so the perplexity can include the probability of the first word. Defaults to True.
 - **device** (str): device to run on, defaults to 'cuda' when available
@@ -54,7 +54,7 @@ If one of the input texts is longer than the max input length of the model, then
 {'perplexities': [8.182524681091309, 33.42122268676758, 27.012239456176758], 'mean_perplexity': 22.871995608011883}
 ```
 
-This metric's range is 0 and up. A lower score is better.
+The range of this metric is [0, inf). A lower score is better.
 
 #### Values from Popular Papers
 
@@ -62,11 +62,11 @@ This metric's range is 0 and up. A lower score is better.
 ### Examples
 Calculating perplexity on input_texts defined here:
 ```python
-perplexity = evaluate.load("perplexity", module_type= "measurement")
+perplexity = evaluate.load("perplexity", module_type="measurement")
 input_texts = ["lorem ipsum", "Happy Birthday!", "Bienvenue"]
 results = perplexity.compute(model_id='gpt2',
                              add_start_token=False,
-                             input_texts=input_texts)
+                             data=input_texts)
 print(list(results.keys()))
 >>>['perplexities', 'mean_perplexity']
 print(round(results["mean_perplexity"], 2))
@@ -82,7 +82,7 @@ input_texts = datasets.load_dataset("wikitext",
                                     split="test")["text"][:50]
 input_texts = [s for s in input_texts if s!='']
 results = perplexity.compute(model_id='gpt2',
-                             input_texts=input_texts)
+                             data=input_texts)
 print(list(results.keys()))
 >>>['perplexities', 'mean_perplexity']
 print(round(results["mean_perplexity"], 2))
