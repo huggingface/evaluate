@@ -72,9 +72,9 @@ results = perplexity.compute(model_id='gpt2',
 print(list(results.keys()))
 >>>['perplexities', 'mean_perplexity']
 print(round(results["mean_perplexity"], 2))
->>>78.22
+>>>646.74
 print(round(results["perplexities"][0], 2))
->>>11.11
+>>>32.25
 ```
 Calculating perplexity on predictions loaded in from a dataset:
 ```python
