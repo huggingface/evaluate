@@ -20,7 +20,7 @@ class DatasetColumn(list):
 
 def choose_split(data):
     available_splits = get_dataset_split_names(data)
-    preferred_split_order = ["test", "validation", "val", "valid", "train", "dev"]
+    preferred_split_order = ["test", "validation", "val", "valid", "dev", "train"]
     for split in preferred_split_order:
         if split in available_splits:
             return split
