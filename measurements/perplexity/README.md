@@ -14,7 +14,7 @@ description: >-
   Perplexity (PPL) can be used for evaluating to what extent a dataset is similar to the distribution of text that a given model was trained on.
   It is defined as the exponentiated average negative log-likelihood of a sequence.
 
-  For more information, see https://huggingface.co/docs/transformers/perplexity
+  For more information on perplexity, see [this tutorial](https://huggingface.co/docs/transformers/perplexity).
 ---
 
 # Measurement Card for Perplexity
@@ -22,8 +22,10 @@ description: >-
 ## Measurement Description
 Given a model and an input text sequence, perplexity measures how likely the model is to generate the input text sequence.
 
-As a measurement, it can be used to to evaluate how well a selection of texts matches the distribution of text that the input model was trained on.
+As a measurement, it can be used to evaluate how well a selection of texts matches the distribution of text that the input model was trained on.
 In this case, the model input should be a trained model, and the input texts should be the text to be evaluated.
+
+This implementation of perplexity is calculated with log base `e`, as in `perplexity = e**(sum(losses) / num_tokenized_tokens)`, following recent convention in deep learning frameworks.
 
 ## Intended Uses
 Dataset analysis or exploration.
@@ -44,7 +46,7 @@ results = perplexity.compute(data=input_texts, model_id='gpt2')
 - **data** (list of str): input text, each separate text snippet is one list entry.
 - **batch_size** (int): the batch size to run texts through the model. Defaults to 16.
 - **add_start_token** (bool): whether to add the start token to the texts, so the perplexity can include the probability of the first word. Defaults to True.
-- **device** (str): device to run on, defaults to 'cuda' when available
+- **device** (str): device to run on, defaults to `cuda` when available
 
 ### Output Values
 This metric outputs a dictionary with the perplexity scores for the text input in the list, and the average perplexity.
