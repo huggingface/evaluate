@@ -35,7 +35,7 @@ Returns:
 
 Examples:
     >>> wilcoxon = evaluate.load("wilcoxon")
-    >>> results = wc.compute(predictions1=[-7, 123.45, 43, 4.91, 5], predictions2=[1337.12, -9.74, 1, 2, 3.21])
+    >>> results = wilcoxon.compute(predictions1=[-7, 123.45, 43, 4.91, 5], predictions2=[1337.12, -9.74, 1, 2, 3.21])
     >>> print(results)
     {'stat': 5.0, 'p': 0.625}
 """
