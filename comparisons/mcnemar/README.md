@@ -68,7 +68,7 @@ print(results)
 
 ## Limitations and bias
 
-The McNemar test is a non-parametric test, so it has relatively few assumptions (basically only that the observations are independent). It should be used used to analyze paired nominal data only.
+The McNemar test is a non-parametric test, so it has relatively few assumptions (basically only that the observations are independent). It should be used to analyze paired nominal data only.
 
 ## Citations
 
