@@ -26,8 +26,8 @@ Wilcoxon's test is a non-parametric signed-rank test that tests whether the dist
 
 _KWARGS_DESCRIPTION = """
 Args:
-    predictions1 (`list` of `int`): Predictions for model 1.
-    predictions2 (`list` of `int`): Predictions for model 2.
+    predictions1 (`list` of `float`): Predictions for model 1.
+    predictions2 (`list` of `float`): Predictions for model 2.
 
 Returns:
     stat (`float`): Wilcoxon test score.
@@ -35,7 +35,7 @@ Returns:
 
 Examples:
     >>> wilcoxon = evaluate.load("wilcoxon")
-    >>> results = wilcoxon.compute(predictions1=[-7, 123, 43, 4, 5], predictions2=[1337, -9, 1, 2, 3])
+    >>> results = wc.compute(predictions1=[-7, 123.45, 43, 4.91, 5], predictions2=[1337.12, -9.74, 1, 2, 3.21])
     >>> print(results)
     {'stat': 5.0, 'p': 0.625}
 """
@@ -63,8 +63,8 @@ class Wilcoxon(evaluate.Comparison):
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
                 {
-                    "predictions1": datasets.Value("int64"),
-                    "predictions2": datasets.Value("int64"),
+                    "predictions1": datasets.Value("float"),
+                    "predictions2": datasets.Value("float"),
                 }
             ),
         )
