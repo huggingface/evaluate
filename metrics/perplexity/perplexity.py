@@ -35,20 +35,25 @@ For more information, see https://huggingface.co/docs/transformers/perplexity
 """
 
 _KWARGS_DESCRIPTION = """
-Args:
+Perplexity can be calculated by passing in a set of logits, labels, and attention mask tensors to the `compute()` function,
+or by passing in a `model_id` and a list of texts to `texts` in the `compute_perplexity_with_pretrained_model()` function,
+which will load a pretrained model and run inference.
+Args for `compute`:
+    logits (`ndarray`): Tensor-like, of shape [batch size, sequence length, vocab size]
+    labels (`ndarray`): Tensor-like, of shape [batch, sequence length]
+    attention_mask (`ndarray`): Tensor-like, of shape [batch, sequence length]
+Args for `compute_perplexity_with_pretrained_model`:
     model_id (str): model used for calculating Perplexity
             NOTE: Perplexity can only be calculated for causal language models.
                     This includes models such as gpt2, causal variations of bert,
                     causal versions of t5, and more (the full list can be found
                     in the AutoModelForCausalLM documentation here:
                     https://huggingface.co/docs/transformers/master/en/model_doc/auto#transformers.AutoModelForCausalLM )
-
-    predictions (list of str): input text, each separate text snippet
-        is one list entry.
+    texts (list of str): input data, each separate text snippet is one list entry.
     batch_size (int): the batch size to run texts through the model. Defaults to 16.
     add_start_token (bool): whether to add the start token to the texts,
         so the perplexity can include the probability of the first word. Defaults to True.
-    device (str): device to run on, defaults to 'cuda' when available
+    device (str): device to run on, defaults to `cuda` when available
 Returns:
     perplexity: dictionary containing the perplexity scores for the texts
         in the input list, as well as the mean perplexity. If one of the input texts is
@@ -58,9 +63,9 @@ Examples:
     Example 1:
         >>> perplexity = evaluate.load("perplexity", module_type="metric")
         >>> input_texts = ["lorem ipsum", "Happy Birthday!", "Bienvenue"]
-        >>> results = perplexity.compute(model_id='gpt2',
+        >>> results = perplexity.compute_perplexity_with_pretrained_model(model_id='gpt2',
         ...                              add_start_token=False,
-        ...                              predictions=input_texts) # doctest:+ELLIPSIS
+        ...                              texts=input_texts) # doctest:+ELLIPSIS
         >>> print(list(results.keys()))
         ['perplexities', 'mean_perplexity']
         >>> print(round(results["mean_perplexity"], 2))
@@ -73,7 +78,7 @@ Examples:
         >>> perplexity = evaluate.load("perplexity", module_type="metric")
         >>> input_texts = load_dataset("wikitext", "wikitext-2-raw-v1", split="test")["text"][:10] # doctest: +SKIP
         >>> input_texts = [s for s in input_texts if s!='']
-        >>> results = perplexity.compute(model_id='gpt2',
+        >>> results = perplexity.compute_perplexity_with_pretrained_model(model_id='gpt2',
         ...                              predictions=input_texts)
         >>> print(list(results.keys()))
         ['perplexities', 'mean_perplexity']
@@ -100,18 +105,10 @@ class Perplexity(evaluate.Metric):
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
-    def _compute(self, predictions, model_id, batch_size: int = 16, add_start_token: bool = True, device=None):
+    @staticmethod
+    def _compute_perplexity_for_model(texts, model_id, batch_size, add_start_token, device):
 
-        if device is not None:
-            assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
-            if device == "gpu":
-                device = "cuda"
-        else:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-
-        model = AutoModelForCausalLM.from_pretrained(model_id)
-        model = model.to(device)
-
+        model = AutoModelForCausalLM.from_pretrained(model_id).to(device)
         tokenizer = AutoTokenizer.from_pretrained(model_id)
 
         # if batch_size > 1 (which generally leads to padding being required), and
@@ -136,7 +133,7 @@ class Perplexity(evaluate.Metric):
             max_tokenized_len = model.config.max_length
 
         encodings = tokenizer(
-            predictions,
+            texts,
             add_special_tokens=False,
             padding=True,
             truncation=True,
@@ -188,3 +185,46 @@ class Perplexity(evaluate.Metric):
             ppls += perplexity_batch.tolist()
 
         return {"perplexities": ppls, "mean_perplexity": np.mean(ppls)}
+
+    def _compute(self, logits=None, labels=None, attention_mask=None):
+        """
+        Computes perplexity according to a set of logits, labels, and an attention mask.
+        Args:
+            logits (`ndarray`): Tensor-like, of shape [batch size, sequence length, vocab size]
+            labels (`ndarray`): Tensor-like, of shape [batch, sequence length]
+            attention_mask (`ndarray`): Tensor-like, of shape [batch, sequence length]
+
+        Returns:
+            (`dict`): Dictionary containing perplexity for each example and mean perplexity.
+        """
+        ppls = torch.exp(
+            (CrossEntropyLoss(reduction="none")(logits.transpose(1, 2), labels) * attention_mask).sum(1)
+            / attention_mask.sum(1)
+        ).tolist()
+        return {"perplexities": ppls, "mean_perplexity": np.mean(ppls)}
+
+    def compute_perplexity_with_pretrained_model(
+        self, texts, model_id: str = None, batch_size: int = 16, add_start_token: bool = True, device=None
+    ):
+        """
+        Compute batched perplexity with regard to some pretrained model loaded by name
+        Args:
+            texts (`list` of `str`): List of texts to calculate perplexity over.
+            model_id (`str`): Name of pretrained model to load.
+            batch_size (`int`): Batch size to run inference on pretrained model.
+            add_start_token (`bool`): Whether to add the start token to the texts, so the perplexity can include the probability of the first word. Defaults to True.
+            device (`str`): device to run on, defaults to `cuda` when available
+        Returns:
+           (`dict`): Dictionary containing perplexity for each example and mean perplexity.
+        """
+        if device is not None:
+            assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
+            if device == "gpu":
+                device = "cuda"
+        else:
+            device = "cuda" if torch.cuda.is_available() else "cpu"
+
+        ppls = self._compute_perplexity_for_model(
+            texts, model_id=model_id, batch_size=batch_size, add_start_token=add_start_token, device=device
+        )
+        return ppls

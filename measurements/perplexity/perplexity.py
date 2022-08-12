@@ -28,7 +28,7 @@ _CITATION = """\
 """
 
 _DESCRIPTION = """
-Perplexity (PPL) can be used for evaluating to what extent a dataset is similar to the distribution of text that a given model was trained on.
+Perplexity (PPL) can be used to evaluate the extent to which a dataset is similar to the distribution of text that a model was trained on.
 It is defined as the exponentiated average negative log-likelihood of a sequence.
 
 For more information, see https://huggingface.co/docs/transformers/perplexity
@@ -100,7 +100,7 @@ class Perplexity(evaluate.Measurement):
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
-    def _compute(self, data, model_id, batch_size: int = 16, add_start_token: bool = True, device=None):
+    def _compute(self, texts, model_id, batch_size: int = 16, add_start_token: bool = True, device=None):
 
         if device is not None:
             assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
@@ -136,7 +136,7 @@ class Perplexity(evaluate.Measurement):
             max_tokenized_len = model.config.max_length
 
         encodings = tokenizer(
-            data,
+            texts,
             add_special_tokens=False,
             padding=True,
             truncation=True,
