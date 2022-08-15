@@ -94,10 +94,8 @@ class TokenClassificationEvaluator(Evaluator):
 
         return offsets
 
-    def prepare_data(
-        self, data: Union[str, Dataset], input_column: str, label_column: str, join_by: str, data_split: Optional[str]
-    ):
-        _, _, data = super().prepare_data(data, input_column, label_column, data_split)
+    def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str, join_by: str):
+        super().prepare_data(data, input_column, label_column)
 
         if not isinstance(data.features[input_column], Sequence) or not isinstance(
             data.features[label_column], Sequence
@@ -123,9 +121,10 @@ class TokenClassificationEvaluator(Evaluator):
             references = data[label_column]
 
         metric_inputs = {"references": references}
-        data_mapped = data.map(lambda x: {input_column: join_by.join(x[input_column])})
-        pipeline_inputs = DatasetColumn(data_mapped, input_column)
-        return metric_inputs, pipeline_inputs, data
+        data = data.map(lambda x: {input_column: join_by.join(x[input_column])})
+        pipeline_inputs = DatasetColumn(data, input_column)
+
+        return metric_inputs, pipeline_inputs
 
     def prepare_pipeline(
         self,
@@ -274,8 +273,9 @@ class TokenClassificationEvaluator(Evaluator):
         result = {}
 
         # Prepare inputs
-        metric_inputs, pipe_inputs, data = self.prepare_data(
-            data=data, data_split=data_split, input_column=input_column, label_column=label_column, join_by=join_by
+        data = self.load_data(data=data, data_split=data_split)
+        metric_inputs, pipe_inputs = self.prepare_data(
+            data=data, input_column=input_column, label_column=label_column, join_by=join_by
         )
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
         metric = self.prepare_metric(metric)

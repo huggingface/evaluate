@@ -56,7 +56,7 @@ class QuestionAnsweringEvaluator(Evaluator):
 
     def prepare_data(
         self,
-        data: Union[str, Dataset],
+        data: Dataset,
         question_column: str,
         context_column: str,
         id_column: str,
@@ -64,11 +64,6 @@ class QuestionAnsweringEvaluator(Evaluator):
         squad_v2_format: bool,
         data_split: str = None,
     ):
-        """Prepare data."""
-        if isinstance(data, str):
-            data_split = self.get_dataset_split(data, data_split)
-            data = load_dataset(data, split=data_split)
-
         if squad_v2_format is None:
             squad_v2_format = self.is_squad_v2_format(data=data, label_column=label_column)
             logger.warning(
@@ -101,14 +96,10 @@ class QuestionAnsweringEvaluator(Evaluator):
             {"id": element[id_column], "answers": element[label_column]} for element in data
         ]
 
-        return (
-            metric_inputs,
-            {
-                "question": DatasetColumn(data, question_column),
-                "context": DatasetColumn(data, context_column),
-            },
-            data,
-        )
+        return metric_inputs, {
+            "question": DatasetColumn(data, question_column),
+            "context": DatasetColumn(data, context_column),
+        }
 
     def is_squad_v2_format(self, data: Dataset, label_column: str = "answers"):
         """
@@ -241,7 +232,8 @@ class QuestionAnsweringEvaluator(Evaluator):
         """
         result = {}
 
-        metric_inputs, pipe_inputs, data = self.prepare_data(
+        data = self.load_data(data=data, data_split=data_split)
+        metric_inputs, pipe_inputs = self.prepare_data(
             data=data,
             data_split=data_split,
             question_column=question_column,

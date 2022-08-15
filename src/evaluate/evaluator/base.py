@@ -189,8 +189,9 @@ class Evaluator(ABC):
         result = {}
 
         # Prepare inputs
-        metric_inputs, pipe_inputs, _ = self.prepare_data(
-            data=data, input_column=input_column, label_column=label_column, data_split=data_split
+        data = self.load_data(data=data, data_split=data_split)
+        metric_inputs, pipe_inputs = self.prepare_data(
+            data=data, input_column=input_column, label_column=label_column
         )
         pipe = self.prepare_pipeline(
             model_or_pipeline=model_or_pipeline,
@@ -228,29 +229,42 @@ class Evaluator(ABC):
             logger.warning(f"Dataset split not defined! Automatically evaluating with split: {data_split.upper()}")
         return data_split
 
-    def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str, data_split: str = None):
+    def load_data(self, data: Union[str, Dataset], data_split: str = None):
         """
-        Prepare data.
-
+        Load dataset with given split.
         Args:
-            data (`str` or `Dataset`, defaults to None):
-                Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
-                name, and load it. Otherwise we assume it represents a pre-loaded dataset.
-            input_column (`str`, defaults to `"text"`):
-                the name of the column containing the text feature in the dataset specified by `data`.
-            label_column (`str`, defaults to `"label"`):
-                the name of the column containing the labels in the dataset specified by `data`.
+            data (`Dataset` or `str`, defaults to None): Specifies the dataset we will run evaluation on. If it is of
+            type `str`, we treat it as the dataset name, and load it. Otherwise we assume it represents a pre-loaded dataset.
             data_split (`str`, defaults to None):
                 User-defined dataset split by name (e.g. train, validation, test). Supports slice-split (test[:n]).
                 If not defined and data is a `str` type, will automatically select the best one via `choose_split()`.
         Returns:
-            `dict`:  metric inputs.
-            `list`:  pipeline inputs.
-            `dataset`: Dataset object.
+
         """
         if isinstance(data, str):
             data_split = self.get_dataset_split(data, data_split)
             data = load_dataset(data, split=data_split)
+        if data is None:
+            raise ValueError(
+                "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
+            )
+        return data
+
+    def prepare_data(self, data: Dataset, input_column: str, label_column: str):
+        """
+        Prepare data.
+
+        Args:
+            data (`Dataset`): Specifies the dataset we will run evaluation on.
+            input_column (`str`, defaults to `"text"`):
+                the name of the column containing the text feature in the dataset specified by `data`.
+            label_column (`str`, defaults to `"label"`):
+                the name of the column containing the labels in the dataset specified by `data`.
+        Returns:
+            `dict`:  metric inputs.
+            `list`:  pipeline inputs.
+        """
+
         if data is None:
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
@@ -263,7 +277,7 @@ class Evaluator(ABC):
             raise ValueError(
                 f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
             )
-        return {"references": data[label_column]}, DatasetColumn(data, input_column), data
+        return {"references": data[label_column]}, DatasetColumn(data, input_column)
 
     def prepare_pipeline(
         self,
