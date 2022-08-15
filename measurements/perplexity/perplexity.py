@@ -29,7 +29,7 @@ _CITATION = """\
 
 _DESCRIPTION = """
 Perplexity (PPL) can be used for evaluating to what extent a dataset is similar to the distribution of text that a given model was trained on.
-It is defined as the exponentiated average negative log-likelihood of a sequence.
+It is defined as the exponentiated average negative log-likelihood of a sequence, calculated with exponent base `e`.
 
 For more information, see https://huggingface.co/docs/transformers/perplexity
 """
@@ -64,9 +64,9 @@ Examples:
         >>> print(list(results.keys()))
         ['perplexities', 'mean_perplexity']
         >>> print(round(results["mean_perplexity"], 2))
-        78.22
+        646.74
         >>> print(round(results["perplexities"][0], 2))
-        11.11
+        32.25
 
     Example 2:
         >>> from datasets import load_dataset
@@ -78,9 +78,9 @@ Examples:
         >>> print(list(results.keys()))
         ['perplexities', 'mean_perplexity']
         >>> print(round(results["mean_perplexity"], 2)) # doctest: +SKIP
-        60.35
+        576.76
         >>> print(round(results["perplexities"][0], 2)) # doctest: +SKIP
-        81.12
+        889.28
 """
 
 
@@ -180,7 +180,7 @@ class Perplexity(evaluate.Measurement):
             shift_labels = labels[..., 1:].contiguous()
             shift_attention_mask_batch = attn_mask[..., 1:].contiguous()
 
-            perplexity_batch = torch.exp2(
+            perplexity_batch = torch.exp(
                 (loss_fct(shift_logits.transpose(1, 2), shift_labels) * shift_attention_mask_batch).sum(1)
                 / shift_attention_mask_batch.sum(1)
             )
