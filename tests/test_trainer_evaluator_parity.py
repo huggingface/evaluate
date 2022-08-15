@@ -74,6 +74,50 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["accuracy"])
 
+    def test_text_classification_parity_two_columns(self):
+        model_name = "prajjwal1/bert-tiny-mnli"
+        max_eval_samples = 150
+
+        subprocess.run(
+            "git sparse-checkout set examples/pytorch/text-classification",
+            shell=True,
+            cwd=os.path.join(self.dir_path, "transformers"),
+        )
+
+        subprocess.run(
+            f"python examples/pytorch/text-classification/run_glue.py"
+            f" --model_name_or_path {model_name}"
+            f" --task_name mnli"
+            f" --do_eval"
+            f" --max_seq_length 256"
+            f" --output_dir {os.path.join(self.dir_path, 'textclassification_mnli_transformers')}"
+            f" --max_eval_samples {max_eval_samples}",
+            shell=True,
+            cwd=os.path.join(self.dir_path, "transformers"),
+        )
+
+        with open(
+            f"{os.path.join(self.dir_path, 'textclassification_mnli_transformers', 'eval_results.json')}", "r"
+        ) as f:
+            transformers_results = json.load(f)
+
+        eval_dataset = load_dataset("glue", "mnli", split=f"validation_matched[:{max_eval_samples}]")
+
+        pipe = pipeline(task="text-classification", model=model_name, tokenizer=model_name, max_length=256)
+
+        task_evaluator = evaluator(task="text-classification")
+        evaluator_results = task_evaluator.compute(
+            model_or_pipeline=pipe,
+            data=eval_dataset,
+            metric="accuracy",
+            input_column="premise",
+            second_input_column="hypothesis",
+            label_column="label",
+            label_mapping={"LABEL_0": 0, "LABEL_1": 1, "LABEL_2": 2},
+        )
+
+        self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["accuracy"])
+
     def test_image_classification_parity(self):
         # we can not compare to the Pytorch transformers example, that uses custom preprocessing on the images
         model_name = "douwekiela/resnet-18-finetuned-dogfood"
