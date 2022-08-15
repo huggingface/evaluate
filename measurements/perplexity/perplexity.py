@@ -100,7 +100,7 @@ class Perplexity(evaluate.Measurement):
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
-    def _compute(self, texts, model_id, batch_size: int = 16, add_start_token: bool = True, device=None):
+    def _compute(self, data, model_id, batch_size: int = 16, add_start_token: bool = True, device=None):
 
         if device is not None:
             assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
@@ -136,7 +136,7 @@ class Perplexity(evaluate.Measurement):
             max_tokenized_len = model.config.max_length
 
         encodings = tokenizer(
-            texts,
+            data,
             add_special_tokens=False,
             padding=True,
             truncation=True,
