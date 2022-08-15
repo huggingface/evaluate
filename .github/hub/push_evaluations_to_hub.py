@@ -78,7 +78,7 @@ def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
     repo = Repository(local_dir=repo_path / module_name, use_auth_token=token)
     
     copy_recursive(module_path, repo_path / module_name)
-    update_evaluate_dependency(repo_path / module_name / "requirements.txt")
+    update_evaluate_dependency(repo_path / module_name / "requirements.txt", commit_hash)
     
     repo.git_add()
     try:
