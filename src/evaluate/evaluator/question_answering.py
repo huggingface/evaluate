@@ -15,7 +15,7 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
-from datasets import Dataset, load_dataset
+from datasets import Dataset
 
 
 try:

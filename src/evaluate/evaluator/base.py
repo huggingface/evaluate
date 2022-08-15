@@ -190,9 +190,7 @@ class Evaluator(ABC):
 
         # Prepare inputs
         data = self.load_data(data=data, data_split=data_split)
-        metric_inputs, pipe_inputs = self.prepare_data(
-            data=data, input_column=input_column, label_column=label_column
-        )
+        metric_inputs, pipe_inputs = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
         pipe = self.prepare_pipeline(
             model_or_pipeline=model_or_pipeline,
             tokenizer=tokenizer,
