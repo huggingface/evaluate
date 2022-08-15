@@ -258,12 +258,12 @@ def _download_additional_modules(
         local_imports.append((import_name, local_import_path))
 
     # Check library imports
-    needs_to_be_installed = []
+    needs_to_be_installed = set()
     for library_import_name, library_import_path in library_imports:
         try:
             lib = importlib.import_module(library_import_name)  # noqa F841
         except ImportError:
-            needs_to_be_installed.append((library_import_name, library_import_path))
+            needs_to_be_installed.add((library_import_name, library_import_path))
     if needs_to_be_installed:
         raise ImportError(
             f"To be able to use {name}, you need to install the following dependencies"
