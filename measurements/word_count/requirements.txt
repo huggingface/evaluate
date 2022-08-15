@@ -1,3 +1,2 @@
-git+https://github.com/huggingface/evaluate.git@main
-datasets~=2.0
+git+https://github.com/huggingface/evaluate.git@{COMMIT_PLACEHOLDER}
 sklearn~=0.0
