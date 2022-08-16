@@ -78,8 +78,12 @@ class Perplexity(evaluate.Metric):
         Returns:
             (`dict`): Dictionary containing perplexity for each example and mean perplexity.
         """
+        logits = predictions[..., :-1, :]
+        labels = references[..., 1:]
+        attention_mask = attention_mask[..., 1:]
+
         ppls = torch.exp(
-            (CrossEntropyLoss(reduction="none")(predictions.transpose(1, 2), references) * attention_mask).sum(1)
+            (CrossEntropyLoss(reduction="none")(logits.transpose(1, 2), labels) * attention_mask).sum(1)
             / attention_mask.sum(1)
         ).tolist()
         return {"perplexities": ppls, "mean_perplexity": np.mean(ppls)}
