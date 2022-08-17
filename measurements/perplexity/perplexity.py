@@ -63,10 +63,10 @@ Examples:
         ...                              data=data) # doctest:+ELLIPSIS
         >>> print(list(results.keys()))
         ['perplexities', 'mean_perplexity']
-        >>> print(round(results["mean_perplexity"], 2))
-        646.75
-        >>> print(round(results["perplexities"][0], 2))
-        32.25
+        >>> print(round(results["mean_perplexity"], 0))
+        647
+        >>> print(round(results["perplexities"][0], 0))
+        32
 
     Example 2:
         >>> from datasets import load_dataset
