@@ -35,7 +35,7 @@ def choose_split(data):
     for split in preferred_split_order:
         if split in available_splits:
             return split
-    raise ValueError("No dataset split defined! Pass an explicit value to the `data_split` kwarg.")
+    raise ValueError("No dataset split defined! Pass an explicit value to the `split` kwarg.")
 
 
 class DatasetColumnPair(list):

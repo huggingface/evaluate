@@ -159,7 +159,7 @@ class QuestionAnsweringEvaluator(Evaluator):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
-        data_split: Optional[str] = None,
+        split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -191,10 +191,9 @@ class QuestionAnsweringEvaluator(Evaluator):
         """
         result = {}
 
-        data = self.load_data(data=data, data_split=data_split)
+        data = self.load_data(data=data, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(
             data=data,
-            data_split=data_split,
             question_column=question_column,
             context_column=context_column,
             id_column=id_column,

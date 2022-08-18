@@ -206,6 +206,16 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 1.0)
 
+    def test_data_loading(self):
+
+        # Test passing in dataset by name with split
+        data = self.evaluator.load_data("evaluate-ci/imdb-ci", split="test[:1]")
+        self.evaluator.prepare_data(data=data, input_column="text", label_column="label", second_input_column=None)
+
+        # Test passing in dataset by name without split and inferring the optimal split
+        data = self.evaluator.load_data("evaluate-ci/imdb-ci")
+        self.evaluator.prepare_data(data=data, input_column="text", label_column="label", second_input_column=None)
+
     def test_overwrite_default_metric(self):
         accuracy = load("accuracy")
         results = self.evaluator.compute(
@@ -513,6 +523,29 @@ class TestQuestionAnsweringEvaluator(TestCase):
             {key: results[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 0.0}
         )
 
+    def test_data_loading(self):
+        # Test passing in dataset by name with data_split
+        data = self.evaluator.load_data("evaluate-ci/squad-ci", split="validation[:1]")
+        self.evaluator.prepare_data(
+            data=data,
+            question_column="question",
+            context_column="context",
+            id_column="id",
+            label_column="answers",
+            squad_v2_format=None,
+        )
+
+        # Test passing in dataset by name without data_split and inferring the optimal split
+        data = self.evaluator.load_data("evaluate-ci/squad-ci")
+        self.evaluator.prepare_data(
+            data=data,
+            question_column="question",
+            context_column="context",
+            id_column="id",
+            label_column="answers",
+            squad_v2_format=None,
+        )
+
     def test_overwrite_default_metric(self):
         # squad_v1-like dataset
         squad = load("squad")
@@ -603,6 +636,25 @@ class TestTokenClassificationEvaluator(TestCase):
             metric="seqeval",
         )
         self.assertEqual(results["overall_accuracy"], 1.0)
+
+    def test_data_loading(self):
+        # Test passing in dataset by name with data_split
+        data = self.evaluator.load_data("evaluate-ci/conll2003-ci", split="validation[:1]")
+        self.evaluator.prepare_data(
+            data=data,
+            input_column="tokens",
+            label_column="ner_tags",
+            join_by=" ",
+        )
+
+        # Test passing in dataset by name without data_split and inferring the optimal split
+        data = self.evaluator.load_data("evaluate-ci/conll2003-ci")
+        self.evaluator.prepare_data(
+            data=data,
+            input_column="tokens",
+            label_column="ner_tags",
+            join_by=" ",
+        )
 
     def test_wrong_task(self):
         self.assertRaises(KeyError, evaluator, "bad_task")

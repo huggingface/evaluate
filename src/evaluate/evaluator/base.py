@@ -217,7 +217,7 @@ class Evaluator(ABC):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
-        data_split: Optional[str] = None,
+        split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,  # noqa: F821
@@ -234,7 +234,7 @@ class Evaluator(ABC):
         result = {}
 
         # Prepare inputs
-        data = self.load_data(data=data, data_split=data_split)
+        data = self.load_data(data=data, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
         pipe = self.prepare_pipeline(
             model_or_pipeline=model_or_pipeline,
@@ -283,27 +283,27 @@ class Evaluator(ABC):
                 )
 
     @staticmethod
-    def get_dataset_split(data, data_split):
-        if data_split is None:
-            data_split = choose_split(data)
-            logger.warning(f"Dataset split not defined! Automatically evaluating with split: {data_split.upper()}")
-        return data_split
+    def get_dataset_split(data, split):
+        if split is None:
+            split = choose_split(data)
+            logger.warning(f"Dataset split not defined! Automatically evaluating with split: {split.upper()}")
+        return split
 
-    def load_data(self, data: Union[str, Dataset], data_split: str = None):
+    def load_data(self, data: Union[str, Dataset], split: str = None):
         """
         Load dataset with given split.
         Args:
             data (`Dataset` or `str`, defaults to None): Specifies the dataset we will run evaluation on. If it is of
             type `str`, we treat it as the dataset name, and load it. Otherwise we assume it represents a pre-loaded dataset.
-            data_split (`str`, defaults to None):
+            split (`str`, defaults to None):
                 User-defined dataset split by name (e.g. train, validation, test). Supports slice-split (test[:n]).
                 If not defined and data is a `str` type, will automatically select the best one via `choose_split()`.
         Returns:
 
         """
         if isinstance(data, str):
-            data_split = self.get_dataset_split(data, data_split)
-            data = load_dataset(data, split=data_split)
+            split = self.get_dataset_split(data, split)
+            data = load_dataset(data, split=split)
         if data is None:
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
