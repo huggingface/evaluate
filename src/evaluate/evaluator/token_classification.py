@@ -17,11 +17,10 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from datasets import ClassLabel, Dataset, Sequence
 from typing_extensions import Literal
 
-from evaluate.evaluator.utils import DatasetColumn
-
 from ..module import EvaluationModule
 from ..utils.file_utils import add_end_docstrings, add_start_docstrings
 from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOCSTRING, Evaluator
+from .utils import DatasetColumn
 
 
 TASK_DOCUMENTATION = r"""
