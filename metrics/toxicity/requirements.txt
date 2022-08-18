@@ -1,0 +1,3 @@
+git+https://github.com/huggingface/evaluate@{COMMIT_PLACEHOLDER}
+vaderSentiment>=3.3.2
+sklearn
