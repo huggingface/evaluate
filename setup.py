@@ -91,7 +91,7 @@ REQUIRED_PKGS = [
 
 TEMPLATE_REQUIRE = [
     # to populate metric template
-    "cookiecutter"
+    "cookiecutter",
     # for the gradio widget
     "gradio>=3.0.0"
 ]
@@ -113,7 +113,7 @@ TESTS_REQUIRE = [
     "torch",
     # metrics dependencies
     "bert_score>=0.3.6",
-    "rouge_score",
+    "rouge_score>=0.1.2",
     "sacrebleu",
     "sacremoses",
     "scipy",

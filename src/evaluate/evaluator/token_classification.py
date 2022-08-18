@@ -19,7 +19,69 @@ from typing_extensions import Literal
 
 from evaluate.evaluator.utils import DatasetColumn
 
-from .base import Evaluator
+from ..module import EvaluationModule
+from ..utils.file_utils import add_end_docstrings, add_start_docstrings
+from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOCSTRING, Evaluator
+
+
+TASK_DOCUMENTATION = r"""
+    The dataset input and label columns are expected to be formatted as a list of words and a list of labels respectively, following [conll2003 dataset](https://huggingface.co/datasets/conll2003). Datasets whose inputs are single strings, and labels are a list of offset are not supported.
+
+    Examples:
+    ```python
+    >>> from evaluate import evaluator
+    >>> from datasets import load_dataset
+    >>> task_evaluator = evaluator("token-classification")
+    >>> data = load_dataset("conll2003", split="validation[:2]")
+    >>> results = task_evaluator.compute(
+    >>>     model_or_pipeline="elastic/distilbert-base-uncased-finetuned-conll03-english",
+    >>>     data=data,
+    >>>     metric="seqeval",
+    >>> )
+    ```
+
+    <Tip>
+
+    For example, the following dataset format is accepted by the evaluator:
+
+    ```python
+    dataset = Dataset.from_dict(
+        mapping={
+            "tokens": [["New", "York", "is", "a", "city", "and", "Felix", "a", "person", "."]],
+            "ner_tags": [[1, 2, 0, 0, 0, 0, 3, 0, 0, 0]],
+        },
+        features=Features({
+            "tokens": Sequence(feature=Value(dtype="string")),
+            "ner_tags": Sequence(feature=ClassLabel(names=["O", "B-LOC", "I-LOC", "B-PER", "I-PER"])),
+            }),
+    )
+    ```
+
+    </Tip>
+
+    <Tip warning={true}>
+
+    For example, the following dataset format is **not** accepted by the evaluator:
+
+    ```python
+    dataset = Dataset.from_dict(
+        mapping={
+            "tokens": [["New York is a city and Felix a person."]],
+            "starts": [[0, 23]],
+            "ends": [[7, 27]],
+            "ner_tags": [["LOC", "PER"]],
+        },
+        features=Features({
+            "tokens": Value(dtype="string"),
+            "starts": Sequence(feature=Value(dtype="int32")),
+            "ends": Sequence(feature=Value(dtype="int32")),
+            "ner_tags": Sequence(feature=Value(dtype="string")),
+        }),
+    )
+    ```
+
+    </Tip>
+"""
 
 
 class TokenClassificationEvaluator(Evaluator):
@@ -145,6 +207,8 @@ class TokenClassificationEvaluator(Evaluator):
 
         return pipe
 
+    @add_start_docstrings(EVALUTOR_COMPUTE_START_DOCSTRING)
+    @add_end_docstrings(EVALUATOR_COMPUTE_RETURN_DOCSTRING, TASK_DOCUMENTATION)
     def compute(
         self,
         model_or_pipeline: Union[
@@ -152,7 +216,7 @@ class TokenClassificationEvaluator(Evaluator):
         ] = None,
         data: Union[str, Dataset] = None,
         data_split: str = None,
-        metric: Union[str, "EvaluationModule"] = None,  # noqa: F821
+        metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
@@ -164,111 +228,13 @@ class TokenClassificationEvaluator(Evaluator):
         join_by: Optional[str] = " ",
     ) -> Tuple[Dict[str, float], Any]:
         """
-        Compute the metric for a given pipeline and dataset combination.
-
-        Args:
-            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`, defaults to `None`):
-                If the argument in not specified, we initialize the default pipeline for the task (in this case
-                `token-classification`). If the argument is of the type `str` or
-                is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
-                argument specifies a pre-initialized pipeline.
-            data (`str` or `Dataset`, defaults to `None`):
-                Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
-                name, and load it. Otherwise we assume it represents a pre-loaded dataset.
-            metric (`str` or `EvaluationModule`, defaults to `None`):
-                Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
-                load it. Otherwise we assume it represents a pre-loaded metric.
-            tokenizer (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
-                Argument can be used to overwrite a default tokenizer if `model_or_pipeline` represents a model for
-                which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
-                this argument.
-            strategy (`Literal["simple", "bootstrap"]`, defaults to "simple"):
-                specifies the evaluation strategy. Possible values are:
-
-                - `"simple"` - we evaluate the metric and return the scores.
-                - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each
-                of the returned metric keys, using `scipy`'s `bootstrap` method
-                https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html.
-            confidence_level (`float`, defaults to `0.95`):
-                The `confidence_level` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
-            n_resamples (`int`, defaults to `9999`):
-                The `n_resamples` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
-            device (`int`, defaults to `None`):
-                Device ordinal for CPU/GPU support of the pipeline. Setting this to -1 will leverage CPU, a positive
-                integer will run the model on the associated CUDA device ID. If`None` is provided it will be inferred and
-                CUDA:0 used if available, CPU otherwise.
-            random_state (`int`, *optional*, defaults to `None`):
-                The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
-                debugging.
-            input_column (`str`, defaults to `"tokens"`):
-                the name of the column containing the tokens feature in the dataset specified by `data`.
-            label_column (`str`, defaults to `"label"`):
-                the name of the column containing the labels in the dataset specified by `data`.
-            join_by (`str`, *optional*, defaults to `" "`):
-                This evaluator supports dataset whose input column is a list of words. This parameter specifies how to join
-                words to generate a string input. This is especially useful for languages that do not separate words by a space.
-
-        Return:
-            A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
-            `"simple"` strategy, the value is the metric score. For the `"bootstrap"` strategy, the value is a `Dict`
-            containing the score, the confidence interval and the standard error calculated for each metric key.
-
-        The dataset input and label columns are expected to be formatted as a list of words and a list of labels respectively, following [conll2003 dataset](https://huggingface.co/datasets/conll2003). Datasets whose inputs are single strings, and labels are a list of offset are not supported.
-
-        Examples:
-        ```python
-        >>> from evaluate import evaluator
-        >>> from datasets import load_dataset
-        >>> task_evaluator = evaluator("token-classification")
-        >>> data = load_dataset("conll2003", split="validation[:2]")
-        >>> results = task_evaluator.compute(
-        >>>     model_or_pipeline="elastic/distilbert-base-uncased-finetuned-conll03-english",
-        >>>     data=data,
-        >>>     metric="seqeval",
-        >>> )
-        ```
-
-        <Tip>
-
-        For example, the following dataset format is accepted by the evaluator:
-
-        ```python
-        dataset = Dataset.from_dict(
-            mapping={
-                "tokens": [["New", "York", "is", "a", "city", "and", "Felix", "a", "person", "."]],
-                "ner_tags": [[1, 2, 0, 0, 0, 0, 3, 0, 0, 0]],
-            },
-            features=Features({
-                "tokens": Sequence(feature=Value(dtype="string")),
-                "ner_tags": Sequence(feature=ClassLabel(names=["O", "B-LOC", "I-LOC", "B-PER", "I-PER"])),
-                }),
-        )
-        ```
-
-        </Tip>
-
-        <Tip warning={true}>
-
-        For example, the following dataset format is **not** accepted by the evaluator:
-
-        ```python
-        dataset = Dataset.from_dict(
-            mapping={
-                "tokens": [["New York is a city and Felix a person."]],
-                "starts": [[0, 23]],
-                "ends": [[7, 27]],
-                "ner_tags": [["LOC", "PER"]],
-            },
-            features=Features({
-                "tokens": Value(dtype="string"),
-                "starts": Sequence(feature=Value(dtype="int32")),
-                "ends": Sequence(feature=Value(dtype="int32")),
-                "ner_tags": Sequence(feature=Value(dtype="string")),
-            }),
-        )
-        ```
-
-        </Tip>
+        input_column (`str`, defaults to `"tokens"`):
+            the name of the column containing the tokens feature in the dataset specified by `data`.
+        label_column (`str`, defaults to `"label"`):
+            the name of the column containing the labels in the dataset specified by `data`.
+        join_by (`str`, *optional*, defaults to `" "`):
+            This evaluator supports dataset whose input column is a list of words. This parameter specifies how to join
+            words to generate a string input. This is especially useful for languages that do not separate words by a space.
         """
         result = {}
 
@@ -283,7 +249,6 @@ class TokenClassificationEvaluator(Evaluator):
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
         predictions = self.predictions_processor(predictions, data[input_column], join_by)
-
         metric_inputs.update(predictions)
 
         # Compute metrics from references and predictions
