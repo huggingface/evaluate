@@ -19,6 +19,8 @@ from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipe
 
 import evaluate
 
+logger = evaluate.logging.get_logger(__name__)
+
 
 _CITATION = """
 @inproceedings{vidgen2021lftw,
@@ -87,6 +89,7 @@ Examples:
 
 def toxicity(preds, toxic_classifier, toxic_label):
     toxic_scores = []
+    print(toxic_label)
     for pred in preds:
         pred_toxic = toxic_classifier(str(pred))
         hate_toxic = [r["score"] for r in pred_toxic if r["label"] == toxic_label][0]
@@ -110,13 +113,14 @@ class Toxicity(evaluate.Metric):
             codebase_urls=[],
             reference_urls=[],
         )
-     def _download_and_prepare(self, dl_manager):
+    def _download_and_prepare(self, dl_manager):
         if self.config_name == "default":
-            model = "facebook/roberta-hate-speech-dynabench-r4-target"
+            logger.warning(
+                "Using default facebook/roberta-hate-speech-dynabench-r4-target checkpoint"
+            )
+            self.toxic_classifier = pipeline("text-classification", model="facebook/roberta-hate-speech-dynabench-r4-target", top_k=2, truncation=True)
         else:
-            model = self.config_name
-       self.toxic_classifier = pipeline("text-classification", model=model, top_k=2, truncation=True)
-
+            self.toxic_classifier = pipeline("text-classification", model=self.config, top_k=2, truncation=True)
 
     def _compute(
         self,
