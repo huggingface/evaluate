@@ -118,11 +118,7 @@ class Toxicity(evaluate.Metric):
         aggregation="all",
         toxic_label="hate",
     ):
-        toxic_tokenizer = AutoTokenizer.from_pretrained(model)
-        toxic_model = AutoModelForSequenceClassification.from_pretrained(model)
-        toxic_classifier = pipeline(
-            "text-classification", model=toxic_model, tokenizer=toxic_tokenizer, top_k=2, truncation=True
-        )
+        toxic_classifier = pipeline("text-classification", model=model, top_k=2, truncation=True)
         scores = toxicity(predictions, toxic_classifier, toxic_label)
         if aggregation == "ratio":
             return {"toxicity_ratio": sum(i >= 0.5 for i in scores) / len(scores)}
