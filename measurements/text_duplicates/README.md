@@ -67,7 +67,7 @@ Example with multiple duplicates and `list_duplicates=True`:
 ```python
 >>> data = ["hello sun", "goodbye moon", "hello sun", "foo bar", "foo bar"]
 >>> duplicates = evaluate.load("text_duplicates")
->>> results = duplicates.compute(data=data)
+>>> results = duplicates.compute(data=data, list_duplicates=True)
 >>> print(results)
 {'duplicate_fraction': 0.4, 'duplicates_list': {'hello sun': 2, 'foo bar': 2}}
 ```
