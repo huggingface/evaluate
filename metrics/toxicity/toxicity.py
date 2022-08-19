@@ -110,15 +110,20 @@ class Toxicity(evaluate.Metric):
             codebase_urls=[],
             reference_urls=[],
         )
+     def _download_and_prepare(self, dl_manager):
+        if self.config_name == "default":
+            model = "facebook/roberta-hate-speech-dynabench-r4-target"
+        else:
+            model = self.config_name
+       self.toxic_classifier = pipeline("text-classification", model=model, top_k=2, truncation=True)
+
 
     def _compute(
         self,
         predictions,
-        model="facebook/roberta-hate-speech-dynabench-r4-target",
         aggregation="all",
         toxic_label="hate",
     ):
-        toxic_classifier = pipeline("text-classification", model=model, top_k=2, truncation=True)
         scores = toxicity(predictions, toxic_classifier, toxic_label)
         if aggregation == "ratio":
             return {"toxicity_ratio": sum(i >= 0.5 for i in scores) / len(scores)}
