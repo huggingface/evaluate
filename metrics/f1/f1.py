@@ -111,8 +111,8 @@ class F1Config(Config):
 
     pos_label: Union[str, int] = 1
     average: str = "binary"
-    labels: List[str] = None
-    sample_weight: List[float] = None
+    labels: Optional[List[str]] = None
+    sample_weight: Optional[List[float]] = None
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
