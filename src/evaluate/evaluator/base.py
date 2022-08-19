@@ -61,6 +61,8 @@ EVALUTOR_COMPUTE_START_DOCSTRING = r"""
         data (`str` or `Dataset`, defaults to `None`):
             Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
             name, and load it. Otherwise we assume it represents a pre-loaded dataset.
+        split (`str`, defaults to None):
+            Defines which dataset split to load. If None is passed, infers based on the `choose_split` function.
         metric (`str` or `EvaluationModule`, defaults to `None`):
             Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
             load it. Otherwise we assume it represents a pre-loaded metric.
@@ -284,6 +286,15 @@ class Evaluator(ABC):
 
     @staticmethod
     def get_dataset_split(data, split):
+        """
+        Infers which split to use if None is given.
+
+        Args:
+             data (`str`): Name of dataset
+             split (`str`, defaults to None): Split to use
+        Returns:
+            `split`: `str` containing which split to use
+        """
         if split is None:
             split = choose_split(data)
             logger.warning(f"Dataset split not defined! Automatically evaluating with split: {split.upper()}")
