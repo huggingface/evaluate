@@ -118,7 +118,7 @@ class F1Config(Config):
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class F1(evaluate.Metric):
 
-    BUILDER_CLASS = F1Config()
+    CONFIG_CLASS = F1Config
     ALLOWED_CONFIG_NAMES = ["default", "multilabel"]
 
     def _info(self, config):

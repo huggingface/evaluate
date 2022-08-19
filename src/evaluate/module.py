@@ -190,8 +190,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             kwargs = {"name": self.config_name}
         else:
             kwargs.update({"name": self.config_name})
-        self.BUILDER_CLASS.update(kwargs)
-        info = self._info(self.BUILDER_CLASS)
+        info = self._info(self.CONFIG_CLASS(**kwargs))
         info.module_name = camelcase_to_snakecase(self.__class__.__name__)
         info.config_name = self.config_name
         info.experiment_id = experiment_id or "default_experiment"
