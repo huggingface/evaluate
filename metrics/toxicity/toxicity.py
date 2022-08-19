@@ -124,7 +124,7 @@ class Toxicity(evaluate.Metric):
         aggregation="all",
         toxic_label="hate",
     ):
-        scores = toxicity(predictions, toxic_classifier, toxic_label)
+        scores = toxicity(predictions, self.toxic_classifier, toxic_label)
         if aggregation == "ratio":
             return {"toxicity_ratio": sum(i >= 0.5 for i in scores) / len(scores)}
         elif aggregation == "maximum":
