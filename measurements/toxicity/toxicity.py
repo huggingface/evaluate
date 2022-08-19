@@ -85,7 +85,6 @@ Examples:
 
 def toxicity(preds, toxic_classifier, toxic_label):
     toxic_scores = []
-    print(toxic_label)
     for pred in preds:
         pred_toxic = toxic_classifier(str(pred))
         hate_toxic = [r["score"] for r in pred_toxic if r["label"] == toxic_label][0]
