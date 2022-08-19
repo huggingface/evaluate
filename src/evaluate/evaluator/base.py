@@ -310,7 +310,7 @@ class Evaluator(ABC):
                 User-defined dataset split by name (e.g. train, validation, test). Supports slice-split (test[:n]).
                 If not defined and data is a `str` type, will automatically select the best one via `choose_split()`.
         Returns:
-
+            data (`Dataset`): Loaded dataset which will be used for evaluation.
         """
         if isinstance(data, str):
             split = self.get_dataset_split(data, split)

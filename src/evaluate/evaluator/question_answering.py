@@ -90,20 +90,9 @@ class QuestionAnsweringEvaluator(Evaluator):
         super().__init__(task, default_metric_name=default_metric_name)
 
     def prepare_data(
-        self,
-        data: Dataset,
-        question_column: str,
-        context_column: str,
-        id_column: str,
-        label_column: str,
-        squad_v2_format: bool,
+        self, data: Dataset, question_column: str, context_column: str, id_column: str, label_column: str
     ):
-        if squad_v2_format is None:
-            squad_v2_format = self.is_squad_v2_format(data=data, label_column=label_column)
-            logger.warning(
-                f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Automatically inferred `squad_v2_format` as {squad_v2_format}."
-            )
-
+        """Prepare data."""
         if data is None:
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
@@ -198,9 +187,13 @@ class QuestionAnsweringEvaluator(Evaluator):
             context_column=context_column,
             id_column=id_column,
             label_column=label_column,
-            squad_v2_format=squad_v2_format,
         )
 
+        if squad_v2_format is None:
+            squad_v2_format = self.is_squad_v2_format(data=data, label_column=label_column)
+            logger.warning(
+                f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Automatically inferred `squad_v2_format` as {squad_v2_format}."
+            )
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
 
         metric = self.prepare_metric(metric)
