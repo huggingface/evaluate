@@ -12,12 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Toxicity detection metric. """
+""" Toxicity detection measurement. """
 
 import datasets
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 
 import evaluate
+
 
 logger = evaluate.logging.get_logger(__name__)
 
@@ -32,16 +33,14 @@ _CITATION = """
 """
 
 _DESCRIPTION = """\
-The toxicity metric aims to quantify the toxicity of the input texts using a hate speech classification model trained for the task
+The toxicity measurement aims to quantify the toxicity of the input texts using a hate speech classification model trained for the task
 """
 
 _KWARGS_DESCRIPTION = """
 Compute the toxicity of the input sentences.
+
 Args:
     `predictions` (list of str): prediction/candidate sentences
-    `model` (optional): the model to be used for measuring toxicity. The default is [roberta-hate-speech-dynabench-r4](https://huggingface.co/facebook/roberta-hate-speech-dynabench-r4-target)
-        NOTE: The model has to be loadable using the AutoModelForSequenceClassification function. For more information, see:
-                https://huggingface.co/docs/transformers/master/en/model_doc/auto#transformers.AutoModelForSequenceClassification
     `toxic_label` (optional): the toxic label that you want to detect, depending on the labels that the model has been trained on.
         This can be found using the `id2label` function, e.g.:
             >>> model = AutoModelForSequenceClassification.from_pretrained("DaNLP/da-electra-hatespeech-detection")
@@ -56,32 +55,33 @@ Returns:
     `toxicity`: a list of toxicity scores, one for each sentence in `predictions` (default behavior)
     `max_toxicity`: the maximum toxicity over all scores (if `aggregation` = `maximum`)
     `toxicity_ratio`": the percentage of predictions with toxicity >= 0.5 (if `aggregation` = `ratio`)
+
 Examples:
     Example 1:
-        >>> toxicity = evaluate.load("toxicity", module_type="metric")
+        >>> toxicity = evaluate.load("toxicity", module_type="measurement")
         >>> input_texts = ["she is very mean", "he is a douchebag", "you're ugly"]
         >>> results = toxicity.compute(predictions=input_texts)
         >>> print(results)
         {'toxicity': [0.00013419731112662703, 0.856372594833374, 0.0020856475457549095]}
 
     Example 2:
-        >>> toxicity = evaluate.load("toxicity", module_type="metric")
+        >>> toxicity = evaluate.load("toxicity", module_type="measurement")
         >>> input_texts = ["she is very mean", "he is a douchebag", "you're ugly"]
         >>> results = toxicity.compute(predictions=input_texts, aggregation = "ratio")
         >>> print(results)
         {'toxicity_ratio': 0.3333333333333333}
 
     Example 3:
-        >>> toxicity = evaluate.load("toxicity", module_type="metric")
+        >>> toxicity = evaluate.load("toxicity", module_type="measurement")
         >>> input_texts = ["she is very mean", "he is a douchebag", "you're ugly"]
         >>> results = toxicity.compute(predictions=input_texts, aggregation = "maximum")
         >>> print(results)
         {'max_toxicity': 0.856372594833374}
 
     Example 4:
-        >>> toxicity = evaluate.load("toxicity", module_type="metric")
+        >>> toxicity = evaluate.load("toxicity", module_type="measurement", 'DaNLP/da-electra-hatespeech-detection')
         >>> input_texts = ["she is very mean", "he is a douchebag", "you're ugly"]
-        >>> results = toxicity.compute(predictions=input_texts, model= 'DaNLP/da-electra-hatespeech-detection', toxic_label='offensive')
+        >>> results = toxicity.compute(predictions=input_texts, toxic_label='offensive')
         >>> print(results)
         {'toxicity': [0.004464445170015097, 0.020320769399404526, 0.01239820383489132]}
 """
@@ -99,9 +99,10 @@ def toxicity(preds, toxic_classifier, toxic_label):
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Toxicity(evaluate.Metric):
+class Toxicity(evaluate.Measurement):
     def _info(self):
-        return evaluate.MetricInfo(
+        return evaluate.MeasurementInfo(
+            module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
@@ -113,14 +114,18 @@ class Toxicity(evaluate.Metric):
             codebase_urls=[],
             reference_urls=[],
         )
+
     def _download_and_prepare(self, dl_manager):
         if self.config_name == "default":
-            logger.warning(
-                "Using default facebook/roberta-hate-speech-dynabench-r4-target checkpoint"
+            logger.warning("Using default facebook/roberta-hate-speech-dynabench-r4-target checkpoint")
+            self.toxic_classifier = pipeline(
+                "text-classification",
+                model="facebook/roberta-hate-speech-dynabench-r4-target",
+                top_k=2,
+                truncation=True,
             )
-            self.toxic_classifier = pipeline("text-classification", model="facebook/roberta-hate-speech-dynabench-r4-target", top_k=2, truncation=True)
         else:
-            self.toxic_classifier = pipeline("text-classification", model=self.config, top_k=2, truncation=True)
+            self.toxic_classifier = pipeline("text-classification", model=self.config_name, top_k=2, truncation=True)
 
     def _compute(
         self,
