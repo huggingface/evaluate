@@ -42,11 +42,7 @@ Compute the toxicity of the input sentences.
 Args:
     `predictions` (list of str): prediction/candidate sentences
     `toxic_label` (optional): the toxic label that you want to detect, depending on the labels that the model has been trained on.
-        This can be found using the `id2label` function, e.g.:
-        >>> model = AutoModelForSequenceClassification.from_pretrained("DaNLP/da-electra-hatespeech-detection")
-        >>> model.config.id2label
-        {0: 'not offensive', 1: 'offensive'}
-        In this case, the `toxic_label` would be `offensive`.
+        This can be found using the `model.config.id2label` function.
     `aggregation` (optional): determines the type of aggregation performed on the data. If set to `None`, the scores for each prediction are returned.
      Otherwise:
         - 'maximum': returns the maximum toxicity over all predictions
