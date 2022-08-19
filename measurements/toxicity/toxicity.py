@@ -89,7 +89,6 @@ def toxicity(preds, toxic_classifier, toxic_label):
     for pred in preds:
         pred_toxic = toxic_classifier(str(pred))
         hate_toxic = [r["score"] for r in pred_toxic if r["label"] == toxic_label][0]
-        # e.g.[{'label': 'nothate', 'score': 0.9998579025268555}, {'label': 'hate', 'score': 0.00014213107351679355}]
         toxic_scores.append(hate_toxic)
     return toxic_scores
 
