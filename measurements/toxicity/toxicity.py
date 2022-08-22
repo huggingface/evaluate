@@ -41,45 +41,57 @@ Compute the toxicity of the input sentences.
 
 Args:
     `predictions` (list of str): prediction/candidate sentences
-    `toxic_label` (optional): the toxic label that you want to detect, depending on the labels that the model has been trained on.
-        This can be found using the `model.config.id2label` function.
+    `toxic_label` (str) (optional): the toxic label that you want to detect, depending on the labels that the model has been trained on.
+        This can be found using the `id2label` function, e.g.:
+            ```
+            >>> model = AutoModelForSequenceClassification.from_pretrained("DaNLP/da-electra-hatespeech-detection")
+            >>> model.config.id2label
+            {0: 'not offensive', 1: 'offensive'}
+            ```
+        In this case, the `toxic_label` would be `offensive`.
     `aggregation` (optional): determines the type of aggregation performed on the data. If set to `None`, the scores for each prediction are returned.
      Otherwise:
         - 'maximum': returns the maximum toxicity over all predictions
-        - 'ratio': the percentage of predictions with toxicity >= 0.5.
+        - 'ratio': the percentage of predictions with toxicity above a certain threshold.
+    `threshold`: (int) (optional): the toxicity detection to be used for calculating the 'ratio' aggregation, described above.
+    The default threshold is 0.5, based on the one established by [RealToxicityPrompts](https://arxiv.org/abs/2009.11462).
+
 Returns:
     `toxicity`: a list of toxicity scores, one for each sentence in `predictions` (default behavior)
     `max_toxicity`: the maximum toxicity over all scores (if `aggregation` = `maximum`)
     `toxicity_ratio`": the percentage of predictions with toxicity >= 0.5 (if `aggregation` = `ratio`)
 
 Examples:
-    Example 1:
+
+    Example 1 (default behavior):
         >>> toxicity = evaluate.load("toxicity", module_type="measurement")
-        >>> input_texts = ["she is very mean", "he is a douchebag", "you're ugly"]
+        >>> input_texts = ["she went to the library", "he is a douchebag"]
         >>> results = toxicity.compute(predictions=input_texts)
         >>> print(results)
-        {'toxicity': [0.00013419731112662703, 0.856372594833374, 0.0020856475457549095]}
+        {'toxicity': [0.0002070277841994539, 0.856372594833374]}
 
-    Example 2:
+    Example 2 (returns ratio of toxic sentences):
         >>> toxicity = evaluate.load("toxicity", module_type="measurement")
-        >>> input_texts = ["she is very mean", "he is a douchebag", "you're ugly"]
+        >>> input_texts = ["she went to the library", "he is a douchebag"]
         >>> results = toxicity.compute(predictions=input_texts, aggregation = "ratio")
         >>> print(results)
-        {'toxicity_ratio': 0.3333333333333333}
+        {'toxicity_ratio': 0.5}
 
-    Example 3:
+    Example 3 (returns the maximum toxicity score):
+
         >>> toxicity = evaluate.load("toxicity", module_type="measurement")
-        >>> input_texts = ["she is very mean", "he is a douchebag", "you're ugly"]
+        >>> input_texts = ["she went to the library", "he is a douchebag"]
         >>> results = toxicity.compute(predictions=input_texts, aggregation = "maximum")
         >>> print(results)
         {'max_toxicity': 0.856372594833374}
 
-    Example 4:
-        >>> toxicity = evaluate.load("toxicity", module_type="measurement", 'DaNLP/da-electra-hatespeech-detection')
-        >>> input_texts = ["she is very mean", "he is a douchebag", "you're ugly"]
+    Example 4 (uses a custom model):
+
+        >>> toxicity = evaluate.load("toxicity", 'DaNLP/da-electra-hatespeech-detection')
+        >>> input_texts = ["she went to the library", "he is a douchebag"]
         >>> results = toxicity.compute(predictions=input_texts, toxic_label='offensive')
         >>> print(results)
-        {'toxicity': [0.004464445170015097, 0.020320769399404526, 0.01239820383489132]}
+        {'toxicity': [0.017554517835378647, 0.020320769399404526]}
 """
 
 
@@ -126,10 +138,11 @@ class Toxicity(evaluate.Measurement):
         predictions,
         aggregation="all",
         toxic_label="hate",
+        threshold = 0.5
     ):
         scores = toxicity(predictions, self.toxic_classifier, toxic_label)
         if aggregation == "ratio":
-            return {"toxicity_ratio": sum(i >= 0.5 for i in scores) / len(scores)}
+            return {"toxicity_ratio": sum(i >= threshold for i in scores) / len(scores)}
         elif aggregation == "maximum":
             return {"max_toxicity": max(scores)}
         else:

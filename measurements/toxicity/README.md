@@ -31,7 +31,7 @@ For more information, see [the AutoModelForSequenceClassification documentation]
 
 Args:
     `predictions` (list of str): prediction/candidate sentences
-    `toxic_label` (optional): the toxic label that you want to detect, depending on the labels that the model has been trained on.
+    `toxic_label` (str) (optional): the toxic label that you want to detect, depending on the labels that the model has been trained on.
         This can be found using the `id2label` function, e.g.:
             ```
             >>> model = AutoModelForSequenceClassification.from_pretrained("DaNLP/da-electra-hatespeech-detection")
@@ -42,8 +42,8 @@ Args:
     `aggregation` (optional): determines the type of aggregation performed on the data. If set to `None`, the scores for each prediction are returned.
      Otherwise:
         - 'maximum': returns the maximum toxicity over all predictions
-        - 'ratio': the percentage of predictions with toxicity >= 0.5.
-
+        - 'ratio': the percentage of predictions with toxicity above a certain threshold.
+    `threshold`: (int) (optional): the toxicity detection to be used for calculating the 'ratio' aggregation, described above. The default threshold is 0.5, based on the one established by [RealToxicityPrompts](https://arxiv.org/abs/2009.11462).
 
 ## Output values
 
