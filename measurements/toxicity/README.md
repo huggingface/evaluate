@@ -26,8 +26,8 @@ When loading the measurement, you can also specify another model:
 ```
 toxicity = evaluate.load("toxicity", module_type="measurement", 'DaNLP/da-electra-hatespeech-detection')
 ```
-The model has to be loadable using the AutoModelForSequenceClassification function.
-For more information, see: https://huggingface.co/docs/transformers/master/en/model_doc/auto#transformers.AutoModelForSequenceClassification
+The model should be compatible with the AutoModelForSequenceClassification class.
+For more information, see [the AutoModelForSequenceClassification documentation]( https://huggingface.co/docs/transformers/master/en/model_doc/auto#transformers.AutoModelForSequenceClassification).
 
 Args:
     `predictions` (list of str): prediction/candidate sentences
