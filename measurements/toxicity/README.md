@@ -21,7 +21,7 @@ The toxicity measurement aims to quantify the toxicity of the input texts using 
 
 ## How to use
 
-The default model used is [roberta-hate-speech-dynabench-r4](https://huggingface.co/facebook/roberta-hate-speech-dynabench-r4-target).
+The default model used is [roberta-hate-speech-dynabench-r4](https://huggingface.co/facebook/roberta-hate-speech-dynabench-r4-target). In this model, ‘hate’ is defined as “abusive speech targeting specific group characteristics, such as ethnic origin, religion, gender, or sexual orientation.” Definitions used by other classifiers may vary.
 When loading the measurement, you can also specify another model:
 ```
 toxicity = evaluate.load("toxicity", 'DaNLP/da-electra-hatespeech-detection', module_type="measurement",)
