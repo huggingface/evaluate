@@ -55,7 +55,7 @@ Example for a single string
 >>> wordlength = evaluate.load("word_length", module_type="measurement")
 >>> results = wordlength.compute(data=data)
 >>> print(results)
-{'average_length': 5}
+{'average_word_length': 5}
 ```
 
 Example for a multiple strings
@@ -63,7 +63,7 @@ Example for a multiple strings
 >>> data = ["hello sun and goodbye moon", "foo bar foo bar"]
 >>> wordlength = evaluate.load("word_length", module_type="measurement")
 >>> results = wordlength.compute(data=text)
-{'average_length': 4.5}
+{'average_word_length': 4.5}
 ```
 
 ## Citation(s)
