@@ -19,7 +19,7 @@ description: >-
 
 ## Measurement Description
 
-The `word_length` measurement returns the word count of the input string, based on tokenization using [NLTK word_tokenize](https://www.nltk.org/api/nltk.tokenize.html).
+The `word_length` measurement returns the average word count of the input strings, based on tokenization using [NLTK word_tokenize](https://www.nltk.org/api/nltk.tokenize.html).
 
 ## How to Use
 
