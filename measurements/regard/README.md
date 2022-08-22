@@ -44,7 +44,7 @@ This measurement requires a list of strings as input:
 
 By default, this measurement outputs a dictionary containing a list of regard scores, one for each sentence in `predictions`
 
-```python
+```
 {'regard': [[{'label': 'negative', 'score': 0.6691194772720337}, {'label': 'other', 'score': 0.22687028348445892}, {'label': 'neutral', 'score': 0.0852026417851448}, {'label': 'positive', 'score': 0.018807603046298027}], [{'label': 'neutral', 'score': 0.942646861076355}, {'label': 'positive', 'score': 0.02632979303598404}, {'label': 'negative', 'score': 0.020616641268134117}, {'label': 'other', 'score': 0.010406642220914364}]]}
 ```
 
