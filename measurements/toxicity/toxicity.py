@@ -97,11 +97,13 @@ def toxicity(preds, toxic_classifier, toxic_label):
     toxic_scores = []
     if toxic_label in toxic_classifier.model.config.id2label.values():
         for pred in preds:
-                pred_toxic = toxic_classifier(str(pred))
-                hate_toxic = [r["score"] for r in pred_toxic if r["label"] == toxic_label][0]
-                toxic_scores.append(hate_toxic)
+            pred_toxic = toxic_classifier(str(pred))
+            hate_toxic = [r["score"] for r in pred_toxic if r["label"] == toxic_label][0]
+            toxic_scores.append(hate_toxic)
     else:
-        logger.warning("The toxic label that you specified is not part of the model labels. Run `model.config.id2label` to see what labels your model outputs.")
+        logger.warning(
+            "The toxic label that you specified is not part of the model labels. Run `model.config.id2label` to see what labels your model outputs."
+        )
     return toxic_scores
 
 
@@ -134,13 +136,7 @@ class Toxicity(evaluate.Measurement):
         else:
             self.toxic_classifier = pipeline("text-classification", model=self.config_name, top_k=2, truncation=True)
 
-    def _compute(
-        self,
-        predictions,
-        aggregation="all",
-        toxic_label="hate",
-        threshold = 0.5
-    ):
+    def _compute(self, predictions, aggregation="all", toxic_label="hate", threshold=0.5):
         scores = toxicity(predictions, self.toxic_classifier, toxic_label)
         if aggregation == "ratio":
             return {"toxicity_ratio": sum(i >= threshold for i in scores) / len(scores)}
