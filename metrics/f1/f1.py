@@ -86,6 +86,12 @@ Examples:
         >>> results = f1_metric.compute(predictions=predictions, references=references)
         >>> print(results)
         {'f1': array([0.8, 0. , 0. ])}
+
+    Example 5-A multi-label example
+        >>> f1_metric = evaluate.load("f1", "multilabel")
+        >>> results = f1_metric.compute(predictions=[[0, 1, 1], [1, 1, 0]], references=[[0, 1, 1], [0, 1, 0]], average="macro")
+        >>> print(round(results['f1'], 2))
+        0.67
 """
 
 

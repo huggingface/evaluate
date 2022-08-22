@@ -163,6 +163,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`evaluate.EvaluationModule.compute` is run.
         experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
             This is useful to compute module in distributed setups (in particular non-additive metrics like F1).
+        hash (``str``): Used to identify the evaluation module according to the hashed file contents.
         max_concurrent_cache_files (``int``): Max number of concurrent module cache files (default 10000).
         timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
     """
@@ -178,6 +179,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         process_id: int = 0,
         seed: Optional[int] = None,
         experiment_id: Optional[str] = None,
+        hash: str = None,
         max_concurrent_cache_files: int = 10000,
         timeout: Union[int, float] = 100,
         **kwargs,
@@ -245,6 +247,9 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         # This is all the cache files on which we have a lock when we are in a distributed setting
         self.file_paths = None
         self.filelocks = None
+
+        # This fingerprints the evaluation module according to the hashed contents of the module code
+        self._hash = hash
 
     def __len__(self):
         """Return the number of examples (predictions or predictions/references pair)
@@ -574,7 +579,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                     self._enforce_nested_string_type(features, example)
                     features.encode_example(example)
                     return features
-                except ValueError:
+                except (ValueError, TypeError):
                     continue
         feature_strings = "\n".join([f"Feature option {i}: {feature}" for i, feature in enumerate(self.features)])
         error_msg = (

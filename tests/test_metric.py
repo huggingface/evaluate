@@ -554,6 +554,16 @@ class TestMetric(TestCase):
         preds, refs = DummyMetric.predictions_and_references()
         expected_results = DummyMetric.expected_results()
         self.assertDictEqual(expected_results, metric.compute(predictions=preds, references=refs))
+
+        metric.info.features = [
+            Features({"predictions": Value("string"), "references": Value("string")}),
+            Features({"predictions": Value("int64"), "references": Value("int64")}),
+        ]
+
+        preds, refs = DummyMetric.predictions_and_references()
+        expected_results = DummyMetric.expected_results()
+        self.assertDictEqual(expected_results, metric.compute(predictions=preds, references=refs))
+
         del metric
 
 

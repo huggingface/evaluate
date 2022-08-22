@@ -258,12 +258,12 @@ def _download_additional_modules(
         local_imports.append((import_name, local_import_path))
 
     # Check library imports
-    needs_to_be_installed = []
+    needs_to_be_installed = set()
     for library_import_name, library_import_path in library_imports:
         try:
             lib = importlib.import_module(library_import_name)  # noqa F841
         except ImportError:
-            needs_to_be_installed.append((library_import_name, library_import_path))
+            needs_to_be_installed.add((library_import_name, library_import_path))
     if needs_to_be_installed:
         raise ImportError(
             f"To be able to use {name}, you need to install the following dependencies"
@@ -622,7 +622,7 @@ def evaluation_module_factory(
                                 download_mode=download_mode,
                                 dynamic_modules_path=dynamic_modules_path,
                             ).get_module()
-                        except FileNotFoundError:
+                        except ConnectionError:
                             pass
                     raise FileNotFoundError
                 # if module_type provided load specific module_type
@@ -647,14 +647,14 @@ def evaluation_module_factory(
             try:
                 return CachedEvaluationModuleFactory(path, dynamic_modules_path=dynamic_modules_path).get_module()
             except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
-                if not isinstance(e1, FileNotFoundError):
+                if not isinstance(e1, (ConnectionError, FileNotFoundError)):
                     raise e1 from None
                 raise FileNotFoundError(
-                    f"Couldn't find a metric script at {relative_to_absolute_path(combined_path)}. "
-                    f"Metric '{path}' doesn't exist on the Hugging Face Hub either."
+                    f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}. "
+                    f"Module '{path}' doesn't exist on the Hugging Face Hub either."
                 ) from None
     else:
-        raise FileNotFoundError(f"Couldn't find a metric script at {relative_to_absolute_path(combined_path)}.")
+        raise FileNotFoundError(f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}.")
 
 
 def load(
@@ -678,7 +678,7 @@ def load(
         path (``str``):
             path to the evaluation processing script with the evaluation builder. Can be either:
                 - a local path to processing script or the directory containing the script (if the script has the same name as the directory),
-                    e.g. ``'./metrics/rouge'`` or ``'./metrics/rogue/rouge.py'``
+                    e.g. ``'./metrics/rouge'`` or ``'./metrics/rouge/rouge.py'``
                 - a evaluation module identifier on the HuggingFace evaluate repo e.g. ``'rouge'`` or ``'bleu'`` that are in either ``'metrics/'``,
                     ``'comparisons/'``, or ``'measurements/'`` depending on the provided ``module_type``.
         config_name (:obj:`str`, optional): selecting a configuration for the metric (e.g. the GLUE metric has a configuration for each subset)
@@ -701,8 +701,8 @@ def load(
     download_mode = DownloadMode(download_mode or DownloadMode.REUSE_DATASET_IF_EXISTS)
     evaluation_module = evaluation_module_factory(
         path, module_type=module_type, revision=revision, download_config=download_config, download_mode=download_mode
-    ).module_path
-    evaluation_cls = import_main_class(evaluation_module)
+    )
+    evaluation_cls = import_main_class(evaluation_module.module_path)
     evaluation_instance = evaluation_cls(
         config_name=config_name,
         process_id=process_id,
@@ -710,6 +710,7 @@ def load(
         cache_dir=cache_dir,
         keep_in_memory=keep_in_memory,
         experiment_id=experiment_id,
+        hash=evaluation_module.hash,
         **init_kwargs,
     )
 

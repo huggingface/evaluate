@@ -47,8 +47,8 @@ jobs:
         steps:
             - checkout
             - run: sudo pip install .[quality]
-            - run: black --check --line-length 119 --target-version py36 tests src metrics
-            - run: isort --check-only tests src metrics
+            - run: black --check --line-length 119 --target-version py36 tests src metrics comparisons measurements
+            - run: isort --check-only tests src metrics comparisons measurements
             - run: flake8 tests src metrics
 
 workflows:

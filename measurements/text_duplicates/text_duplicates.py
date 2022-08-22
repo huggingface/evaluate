@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import evaluate
-import datasets
-from collections import Counter
 import hashlib
+from collections import Counter
+
+import datasets
+
+import evaluate
+
 
 logger = evaluate.logging.get_logger(__name__)
 
@@ -47,9 +50,12 @@ Examples:
 
 # TODO: Add BibTeX citation
 _CITATION = ""
+
+
 def get_hash(example):
     """Get the hash of a string"""
     return hashlib.md5(example.strip().encode("utf-8")).hexdigest()
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class TextDuplicates(evaluate.Measurement):
@@ -64,19 +70,21 @@ class TextDuplicates(evaluate.Measurement):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             # This defines the format of each prediction and reference
-            features=datasets.Features({
-                'data': datasets.Value('string'),
-            })
+            features=datasets.Features(
+                {
+                    "data": datasets.Value("string"),
+                }
+            ),
         )
 
-    def _compute(self, data, list_duplicates = False):
+    def _compute(self, data, list_duplicates=False):
         """Returns the duplicates contained in the input data and the number of times they are repeated."""
         if list_duplicates == True:
             logger.warning("This functionality can be memory-intensive for large datasets!")
             n_dedup = len(set([get_hash(d) for d in data]))
             c = Counter(data)
             duplicates = {k: v for k, v in c.items() if v > 1}
-            return {"duplicate_fraction": 1 - (n_dedup/len(data)), "duplicates_list": duplicates}
+            return {"duplicate_fraction": 1 - (n_dedup / len(data)), "duplicates_list": duplicates}
         else:
-             n_dedup = len(set([get_hash(d) for d in data]))
-             return  {"duplicate_fraction": 1 - (n_dedup/len(data))}
+            n_dedup = len(set([get_hash(d) for d in data]))
+            return {"duplicate_fraction": 1 - (n_dedup / len(data))}

@@ -42,10 +42,29 @@ At minimum, this metric takes as input a list of predictions and a list of refer
 {'rouge1': 1.0, 'rouge2': 1.0, 'rougeL': 1.0, 'rougeLsum': 1.0}
 ```
 
+One can also pass a custom tokenizer which is especially useful for non-latin languages.
+```python
+>>> results = rouge.compute(predictions=predictions,
+...                         references=references,
+                            tokenizer=lambda x: x.split())
+>>> print(results)
+{'rouge1': 1.0, 'rouge2': 1.0, 'rougeL': 1.0, 'rougeLsum': 1.0}
+```
+
+It can also deal with lists of references for each predictions:
+```python
+>>> rouge = evaluate.load('rouge')
+>>> predictions = ["hello there", "general kenobi"]
+>>> references = [["hello", "there"], ["general kenobi", "general yoda"]]
+>>> results = rouge.compute(predictions=predictions,
+...                         references=references)
+>>> print(results)
+{'rouge1': 0.8333, 'rouge2': 0.5, 'rougeL': 0.8333, 'rougeLsum': 0.8333}```
+
 ### Inputs
 - **predictions** (`list`): list of predictions to score. Each prediction
         should be a string with tokens separated by spaces.
-- **references** (`list`): list of reference for each prediction. Each
+- **references** (`list` or `list[list]`): list of reference for each prediction or a list of several references per prediction. Each
         reference should be a string with tokens separated by spaces.
 - **rouge_types** (`list`): A list of rouge types to calculate. Defaults to `['rouge1', 'rouge2', 'rougeL', 'rougeLsum']`.
     - Valid rouge types:

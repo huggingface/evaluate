@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 GIT_UP_TO_DATE = "On branch main\nYour branch is up to date with 'origin/main'.\
 \n\nnothing to commit, working tree clean\n"
 
+COMMIT_PLACEHOLDER = "{COMMIT_PLACEHOLDER}"
 
 def get_git_tag(lib_path, commit_hash):
     # check if commit has a tag, see: https://stackoverflow.com/questions/1474115/how-to-find-the-tag-associated-with-a-given-git-commit
@@ -41,6 +42,13 @@ def copy_recursive(source_base_path, target_base_path):
         else:
             shutil.copy(item, traget_path)
 
+def update_evaluate_dependency(requirements_path, commit_hash):
+    """Updates the evaluate requirement with the latest commit."""
+    with open(requirements_path, "r") as f:
+        file_content = f.read()
+    file_content = file_content.replace(COMMIT_PLACEHOLDER, commit_hash)
+    with open(requirements_path, "w") as f:
+        f.write(file_content)
 
 def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
     module_name = module_path.stem
@@ -70,6 +78,7 @@ def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
     repo = Repository(local_dir=repo_path / module_name, use_auth_token=token)
     
     copy_recursive(module_path, repo_path / module_name)
+    update_evaluate_dependency(repo_path / module_name / "requirements.txt", commit_hash)
     
     repo.git_add()
     try:
@@ -83,7 +92,7 @@ def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
             raise error
 
     if tag is not None:
-        repo.add_tag(tag)
+        repo.add_tag(tag, message="add evaluate tag", remote="origin")
     
     shutil.rmtree(repo_path)
 
@@ -96,11 +105,14 @@ if __name__ == "__main__":
     evaluate_lib_path = Path(os.getenv("EVALUATE_LIB_PATH"))
     commit_hash = os.getenv("GIT_HASH")
     git_tag = get_git_tag(evaluate_lib_path, commit_hash)
+    if git_tag is not None:
+        logger.info(f"Found tag: {git_tag}.")
 
     for type, dir in zip(evaluation_types, evaluation_paths):
         if (evaluate_lib_path/dir).exists():
             for module_path in (evaluate_lib_path/dir).iterdir():
                 if module_path.is_dir():
+                    logger.info(f"Updating: module {module_path.name}.")
                     push_module_to_hub(module_path, type, token, commit_hash, tag=git_tag)
         else:
             logger.warning(f"No folder {str(evaluate_lib_path/dir)} for {type} found.")

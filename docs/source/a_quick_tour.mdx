@@ -27,7 +27,7 @@ Any metric, comparison, or measurement is loaded with the `evaluate.load` functi
 >>> accuracy = evaluate.load("accuracy")
 ```
 
-If you want to make sure you are loading the right type of evaluation (especially if there are name clashes) you can explicitely pass the type:
+If you want to make sure you are loading the right type of evaluation (especially if there are name clashes) you can explicitly pass the type:
 
 ```py
 >>> word_length = evaluate.load("word_length", module_type="measurement")
@@ -48,13 +48,13 @@ See the [Creating and Sharing Guide](/docs/evaluate/main/en/creating_and_sharing
 With [`list_evaluation_modules`] you can check what modules are available on the hub. You can also filter for a specific modules and skip community metrics if you want. You can also see additional information such as likes:
 
 ```python
-evaluate.list_evaluation_modules(
-  module_type="comparison",
-  include_community=False, 
-  with_details=True)
+>>> evaluate.list_evaluation_modules(
+...   module_type="comparison",
+...   include_community=False, 
+...   with_details=True)
 
->>> [{'name': 'mcnemar', 'type': 'comparison', 'community': False, 'likes': 1},
-...  {'name': 'exact_match', 'type': 'comparison', 'community': False, 'likes': 0}]
+[{'name': 'mcnemar', 'type': 'comparison', 'community': False, 'likes': 1},
+ {'name': 'exact_match', 'type': 'comparison', 'community': False, 'likes': 0}]
 ```
 
 ## Module attributes
@@ -129,7 +129,7 @@ Now that we know how the evaluation module works and what should go in there we 
 
 In the incremental approach the necessary inputs are added to the module with [`EvaluationModule.add`] or [`EvaluationModule.add_batch`] and the score is calculated at the end with [`EvaluationModule.compute`]. Alternatively, one can pass all the inputs at once to `compute()`. Let's have a look at the two approaches.
 
-### Using `compute()`
+### How to compute
 
 The simplest way to calculate the score of an evaluation module is by calling `compute()` directly with the necessary inputs. Simply pass the inputs as seen in `features` to the `compute()` method.
 
@@ -139,7 +139,7 @@ The simplest way to calculate the score of an evaluation module is by calling `c
 ```
 Evaluation modules return the results in a dictionary. However, in some instances you build up the predictions iteratively or in a distributed fashion in which case `add()` or `add_batch()` are useful.
 
-### Using `add()` and `add_batch()`
+### Calculate a single metric or a batch of metrics
 
 In many evaluation pipelines you build the predictions iteratively such as in a for-loop. In that case you could store the predictions in a list and at the end pass them to `compute()`. With `add()` and `add_batch()` you can circumvent the step of storing the predictions separately. If you are only creating single predictions at a time you can use `add()`:
 
@@ -178,16 +178,38 @@ A common way to overcome this issue is to fallback on single process evaluation.
 
 This solution allows 🤗 Evaluate to perform distributed predictions, which is important for evaluation speed in distributed settings. At the same time, you can also use complex non-additive metrics without wasting valuable GPU or CPU memory.
 
+## Combining several evaluations
+
+Often one wants to not only evaluate a single metric but a range of different metrics capturing different aspects of a model. E.g. for classification it is usually a good idea to compute F1-score, recall, and precision in addition to accuracy to get a better picture of model performance. Naturally, you can load a bunch of metrics and call them sequentially. However, a more convenient way is to use the [`~evaluate.combine`] function to bundle them together:
+
+
+```python
+>>> clf_metrics = evaluate.combine(["accuracy", "f1", "precision", "recall"])
+```
+
+The `combine` function accepts both the list of names of the metrics as well as an instantiated modules. The `compute` call then computes each metric:
+
+```python
+>>> clf_metrics.compute(predictions=[0, 1, 0], references=[0, 1, 1])
+
+{
+  'accuracy': 0.667,
+  'f1': 0.667,
+  'precision': 1.0,
+  'recall': 0.5
+}
+```
+
 ## Save and push to the Hub
 
 Saving and sharing evaluation results is an important step. We provide the [`evaluate.save`] function to easily save metrics results. You can either pass a specific filename or a directory. In the latter case, the results are saved in a file with an automatically created file name. Besides the directory or file name, the function takes any key-value pairs as inputs and stores them in a JSON file.
 
 ```py
-result = accuracy.compute(references=[0,1,0,1], predictions=[1,0,0,1])
+>>> result = accuracy.compute(references=[0,1,0,1], predictions=[1,0,0,1])
 
-hyperparams = {"model": "bert-base-uncased"}
-evaluate.save("./results/"experiment="run 42", **result, **hyperparams)
->>> PosixPath('results/result-2022_05_30-22_09_11.json')
+>>> hyperparams = {"model": "bert-base-uncased"}
+>>> evaluate.save("./results/"experiment="run 42", **result, **hyperparams)
+PosixPath('results/result-2022_05_30-22_09_11.json')
 ```
 
 The content of the JSON file look like the following:
@@ -225,7 +247,7 @@ evaluate.push_to_hub(
 
 ## Evaluator
 
-The [`evaluate.evaluator`] provides automated evaluation and only requires a model, dataset, metric in contrast to the metrics in `EvaluationModule`s that require the model's predictions. As such it is easier to evaluate a model on a dataset with a given metric as the inference is handled internally. To make that possible it uses the `Pipeline` abstraction from `transformers`. However, you can use your own framework as long as it follows the `Pipeline` interface.
+The [`evaluate.evaluator`] provides automated evaluation and only requires a model, dataset, metric in contrast to the metrics in `EvaluationModule`s that require the model's predictions. As such it is easier to evaluate a model on a dataset with a given metric as the inference is handled internally. To make that possible it uses the [`~transformers.pipeline`] abstraction from `transformers`. However, you can use your own framework as long as it follows the `pipeline` interface.
 
 To make an evaluation with the `evaluator` let's load a `transformers` pipeline (but you can pass your own custom inference class for any framework as long as it follows the pipeline call API) with an model trained on IMDb, the IMDb test split and the accuracy metric. 
 
@@ -243,30 +265,30 @@ metric = evaluate.load("accuracy")
 Then you can create an evaluator for text classification and pass the three objects to the `compute()` method. With the label mapping `evaluate` provides a method to align the pipeline outputs with the label column in the dataset:
 
 ```python
-eval = evaluator("text-classification")
+>>> eval = evaluator("text-classification")
 
-results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric,
-                       label_mapping={"NEGATIVE": 0, "POSITIVE": 1},)
+>>> results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric,
+...                        label_mapping={"NEGATIVE": 0, "POSITIVE": 1},)
 
-print(results)
->>> {'accuracy': 0.934}
+>>> print(results)
+{'accuracy': 0.934}
 ```
 
 Calculating the value of the metric alone is often not enough to know if a model performs significantly better than another one. With _bootstrapping_ `evaluate` computes confidence intervals and the standard error which helps estimate how stable a score is:
 
 ```python
-results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric,
-                       label_mapping={"NEGATIVE": 0, "POSITIVE": 1},
-                       strategy="bootstrap", n_resamples=200)
+>>> results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric,
+...                        label_mapping={"NEGATIVE": 0, "POSITIVE": 1},
+...                        strategy="bootstrap", n_resamples=200)
 
-print(results)
->>> {'accuracy': 
-...     {
-...       'confidence_interval': (0.906, 0.9406749892841922),
-...       'standard_error': 0.00865213251082787,
-...       'score': 0.923
-...     }
-... }
+>>> print(results)
+{'accuracy': 
+    {
+      'confidence_interval': (0.906, 0.9406749892841922),
+      'standard_error': 0.00865213251082787,
+      'score': 0.923
+    }
+}
 ```
 
 The evaluator expects a `"text"` and `"label"` column for the data input. If your dataset differs you can provide the columns with the keywords `input_column="text"` and `label_column="label"`. Currently only `"text-classification"` is supported with more tasks being added in the future.

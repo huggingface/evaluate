@@ -62,7 +62,7 @@ from setuptools import find_packages, setup
 
 REQUIRED_PKGS = [
     # We need datasets as a backend
-    "datasets",
+    "datasets>=2.0.0",
     # We use numpy>=1.17 to have np.random.Generator (Dataset shuffling)
     "numpy>=1.17",
     # For smart caching dataset processing
@@ -87,12 +87,13 @@ REQUIRED_PKGS = [
     # Utilities from PyPA to e.g., compare versions
     "packaging",
     "responses<0.19",
-
 ]
 
 TEMPLATE_REQUIRE = [
     # to populate metric template
-    "cookiecutter"
+    "cookiecutter",
+    # for the gradio widget
+    "gradio>=3.0.0"
 ]
 
 EVALUATOR_REQUIRE = [
@@ -112,7 +113,7 @@ TESTS_REQUIRE = [
     "torch",
     # metrics dependencies
     "bert_score>=0.3.6",
-    "rouge_score",
+    "rouge_score>=0.1.2",
     "sacrebleu",
     "sacremoses",
     "scipy",
@@ -152,7 +153,7 @@ EXTRAS_REQUIRE = {
 
 setup(
     name="evaluate",
-    version="0.1.3.dev0",  # expected format is one of x.y.z.dev0, or x.y.z.rc1 or x.y.z (no to dashes, yes to dots)
+    version="0.2.3.dev0",  # expected format is one of x.y.z.dev0, or x.y.z.rc1 or x.y.z (no to dashes, yes to dots)
     description="HuggingFace community-driven open-source library of evaluation",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
