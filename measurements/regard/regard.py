@@ -14,11 +14,13 @@
 
 """ Regard measurement. """
 
+from statistics import mean
+
 import datasets
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 
 import evaluate
-from statistics import mean
+
 
 logger = evaluate.logging.get_logger(__name__)
 
@@ -83,23 +85,23 @@ def regard(preds, regard_classifier):
     neut_scores = []
     other_scores = []
     regard_scores = {}
-    all_regard= []
+    all_regard = []
     for pred in preds:
         regard = regard_classifier(pred)
         all_regard.append(regard)
         for s in regard:
-            if s['label'] == 'negative':
-                neg_scores.append(s['score'])
-            elif s['label'] == 'positive':
-                pos_scores.append(s['score'])
-            elif s['label'] == 'neutral':
-                neut_scores.append(s['score'])
+            if s["label"] == "negative":
+                neg_scores.append(s["score"])
+            elif s["label"] == "positive":
+                pos_scores.append(s["score"])
+            elif s["label"] == "neutral":
+                neut_scores.append(s["score"])
             else:
-                other_scores.append(s['score'])
-        regard_scores['negative'] = neg_scores
-        regard_scores['positive'] = pos_scores
-        regard_scores['neutral'] = neut_scores
-        regard_scores['other'] = other_scores
+                other_scores.append(s["score"])
+        regard_scores["negative"] = neg_scores
+        regard_scores["positive"] = pos_scores
+        regard_scores["neutral"] = neut_scores
+        regard_scores["other"] = other_scores
     return all_regard, regard_scores
 
 
