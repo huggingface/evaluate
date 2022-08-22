@@ -24,7 +24,7 @@ The toxicity measurement aims to quantify the toxicity of the input texts using 
 The default model used is [roberta-hate-speech-dynabench-r4](https://huggingface.co/facebook/roberta-hate-speech-dynabench-r4-target).
 When loading the measurement, you can also specify another model:
 ```
-toxicity = evaluate.load("toxicity", module_type="measurement", 'DaNLP/da-electra-hatespeech-detection')
+toxicity = evaluate.load("toxicity", 'DaNLP/da-electra-hatespeech-detection', module_type="measurement",)
 ```
 The model should be compatible with the AutoModelForSequenceClassification class.
 For more information, see [the AutoModelForSequenceClassification documentation]( https://huggingface.co/docs/transformers/master/en/model_doc/auto#transformers.AutoModelForSequenceClassification).
@@ -45,8 +45,6 @@ Args:
         - 'ratio': the percentage of predictions with toxicity >= 0.5.
 
 
-
-
 ## Output values
 
     `toxicity`: a list of toxicity scores, one for each sentence in `predictions` (default behavior)
@@ -63,34 +61,34 @@ Args:
     Example 1 (default behavior):
 ```
 >>> toxicity = evaluate.load("toxicity", module_type="measurement")
->>> input_texts = ["she is very mean", "he is a douchebag", "you're ugly"]
+>>> input_texts = ["she went to the library", "he is a douchebag"]
 >>> results = toxicity.compute(predictions=input_texts)
 >>> print(results)
-{'toxicity': [0.00013419731112662703, 0.856372594833374, 0.0020856475457549095]}
+{'toxicity': [0.0002070277841994539, 0.856372594833374]}
 ```
     Example 2 (returns ratio of toxic sentences):
 ```
 >>> toxicity = evaluate.load("toxicity", module_type="measurement")
->>> input_texts = ["she is very mean", "he is a douchebag", "you're ugly"]
+>>> input_texts = ["she went to the library", "he is a douchebag"]
 >>> results = toxicity.compute(predictions=input_texts, aggregation = "ratio")
 >>> print(results)
-{'toxicity_ratio': 0.3333333333333333}
+{'toxicity_ratio': 0.5}
 ```
     Example 3 (returns the maximum toxicity score):
 ```
 >>> toxicity = evaluate.load("toxicity", module_type="measurement")
->>> input_texts = ["she is very mean", "he is a douchebag", "you're ugly"]
+>>> input_texts = ["she went to the library", "he is a douchebag"]
 >>> results = toxicity.compute(predictions=input_texts, aggregation = "maximum")
 >>> print(results)
 {'max_toxicity': 0.856372594833374}
 ```
     Example 4 (uses a custom model):
 ```
->>> toxicity = evaluate.load("toxicity", module_type="measurement", 'DaNLP/da-electra-hatespeech-detection')
->>> input_texts = ["she is very mean", "he is a douchebag", "you're ugly"]
+>>> toxicity = evaluate.load("toxicity", 'DaNLP/da-electra-hatespeech-detection')
+>>> input_texts = ["she went to the library", "he is a douchebag"]
 >>> results = toxicity.compute(predictions=input_texts, toxic_label='offensive')
 >>> print(results)
-{'toxicity': [0.004464445170015097, 0.020320769399404526, 0.01239820383489132]}
+{'toxicity': [0.017554517835378647, 0.020320769399404526]}
 ```
 
 
