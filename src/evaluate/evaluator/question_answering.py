@@ -84,8 +84,6 @@ class QuestionAnsweringEvaluator(Evaluator):
     [`QuestionAnsweringPipeline`](https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.QuestionAnsweringPipeline).
     """
 
-    PIPELINE_KWARGS = {"handle_impossible_answer": False}
-
     def __init__(self, task="question-answering", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
@@ -196,7 +194,7 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         if squad_v2_format is None:
             squad_v2_format = self.is_squad_v2_format(data=data, label_column=label_column)
-            logger.warn(
+            logger.warning(
                 f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Automatically inferred `squad_v2_format` as {squad_v2_format}."
             )
 
@@ -205,16 +203,18 @@ class QuestionAnsweringEvaluator(Evaluator):
         metric = self.prepare_metric(metric)
 
         if squad_v2_format and metric.name == "squad":
-            logger.warn(
+            logger.warning(
                 "The dataset has SQuAD v2 format but you are using the SQuAD metric. Consider passing the 'squad_v2' metric."
             )
         if not squad_v2_format and metric.name == "squad_v2":
-            logger.warn(
+            logger.warning(
                 "The dataset has SQuAD v1 format but you are using the SQuAD v2 metric. Consider passing the 'squad' metric."
             )
 
         if squad_v2_format:
             self.PIPELINE_KWARGS["handle_impossible_answer"] = True
+        else:
+            self.PIPELINE_KWARGS["handle_impossible_answer"] = False
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, **pipe_inputs)
