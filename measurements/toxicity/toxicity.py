@@ -65,8 +65,8 @@ Examples:
         >>> toxicity = evaluate.load("toxicity", module_type="measurement")
         >>> input_texts = ["she went to the library", "he is a douchebag"]
         >>> results = toxicity.compute(predictions=input_texts)
-        >>> print(results)
-        {'toxicity': [0.0002070277841994539, 0.856372594833374]}
+        >>> print([round(s, 4) for s in results["toxicity"]])
+        [0.0002, 0.8564]
 
     Example 2 (returns ratio of toxic sentences):
         >>> toxicity = evaluate.load("toxicity", module_type="measurement")
@@ -80,16 +80,16 @@ Examples:
         >>> toxicity = evaluate.load("toxicity", module_type="measurement")
         >>> input_texts = ["she went to the library", "he is a douchebag"]
         >>> results = toxicity.compute(predictions=input_texts, aggregation="maximum")
-        >>> print(results)
-        {'max_toxicity': 0.856372594833374}
+        >>> print([round(s, 4) for s in results["max_toxicity"]])
+        0.8564
 
     Example 4 (uses a custom model):
 
         >>> toxicity = evaluate.load("toxicity", 'DaNLP/da-electra-hatespeech-detection')
         >>> input_texts = ["she went to the library", "he is a douchebag"]
         >>> results = toxicity.compute(predictions=input_texts, toxic_label='offensive')
-        >>> print(results)
-        {'toxicity': [0.017554517835378647, 0.020320769399404526]}
+        >>> print([round(s, 4) for s in results["toxicity"]])
+        [0.0176, 0.0203]}
 """
 
 
