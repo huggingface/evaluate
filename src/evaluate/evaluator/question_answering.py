@@ -84,6 +84,8 @@ class QuestionAnsweringEvaluator(Evaluator):
     [`QuestionAnsweringPipeline`](https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.QuestionAnsweringPipeline).
     """
 
+    PIPELINE_KWARGS = {}
+
     def __init__(self, task="question-answering", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
