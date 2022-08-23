@@ -80,7 +80,7 @@ Examples:
         >>> toxicity = evaluate.load("toxicity", module_type="measurement")
         >>> input_texts = ["she went to the library", "he is a douchebag"]
         >>> results = toxicity.compute(predictions=input_texts, aggregation="maximum")
-        >>>  print(round(results['max_toxicity'], 4))
+        >>> print(round(results['max_toxicity'], 4))
         0.8564
 
     Example 4 (uses a custom model):
