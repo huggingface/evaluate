@@ -48,7 +48,7 @@ Args:
         {0: 'not offensive', 1: 'offensive'}
         In this case, the `toxic_label` would be ['offensive'].
     `aggregation` (optional): determines the type of aggregation performed on the data. If set to `None`, the scores for each prediction are returned.
-     Otherwise:
+    Otherwise:
         - 'maximum': returns the maximum toxicity over all predictions
         - 'ratio': the percentage of predictions with toxicity above a certain threshold.
     `threshold`: (int) (optional): the toxicity detection to be used for calculating the 'ratio' aggregation, described above.
