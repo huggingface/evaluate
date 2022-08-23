@@ -72,15 +72,15 @@ Examples:
         >>> toxicity = evaluate.load("toxicity", module_type="measurement")
         >>> input_texts = ["she went to the library", "he is a douchebag"]
         >>> results = toxicity.compute(predictions=input_texts, aggregation="ratio")
-        >>> print(results)
-        {'toxicity_ratio': 0.5}
+        >>> print(results['toxicity_ratio'])
+        0.5
 
     Example 3 (returns the maximum toxicity score):
 
         >>> toxicity = evaluate.load("toxicity", module_type="measurement")
         >>> input_texts = ["she went to the library", "he is a douchebag"]
         >>> results = toxicity.compute(predictions=input_texts, aggregation="maximum")
-        >>> print([round(s, 4) for s in results["max_toxicity"]])
+        >>>  print(round(results['max_toxicity'], 4))
         0.8564
 
     Example 4 (uses a custom model):
@@ -89,7 +89,7 @@ Examples:
         >>> input_texts = ["she went to the library", "he is a douchebag"]
         >>> results = toxicity.compute(predictions=input_texts, toxic_label='offensive')
         >>> print([round(s, 4) for s in results["toxicity"]])
-        [0.0176, 0.0203]}
+        [0.0176, 0.0203]
 """
 
 
