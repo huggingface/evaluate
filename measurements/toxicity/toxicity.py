@@ -95,15 +95,14 @@ Examples:
 
 def toxicity(preds, toxic_classifier, toxic_label):
     toxic_scores = []
-    if toxic_label in toxic_classifier.model.config.id2label.values():
-        for pred in preds:
-            pred_toxic = toxic_classifier(str(pred))
+    if toxic_label not in toxic_classifier.model.config.id2label.values():
+        logger.warning(
+            "The `toxic_label` that you specified is not part of the model labels. Run `model.config.id2label` to see what labels your model outputs."
+        )
+    else:
+        for pred_toxic in toxic_classifier(preds):
             hate_toxic = [r["score"] for r in pred_toxic if r["label"] == toxic_label][0]
             toxic_scores.append(hate_toxic)
-    else:
-        logger.warning(
-            "The toxic label that you specified is not part of the model labels. Run `model.config.id2label` to see what labels your model outputs."
-        )
     return toxic_scores
 
 
@@ -130,7 +129,7 @@ class Toxicity(evaluate.Measurement):
             self.toxic_classifier = pipeline(
                 "text-classification",
                 model="facebook/roberta-hate-speech-dynabench-r4-target",
-                top_k=2,
+                top_k=99999,
                 truncation=True,
             )
         else:
