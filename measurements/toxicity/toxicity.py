@@ -125,6 +125,9 @@ class Toxicity(evaluate.Measurement):
 
     def _download_and_prepare(self, dl_manager):
         if self.config_name == "default":
+            model_name = "facebook/roberta-hate-speech-dynabench-r4-target"
+        else:
+            model_name = self.config_name
             logger.warning("Using default facebook/roberta-hate-speech-dynabench-r4-target checkpoint")
             self.toxic_classifier = pipeline(
                 "text-classification",
