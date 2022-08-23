@@ -35,7 +35,7 @@ This measurement requires a list of strings as input:
 
 ### Output Values
 - **duplicate_fraction**(`float`): the fraction of duplicates in the input string(s).
-- **duplicates_list**(`list`): (optional) a list of tuples with the duplicate strings and the number of times they are repeated.
+- **duplicates_dict**(`list`): (optional) a list of tuples with the duplicate strings and the number of times they are repeated.
 
 By default, this measurement outputs a dictionary containing the fraction of duplicates in the input string(s) (`duplicate_fraction`):
   )
@@ -46,7 +46,7 @@ By default, this measurement outputs a dictionary containing the fraction of dup
 With the `list_duplicates=True` option, this measurement will also output a dictionary of tuples with duplicate strings and their counts.
 
 ```python
-{'duplicate_fraction': 0.33333333333333337, 'duplicates_list': {'hello sun': 2}}
+{'duplicate_fraction': 0.33333333333333337, 'duplicates_dict': {'hello sun': 2}}
 ```
 
 Warning: the `list_duplicates=True` function can be memory-intensive for large datasets.
@@ -67,9 +67,9 @@ Example with multiple duplicates and `list_duplicates=True`:
 ```python
 >>> data = ["hello sun", "goodbye moon", "hello sun", "foo bar", "foo bar"]
 >>> duplicates = evaluate.load("text_duplicates")
->>> results = duplicates.compute(data=data)
+>>> results = duplicates.compute(data=data, list_duplicates=True)
 >>> print(results)
-{'duplicate_fraction': 0.4, 'duplicates_list': {'hello sun': 2, 'foo bar': 2}}
+{'duplicate_fraction': 0.4, 'duplicates_dict': {'hello sun': 2, 'foo bar': 2}}
 ```
 
 ## Citation(s)

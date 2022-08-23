@@ -13,6 +13,8 @@ from transformers import AutoFeatureExtractor, AutoModelForImageClassification, 
 
 from evaluate import evaluator, load
 
+from .utils import slow
+
 
 class TestEvaluatorTrainerParity(unittest.TestCase):
     def setUp(self):
@@ -74,6 +76,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["accuracy"])
 
+    @slow
     def test_text_classification_parity_two_columns(self):
         model_name = "prajjwal1/bert-tiny-mnli"
         max_eval_samples = 150
