@@ -39,6 +39,7 @@ def disable_tqdm_output():
 def set_update_download_counts_to_false(monkeypatch):
     # don't take tests into account when counting downloads
     monkeypatch.setattr("evaluate.config.HF_UPDATE_DOWNLOAD_COUNTS", False)
+    monkeypatch.setattr("datasets.config.HF_UPDATE_DOWNLOAD_COUNTS", False)
 
 
 FILE_CONTENT = """\
