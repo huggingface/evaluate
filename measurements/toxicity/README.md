@@ -33,7 +33,7 @@ Args:
     `predictions` (list of str): prediction/candidate sentences
     `toxic_label` (str) (optional): the toxic label that you want to detect, depending on the labels that the model has been trained on.
         This can be found using the `id2label` function, e.g.:
-        ```
+        ```python
         >>> model = AutoModelForSequenceClassification.from_pretrained("DaNLP/da-electra-hatespeech-detection")
         >>> model.config.id2label
         {0: 'not offensive', 1: 'offensive'}
