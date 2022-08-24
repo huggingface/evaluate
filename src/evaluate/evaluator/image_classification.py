@@ -50,6 +50,8 @@ class ImageClassificationEvaluator(Evaluator):
     Methods in this class assume a data format compatible with the [`ImageClassificationPipeline`].
     """
 
+    PIPELINE_KWARGS = {}
+
     def __init__(self, task="image-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
