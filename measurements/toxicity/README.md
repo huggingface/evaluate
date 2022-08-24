@@ -83,7 +83,7 @@ Args:
 0.8564
 ```
     Example 4 (uses a custom model):
-```
+```python
 >>> toxicity = evaluate.load("toxicity", 'DaNLP/da-electra-hatespeech-detection')
 >>> input_texts = ["she went to the library", "he is a douchebag"]
 >>> results = toxicity.compute(predictions=input_texts, toxic_label='offensive')
