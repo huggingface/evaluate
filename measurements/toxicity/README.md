@@ -59,7 +59,7 @@ Args:
 
 ## Examples
     Example 1 (default behavior):
-```
+```python
 >>> toxicity = evaluate.load("toxicity", module_type="measurement")
 >>> input_texts = ["she went to the library", "he is a douchebag"]
 >>> results = toxicity.compute(predictions=input_texts)
