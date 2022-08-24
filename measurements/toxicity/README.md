@@ -67,7 +67,7 @@ Args:
 [0.0002, 0.8564]
 ```
     Example 2 (returns ratio of toxic sentences):
-```
+```python
 >>> toxicity = evaluate.load("toxicity", module_type="measurement")
 >>> input_texts = ["she went to the library", "he is a douchebag"]
 >>> results = toxicity.compute(predictions=input_texts, aggregation="ratio")
