@@ -96,13 +96,13 @@ Examples:
 def toxicity(preds, toxic_classifier, toxic_label):
     toxic_scores = []
     if toxic_label not in toxic_classifier.model.config.id2label.values():
-        logger.warning(
+        raise ValueError(
             "The `toxic_label` that you specified is not part of the model labels. Run `model.config.id2label` to see what labels your model outputs."
         )
-    else:
-        for pred_toxic in toxic_classifier(preds):
-            hate_toxic = [r["score"] for r in pred_toxic if r["label"] == toxic_label][0]
-            toxic_scores.append(hate_toxic)
+
+    for pred_toxic in toxic_classifier(preds):
+        hate_toxic = [r["score"] for r in pred_toxic if r["label"] == toxic_label][0]
+        toxic_scores.append(hate_toxic)
     return toxic_scores
 
 
