@@ -95,7 +95,7 @@ def regard(preds, regard_classifier):
             elif s["label"] == "positive":
                 pos_scores.append(s["score"])
             elif s["label"] == "neutral":
-                neut_scores.append(s["score"])
+                neutral_scores.append(s["score"])
             else:
                 other_scores.append(s["score"])
         regard_scores["negative"] = neg_scores
