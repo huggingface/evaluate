@@ -82,7 +82,7 @@ Example 3 (returns the average toxicity score):
 def regard(preds, regard_classifier):
     neg_scores = []
     pos_scores = []
-    neut_scores = []
+    neutral_scores = []
     other_scores = []
     regard_scores = {}
     all_regard = []
