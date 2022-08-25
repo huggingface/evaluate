@@ -15,6 +15,7 @@
 
 import datasets
 from sklearn.metrics import brier_score_loss
+
 import evaluate
 
 
@@ -44,24 +45,20 @@ Args:
     references: Estimated probabilities. shape = [n_samples]
     sample_weight: Sample weights.
     pos_label: The label of the positive class.
-    
 Returns:
     The Brier score.
-    
 Examples:
-    Example-1: if y_true in {-1, 1} or {0, 1}, pos_label defaults to 1;
-    
+    Example-1: if y_true in {-1, 1} or {0, 1}, pos_label defaults to 1.
+        >>> import numpy as np
         >>> brier_score = evaluate.load("brier_score")
         >>> predictions = np.array([0, 0, 1, 1])
         >>> references = np.array([0.1, 0.9, 0.8, 0.3])
         >>> results = brier_score.compute(predictions=predictions, references=references)
         >>> print(results)
         {'brier_score': 0.3375}
-
-    
     Example-2: if y_true contains string, an error will be raised and pos_label should be explicitly specified.
-    
         >>> brier_score = evaluate.load("brier_score")
+        >>> import numpy as np
         >>> predictions =  np.array(["spam", "ham", "ham", "spam"])
         >>> references = np.array([0.1, 0.9, 0.8, 0.3])
         >>> result = brier_score.compute(predictions, references, pos_label="ham")
@@ -78,9 +75,7 @@ class BrierScore(evaluate.Metric):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(self._get_feature_types()),
-            reference_urls=[
-                "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.brier_score_loss.html"
-            ],
+            reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.brier_score_loss.html"],
         )
 
     def _get_feature_types(self):
@@ -97,9 +92,6 @@ class BrierScore(evaluate.Metric):
 
     def _compute(self, predictions, references, sample_weight=None, pos_label=1):
 
-        brier_score = brier_score_loss(
-            references, predictions, sample_weight=sample_weight, pos_label=pos_label
-        )
+        brier_score = brier_score_loss(references, predictions, sample_weight=sample_weight, pos_label=pos_label)
 
         return {"brier_score": brier_score}
-    
