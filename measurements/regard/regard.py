@@ -100,7 +100,7 @@ def regard(preds, regard_classifier):
                 other_scores.append(s["score"])
         regard_scores["negative"] = neg_scores
         regard_scores["positive"] = pos_scores
-        regard_scores["neutral"] = neut_scores
+        regard_scores["neutral"] = neutral_scores
         regard_scores["other"] = other_scores
     return all_regard, regard_scores
 
