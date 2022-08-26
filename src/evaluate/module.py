@@ -15,11 +15,11 @@
 # Lint as: python3
 """ EvaluationModule base class."""
 import collections
-from copy import deepcopy
 import itertools
 import os
 import types
 import uuid
+from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -34,7 +34,7 @@ from datasets.utils.filelock import BaseFileLock, FileLock, Timeout
 from datasets.utils.py_utils import copyfunc, temp_seed, zip_dict
 
 from . import config
-from .info import EvaluationModuleInfo
+from .info import Config, EvaluationModuleInfo
 from .naming import camelcase_to_snakecase
 from .utils.file_utils import DownloadConfig
 from .utils.logging import get_logger
@@ -169,6 +169,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
     """
 
     ALLOWED_CONFIG_NAMES = ["default"]
+    CONFIG_CLASS = Config
 
     def __init__(
         self,
@@ -186,8 +187,10 @@ class EvaluationModule(EvaluationModuleInfoMixin):
     ):
         # prepare info
         self.config_name = config_name or "default"
-        if self.config_name not in self.ALLOWED_CONFIG_NAMES:
-            raise ValueError(f"The config name '{self.config_name}' not in list of allowed config names: {self.ALLOWED_CONFIG_NAMES}.")
+        if self.ALLOWED_CONFIG_NAMES is not None and self.config_name not in self.ALLOWED_CONFIG_NAMES:
+            raise ValueError(
+                f"The config name '{self.config_name}' not in list of allowed config names: {self.ALLOWED_CONFIG_NAMES}."
+            )
         if kwargs is None:
             kwargs = {"name": self.config_name}
         else:
@@ -460,7 +463,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                 self.config.update(compute_kwargs)
 
                 output = self._compute(**inputs)
-                
+
                 self._module_info.config = config_state
 
             if self.buf_writer is not None:
@@ -636,7 +639,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             else:
                 self._check_rendez_vous()  # wait for master to be ready and to let everyone go
 
-    def _info(self) -> EvaluationModuleInfo:
+    def _info(self, config) -> EvaluationModuleInfo:
         """Construct the EvaluationModuleInfo object. See `EvaluationModuleInfo` for details.
 
         Warning: This function is only called once and the result is cached for all
