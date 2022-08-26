@@ -80,7 +80,7 @@ Examples:
         >>> predictions = np.array([0.1, 0.9, 0.8, 0.3])
         >>> results = brier_score.compute(references=references, predictions=predictions, pos_label="ham")
         >>> print(round(results["brier_score"], 4))
-        0.3375
+        0.0375
 """
 
 
