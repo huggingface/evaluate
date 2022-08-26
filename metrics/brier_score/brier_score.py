@@ -41,13 +41,30 @@ Brier score is a type of evaluation metric for classification tasks, where you p
 
 _KWARGS_DESCRIPTION = """
 Args:
-    predictions: Ground truth (correct) target values. shape = [n_samples]
-    references: Estimated probabilities. shape = [n_samples]
-    sample_weight: Sample weights.
-    pos_label: The label of the positive class.
-Returns:
-    The Brier score.
+    y_true : array of shape (n_samples,)
+        True targets.
+
+    y_prob : array of shape (n_samples,)
+        Probabilities of the positive class.
+
+    sample_weight : array-like of shape (n_samples,), default=None
+        Sample weights.
+
+    pos_label : int or str, default=None
+        Label of the positive class. `pos_label` will be inferred in the
+        following manner:
+
+        * if `y_true` in {-1, 1} or {0, 1}, `pos_label` defaults to 1;
+        * else if `y_true` contains string, an error will be raised and
+          `pos_label` should be explicitly specified;
+        * otherwise, `pos_label` defaults to the greater label,
+          i.e. `np.unique(y_true)[-1]`.
+
+Returns
+    score : float
+        Brier score loss.
 Examples:
+
     Example-1: if y_true in {-1, 1} or {0, 1}, pos_label defaults to 1.
         >>> import numpy as np
         >>> brier_score = evaluate.load("brier_score")
@@ -56,6 +73,7 @@ Examples:
         >>> results = brier_score.compute(predictions=predictions, references=references)
         >>> print(results)
         {'brier_score': 0.3375}
+
     Example-2: if y_true contains string, an error will be raised and pos_label should be explicitly specified.
         >>> brier_score = evaluate.load("brier_score")
         >>> import numpy as np
