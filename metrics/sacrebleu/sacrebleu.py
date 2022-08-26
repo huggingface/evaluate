@@ -13,6 +13,8 @@
 # limitations under the License.
 """ SACREBLEU metric. """
 
+from dataclasses import dataclass
+from typing import Callable, Optional
 import datasets
 import sacrebleu as scb
 from packaging import version
@@ -101,10 +103,26 @@ Examples:
         39.8
 """
 
+@dataclass
+class SacrebleuConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    smooth_method: str = "exp"
+    average: str = "binary"
+    smooth_value: Optional[float] = None
+    force: bool = False
+    lowercase: bool = False
+    tokenize: Optional[Callable] = None
+    use_effective_order: bool = False
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Sacrebleu(evaluate.Metric):
-    def _info(self):
+
+    CONFIG_CLASS = SacrebleuConfig
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         if version.parse(scb.__version__) < version.parse("1.4.12"):
             raise ImportWarning(
                 "To use `sacrebleu`, the module `sacrebleu>=1.4.12` is required, and the current version of `sacrebleu` doesn't match this condition.\n"
@@ -115,6 +133,7 @@ class Sacrebleu(evaluate.Metric):
             citation=_CITATION,
             homepage="https://github.com/mjpost/sacreBLEU",
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=[
                 datasets.Features(
                     {
@@ -141,12 +160,6 @@ class Sacrebleu(evaluate.Metric):
         self,
         predictions,
         references,
-        smooth_method="exp",
-        smooth_value=None,
-        force=False,
-        lowercase=False,
-        tokenize=None,
-        use_effective_order=False,
     ):
         # if only one reference is provided make sure we still use list of lists
         if isinstance(references[0], str):
@@ -159,12 +172,12 @@ class Sacrebleu(evaluate.Metric):
         output = scb.corpus_bleu(
             predictions,
             transformed_references,
-            smooth_method=smooth_method,
-            smooth_value=smooth_value,
-            force=force,
-            lowercase=lowercase,
-            use_effective_order=use_effective_order,
-            **(dict(tokenize=tokenize) if tokenize else {}),
+            smooth_method=self.config.smooth_method,
+            smooth_value=self.config.smooth_value,
+            force=self.config.force,
+            lowercase=self.config.lowercase,
+            use_effective_order=self.config.use_effective_order,
+            **(dict(tokenize=self.config.tokenize) if self.config.tokenize else {}),
         )
         output_dict = {
             "score": output.score,

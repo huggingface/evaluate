@@ -13,14 +13,13 @@
 # limitations under the License.
 """F1 metric."""
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from typing import List, Optional, Union
 
 import datasets
 from sklearn.metrics import f1_score
 
 import evaluate
-from evaluate.info import Config
 
 
 _DESCRIPTION = """
@@ -111,7 +110,7 @@ _CITATION = """
 
 
 @dataclass
-class F1Config(Config):
+class F1Config(evaluate.info.Config):
 
     name: str = "default"
 
@@ -132,6 +131,7 @@ class F1(evaluate.Metric):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Sequence(datasets.Value("int32")),
@@ -144,7 +144,6 @@ class F1(evaluate.Metric):
                 }
             ),
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html"],
-            config=config
         )
 
     def _compute(self, predictions, references):

@@ -34,6 +34,8 @@ predictions['scores']
 ```
 """
 
+from dataclasses import dataclass
+from typing import Optional
 import comet  # From: unbabel-comet
 import datasets
 import torch
@@ -105,16 +107,29 @@ Examples:
     [0.19, 0.92]
 """
 
+@dataclass
+class COMETConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    gpus: Optional[int] = None
+    progress_bar: bool = False
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class COMET(evaluate.Metric):
-    def _info(self):
+    
+    CONFIG_CLASS = COMETConfig
+    ALLOWED_CONFIG_NAMES = None
+    
+    def _info(self, config):
 
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="https://unbabel.github.io/COMET/html/index.html",
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "sources": datasets.Value("string", id="sequence"),
@@ -136,10 +151,12 @@ class COMET(evaluate.Metric):
         else:
             self.scorer = comet.load_from_checkpoint(comet.download_model(self.config_name))
 
-    def _compute(self, sources, predictions, references, gpus=None, progress_bar=False):
-        if gpus is None:
+    def _compute(self, sources, predictions, references):
+        if self.config.gpus is None:
             gpus = 1 if torch.cuda.is_available() else 0
+        else:
+            gpus = self.config.gpus
         data = {"src": sources, "mt": predictions, "ref": references}
         data = [dict(zip(data, t)) for t in zip(*data.values())]
-        scores, mean_score = self.scorer.predict(data, gpus=gpus, progress_bar=progress_bar)
+        scores, mean_score = self.scorer.predict(data, gpus=gpus, progress_bar=self.config.progress_bar)
         return {"mean_score": mean_score, "scores": scores}

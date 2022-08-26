@@ -13,7 +13,8 @@
 # limitations under the License.
 """ Google BLEU (aka GLEU) metric. """
 
-from typing import Dict, List
+from dataclasses import dataclass
+from typing import Callable, Dict, List, Optional
 
 import datasets
 from nltk.translate import gleu_score
@@ -122,15 +123,27 @@ Examples:
         >>> print(round(results["google_bleu"], 2))
         0.4
 """
+@dataclass
+class GoogleBleuConfig(evaluate.info.Config):
 
+    name: str = "default"
+
+    tokenizer: Optional[Callable] = None
+    min_len: int = 1
+    max_len: int = 4
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class GoogleBleu(evaluate.Metric):
-    def _info(self) -> MetricInfo:
+
+    CONFIG_CLASS = GoogleBleuConfig
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config) -> MetricInfo:
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=[
                 datasets.Features(
                     {
@@ -147,14 +160,12 @@ class GoogleBleu(evaluate.Metric):
             ],
         )
 
-    def _compute(
-        self,
-        predictions: List[str],
-        references: List[List[str]],
-        tokenizer=Tokenizer13a(),
-        min_len: int = 1,
-        max_len: int = 4,
-    ) -> Dict[str, float]:
+    def _compute(self, predictions, references):
+
+        if self.config.tokenizer is None:
+            tokenizer = Tokenizer13a()
+        else:
+            tokenizer = self.config.tokenizer
         # if only one reference is provided make sure we still use list of lists
         if isinstance(references[0], str):
             references = [[ref] for ref in references]
@@ -163,6 +174,6 @@ class GoogleBleu(evaluate.Metric):
         predictions = [tokenizer(p) for p in predictions]
         return {
             "google_bleu": gleu_score.corpus_gleu(
-                list_of_references=references, hypotheses=predictions, min_len=min_len, max_len=max_len
+                list_of_references=references, hypotheses=predictions, min_len=self.config.min_len, max_len=self.config.max_len
             )
         }

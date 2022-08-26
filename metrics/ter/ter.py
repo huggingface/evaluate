@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ TER metric as available in sacrebleu. """
+from dataclasses import dataclass
 import datasets
 import sacrebleu as scb
 from packaging import version
@@ -148,11 +149,24 @@ Examples:
         >>> print(results)
         {'score': 100.0, 'num_edits': 10, 'ref_length': 10.0}
 """
+@dataclass
+class TerConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    normalized: bool = False
+    ignore_punct: bool = False
+    support_zh_ja_chars: bool = False
+    case_sensitive: bool = False
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Ter(evaluate.Metric):
-    def _info(self):
+
+    CONFIG_CLASS = TerConfig
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         if version.parse(scb.__version__) < version.parse("1.4.12"):
             raise ImportWarning(
                 "To use `sacrebleu`, the module `sacrebleu>=1.4.12` is required, and the current version of `sacrebleu` doesn't match this condition.\n"
@@ -163,6 +177,7 @@ class Ter(evaluate.Metric):
             citation=_CITATION,
             homepage="http://www.cs.umd.edu/~snover/tercom/",
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=[
                 datasets.Features(
                     {
@@ -187,10 +202,6 @@ class Ter(evaluate.Metric):
         self,
         predictions,
         references,
-        normalized: bool = False,
-        ignore_punct: bool = False,
-        support_zh_ja_chars: bool = False,
-        case_sensitive: bool = False,
     ):
         # if only one reference is provided make sure we still use list of lists
         if isinstance(references[0], str):
@@ -202,10 +213,10 @@ class Ter(evaluate.Metric):
         transformed_references = [[refs[i] for refs in references] for i in range(references_per_prediction)]
 
         sb_ter = TER(
-            normalized=normalized,
-            no_punct=ignore_punct,
-            asian_support=support_zh_ja_chars,
-            case_sensitive=case_sensitive,
+            normalized=self.config.normalized,
+            no_punct=self.config.ignore_punct,
+            asian_support=self.config.support_zh_ja_chars,
+            case_sensitive=self.config.case_sensitive,
         )
         output = sb_ter.corpus_score(predictions, transformed_references)
 

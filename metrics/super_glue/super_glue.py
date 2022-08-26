@@ -146,8 +146,8 @@ def evaluate_multirc(ids_preds, labels):
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class SuperGlue(evaluate.Metric):
-    def _info(self):
-        if self.config_name not in [
+
+    ALLOWED_CONFIG_NAMES = [
             "boolq",
             "cb",
             "copa",
@@ -159,15 +159,14 @@ class SuperGlue(evaluate.Metric):
             "wsc.fixed",
             "axb",
             "axg",
-        ]:
-            raise KeyError(
-                "You should supply a configuration name selected in "
-                '["boolq", "cb", "copa", "multirc", "record", "rte", "wic", "wsc", "wsc.fixed", "axb", "axg",]'
-            )
+        ]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(self._get_feature_types()),
             codebase_urls=[],
             reference_urls=[],

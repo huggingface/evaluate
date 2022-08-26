@@ -13,6 +13,8 @@
 # limitations under the License.
 """MSE - Mean Squared Error Metric"""
 
+from dataclasses import dataclass
+from typing import List, Optional
 import datasets
 from sklearn.metrics import mean_squared_error
 
@@ -85,13 +87,28 @@ Examples:
 """
 
 
+@dataclass
+class MseConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    multioutput: str = "uniform_average"
+    sample_weight: Optional[List[float]] = None
+    squared: bool = True
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Mse(evaluate.Metric):
-    def _info(self):
+
+    CONFIG_CLASS = MseConfig
+    ALLOWED_CONFIG_NAMES = ["default", "multilist"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(self._get_feature_types()),
             reference_urls=[
                 "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_squared_error.html"
@@ -110,10 +127,10 @@ class Mse(evaluate.Metric):
                 "references": datasets.Value("float"),
             }
 
-    def _compute(self, predictions, references, sample_weight=None, multioutput="uniform_average", squared=True):
+    def _compute(self, predictions, references):
 
         mse = mean_squared_error(
-            references, predictions, sample_weight=sample_weight, multioutput=multioutput, squared=squared
+            references, predictions, sample_weight=self.config.sample_weight, multioutput=self.config.multioutput, squared=self.config.squared
         )
 
         return {"mse": mse}

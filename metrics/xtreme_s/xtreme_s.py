@@ -13,7 +13,8 @@
 # limitations under the License.
 """ XTREME-S benchmark metric. """
 
-from typing import List
+from dataclasses import dataclass
+from typing import List, Optional
 
 import datasets
 from datasets.config import PY_VERSION
@@ -217,12 +218,22 @@ def wer_and_cer(preds, labels, concatenate_texts, config_name):
 
         return {"wer": compute_score(preds, labels, "wer"), "cer": compute_score(preds, labels, "cer")}
 
+@dataclass
+class XtremeSConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    bleu_kwargs: Optional[dict] = None
+    wer_kwargs: Optional[dict] = None
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class XtremeS(evaluate.Metric):
-    def _info(self):
-        if self.config_name not in _CONFIG_NAMES:
-            raise KeyError(f"You should supply a configuration name selected in {_CONFIG_NAMES}")
+
+    CONFIG_CLASS = XtremeSConfig
+    ALLOWED_CONFIG_NAMES = _CONFIG_NAMES
+
+    def _info(self, config):
 
         pred_type = "int64" if self.config_name in ["fleurs-lang_id", "minds14"] else "string"
 
@@ -230,6 +241,7 @@ class XtremeS(evaluate.Metric):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {"predictions": datasets.Value(pred_type), "references": datasets.Value(pred_type)}
             ),
@@ -238,10 +250,10 @@ class XtremeS(evaluate.Metric):
             format="numpy",
         )
 
-    def _compute(self, predictions, references, bleu_kwargs=None, wer_kwargs=None):
+    def _compute(self, predictions, references):
 
-        bleu_kwargs = bleu_kwargs if bleu_kwargs is not None else {}
-        wer_kwargs = wer_kwargs if wer_kwargs is not None else {}
+        bleu_kwargs = self.config.bleu_kwargs if self.config.bleu_kwargs is not None else {}
+        wer_kwargs = self.config.wer_kwargs if self.config.wer_kwargs is not None else {}
 
         if self.config_name == "fleurs-lang_id":
             return {"accuracy": simple_accuracy(predictions, references)}

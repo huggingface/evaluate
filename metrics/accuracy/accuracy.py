@@ -13,6 +13,9 @@
 # limitations under the License.
 """Accuracy metric."""
 
+from dataclasses import dataclass
+from typing import List, Optional
+
 import datasets
 from sklearn.metrics import accuracy_score
 
@@ -77,13 +80,26 @@ _CITATION = """
 """
 
 
+@dataclass
+class AccuracyConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    normalize: bool = True
+    sample_weight: Optional[List[float]] = None
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Accuracy(evaluate.Metric):
-    def _info(self):
+    CONFIG_CLASS = AccuracyConfig
+    ALLOWED_CONFIG_NAMES = ["default", "multilabel"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Sequence(datasets.Value("int32")),
@@ -98,9 +114,11 @@ class Accuracy(evaluate.Metric):
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html"],
         )
 
-    def _compute(self, predictions, references, normalize=True, sample_weight=None):
+    def _compute(self, predictions, references):
         return {
             "accuracy": float(
-                accuracy_score(references, predictions, normalize=normalize, sample_weight=sample_weight)
+                accuracy_score(
+                    references, predictions, normalize=self.config.normalize, sample_weight=self.config.sample_weight
+                )
             )
         }
