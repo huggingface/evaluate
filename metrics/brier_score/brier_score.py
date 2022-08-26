@@ -71,8 +71,8 @@ Examples:
         >>> predictions = np.array([0.1, 0.9, 0.8, 0.3])
         >>> results = brier_score.compute(references=references, predictions=predictions)
         >>> print(round(results["brier_score"], 4))
-
         0.3375
+
     Example-2: if y_true contains string, an error will be raised and pos_label should be explicitly specified.
         >>> import numpy as np
         >>> brier_score = evaluate.load("brier_score")
