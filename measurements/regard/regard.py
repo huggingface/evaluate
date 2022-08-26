@@ -14,9 +14,10 @@
 
 """ Regard measurement. """
 
-from statistics import mean
 from collections import defaultdict
 from operator import itemgetter
+from statistics import mean
+
 import datasets
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
 
@@ -48,7 +49,7 @@ Compute the regard of the input sentences.
 Args:
     `predictions` (list of str): prediction/candidate sentences, e.g. sentences describing a given demographic group.
     `references` (list of str): reference/comparison sentences, e.g. sentences describing a different demographic group to compare against.
-    `aggregation` (str) (optional): determines the type of aggregation performed on the data.
+    `aggregation` (str) (optional): determines the type of aggregation performed.
     If set to `None`, the difference between the regard scores for the two categories is returned.
      Otherwise:
         - 'average' : returns the average regard for each category (negative, positive, neutral, other) for each group
@@ -61,22 +62,47 @@ Returns:
 
 Examples:
 
-# TODO:
+Example 1 (default behavior):
+>>> regard = evaluate.load("regard", module_type="measurement")
+>>> group1 = ['the girls were mean', 'women are too ambitious']
+>>> group2 = ['boys make too much noise', 'men are often violent']
+>>> results = regard.compute(predictions = group1, references = group2)
+>>> print(results)
+{'regard_difference': {'neutral': 0.3451282191090286, 'negative': -0.36345648765563965, 'other': 0.010959412436932325, 'positive': 0.007368835678789765}}
 
+
+Example 2 (returns the maximum toxicity score):
+>>> regard = evaluate.load("regard", module_type="measurement")
+>>> group1 = ['the girls were mean', 'women are too ambitious']
+>>> group2 = ['boys make too much noise', 'men are often violent']
+>>> results = regard.compute(predictions = group1, references = group2, aggregation = "maximum")
+>>> print(results)
+{'max_regard': {'negative': 0.6691194772720337, 'positive': 0.02632979303598404, 'neutral': 0.942646861076355, 'other': 0.22687028348445892}}
+
+
+Example 3 (returns the average toxicity score):
+
+>>> regard = evaluate.load("regard", module_type="measurement")
+>>> group1 =  group1 = ['the girls are smart', 'the women are impressive']
+>>> group2 = ['boys make too much noise', 'men are often violent']
+>>> results = regard.compute(predictions = group1, references = group2, aggregation = "average")
+>>> print(results)
+{'average_predictions_regard': {'neutral': 0.9492073953151703, 'positive': 0.033664701506495476, 'negative': 0.0111181172542274, 'other': 0.006009730044752359},
+'average_references_regard': {'negative': 0.9357638359069824, 'other': 0.03806556994095445, 'neutral': 0.025142709724605083, 'positive': 0.00102789539960213}}
 """
 
 
 def regard(preds, refs, regard_classifier):
-    pred_scores= defaultdict(list)
+    pred_scores = defaultdict(list)
     ref_scores = defaultdict(list)
     pred_regard = regard_classifier(preds)
-    ref_regard =  regard_classifier(refs)
+    ref_regard = regard_classifier(refs)
     for pred in pred_regard:
         for pred_score in pred:
-            pred_scores[pred_score['label']].append(pred_score['score'])
+            pred_scores[pred_score["label"]].append(pred_score["score"])
     for ref in ref_regard:
         for ref_score in ref:
-            ref_scores[ref_score['label']].append(ref_score['score'])
+            ref_scores[ref_score["label"]].append(ref_score["score"])
     return dict(pred_scores), dict(ref_scores)
 
 
@@ -123,8 +149,10 @@ class Regard(evaluate.Measurement):
                 pred_max[k] = max(v)
             for k, v in ref_regard.items():
                 ref_max[k] = max(v)
-            return {"max_predictions_regard": max(pred_max.items(), key=itemgetter(1)),
-                    "max_references_regard":  max(ref_max.items(), key=itemgetter(1))}
+            return {
+                "max_predictions_regard": max(pred_max.items(), key=itemgetter(1)),
+                "max_references_regard": max(ref_max.items(), key=itemgetter(1)),
+            }
         elif aggregation == "average":
             return {"average_predictions_regard": pred_average, "average_references_regard": ref_average}
         else:

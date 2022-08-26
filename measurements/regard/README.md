@@ -24,40 +24,44 @@ It uses a model trained on labelled data from the paper ["The Woman Worked as a 
 
 ## How to Use
 
-This measurement requires a list of strings as input:
+This measurement requires two lists of strings as input, enabling comparing the estimated polarity between the groups.
 
 ```python
 >>> regard = evaluate.load("regard", module_type="measurement")
->>> input_texts = ["these girls are silly", "these boys are lost"]
->>> results = regard.compute(predictions=input_texts)
+>>> group1 = ['the girls were mean', 'women are too ambitious']
+>>> group2 = ['boys make too much noise', 'men are often violent']
+>>> regard.compute(predictions = group1, references = group2)
 ```
 
 ### Inputs
-- **predictions** (list of `str`): A list of prediction/candidate sentences
-- **aggregation** (`str`) (optional): determines the type of aggregation performed on the data.
-    If set to `None`, the scores for each sentences are returned.
+- **predictions** (list of `str`): prediction/candidate sentences, e.g. sentences describing a given demographic group.
+- **references** (list of `str`): reference/comparison sentences, e.g. sentences describing a different demographic group to compare against.
+- **aggregation** (`str`) (optional): determines the type of aggregation performed.
+    If set to `None`, the difference between the regard scores for the two categories is returned.
      Otherwise:
-        - `average` : returns the average regard for each category (negative, positive, neutral, other)
-        - `maximum`: returns the maximum regard for each category
+        - `average` : returns the average regard for each category (negative, positive, neutral, other) for each group
+        - `maximum`: returns the maximum regard for each group
 
 ### Output Values
 
-By default, this measurement outputs a dictionary containing a list of regard scores, one for each sentence in `predictions`
+By default, this measurement outputs a dictionary containing a list of regard scores, one for each category (negative, positive, neutral, other), representing the difference in regard between the two groups.
 
 ```
-{'regard': [[{'label': 'negative', 'score': 0.6691194772720337}, {'label': 'other', 'score': 0.22687028348445892}, {'label': 'neutral', 'score': 0.0852026417851448}, {'label': 'positive', 'score': 0.018807603046298027}], [{'label': 'neutral', 'score': 0.942646861076355}, {'label': 'positive', 'score': 0.02632979303598404}, {'label': 'negative', 'score': 0.020616641268134117}, {'label': 'other', 'score': 0.010406642220914364}]]}
+{'regard_difference': {'neutral': 0.3451282191090286, 'negative': -0.36345648765563965, 'other': 0.010959412436932325, 'positive': 0.007368835678789765}}
 ```
 
-With the `aggregation='maximum'` option, this measurement will output the maximum regard for each category (negative, positive, neutral, other):
+With the `aggregation='maximum'` option, this measurement will output the maximum regard for each group:
 
 ```python
-{'max_regard': {'negative': 0.6691194772720337, 'positive': 0.02632979303598404, 'neutral': 0.942646861076355, 'other': 0.22687028348445892}}
+{'max_predictions_regard': ('negative', 0.9497271180152893),
+ 'max_references_regard': ('negative', 0.9757490158081055)}
 ```
 
 With the `aggregation='average'` option, this measurement will output the average regard for each category (negative, positive, neutral, other):
 
 ```python
-{'average_regard': {'negative': 0.3448680592700839, 'positive': 0.022568698041141033, 'neutral': 0.5139247514307499, 'other': 0.11863846285268664}}
+{'average_predictions_regard': {'neutral': 0.37027092883363366, 'negative': 0.5723073482513428, 'other': 0.04902498237788677, 'positive': 0.008396731078391895},
+'average_references_regard': {'negative': 0.9357638359069824, 'other': 0.03806556994095445, 'neutral': 0.025142709724605083, 'positive': 0.00102789539960213}}
 ```
 
 ### Examples
@@ -66,17 +70,19 @@ Example 1 (default behavior):
 
 ```python
 >>> regard = evaluate.load("regard", module_type="measurement")
->>> input_texts = ["these girls are silly", "these boys are lost"]
->>> results = regard.compute(predictions=input_texts)
+>>> group1 = ['the girls were mean', 'women are too ambitious']
+>>> group2 = ['boys make too much noise', 'men are often violent']
+>>> results = regard.compute(predictions = group1, references = group2)
 >>> print(results)
-{'regard': [[{'label': 'negative', 'score': 0.6691194772720337}, {'label': 'other', 'score': 0.22687028348445892}, {'label': 'neutral', 'score': 0.0852026417851448}, {'label': 'positive', 'score': 0.018807603046298027}], [{'label': 'neutral', 'score': 0.942646861076355}, {'label': 'positive', 'score': 0.02632979303598404}, {'label': 'negative', 'score': 0.020616641268134117}, {'label': 'other', 'score': 0.010406642220914364}]]}
+{'regard_difference': {'neutral': 0.3451282191090286, 'negative': -0.36345648765563965, 'other': 0.010959412436932325, 'positive': 0.007368835678789765}}
 ```
 
 Example 2 (returns the maximum toxicity score):
 ```python
 >>> regard = evaluate.load("regard", module_type="measurement")
->>> input_texts = ["these girls are silly", "these boys are lost"]
->>> results = toxicity.compute(predictions=input_texts, aggregation = "maximum")
+>>> group1 = ['the girls were mean', 'women are too ambitious']
+>>> group2 = ['boys make too much noise', 'men are often violent']
+>>> results = regard.compute(predictions = group1, references = group2, aggregation = "maximum")
 >>> print(results)
 {'max_regard': {'negative': 0.6691194772720337, 'positive': 0.02632979303598404, 'neutral': 0.942646861076355, 'other': 0.22687028348445892}}
 ```
@@ -84,10 +90,12 @@ Example 2 (returns the maximum toxicity score):
 Example 3 (returns the average toxicity score):
 ```python
 >>> regard = evaluate.load("regard", module_type="measurement")
->>> input_texts = ["these girls are silly", "these boys are lost"]
->>> results = toxicity.compute(predictions=input_texts, aggregation = "average")
+>>> group1 =  group1 = ['the girls are smart', 'the women are impressive']
+>>> group2 = ['boys make too much noise', 'men are often violent']
+>>> results = regard.compute(predictions = group1, references = group2, aggregation = "average")
 >>> print(results)
-{'average_regard': {'negative': 0.3448680592700839, 'positive': 0.022568698041141033, 'neutral': 0.5139247514307499, 'other': 0.11863846285268664}}
+{'average_predictions_regard': {'neutral': 0.9492073953151703, 'positive': 0.033664701506495476, 'negative': 0.0111181172542274, 'other': 0.006009730044752359}, 'average_references_regard': {'negative': 0.9357638359069824, 'other': 0.03806556994095445, 'neutral': 0.025142709724605083, 'positive': 0.00102789539960213}}
+
 ```
 
 ## Citation(s)
