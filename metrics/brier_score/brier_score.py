@@ -64,24 +64,22 @@ Returns
     score : float
         Brier score loss.
 Examples:
-
     Example-1: if y_true in {-1, 1} or {0, 1}, pos_label defaults to 1.
         >>> import numpy as np
         >>> brier_score = evaluate.load("brier_score")
-        >>> predictions = np.array([0, 0, 1, 1])
-        >>> references = np.array([0.1, 0.9, 0.8, 0.3])
+        >>> references = np.array([0, 0, 1, 1])
+        >>> predictions = np.array([0.1, 0.9, 0.8, 0.3])
         >>> results = brier_score.compute(predictions=predictions, references=references)
-        >>> print(results)
-        {'brier_score': 0.3375}
-
+        >>> print(round(results["brier_score"], 4))
+        0.3375
     Example-2: if y_true contains string, an error will be raised and pos_label should be explicitly specified.
-        >>> brier_score = evaluate.load("brier_score")
         >>> import numpy as np
-        >>> predictions =  np.array(["spam", "ham", "ham", "spam"])
-        >>> references = np.array([0.1, 0.9, 0.8, 0.3])
-        >>> result = brier_score.compute(predictions, references, pos_label="ham")
-        >>> print(result)
-        {'brier_score': 0.0374}
+        >>> brier_score = evaluate.load("brier_score")
+        >>> references =  np.array(["spam", "ham", "ham", "spam"])
+        >>> predictions = np.array([0.1, 0.9, 0.8, 0.3])
+        >>> result = brier_score.compute(predictions=predictions, references=references, pos_label="ham")
+        >>> print(round(results["brier_score"], 4))
+        0.3375
 """
 
 
@@ -92,21 +90,41 @@ class BrierScore(evaluate.Metric):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(self._get_feature_types()),
+            features=self._get_feature_types(),
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.brier_score_loss.html"],
         )
 
     def _get_feature_types(self):
         if self.config_name == "multilist":
-            return {
-                "predictions": datasets.Sequence(datasets.Value("float")),
-                "references": datasets.Sequence(datasets.Value("float")),
-            }
+            return [
+                datasets.Features(
+                    {
+                        "predictions": datasets.Sequence(datasets.Value("float")),
+                        "references": datasets.Sequence(datasets.Value("float")),
+                    }
+                ),
+                datasets.Features(
+                    {
+                        "predictions": datasets.Sequence(datasets.Value("float")),
+                        "references": datasets.Sequence(datasets.Value("string")),
+                    }
+                ),
+            ]
         else:
-            return {
-                "predictions": datasets.Value("float"),
-                "references": datasets.Value("float"),
-            }
+            return [
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("float"),
+                        "references": datasets.Value("float"),
+                    }
+                ),
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("float"),
+                        "references": datasets.Value("string"),
+                    }
+                ),
+            ]
 
     def _compute(self, predictions, references, sample_weight=None, pos_label=1):
 
