@@ -206,6 +206,22 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 1.0)
 
+    def test_data_loading(self):
+
+        # Test passing in dataset by name with split
+        data = self.evaluator.load_data("evaluate/imdb-ci", split="test[:1]")
+        self.evaluator.prepare_data(data=data, input_column="text", label_column="label", second_input_column=None)
+
+        # Test passing in dataset by name without split and inferring the optimal split
+        data = self.evaluator.load_data("evaluate/imdb-ci")
+        self.evaluator.prepare_data(data=data, input_column="text", label_column="label", second_input_column=None)
+
+        # Test that it chooses the correct one (e.g. imdb only has train and test, but no validation)
+        self.assertEqual(data.split, "test")
+
+        # Test that the data point returned is correct; this maps to the first example in the dataset
+        self.assertEqual(data[0]["text"], "I love movies about whales!")
+
     def test_overwrite_default_metric(self):
         accuracy = load("accuracy")
         results = self.evaluator.compute(
@@ -513,6 +529,25 @@ class TestQuestionAnsweringEvaluator(TestCase):
             {key: results[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 0.0}
         )
 
+    def test_data_loading(self):
+        # Test passing in dataset by name with data_split
+        data = self.evaluator.load_data("evaluate/squad-ci", split="validation[:1]")
+        self.evaluator.prepare_data(
+            data=data, question_column="question", context_column="context", id_column="id", label_column="answers"
+        )
+
+        # Test passing in dataset by name without data_split and inferring the optimal split
+        data = self.evaluator.load_data("evaluate/squad-ci")
+        self.evaluator.prepare_data(
+            data=data, question_column="question", context_column="context", id_column="id", label_column="answers"
+        )
+
+        # Test that it chooses the correct one (e.g. squad only has train and validation, but no test)
+        self.assertEqual(data.split, "validation")
+
+        # Test that the data point returned is correct; this maps to the first example in the squad-ci dataset
+        self.assertEqual(data[0]["id"], "56be4db0acb8001400a502ec")
+
     def test_overwrite_default_metric(self):
         # squad_v1-like dataset
         squad = load("squad")
@@ -603,6 +638,31 @@ class TestTokenClassificationEvaluator(TestCase):
             metric="seqeval",
         )
         self.assertEqual(results["overall_accuracy"], 1.0)
+
+    def test_data_loading(self):
+        # Test passing in dataset by name with data_split
+        data = self.evaluator.load_data("evaluate/conll2003-ci", split="validation[:1]")
+        self.evaluator.prepare_data(
+            data=data,
+            input_column="tokens",
+            label_column="ner_tags",
+            join_by=" ",
+        )
+
+        # Test passing in dataset by name without data_split and inferring the optimal split
+        data = self.evaluator.load_data("evaluate/conll2003-ci")
+        self.evaluator.prepare_data(
+            data=data,
+            input_column="tokens",
+            label_column="ner_tags",
+            join_by=" ",
+        )
+
+        # Test that it chooses the correct one (e.g. conll2003 has train, validation, test but should select test)
+        self.assertEqual(data.split, "test")
+
+        # Test that the data point returned is correct; this maps to the first example in the dataset
+        self.assertEqual(data[0]["id"], "0")
 
     def test_wrong_task(self):
         self.assertRaises(KeyError, evaluator, "bad_task")
