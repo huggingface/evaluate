@@ -69,15 +69,16 @@ Examples:
         >>> brier_score = evaluate.load("brier_score")
         >>> references = np.array([0, 0, 1, 1])
         >>> predictions = np.array([0.1, 0.9, 0.8, 0.3])
-        >>> results = brier_score.compute(predictions=predictions, references=references)
-        >>> print(round(results["brier_score"], 4))
+        >>> results = brier_score.compute(references=references, predictions=predictions)
+        >>> print(round(results["brier_score"], 4))3+
+
         0.3375
     Example-2: if y_true contains string, an error will be raised and pos_label should be explicitly specified.
         >>> import numpy as np
         >>> brier_score = evaluate.load("brier_score")
         >>> references =  np.array(["spam", "ham", "ham", "spam"])
         >>> predictions = np.array([0.1, 0.9, 0.8, 0.3])
-        >>> results = brier_score.compute(predictions=predictions, references=references, pos_label="ham")
+        >>> results = brier_score.compute(references=references, predictions=predictions, pos_label="ham")
         >>> print(round(results["brier_score"], 4))
         0.3375
 """
@@ -99,14 +100,14 @@ class BrierScore(evaluate.Metric):
             return [
                 datasets.Features(
                     {
-                        "predictions": datasets.Sequence(datasets.Value("float")),
                         "references": datasets.Sequence(datasets.Value("float")),
+                        "predictions": datasets.Sequence(datasets.Value("float")),
                     }
                 ),
                 datasets.Features(
                     {
-                        "predictions": datasets.Sequence(datasets.Value("float")),
                         "references": datasets.Sequence(datasets.Value("string")),
+                        "predictions": datasets.Sequence(datasets.Value("float")),
                     }
                 ),
             ]
@@ -114,20 +115,20 @@ class BrierScore(evaluate.Metric):
             return [
                 datasets.Features(
                     {
-                        "predictions": datasets.Value("float"),
                         "references": datasets.Value("float"),
+                        "predictions": datasets.Value("float"),
                     }
                 ),
                 datasets.Features(
                     {
-                        "predictions": datasets.Value("float"),
                         "references": datasets.Value("string"),
+                        "predictions": datasets.Value("float"),
                     }
                 ),
             ]
 
-    def _compute(self, predictions, references, sample_weight=None, pos_label=1):
+    def _compute(self, references, predictions, sample_weight=None, pos_label=1):
 
-        brier_score = brier_score_loss(predictions, references, sample_weight=sample_weight, pos_label=pos_label)
+        brier_score = brier_score_loss(references, predictions, sample_weight=sample_weight, pos_label=pos_label)
 
         return {"brier_score": brier_score}
