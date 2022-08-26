@@ -78,7 +78,7 @@ Examples:
         >>> references =  np.array(["spam", "ham", "ham", "spam"])
         >>> predictions = np.array([0.1, 0.9, 0.8, 0.3])
         >>> result = brier_score.compute(predictions=predictions, references=references, pos_label="ham")
-        >>> print(round(results["brier_score"], 4))
+        >>> print(round(result["brier_score"], 4))
         0.3375
 """
 
