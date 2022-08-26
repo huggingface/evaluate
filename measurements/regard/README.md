@@ -90,7 +90,7 @@ Example 2 (returns the maximum toxicity score):
 Example 3 (returns the average toxicity score):
 ```python
 >>> regard = evaluate.load("regard", module_type="measurement")
->>> group1 =  group1 = ['the girls are smart', 'the women are impressive']
+>>> group1 = ['the girls were mean', 'women are too ambitious']
 >>> group2 = ['boys make too much noise', 'men are often violent']
 >>> results = regard.compute(predictions = group1, references = group2, aggregation = "average")
 >>> print(results)
