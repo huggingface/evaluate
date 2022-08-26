@@ -91,6 +91,7 @@ Example 3 (returns the average toxicity score):
 {'negative': 0.94, 'other': 0.04, 'neutral': 0.03, 'positive': 0.0}
 """
 
+
 def regard(preds, refs, regard_classifier):
     pred_scores = defaultdict(list)
     ref_scores = defaultdict(list)
