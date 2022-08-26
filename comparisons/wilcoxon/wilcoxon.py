@@ -55,12 +55,13 @@ _CITATION = """
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Wilcoxon(evaluate.Comparison):
-    def _info(self):
+    def _info(self, config):
         return evaluate.ComparisonInfo(
             module_type="comparison",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "predictions1": datasets.Value("float"),
