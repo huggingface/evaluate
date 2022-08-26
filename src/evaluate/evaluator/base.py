@@ -315,11 +315,15 @@ class Evaluator(ABC):
         if isinstance(data, str):
             split = self.get_dataset_split(data, split)
             data = load_dataset(data, split=split)
-        if data is None:
+            return data
+        elif isinstance(data, Dataset):
+            if split is not None:
+                logger.warning("`data` is a preloaded Dataset! Ignoring `split`.")
+            return data
+        else:
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
-        return data
 
     def prepare_data(self, data: Dataset, input_column: str, label_column: str):
         """

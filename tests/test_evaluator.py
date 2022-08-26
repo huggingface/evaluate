@@ -220,7 +220,7 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertEqual(data.split, "test")
 
         # Test that the data point returned is correct; this maps to the first example in the dataset
-        self.assertEqual(data[:]["text"][0], "I love movies about whales!")
+        self.assertEqual(data[0]["text"], "I love movies about whales!")
 
     def test_overwrite_default_metric(self):
         accuracy = load("accuracy")
@@ -546,7 +546,7 @@ class TestQuestionAnsweringEvaluator(TestCase):
         self.assertEqual(data.split, "validation")
 
         # Test that the data point returned is correct; this maps to the first example in the squad-ci dataset
-        self.assertEqual(data[:]["id"][0], "56be4db0acb8001400a502ec")
+        self.assertEqual(data[0]["id"], "56be4db0acb8001400a502ec")
 
     def test_overwrite_default_metric(self):
         # squad_v1-like dataset
@@ -662,7 +662,7 @@ class TestTokenClassificationEvaluator(TestCase):
         self.assertEqual(data.split, "test")
 
         # Test that the data point returned is correct; this maps to the first example in the dataset
-        self.assertEqual(data[:]["id"][0], "0")
+        self.assertEqual(data[0]["id"], "0")
 
     def test_wrong_task(self):
         self.assertRaises(KeyError, evaluator, "bad_task")
