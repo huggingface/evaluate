@@ -47,7 +47,7 @@ Compute the regard of the input sentences.
 
 Args:
     `predictions` (list of str): prediction/candidate sentences, e.g. sentences describing a given demographic group.
-    `references` (list of str): reference/comparison sentences, e.g. sentences decribing a different demographic group to compare against.
+    `references` (list of str): reference/comparison sentences, e.g. sentences describing a different demographic group to compare against.
     `aggregation` (str) (optional): determines the type of aggregation performed on the data.
     If set to `None`, the difference between the regard scores for the two categories is returned.
      Otherwise:
