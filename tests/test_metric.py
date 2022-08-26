@@ -14,11 +14,12 @@ from .utils import require_tf, require_torch
 
 
 class DummyMetric(EvaluationModule):
-    def _info(self):
+    def _info(self, config):
         return EvaluationModuleInfo(
             description="dummy metric for tests",
             citation="insert citation here",
             features=Features({"predictions": Value("int64"), "references": Value("int64")}),
+            config=config,
         )
 
     def _compute(self, predictions, references):
@@ -71,10 +72,11 @@ class DummyMetric(EvaluationModule):
 
 
 class AnotherDummyMetric(EvaluationModule):
-    def _info(self):
+    def _info(self, config):
         return EvaluationModuleInfo(
             description="another dummy metric for tests",
             citation="insert citation here",
+            config=config,
             features=Features({"predictions": Value("int64"), "references": Value("int64")}),
         )
 
@@ -568,10 +570,13 @@ class TestMetric(TestCase):
 
 
 class MetricWithMultiLabel(EvaluationModule):
-    def _info(self):
+    ALLOWED_CONFIG_NAMES = ["default", "multilabel"]
+
+    def _info(self, config):
         return EvaluationModuleInfo(
             description="dummy metric for tests",
             citation="insert citation here",
+            config=config,
             features=Features(
                 {"predictions": Sequence(Value("int64")), "references": Sequence(Value("int64"))}
                 if self.config_name == "multilabel"
@@ -617,10 +622,11 @@ def test_safety_checks_process_vars():
 
 
 class AccuracyWithNonStandardFeatureNames(EvaluationModule):
-    def _info(self):
+    def _info(self, config):
         return EvaluationModuleInfo(
             description="dummy metric for tests",
             citation="insert citation here",
+            config=config,
             features=Features({"inputs": Value("int64"), "targets": Value("int64")}),
         )
 

@@ -23,7 +23,7 @@ from datasets import Features, Value
 
 class __DummyMetric1__(evaluate.EvaluationModule):
 
-    def _info(self):
+    def _info(self, config):
         return EvaluationModuleInfo(features=Features({"predictions": Value("int"), "references": Value("int")}))
 
     def _compute(self, predictions, references):
