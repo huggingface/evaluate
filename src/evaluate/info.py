@@ -32,15 +32,20 @@ logger = get_logger(__name__)
 
 
 @dataclass
-class Config:
+class Config(object):
     """Base class to store the configuration used for the evaluation module."""
 
-    name = "default"
+    name: str = "default"
 
     def update(self, config):
         for key, value in config.items():
             if hasattr(self, key):
                 setattr(self, key, value)
+            else:
+                logger.warning(
+                    f"The config '{key}' with value '{value}' was passed but is not registered in the config and thus ignored."
+                )
+
 
 @dataclass
 class EvaluationModuleInfo:
