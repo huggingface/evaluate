@@ -77,8 +77,8 @@ Examples:
         >>> brier_score = evaluate.load("brier_score")
         >>> references =  np.array(["spam", "ham", "ham", "spam"])
         >>> predictions = np.array([0.1, 0.9, 0.8, 0.3])
-        >>> result = brier_score.compute(predictions=predictions, references=references, pos_label="ham")
-        >>> print(round(result["brier_score"], 4))
+        >>> results = brier_score.compute(predictions=predictions, references=references, pos_label="ham")
+        >>> print(round(results["brier_score"], 4))
         0.3375
 """
 
@@ -128,6 +128,6 @@ class BrierScore(evaluate.Metric):
 
     def _compute(self, predictions, references, sample_weight=None, pos_label=1):
 
-        brier_score = brier_score_loss(references, predictions, sample_weight=sample_weight, pos_label=pos_label)
+        brier_score = brier_score_loss(predictions, references, sample_weight=sample_weight, pos_label=pos_label)
 
         return {"brier_score": brier_score}
