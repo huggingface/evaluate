@@ -63,10 +63,10 @@ Examples:
         ...                              data=data) # doctest:+ELLIPSIS
         >>> print(list(results.keys()))
         ['perplexities', 'mean_perplexity']
-        >>> print(round(results["mean_perplexity"], 2))
-        78.22
-        >>> print(round(results["perplexities"][0], 2))
-        11.11
+        >>> print(round(results["mean_perplexity"], 0))
+        647.0
+        >>> print(round(results["perplexities"][0], 0))
+        32.0
 
     Example 2:
         >>> from datasets import load_dataset
@@ -78,9 +78,9 @@ Examples:
         >>> print(list(results.keys()))
         ['perplexities', 'mean_perplexity']
         >>> print(round(results["mean_perplexity"], 2)) # doctest: +SKIP
-        60.35
+        576.76
         >>> print(round(results["perplexities"][0], 2)) # doctest: +SKIP
-        81.12
+        889.28
 """
 
 
@@ -180,7 +180,7 @@ class Perplexity(evaluate.Measurement):
             shift_labels = labels[..., 1:].contiguous()
             shift_attention_mask_batch = attn_mask[..., 1:].contiguous()
 
-            perplexity_batch = torch.exp2(
+            perplexity_batch = torch.exp(
                 (loss_fct(shift_logits.transpose(1, 2), shift_labels) * shift_attention_mask_batch).sum(1)
                 / shift_attention_mask_batch.sum(1)
             )

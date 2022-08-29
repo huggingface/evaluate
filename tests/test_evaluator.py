@@ -45,10 +45,10 @@ class DummyTextClassificationPipeline:
         self.task = "text-classification"
         self.sleep_time = sleep_time
 
-    def __call__(self, text, **kwargs):
+    def __call__(self, inputs, **kwargs):
         if self.sleep_time is not None:
             sleep(self.sleep_time)
-        return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(text)]
+        return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(inputs)]
 
 
 class DummyImageClassificationPipeline:
@@ -206,6 +206,22 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 1.0)
 
+    def test_data_loading(self):
+
+        # Test passing in dataset by name with split
+        data = self.evaluator.load_data("evaluate/imdb-ci", split="test[:1]")
+        self.evaluator.prepare_data(data=data, input_column="text", label_column="label", second_input_column=None)
+
+        # Test passing in dataset by name without split and inferring the optimal split
+        data = self.evaluator.load_data("evaluate/imdb-ci")
+        self.evaluator.prepare_data(data=data, input_column="text", label_column="label", second_input_column=None)
+
+        # Test that it chooses the correct one (e.g. imdb only has train and test, but no validation)
+        self.assertEqual(data.split, "test")
+
+        # Test that the data point returned is correct; this maps to the first example in the dataset
+        self.assertEqual(data[0]["text"], "I love movies about whales!")
+
     def test_overwrite_default_metric(self):
         accuracy = load("accuracy")
         results = self.evaluator.compute(
@@ -280,6 +296,60 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertAlmostEqual(results["total_time_in_seconds"], 0.1, 1)
         self.assertAlmostEqual(results["samples_per_second"], len(data) / results["total_time_in_seconds"], 5)
         self.assertAlmostEqual(results["latency_in_seconds"], results["total_time_in_seconds"] / len(data), 5)
+
+
+class TestTextClassificationEvaluatorTwoColumns(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict(
+            {
+                "label": [1, 0],
+                "premise": ["great car", "great movie"],
+                "hypothesis": ["great vehicle", "horrible movie"],
+            }
+        )
+        self.default_model = "prajjwal1/bert-tiny-mnli"
+        self.input_column = "premise"
+        self.second_input_column = "hypothesis"
+        self.label_column = "label"
+        self.pipe = DummyTextClassificationPipeline()
+        self.model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.default_model)
+        self.evaluator = evaluator("text-classification")
+        self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
+        self.label_mapping2 = {"LABEL_0": 0, "LABEL_1": 1, "LABEL_2": 2}
+
+    def test_pipe_init(self):
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            input_column=self.input_column,
+            second_input_column=self.second_input_column,
+            label_column="label",
+            label_mapping=self.label_mapping,
+        )
+        self.assertEqual(results["accuracy"], 1.0)
+
+    def test_model_init(self):
+        results = self.evaluator.compute(
+            model_or_pipeline=self.default_model,
+            data=self.data,
+            metric="accuracy",
+            input_column=self.input_column,
+            second_input_column=self.second_input_column,
+            label_column=self.label_column,
+            label_mapping=self.label_mapping2,
+        )
+        self.assertEqual(results["accuracy"], 1.0)
+        results = self.evaluator.compute(
+            model_or_pipeline=self.model,
+            data=self.data,
+            metric="accuracy",
+            input_column=self.input_column,
+            second_input_column=self.second_input_column,
+            tokenizer=self.tokenizer,
+            label_mapping=self.label_mapping2,
+        )
+        self.assertEqual(results["accuracy"], 1.0)
 
 
 class TestImageClassificationEvaluator(TestCase):
@@ -401,7 +471,7 @@ class TestQuestionAnsweringEvaluator(TestCase):
             metric="squad",
         )
         self.assertEqual(results["exact_match"], 0)
-        self.assertEqual(results["f1"], 0)
+        self.assertEqual(results["f1"], 100 / 3)
 
         model = AutoModelForQuestionAnswering.from_pretrained(self.default_model)
         tokenizer = AutoTokenizer.from_pretrained(self.default_model)
@@ -412,7 +482,7 @@ class TestQuestionAnsweringEvaluator(TestCase):
             tokenizer=tokenizer,
         )
         self.assertEqual(results["exact_match"], 0)
-        self.assertEqual(results["f1"], 0)
+        self.assertEqual(results["f1"], 100 / 3)
 
     def test_class_init(self):
         # squad_v1-like dataset
@@ -458,6 +528,25 @@ class TestQuestionAnsweringEvaluator(TestCase):
         self.assertDictEqual(
             {key: results[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 0.0}
         )
+
+    def test_data_loading(self):
+        # Test passing in dataset by name with data_split
+        data = self.evaluator.load_data("evaluate/squad-ci", split="validation[:1]")
+        self.evaluator.prepare_data(
+            data=data, question_column="question", context_column="context", id_column="id", label_column="answers"
+        )
+
+        # Test passing in dataset by name without data_split and inferring the optimal split
+        data = self.evaluator.load_data("evaluate/squad-ci")
+        self.evaluator.prepare_data(
+            data=data, question_column="question", context_column="context", id_column="id", label_column="answers"
+        )
+
+        # Test that it chooses the correct one (e.g. squad only has train and validation, but no test)
+        self.assertEqual(data.split, "validation")
+
+        # Test that the data point returned is correct; this maps to the first example in the squad-ci dataset
+        self.assertEqual(data[0]["id"], "56be4db0acb8001400a502ec")
 
     def test_overwrite_default_metric(self):
         # squad_v1-like dataset
@@ -549,6 +638,31 @@ class TestTokenClassificationEvaluator(TestCase):
             metric="seqeval",
         )
         self.assertEqual(results["overall_accuracy"], 1.0)
+
+    def test_data_loading(self):
+        # Test passing in dataset by name with data_split
+        data = self.evaluator.load_data("evaluate/conll2003-ci", split="validation[:1]")
+        self.evaluator.prepare_data(
+            data=data,
+            input_column="tokens",
+            label_column="ner_tags",
+            join_by=" ",
+        )
+
+        # Test passing in dataset by name without data_split and inferring the optimal split
+        data = self.evaluator.load_data("evaluate/conll2003-ci")
+        self.evaluator.prepare_data(
+            data=data,
+            input_column="tokens",
+            label_column="ner_tags",
+            join_by=" ",
+        )
+
+        # Test that it chooses the correct one (e.g. conll2003 has train, validation, test but should select test)
+        self.assertEqual(data.split, "test")
+
+        # Test that the data point returned is correct; this maps to the first example in the dataset
+        self.assertEqual(data[0]["id"], "0")
 
     def test_wrong_task(self):
         self.assertRaises(KeyError, evaluator, "bad_task")

@@ -1,8 +1,8 @@
 ---
 title: Label Distribution
 emoji: 🤗
-colorFrom: blue
-colorTo: red
+colorFrom: green
+colorTo: purple
 sdk: gradio
 sdk_version: 3.0.2
 app_file: app.py
