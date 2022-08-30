@@ -88,7 +88,6 @@ TASK_DOCUMENTATION = r"""
 
     </Tip>
 """
->>>>>>> main
 
 
 logger = get_logger(__name__)
