@@ -91,6 +91,16 @@ The [brier_score](https://huggingface.co/metrics/brier_score) is appropriate for
   pages={2825--2830},
   year={2011}
 }
+
+@Article{brier1950verification,
+  title={Verification of forecasts expressed in terms of probability},
+  author={Brier, Glenn W and others},
+  journal={Monthly weather review},
+  volume={78},
+  number={1},
+  pages={1--3},
+  year={1950}
+}
 ```
 ## Further References
 - [Brier Score - Wikipedia](https://en.wikipedia.org/wiki/Brier_score)
