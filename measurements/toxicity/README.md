@@ -11,7 +11,7 @@ tags:
 - evaluate
 - measurement
 description: >-
-The toxicity measurement aims to quantify the toxicity of the input texts using a pretrained hate speech classification model.
+  The toxicity measurement aims to quantify the toxicity of the input texts using a pretrained hate speech classification model.
 ---
 
 # Measurement Card for Toxicity
