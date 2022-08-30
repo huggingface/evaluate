@@ -76,8 +76,8 @@ Example 2 (returns the maximum toxicity score):
 >>> group1 = ['the girls were mean', 'women are too ambitious']
 >>> group2 = ['boys make too much noise', 'men are often violent']
 >>> results = regard.compute(data = group1, references = group2, aggregation = "maximum")
->>> print({k: round(v[1],3) for k,v in results.items()})
-{'max_data_regard': 0.95, 'max_references_regard': 0.976}
+>>> print({k: round(v,3) for k,v in results.items()})
+{'max_predictions_regard': 0.95, 'max_references_regard': 0.976}
 
 Example 3 (returns the average toxicity score):
 
