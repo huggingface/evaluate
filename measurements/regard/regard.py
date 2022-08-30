@@ -146,6 +146,6 @@ class Regard(evaluate.Measurement):
                 "max_references_regard": max([max(v) for v in ref_regard.values()]),
             }
         elif aggregation == "average":
-            return {"average_data_regard": pred_average, "average_references_regard": ref_average}
+            return {"average_data_regard": pred_mean, "average_references_regard": ref_mean}
         else:
-            return {"regard_difference": {key: pred_average[key] - ref_average.get(key, 0) for key in pred_average}}
+            return {"regard_difference": {key: pred_mean[key] - ref_mean.get(key, 0) for key in pred_mean}}
