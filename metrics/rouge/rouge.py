@@ -80,6 +80,16 @@ Examples:
 """
 
 
+class Tokenizer:
+    """Helper class to wrap a callable into a class with a `tokenize` method as used by rouge-score."""
+
+    def __init__(self, tokenizer_func):
+        self.tokenizer_func = tokenizer_func
+
+    def tokenize(self, text):
+        return self.tokenizer_func(text)
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Rouge(evaluate.Metric):
     def _info(self):
@@ -87,12 +97,20 @@ class Rouge(evaluate.Metric):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": datasets.Value("string", id="sequence"),
-                    "references": datasets.Value("string", id="sequence"),
-                }
-            ),
+            features=[
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Sequence(datasets.Value("string", id="sequence")),
+                    }
+                ),
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Value("string", id="sequence"),
+                    }
+                ),
+            ],
             codebase_urls=["https://github.com/google-research/google-research/tree/master/rouge"],
             reference_urls=[
                 "https://en.wikipedia.org/wiki/ROUGE_(metric)",
@@ -100,18 +118,28 @@ class Rouge(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references, rouge_types=None, use_aggregator=True, use_stemmer=False):
+    def _compute(
+        self, predictions, references, rouge_types=None, use_aggregator=True, use_stemmer=False, tokenizer=None
+    ):
         if rouge_types is None:
             rouge_types = ["rouge1", "rouge2", "rougeL", "rougeLsum"]
 
-        scorer = rouge_scorer.RougeScorer(rouge_types=rouge_types, use_stemmer=use_stemmer)
+        multi_ref = isinstance(references[0], list)
+
+        if tokenizer is not None:
+            tokenizer = Tokenizer(tokenizer)
+
+        scorer = rouge_scorer.RougeScorer(rouge_types=rouge_types, use_stemmer=use_stemmer, tokenizer=tokenizer)
         if use_aggregator:
             aggregator = scoring.BootstrapAggregator()
         else:
             scores = []
 
         for ref, pred in zip(references, predictions):
-            score = scorer.score(ref, pred)
+            if multi_ref:
+                score = scorer.score_multi(ref, pred)
+            else:
+                score = scorer.score(ref, pred)
             if use_aggregator:
                 aggregator.add_scores(score)
             else:
