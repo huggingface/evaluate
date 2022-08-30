@@ -47,7 +47,7 @@ _KWARGS_DESCRIPTION = """
 Compute the regard of the input sentences.
 
 Args:
-    `predictions` (list of str): prediction/candidate sentences, e.g. sentences describing a given demographic group.
+    `data` (list of str): prediction/candidate sentences, e.g. sentences describing a given demographic group.
     `references` (list of str): reference/comparison sentences, e.g. sentences describing a different demographic group to compare against.
     `aggregation` (str) (optional): determines the type of aggregation performed.
     If set to `None`, the difference between the regard scores for the two categories is returned.
@@ -57,8 +57,8 @@ Args:
 
 Returns:
     `regard_difference`: the difference between the regard scores for the two groups
-    `average_predictions_regard` and 'average_references_regard': the average regard for each category (negative, positive, neutral, other)  (if `aggregation` = `average`)
-    `max_predictions_regard` and 'max_references_regard': the maximum regard for each group  (if `aggregation` = `maximum`)
+    `average_data_regard` and 'average_references_regard': the average regard for each category (negative, positive, neutral, other)  (if `aggregation` = `average`)
+    `max_data_regard` and 'max_references_regard': the maximum regard for each group  (if `aggregation` = `maximum`)
 
 Examples:
 
@@ -66,7 +66,7 @@ Example 1 (default behavior):
 >>> regard = evaluate.load("regard", module_type="measurement")
 >>> group1 = ['the girls were mean', 'women are too ambitious']
 >>> group2 = ['boys make too much noise', 'men are often violent']
->>> results = regard.compute(predictions = group1, references = group2)
+>>> results = regard.compute(data = group1, references = group2)
 >>> print({k: round(v, 2) for k, v in results['regard_difference'].items()})
 {'neutral': 0.35, 'negative': -0.36, 'other': 0.01, 'positive': 0.01}
 
@@ -75,17 +75,17 @@ Example 2 (returns the maximum toxicity score):
 >>> regard = evaluate.load("regard", module_type="measurement")
 >>> group1 = ['the girls were mean', 'women are too ambitious']
 >>> group2 = ['boys make too much noise', 'men are often violent']
->>> results = regard.compute(predictions = group1, references = group2, aggregation = "maximum")
+>>> results = regard.compute(data = group1, references = group2, aggregation = "maximum")
 >>> print({k: round(v[1],3) for k,v in results.items()})
-{'max_predictions_regard': 0.95, 'max_references_regard': 0.976}
+{'max_data_regard': 0.95, 'max_references_regard': 0.976}
 
 Example 3 (returns the average toxicity score):
 
 >>> regard = evaluate.load("regard", module_type="measurement")
 >>> group1 = ['the girls were mean', 'women are too ambitious']
 >>> group2 = ['boys make too much noise', 'men are often violent']
->>> results = regard.compute(predictions = group1, references = group2, aggregation = "average")
->>> print({k: round(v, 2) for k, v in results['average_predictions_regard'].items()})
+>>> results = regard.compute(data = group1, references = group2, aggregation = "average")
+>>> print({k: round(v, 2) for k, v in results['average_data_regard'].items()})
 {'neutral': 0.37, 'negative': 0.57, 'other': 0.05, 'positive': 0.01}
 >>> print({k: round(v, 2) for k, v in results['average_references_regard'].items()})
 {'negative': 0.94, 'other': 0.04, 'neutral': 0.03, 'positive': 0.0}
@@ -116,7 +116,7 @@ class Regard(evaluate.Measurement):
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
                 {
-                    "predictions": datasets.Value("string", id="sequence"),
+                    "data": datasets.Value("string", id="sequence"),
                     "references": datasets.Value("string", id="sequence"),
                 }
             ),
@@ -133,11 +133,11 @@ class Regard(evaluate.Measurement):
 
     def _compute(
         self,
-        predictions,
+        data,
         references,
         aggregation=None,
     ):
-        pred_regard, ref_regard = regard(predictions, references, self.regard_classifier)
+        pred_regard, ref_regard = regard(data, references, self.regard_classifier)
         pred_average, ref_average = {}, {}
         for k, v in pred_regard.items():
             pred_average[k] = mean(v)
@@ -150,10 +150,10 @@ class Regard(evaluate.Measurement):
             for k, v in ref_regard.items():
                 ref_max[k] = max(v)
             return {
-                "max_predictions_regard": max(pred_max.items(), key=itemgetter(1)),
+                "max_data_regard": max(pred_max.items(), key=itemgetter(1)),
                 "max_references_regard": max(ref_max.items(), key=itemgetter(1)),
             }
         elif aggregation == "average":
-            return {"average_predictions_regard": pred_average, "average_references_regard": ref_average}
+            return {"average_data_regard": pred_average, "average_references_regard": ref_average}
         else:
             return {"regard_difference": {key: pred_average[key] - ref_average.get(key, 0) for key in pred_average}}
