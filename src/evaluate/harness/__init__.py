@@ -22,9 +22,8 @@ class Harness:
     ```python
     >>> from evaluate.harness import Harness
 
-    >>> harness_config = Harness.from_json('mathemakitten/sentiment')
-    >>> harness = Harness(harness_config)
-    >>> results = harness.run()
+    >>> harness = Harness('mathemakitten/sentiment')
+    >>> results = harness.run(model_or_pipeline='gpt2')
     ```
     """
 
@@ -49,10 +48,10 @@ class Harness:
         self.tasks = []
         for task_group in self.config['task_groups']:
             for task in task_group['tasks']:
-                self.tasks.append(task_group['task_type'] + '/' + task['name'])
+                self.tasks.append(task_group['task_type'] + '/' + task['data'])
 
     @classmethod
-    def from_json(cls, path):
+    def from_config(cls, path):
         """
         Instantiates a Harness object from a JSON file which will be passed to the Evaluator to run evaluation for a
         model on this collection of tasks.
@@ -81,9 +80,9 @@ class Harness:
             logger.info(f"Running harness: {self.config['harness_name']} with tasks {self.tasks}")
 
             for task in task_group["tasks"]:
-                logger.info(f"Running task: {task['name']}")
+                logger.info(f"Running task: {task['data']}")
 
-                data = Dataset.from_dict(load_dataset(task['data'])["test"][:])
+                data = Dataset.from_dict(load_dataset(task['data'])["test"][:5])
 
                 args_for_task = task["args_for_task"]
                 args_for_task["model_or_pipeline"] = model_or_pipeline
@@ -91,5 +90,5 @@ class Harness:
 
                 results = e.compute(**args_for_task)
 
-                results_all[task["name"]] = results
+                results_all[task["data"]] = results
         return results_all
