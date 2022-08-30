@@ -25,8 +25,8 @@ import pyarrow.parquet as pq
 # Lint as: python3
 from datasets import Dataset, load_dataset
 
-from evaluate.utils import canary
 from evaluate.evaluator.utils import choose_split
+from evaluate.utils import canary
 
 
 try:

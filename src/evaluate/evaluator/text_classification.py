@@ -12,14 +12,22 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import hashlib
+import os
 from numbers import Number
 from typing import Any, Callable, Dict, Optional, Tuple, Union
 
+import dill
+import pyarrow as pa
+import pyarrow.parquet as pq
 from datasets import Dataset, load_dataset
 from typing_extensions import Literal
 
+from evaluate.utils import canary
+
 from ..module import EvaluationModule
 from ..utils.file_utils import add_end_docstrings, add_start_docstrings
+from ..utils.logging import get_logger
 from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOCSTRING, Evaluator
 from .utils import DatasetColumnPair
 
@@ -42,6 +50,8 @@ TASK_DOCUMENTATION = r"""
     >>> )
     ```
 """
+
+logger = get_logger(__name__)
 
 
 class TextClassificationEvaluator(Evaluator):
@@ -82,6 +92,18 @@ class TextClassificationEvaluator(Evaluator):
         ]
         return {"predictions": predictions}
 
+    def compute_canary_hash(self, pipe, input_column, label_column, second_input_column=None):
+        canary_data = canary.CanaryDataset(self.task, input_column, label_column)
+        _, canary_inputs = self.prepare_data(
+            data=canary_data.data,
+            input_column=input_column,
+            label_column=label_column,
+            second_input_column=second_input_column,
+        )
+        predictions, _ = self.call_pipeline(pipe, canary_inputs)
+        if "score" in predictions[0].keys():  # Ensures `predictions` returns unique scores for each canary example
+            return hashlib.md5(dill.dumps(predictions)).hexdigest()
+
     @add_start_docstrings(EVALUTOR_COMPUTE_START_DOCSTRING)
     @add_end_docstrings(EVALUATOR_COMPUTE_RETURN_DOCSTRING, TASK_DOCUMENTATION)
     def compute(
@@ -102,6 +124,7 @@ class TextClassificationEvaluator(Evaluator):
         second_input_column: Optional[str] = None,
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
+        cache_if_possible=False,
     ) -> Tuple[Dict[str, float], Any]:
         """
         input_column (`str`, *optional*, defaults to `"text"`):
@@ -129,6 +152,26 @@ class TextClassificationEvaluator(Evaluator):
             device=device,
         )
         metric = self.prepare_metric(metric)
+
+        # If `cache_if_possible` = True, test whether this exact pipe has been instantiated before
+        if cache_if_possible:
+            canary_hash = self.compute_canary_hash(pipe, input_column, label_column)
+            if canary_hash is not None:
+                # Check if model, data, metric combination has already been computed and cached
+                cache_file_name = os.path.join(
+                    self.cache_dir, f"cache-{canary_hash}-{data._fingerprint}-{metric._hash}" + ".parquet"
+                )
+
+                # Retrieve computed results from the cache if they already exist
+                if os.path.exists(cache_file_name):
+                    logger.warning(f"Loading cached computed results at {cache_file_name}")
+                    result_from_table = pa.Table.to_pydict(pq.read_table(cache_file_name))
+                    result = {k: v[0] for (k, v) in result_from_table.items()}
+                    return result
+            else:
+                logger.warning(
+                    "This model or pipeline cannot be cached since its outputs do not conform to the expected format and a canary_hash cannot be computed."
+                )
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
