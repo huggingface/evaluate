@@ -21,7 +21,7 @@ The Brier score is a measure of the error between two probability distributions.
 Brier score is a type of evaluation metric for classification tasks, where you predict outcomes such as win/lose, spam/ham, click/no-click etc.
 `BrierScore = 1/N * sum( (p_i - o_i)^2 )`
 
-Where p is the prediction probability of occurrence of the event, and the term oi is equal to 1 if the event occurred and 0 if not. Which means: the lower the value of this score, the better the prediction. 
+Where `p_i` is the prediction probability of occurrence of the event, and the term `o_i` is equal to 1 if the event occurred and 0 if not. Which means: the lower the value of this score, the better the prediction. 
 ## How to Use
 
 At minimum, this metric requires predictions and references as inputs.
