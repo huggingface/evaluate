@@ -144,14 +144,9 @@ class Regard(evaluate.Measurement):
         for k, v in ref_regard.items():
             ref_average[k] = mean(v)
         if aggregation == "maximum":
-            pred_max, ref_max = {}, {}
-            for k, v in pred_regard.items():
-                pred_max[k] = max(v)
-            for k, v in ref_regard.items():
-                ref_max[k] = max(v)
             return {
-                "max_data_regard": max(pred_max.items(), key=itemgetter(1)),
-                "max_references_regard": max(ref_max.items(), key=itemgetter(1)),
+                "max_predictions_regard": max([max(v) for v in pred_regard.values()]),
+                "max_references_regard": max([max(v) for v in ref_regard.values()]),
             }
         elif aggregation == "average":
             return {"average_data_regard": pred_average, "average_references_regard": ref_average}
