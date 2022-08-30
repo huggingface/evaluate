@@ -11,7 +11,7 @@ tags:
 - evaluate
 - metric
 description: >-
-The Brier score is a measure of the error between two probability distributions.
+  The Brier score is a measure of the error between two probability distributions.
 ---
 
 # Metric Card for Brier Score
