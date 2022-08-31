@@ -82,7 +82,7 @@ class Harness:
             for task in task_group["tasks"]:
                 logger.info(f"Running task: {task['data']}")
 
-                data = Dataset.from_dict(load_dataset(path=task['data'], name=task.get('name'))[:5])
+                data = Dataset.from_dict(load_dataset(path=task['data'], name=task.get('name'))['test'][:5])
 
                 args_for_task = task["args_for_task"]
                 args_for_task["model_or_pipeline"] = model_or_pipeline
