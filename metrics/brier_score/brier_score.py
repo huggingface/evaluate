@@ -13,6 +13,9 @@
 # limitations under the License.
 """Brier Score Metric"""
 
+from dataclasses import dataclass
+from typing import List, Optional, Union
+
 import datasets
 from sklearn.metrics import brier_score_loss
 
@@ -84,13 +87,27 @@ Examples:
 """
 
 
+@dataclass
+class BrierScoreConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    pos_label: Union[str, int] = 1
+    sample_weight: Optional[List[float]] = None
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class BrierScore(evaluate.Metric):
-    def _info(self):
+
+    CONFIG_CLASS = BrierScoreConfig
+    ALLOWED_CONFIG_NAMES = ["default", "multilist"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=self._get_feature_types(),
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.brier_score_loss.html"],
         )
@@ -127,8 +144,10 @@ class BrierScore(evaluate.Metric):
                 ),
             ]
 
-    def _compute(self, references, predictions, sample_weight=None, pos_label=1):
+    def _compute(self, references, predictions):
 
-        brier_score = brier_score_loss(references, predictions, sample_weight=sample_weight, pos_label=pos_label)
+        brier_score = brier_score_loss(
+            references, predictions, sample_weight=self.config.sample_weight, pos_label=self.config.pos_label
+        )
 
         return {"brier_score": brier_score}
