@@ -35,7 +35,7 @@ This measurement requires two lists of strings as input, enabling comparing the 
 
 ### Inputs
 - **data** (list of `str`): prediction/candidate sentences, e.g. sentences describing a given demographic group.
-- **references** (list of `str`): reference/comparison sentences, e.g. sentences describing a different demographic group to compare against.
+- **references** (list of `str`) (optional): reference/comparison sentences, e.g. sentences describing a different demographic group to compare against.
 - **aggregation** (`str`) (optional): determines the type of aggregation performed.
     If set to `None`, the difference between the regard scores for the two categories is returned.
      Otherwise:
@@ -44,10 +44,29 @@ This measurement requires two lists of strings as input, enabling comparing the 
 
 ### Output Values
 
+**With a single input**:
+
+`regard` : the regard scores of each string in the input list (if no aggregation is specified)
+```python
+{'neutral': 0.95, 'positive': 0.02, 'negative': 0.02, 'other': 0.01}
+{'negative': 0.97, 'other': 0.02, 'neutral': 0.01, 'positive': 0.0}
+```
+
+`average_regard`: the average regard for each category (negative, positive, neutral, other)  (if `aggregation` = `average`)
+```python
+{'neutral': 0.48, 'positive': 0.01, 'negative': 0.5, 'other': 0.01}
+```
+
+`max_regard`: the maximum regard across all input strings (if `aggregation` = `maximum`)
+```python
+{'neutral': 0.95, 'positive': 0.024, 'negative': 0.972, 'other': 0.019}
+```
+
+**With two lists of inputs**:
+
 By default, this measurement outputs a dictionary containing a list of regard scores, one for each category (negative, positive, neutral, other), representing the difference in regard between the two groups.
 
-```
->>> print({k: round(v, 2) for k, v in results['regard_difference'].items()})
+```python
 {'neutral': 0.35, 'negative': -0.36, 'other': 0.01, 'positive': 0.01}
 ```
 
@@ -65,10 +84,21 @@ With the `aggregation='average'` option, this measurement will output the averag
 
 ### Examples
 
-Example 1 (default behavior):
+Example 1 (single input):
 
 ```python
->>> regard = evaluate.load("regard", module_type="measurement")
+>>> regard = evaluate.load("regard")
+>>> group1 = ['xyz are described as mean', 'xyz are thought of as being too ambitious']
+>>> results = regard.compute(data = group1)
+>>> for d in results['regard']:
+...     print({l['label']: round(l['score'],2) for l in d})
+{'neutral': 0.95, 'positive': 0.02, 'negative': 0.02, 'other': 0.01}
+{'negative': 0.97, 'other': 0.02, 'neutral': 0.01, 'positive': 0.0}
+```
+
+Example 2 (comparison mode):
+```python
+>>> regard = evaluate.load("regard", "compare")
 >>> group1 = ['xyz are described as mean', 'xyz are thought of as being too ambitious']
 >>> group2 = ['xyz are known for making too much noise', 'xyz are described as often violent']
 >>> results = regard.compute(data = group1, references = group2)
@@ -76,21 +106,23 @@ Example 1 (default behavior):
 {'neutral': 0.46, 'positive': 0.01, 'negative': -0.46, 'other': -0.01}
 ```
 
-Example 2 (returns the maximum toxicity score):
+Example 3 (returns the maximum toxicity score):
 ```python
->>> regard = evaluate.load("regard", module_type="measurement")
->>> group1 = ['the girls were mean', 'women are too ambitious']
->>> group2 = ['boys make too much noise', 'men are often violent']
+>>> regard = evaluate.load("regard", "compare")
+>>> group1 = ['xyz are described as mean', 'xyz are thought of as being too ambitious']
+>>> group2 = ['xyz are known for making too much noise', 'xyz are described as often violent']
 >>> results = regard.compute(data = group1, references = group2, aggregation = "maximum")
->>> print({k: round(v,3) for k,v in results.items()})
-{'max_predictions_regard': 0.972, 'max_references_regard': 0.979}
+>>> print({k: round(v, 2) for k, v in results['max_data_regard'].items()})
+{'neutral': 0.95, 'positive': 0.02, 'negative': 0.97, 'other': 0.02}
+>>> print({k: round(v, 2) for k, v in results['max_references_regard'].items()})
+{'negative': 0.98, 'other': 0.04, 'neutral': 0.03, 'positive': 0.0}
 ```
 
-Example 3 (returns the average toxicity score):
+Example 4 (returns the average toxicity score):
 ```python
->>> regard = evaluate.load("regard", module_type="measurement")
->>> group1 = ['the girls were mean', 'women are too ambitious']
->>> group2 = ['boys make too much noise', 'men are often violent']
+>>> regard = evaluate.load("regard", "compare")
+>>> group1 = ['xyz are described as mean', 'xyz are thought of as being too ambitious']
+>>> group2 = ['xyz are known for making too much noise', 'xyz are described as often violent']
 >>> results = regard.compute(data = group1, references = group2, aggregation = "average")
 >>> print({k: round(v, 2) for k, v in results['average_data_regard'].items()})
 {'neutral': 0.48, 'positive': 0.01, 'negative': 0.5, 'other': 0.01}
