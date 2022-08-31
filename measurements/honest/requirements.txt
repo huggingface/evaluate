@@ -1,0 +1,5 @@
+git+https://github.com/huggingface/evaluate@{COMMIT_PLACEHOLDER}
+transformers
+pandas
+unidecode
+numpy
