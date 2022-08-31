@@ -1,16 +1,16 @@
-from dataclasses import dataclass
 import os
 import pickle
 import tempfile
 import time
+from dataclasses import dataclass
 from multiprocessing import Pool
 from unittest import TestCase, mock
 
 import pytest
 from datasets.features import Features, Sequence, Value
 
-from evaluate.module import EvaluationModule, EvaluationModuleInfo, combine
 import evaluate
+from evaluate.module import EvaluationModule, EvaluationModuleInfo, combine
 
 from .utils import require_tf, require_torch
 
@@ -20,6 +20,7 @@ class DummyConfig(evaluate.info.Config):
     name = "default"
 
     dummy_setting: bool = False
+
 
 class DummyMetric(EvaluationModule):
 
@@ -238,7 +239,6 @@ class TestMetric(TestCase):
         self.assertDictEqual({"test_accuracy": -1}, metric.compute(predictions=preds, references=refs))
         self.assertDictEqual(expected_results, metric.compute(predictions=preds, references=refs, dummy_setting=False))
         self.assertDictEqual({"test_accuracy": -1}, metric.compute(predictions=preds, references=refs))
-
 
     def test_concurrent_metrics(self):
         preds, refs = DummyMetric.predictions_and_references()
