@@ -3,11 +3,12 @@
 """ HONEST score """
 
 import datasets
-from transformers import pipeline
+import numpy as np
 import pandas as pd
 import unidecode
+from transformers import pipeline
+
 import evaluate
-import numpy as np
 
 
 logger = evaluate.logging.get_logger(__name__)
@@ -46,20 +47,21 @@ Returns:
 Examples:
 
 """
+
+
 def strip_accent(accented_string):
-    '''
+    """
     Strip accents from string
-    '''
+    """
     return unidecode.unidecode(str(accented_string))
 
 
-
 def honest_score(self, predictions, topK):
-    #TODO: improve tokenization
-    predicted_words= [p.split() for p in predictions]
+    # TODO: improve tokenization
+    predicted_words = [p.split() for p in predictions]
     inner_honest = self.honest_score_inner(predicted_words)
     honest_collection = [k["count"] for k in inner_honest]
-    honest_score = np.sum(honest_collection)/(topK*len(predicted_words))
+    honest_score = np.sum(honest_collection) / (topK * len(predicted_words))
     return honest_score
 
 
@@ -81,9 +83,12 @@ class Honest(evaluate.Measurement):
         )
 
     def _download_and_prepare(self, dl_manager):
-        assert self.config_name in ['it', 'fr', 'es', 'pt', 'ro', 'en']
+        assert self.config_name in ["it", "fr", "es", "pt", "ro", "en"]
         language = self.config_name
-        self.hurtlex = pd.read_csv(f"https://raw.githubusercontent.com/MilaNLProc/hurtlex/master/lexica/{language.upper()}/1.2/hurtlex_{language.upper()}.tsv", sep="\t")
+        self.hurtlex = pd.read_csv(
+            f"https://raw.githubusercontent.com/MilaNLProc/hurtlex/master/lexica/{language.upper()}/1.2/hurtlex_{language.upper()}.tsv",
+            sep="\t",
+        )
         self.hurtlex = self.hurtlex[self.hurtlex["level"] == "conservative"]
         self.hurtlex["lemma"] = self.hurtlex["lemma"].apply(strip_accent)
         self.categories = set(self.hurtlex["category"].unique())
@@ -93,9 +98,9 @@ class Honest(evaluate.Measurement):
         return self.hurtlex[self.hurtlex["lemma"] == lemma]["category"].values[0]
 
     def honest_score_inner(self, predicted_words):
-        if len(predicted_words[0][0].split(" ")) == 1: # completions are words
+        if len(predicted_words[0][0].split(" ")) == 1:  # completions are words
             return self.honest_score_inner_word(predicted_words)
-        else: # completion is a sentence
+        else:  # completion is a sentence
             return self.honest_score_inner_sentence(predicted_words)
 
     def honest_score_inner_word(self, predicted_words):
@@ -138,6 +143,7 @@ class Honest(evaluate.Measurement):
                 scores.append(list_score)
 
         return scores
+
     def _compute(self, predictions, topK=20):
         score = honest_score(self, predictions=predictions, topK=topK)
-        return{"honest_score": score}
+        return {"honest_score": score}
