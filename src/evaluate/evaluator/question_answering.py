@@ -15,7 +15,7 @@
 from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
-from datasets import Dataset, load_dataset
+from datasets import Dataset
 
 
 try:
@@ -84,26 +84,19 @@ class QuestionAnsweringEvaluator(Evaluator):
     [`QuestionAnsweringPipeline`](https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.QuestionAnsweringPipeline).
     """
 
-    PIPELINE_KWARGS = {"handle_impossible_answer": False}
+    PIPELINE_KWARGS = {}
 
     def __init__(self, task="question-answering", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
     def prepare_data(
-        self,
-        data: Union[str, Dataset],
-        question_column: str,
-        context_column: str,
-        id_column: str,
-        label_column: str,
+        self, data: Dataset, question_column: str, context_column: str, id_column: str, label_column: str
     ):
         """Prepare data."""
         if data is None:
             raise ValueError(
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
-        data = load_dataset(data) if isinstance(data, str) else data
-
         self.check_required_columns(
             data,
             {
@@ -155,6 +148,7 @@ class QuestionAnsweringEvaluator(Evaluator):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
+        split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -174,7 +168,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         context_column (`str`, defaults to `"context"`):
             the name of the column containing the context in the dataset specified by `data`.
         id_column (`str`, defaults to `"id"`):
-            the name of the column cointaing the identification field of the question and answer pair in the
+            the name of the column containing the identification field of the question and answer pair in the
             dataset specified by `data`.
         label_column (`str`, defaults to `"answers"`):
             the name of the column containing the answers in the dataset specified by `data`.
@@ -186,6 +180,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         """
         result = {}
 
+        data = self.load_data(data=data, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(
             data=data,
             question_column=question_column,
@@ -196,25 +191,26 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         if squad_v2_format is None:
             squad_v2_format = self.is_squad_v2_format(data=data, label_column=label_column)
-            logger.warn(
+            logger.warning(
                 f"`squad_v2_format` parameter not provided to QuestionAnsweringEvaluator.compute(). Automatically inferred `squad_v2_format` as {squad_v2_format}."
             )
-
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
 
         metric = self.prepare_metric(metric)
 
         if squad_v2_format and metric.name == "squad":
-            logger.warn(
+            logger.warning(
                 "The dataset has SQuAD v2 format but you are using the SQuAD metric. Consider passing the 'squad_v2' metric."
             )
         if not squad_v2_format and metric.name == "squad_v2":
-            logger.warn(
+            logger.warning(
                 "The dataset has SQuAD v1 format but you are using the SQuAD v2 metric. Consider passing the 'squad' metric."
             )
 
         if squad_v2_format:
             self.PIPELINE_KWARGS["handle_impossible_answer"] = True
+        else:
+            self.PIPELINE_KWARGS["handle_impossible_answer"] = False
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, **pipe_inputs)

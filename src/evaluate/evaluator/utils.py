@@ -1,4 +1,4 @@
-from datasets import Dataset
+from datasets import Dataset, get_dataset_split_names
 
 
 class DatasetColumn(list):
@@ -16,6 +16,26 @@ class DatasetColumn(list):
 
     def __iter__(self):
         return (self.dataset[i][self.key] for i in range(len(self)))
+
+
+def choose_split(data):
+    available_splits = get_dataset_split_names(data)
+    preferred_split_order = [
+        "test",
+        "testing",
+        "eval",
+        "evaluation",
+        "validation",
+        "val",
+        "valid",
+        "dev",
+        "train",
+        "training",
+    ]
+    for split in preferred_split_order:
+        if split in available_splits:
+            return split
+    raise ValueError("No dataset split defined! Pass an explicit value to the `split` kwarg.")
 
 
 class DatasetColumnPair(list):
