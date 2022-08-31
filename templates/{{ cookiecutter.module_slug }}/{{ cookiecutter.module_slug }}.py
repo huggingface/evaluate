@@ -13,6 +13,7 @@
 # limitations under the License.
 """TODO: Add a description here."""
 
+from dataclasses import dataclass
 import evaluate
 import datasets
 
@@ -56,10 +57,21 @@ Examples:
 # TODO: Define external resources urls if needed
 BAD_WORDS_URL = "http://url/to/external/resource/bad_words.txt"
 
+@dataclass
+class {{ cookiecutter.module_class_name }}Config(evaluate.info.Config):
+
+    name: str = "default"
+
+    multiplier: float = 1.0
+    # TODO: add additional configs here. They can be accessed inside `_compute` 
+    # with `self.config.CONFIG_NAME` and configured with keywords in both `load` or `compute`.
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class {{ cookiecutter.module_class_name }}(evaluate.{{ cookiecutter.module_type | capitalize}}):
     """TODO: Short description of my evaluation module."""
+
+    CONFIG_CLASS = {{ cookiecutter.module_class_name }}Config
+    ALLOWED_CONFIG_NAMES = ["default"]
 
     def _info(self, config):
         # TODO: Specifies the evaluate.EvaluationModuleInfo object
@@ -93,5 +105,5 @@ class {{ cookiecutter.module_class_name }}(evaluate.{{ cookiecutter.module_type 
         # TODO: Compute the different scores of the module
         accuracy = sum(i == j for i, j in zip(predictions, references)) / len(predictions)
         return {
-            "accuracy": accuracy,
+            "accuracy": self.config.multiplier * accuracy,
         }
