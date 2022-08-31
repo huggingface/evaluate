@@ -12,9 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """Exact Match metric."""
-from dataclasses import dataclass
 import re
 import string
+from dataclasses import dataclass
 from typing import Optional
 
 import datasets
@@ -83,6 +83,7 @@ Examples:
 
 _CITATION = """
 """
+
 
 @dataclass
 class ExactMatchConfig(evaluate.info.Config):

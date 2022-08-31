@@ -218,6 +218,7 @@ def wer_and_cer(preds, labels, concatenate_texts, config_name):
 
         return {"wer": compute_score(preds, labels, "wer"), "cer": compute_score(preds, labels, "cer")}
 
+
 @dataclass
 class XtremeSConfig(evaluate.info.Config):
 

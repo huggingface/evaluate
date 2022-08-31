@@ -16,6 +16,7 @@
 
 from dataclasses import dataclass
 from typing import List, Optional, Union
+
 import datasets
 import faiss  # Here to have a nice missing dependency error message early on
 import numpy  # Here to have a nice missing dependency error message early on
@@ -86,6 +87,7 @@ Examples:
     1.0
 """
 
+
 @dataclass
 class MauveConfig(evaluate.info.Config):
 
@@ -95,23 +97,24 @@ class MauveConfig(evaluate.info.Config):
     average: str = "binary"
     labels: Optional[List[str]] = None
     sample_weight: Optional[List[float]] = None
-    
+
     p_features: Optional[List] = None
     q_features: Optional[List] = None
     p_tokens: Optional[List] = None
     q_tokens: Optional[List] = None
-    num_buckets: str ="auto"
-    pca_max_data: int =  -1
+    num_buckets: str = "auto"
+    pca_max_data: int = -1
     kmeans_explained_var: float = 0.9
     kmeans_num_redo: int = 5
     kmeans_max_iter: int = 500
     featurize_model_name: str = "gpt2-large"
-    device_id: int = -1,
+    device_id: int = (-1,)
     max_text_length: int = 1024
     divergence_curve_discretization_size: int = 25
     mauve_scaling_factor: int = 5
-    verbose: bool  = True
+    verbose: bool = True
     seed: int = 25
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Mauve(evaluate.Metric):

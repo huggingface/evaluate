@@ -13,6 +13,7 @@
 # limitations under the License.
 """ CoVal metric. """
 from dataclasses import dataclass
+
 import coval  # From: git+https://github.com/ns-moosavi/coval.git noqa: F401
 import datasets
 from coval.conll import reader, util
@@ -269,6 +270,7 @@ def check_gold_parse_annotation(key_lines):
                     break
     return has_gold_parse
 
+
 @dataclass
 class CovalConfig(evaluate.info.Config):
 
@@ -278,6 +280,7 @@ class CovalConfig(evaluate.info.Config):
     NP_only: bool = False
     min_span: bool = False
     remove_nested: bool = False
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Coval(evaluate.Metric):

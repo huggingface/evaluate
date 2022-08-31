@@ -14,6 +14,7 @@
 """Spearman correlation coefficient metric."""
 
 from dataclasses import dataclass
+
 import datasets
 from scipy.stats import spearmanr
 
@@ -96,13 +97,13 @@ _CITATION = r"""\
 }
 """
 
+
 @dataclass
 class SpearmanrConfig(evaluate.info.Config):
 
     name: str = "default"
 
     return_pvalue: bool = False
-
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)

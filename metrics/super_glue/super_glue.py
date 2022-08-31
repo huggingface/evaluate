@@ -148,18 +148,18 @@ def evaluate_multirc(ids_preds, labels):
 class SuperGlue(evaluate.Metric):
 
     ALLOWED_CONFIG_NAMES = [
-            "boolq",
-            "cb",
-            "copa",
-            "multirc",
-            "record",
-            "rte",
-            "wic",
-            "wsc",
-            "wsc.fixed",
-            "axb",
-            "axg",
-        ]
+        "boolq",
+        "cb",
+        "copa",
+        "multirc",
+        "record",
+        "rte",
+        "wic",
+        "wsc",
+        "wsc.fixed",
+        "axb",
+        "axg",
+    ]
 
     def _info(self, config):
         return evaluate.MetricInfo(

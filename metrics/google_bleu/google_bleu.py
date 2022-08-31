@@ -123,6 +123,8 @@ Examples:
         >>> print(round(results["google_bleu"], 2))
         0.4
 """
+
+
 @dataclass
 class GoogleBleuConfig(evaluate.info.Config):
 
@@ -131,6 +133,7 @@ class GoogleBleuConfig(evaluate.info.Config):
     tokenizer: Optional[Callable] = None
     min_len: int = 1
     max_len: int = 4
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class GoogleBleu(evaluate.Metric):
@@ -174,6 +177,9 @@ class GoogleBleu(evaluate.Metric):
         predictions = [tokenizer(p) for p in predictions]
         return {
             "google_bleu": gleu_score.corpus_gleu(
-                list_of_references=references, hypotheses=predictions, min_len=self.config.min_len, max_len=self.config.max_len
+                list_of_references=references,
+                hypotheses=predictions,
+                min_len=self.config.min_len,
+                max_len=self.config.max_len,
             )
         }

@@ -16,6 +16,7 @@
 # The dependencies in https://github.com/google-research/google-research/blob/master/rouge/requirements.txt
 from dataclasses import dataclass
 from typing import Callable, List, Optional
+
 import absl  # Here to have a nice missing dependency error message early on
 import datasets
 import nltk  # Here to have a nice missing dependency error message early on
@@ -91,6 +92,7 @@ class Tokenizer:
     def tokenize(self, text):
         return self.tokenizer_func(text)
 
+
 @dataclass
 class RougeConfig(evaluate.info.Config):
 
@@ -107,7 +109,7 @@ class Rouge(evaluate.Metric):
 
     CONFIG_CLASS = RougeConfig
     ALLOWED_CONFIG_NAMES = ["default"]
-    
+
     def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
@@ -136,7 +138,9 @@ class Rouge(evaluate.Metric):
         )
 
     def _compute(
-        self, predictions, references,
+        self,
+        predictions,
+        references,
     ):
         if self.config.rouge_types is None:
             rouge_types = ["rouge1", "rouge2", "rougeL", "rougeLsum"]
@@ -146,11 +150,13 @@ class Rouge(evaluate.Metric):
         multi_ref = isinstance(references[0], list)
 
         if self.config.tokenizer is not None:
-            tokenizer = Tokenizer(tokenizer)
+            tokenizer = Tokenizer(self.config.tokenizer)
         else:
             tokenizer = self.config.tokenizer
 
-        scorer = rouge_scorer.RougeScorer(rouge_types=rouge_types, use_stemmer=self.config.use_stemmer, tokenizer=tokenizer)
+        scorer = rouge_scorer.RougeScorer(
+            rouge_types=rouge_types, use_stemmer=self.config.use_stemmer, tokenizer=tokenizer
+        )
         if self.config.use_aggregator:
             aggregator = scoring.BootstrapAggregator()
         else:

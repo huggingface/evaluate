@@ -15,6 +15,7 @@
 
 from dataclasses import dataclass
 from typing import List, Optional, Union
+
 import datasets
 from sklearn.metrics import mean_absolute_error
 
@@ -82,6 +83,7 @@ Examples:
     {'mae': array([0.5, 1. ])}
 """
 
+
 @dataclass
 class MaeConfig(evaluate.info.Config):
 
@@ -95,7 +97,7 @@ class MaeConfig(evaluate.info.Config):
 class Mae(evaluate.Metric):
     CONFIG_CLASS = MaeConfig
     ALLOWED_CONFIG_NAMES = ["default", "multilist"]
-    
+
     def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
@@ -122,6 +124,8 @@ class Mae(evaluate.Metric):
 
     def _compute(self, predictions, references):
 
-        mae_score = mean_absolute_error(references, predictions, sample_weight=self.config.sample_weight, multioutput=self.config.multioutput)
+        mae_score = mean_absolute_error(
+            references, predictions, sample_weight=self.config.sample_weight, multioutput=self.config.multioutput
+        )
 
         return {"mae": mae_score}

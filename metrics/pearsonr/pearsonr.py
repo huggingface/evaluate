@@ -14,6 +14,7 @@
 """Pearson correlation coefficient metric."""
 
 from dataclasses import dataclass
+
 import datasets
 from scipy.stats import pearsonr
 
@@ -90,6 +91,7 @@ class PearsonrConfig(evaluate.info.Config):
     name: str = "default"
 
     return_pvalue: bool = True
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Pearsonr(evaluate.Metric):

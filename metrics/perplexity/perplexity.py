@@ -15,6 +15,7 @@
 
 from dataclasses import dataclass
 from typing import Optional
+
 import datasets
 import numpy as np
 import torch
@@ -85,6 +86,7 @@ Examples:
         889.28
 """
 
+
 @dataclass
 class PerplexityConfig(evaluate.info.Config):
 
@@ -94,6 +96,7 @@ class PerplexityConfig(evaluate.info.Config):
     batch_size: int = 16
     add_start_token: bool = True
     device: Optional[str] = None
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Perplexity(evaluate.Metric):

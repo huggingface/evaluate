@@ -36,6 +36,7 @@ predictions['scores']
 
 from dataclasses import dataclass
 from typing import Optional
+
 import comet  # From: unbabel-comet
 import datasets
 import torch
@@ -107,6 +108,7 @@ Examples:
     [0.19, 0.92]
 """
 
+
 @dataclass
 class COMETConfig(evaluate.info.Config):
 
@@ -118,10 +120,10 @@ class COMETConfig(evaluate.info.Config):
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class COMET(evaluate.Metric):
-    
+
     CONFIG_CLASS = COMETConfig
     ALLOWED_CONFIG_NAMES = None
-    
+
     def _info(self, config):
 
         return evaluate.MetricInfo(

@@ -675,7 +675,7 @@ def test_metric_with_non_standard_feature_names_compute(tmp_path):
     assert results == AccuracyWithNonStandardFeatureNames.expected_results()
 
 
-class TestEvaluationcombined_evaluation(TestCase):
+class TestCombinedEvaluation(TestCase):
     def test_single_module(self):
         preds, refs = DummyMetric.predictions_and_references()
         expected_results = DummyMetric.expected_results()

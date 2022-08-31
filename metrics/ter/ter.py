@@ -13,6 +13,7 @@
 # limitations under the License.
 """ TER metric as available in sacrebleu. """
 from dataclasses import dataclass
+
 import datasets
 import sacrebleu as scb
 from packaging import version
@@ -149,6 +150,8 @@ Examples:
         >>> print(results)
         {'score': 100.0, 'num_edits': 10, 'ref_length': 10.0}
 """
+
+
 @dataclass
 class TerConfig(evaluate.info.Config):
 

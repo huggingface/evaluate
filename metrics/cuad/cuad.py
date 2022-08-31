@@ -70,7 +70,7 @@ Examples:
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class CUAD(evaluate.Metric):
-    
+
     ALLOWED_CONFIG_NAMES = ["default"]
 
     def _info(self, config):

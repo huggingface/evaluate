@@ -14,6 +14,7 @@
 """ SQuAD v2 metric. """
 
 from dataclasses import dataclass
+
 import datasets
 
 import evaluate
@@ -87,6 +88,7 @@ Examples:
     {'exact': 100.0, 'f1': 100.0, 'total': 1, 'HasAns_exact': 100.0, 'HasAns_f1': 100.0, 'HasAns_total': 1, 'best_exact': 100.0, 'best_exact_thresh': 0.0, 'best_f1': 100.0, 'best_f1_thresh': 0.0}
 """
 
+
 @dataclass
 class SquadV2Config(evaluate.info.Config):
 
@@ -136,8 +138,12 @@ class SquadV2(evaluate.Metric):
         no_ans_qids = [k for k, v in qid_to_has_ans.items() if not v]
 
         exact_raw, f1_raw = get_raw_scores(dataset, predictions)
-        exact_thresh = apply_no_ans_threshold(exact_raw, no_answer_probabilities, qid_to_has_ans, self.config.no_answer_threshold)
-        f1_thresh = apply_no_ans_threshold(f1_raw, no_answer_probabilities, qid_to_has_ans, self.config.no_answer_threshold)
+        exact_thresh = apply_no_ans_threshold(
+            exact_raw, no_answer_probabilities, qid_to_has_ans, self.config.no_answer_threshold
+        )
+        f1_thresh = apply_no_ans_threshold(
+            f1_raw, no_answer_probabilities, qid_to_has_ans, self.config.no_answer_threshold
+        )
         out_eval = make_eval_dict(exact_thresh, f1_thresh)
 
         if has_ans_qids:

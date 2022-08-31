@@ -15,6 +15,7 @@
 
 from dataclasses import dataclass
 from typing import List, Optional
+
 import datasets
 from sklearn.metrics import mean_squared_error
 
@@ -130,7 +131,11 @@ class Mse(evaluate.Metric):
     def _compute(self, predictions, references):
 
         mse = mean_squared_error(
-            references, predictions, sample_weight=self.config.sample_weight, multioutput=self.config.multioutput, squared=self.config.squared
+            references,
+            predictions,
+            sample_weight=self.config.sample_weight,
+            multioutput=self.config.multioutput,
+            squared=self.config.squared,
         )
 
         return {"mse": mse}

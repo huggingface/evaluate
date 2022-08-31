@@ -15,6 +15,7 @@
 
 from dataclasses import dataclass
 from typing import List, Optional, Union
+
 import datasets
 from sklearn.metrics import precision_score
 
@@ -102,6 +103,7 @@ _CITATION = """
     year={2011}
 }
 """
+
 
 @dataclass
 class PrecisionConfig(evaluate.info.Config):

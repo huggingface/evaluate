@@ -14,6 +14,7 @@
 """ METEOR metric. """
 
 from dataclasses import dataclass
+
 import datasets
 import numpy as np
 from datasets.config import importlib_metadata, version
@@ -82,6 +83,7 @@ Examples:
     0.6944
 """
 
+
 @dataclass
 class MeteorConfig(evaluate.info.Config):
 
@@ -143,14 +145,20 @@ class Meteor(evaluate.Metric):
                     meteor_score.meteor_score(
                         [word_tokenize(ref) for ref in refs],
                         word_tokenize(pred),
-                        alpha=self.config.alpha, beta=self.config.beta, gamma=self.config.gamma
+                        alpha=self.config.alpha,
+                        beta=self.config.beta,
+                        gamma=self.config.gamma,
                     )
                     for refs, pred in zip(references, predictions)
                 ]
             else:
                 scores = [
                     meteor_score.single_meteor_score(
-                        word_tokenize(ref), word_tokenize(pred), alpha=self.config.alpha, beta=self.config.beta, gamma=self.config.gamma
+                        word_tokenize(ref),
+                        word_tokenize(pred),
+                        alpha=self.config.alpha,
+                        beta=self.config.beta,
+                        gamma=self.config.gamma,
                     )
                     for ref, pred in zip(references, predictions)
                 ]
@@ -160,13 +168,17 @@ class Meteor(evaluate.Metric):
                     meteor_score.meteor_score(
                         [[word_tokenize(ref) for ref in group] for group in references][0],
                         word_tokenize(pred),
-                        alpha=self.config.alpha, beta=self.config.beta, gamma=self.config.gamma
+                        alpha=self.config.alpha,
+                        beta=self.config.beta,
+                        gamma=self.config.gamma,
                     )
                     for ref, pred in zip(references, predictions)
                 ]
             else:
                 scores = [
-                    meteor_score.single_meteor_score(ref, pred, alpha=self.config.alpha, beta=self.config.beta, gamma=self.config.gamma)
+                    meteor_score.single_meteor_score(
+                        ref, pred, alpha=self.config.alpha, beta=self.config.beta, gamma=self.config.gamma
+                    )
                     for ref, pred in zip(references, predictions)
                 ]
 

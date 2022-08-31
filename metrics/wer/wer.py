@@ -14,6 +14,7 @@
 """ Word Error Ratio (WER) metric. """
 
 from dataclasses import dataclass
+
 import datasets
 from jiwer import compute_measures
 
@@ -73,6 +74,7 @@ Examples:
     >>> print(wer_score)
     0.5
 """
+
 
 @dataclass
 class WERConfig(evaluate.info.Config):

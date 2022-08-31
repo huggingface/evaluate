@@ -284,6 +284,7 @@ class MeanIoUConfig(evaluate.info.Config):
     label_map: Optional[Dict[int, int]] = None
     reduce_labels: bool = False
 
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class MeanIoU(evaluate.Metric):
 
@@ -318,7 +319,7 @@ class MeanIoU(evaluate.Metric):
             raise ValueError("You have to specify a value for `num_labels`.")
         if self.config.ignore_index is None:
             raise ValueError("You have to specify a value for `ignore_index`.")
-        
+
         iou_result = mean_iou(
             results=predictions,
             gt_seg_maps=references,

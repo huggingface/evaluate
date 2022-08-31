@@ -15,6 +15,7 @@
 
 from dataclasses import dataclass
 from typing import List, Optional
+
 import datasets
 import numpy as np
 from rl_reliability_metrics.evaluation import eval_metrics
@@ -81,6 +82,8 @@ Examples:
     >>> print(results["LowerCVaROnRaw"].round(4))
     [0.0258]
 """
+
+
 @dataclass
 class RLReliabilityConfig(evaluate.info.Config):
 
@@ -92,6 +95,7 @@ class RLReliabilityConfig(evaluate.info.Config):
     window_size_trimmed: int = 99000
     alpha: float = 0.05
     eval_points: Optional[List] = None
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class RLReliability(evaluate.Metric):

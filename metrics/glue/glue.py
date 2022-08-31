@@ -106,19 +106,19 @@ def pearson_and_spearman(preds, labels):
 class Glue(evaluate.Metric):
 
     ALLOWED_CONFIG_NAMES = [
-            "sst2",
-            "mnli",
-            "mnli_mismatched",
-            "mnli_matched",
-            "cola",
-            "stsb",
-            "mrpc",
-            "qqp",
-            "qnli",
-            "rte",
-            "wnli",
-            "hans",
-        ]
+        "sst2",
+        "mnli",
+        "mnli_mismatched",
+        "mnli_matched",
+        "cola",
+        "stsb",
+        "mrpc",
+        "qqp",
+        "qnli",
+        "rte",
+        "wnli",
+        "hans",
+    ]
 
     def _info(self, config):
         return evaluate.MetricInfo(

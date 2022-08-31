@@ -106,20 +106,20 @@ def precision_at_10(en_sentvecs, in_sentvecs):
 class IndicGlue(evaluate.Metric):
 
     ALLOWED_CONFIG_NAMES = [
-            "wnli",
-            "copa",
-            "sna",
-            "csqa",
-            "wstp",
-            "inltkh",
-            "bbca",
-            "cvit-mkb-clsr",
-            "iitp-mr",
-            "iitp-pr",
-            "actsa-sc",
-            "md",
-            "wiki-ner",
-        ]
+        "wnli",
+        "copa",
+        "sna",
+        "csqa",
+        "wstp",
+        "inltkh",
+        "bbca",
+        "cvit-mkb-clsr",
+        "iitp-mr",
+        "iitp-pr",
+        "actsa-sc",
+        "md",
+        "wiki-ner",
+    ]
 
     def _info(self, config):
         return evaluate.MetricInfo(

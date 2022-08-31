@@ -15,6 +15,7 @@
 
 from dataclasses import dataclass
 from typing import Callable, Optional
+
 import datasets
 import sacrebleu as scb
 from packaging import version
@@ -103,6 +104,7 @@ Examples:
         39.8
 """
 
+
 @dataclass
 class SacrebleuConfig(evaluate.info.Config):
 
@@ -115,6 +117,7 @@ class SacrebleuConfig(evaluate.info.Config):
     lowercase: bool = False
     tokenize: Optional[Callable] = None
     use_effective_order: bool = False
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Sacrebleu(evaluate.Metric):

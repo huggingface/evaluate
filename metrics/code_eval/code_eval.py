@@ -16,11 +16,11 @@ This is an evaluation harness for the HumanEval problem solving dataset
 described in the paper "Evaluating Large Language Models Trained on Code"
 (https://arxiv.org/abs/2107.03374)."""
 
-from dataclasses import dataclass, field
 import itertools
 import os
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
 from typing import List
 
 import datasets

@@ -325,7 +325,6 @@ class WikiSplit(evaluate.Metric):
 
     ALLOWED_CONFIG_NAMES = ["default"]
 
-
     def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,

@@ -13,8 +13,8 @@
 # limitations under the License.
 """ seqeval metric. """
 
-from dataclasses import dataclass
 import importlib
+from dataclasses import dataclass
 from typing import List, Optional, Union
 
 import datasets
@@ -99,6 +99,7 @@ Examples:
     1.0
 """
 
+
 @dataclass
 class SeqevalConfig(evaluate.info.Config):
 
@@ -109,6 +110,7 @@ class SeqevalConfig(evaluate.info.Config):
     mode: Optional[str] = None
     sample_weight: Optional[List[int]] = None
     zero_division: Union[str, int] = "warn"
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Seqeval(evaluate.Metric):
@@ -143,7 +145,9 @@ class Seqeval(evaluate.Metric):
                 scheme_module = importlib.import_module("seqeval.scheme")
                 scheme = getattr(scheme_module, self.config.scheme)
             except AttributeError:
-                raise ValueError(f"Scheme should be one of [IOB1, IOB2, IOE1, IOE2, IOBES, BILOU], got {scheme}")
+                raise ValueError(f"Scheme should be one of [IOB1, IOB2, IOE1, IOE2, IOBES, BILOU], got {self.config.scheme}")
+        else:
+            scheme = self.config.scheme
         report = classification_report(
             y_true=references,
             y_pred=predictions,

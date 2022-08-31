@@ -15,6 +15,7 @@
 
 from dataclasses import dataclass
 from typing import List, Optional, Union
+
 import datasets
 from sklearn.metrics import roc_auc_score
 
@@ -143,6 +144,7 @@ year={2011}
 }
 """
 
+
 @dataclass
 class ROCAUCConfig(evaluate.info.Config):
 
@@ -152,7 +154,7 @@ class ROCAUCConfig(evaluate.info.Config):
     average: str = "macro"
     labels: Optional[List[str]] = None
     sample_weight: Optional[List[float]] = None
-    max_fpr: Optional[float] = None 
+    max_fpr: Optional[float] = None
     multi_class: str = "raise"
 
 

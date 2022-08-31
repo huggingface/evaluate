@@ -15,6 +15,7 @@
 
 from dataclasses import dataclass
 from typing import List, Optional
+
 import datasets
 import numpy as np
 
@@ -58,13 +59,13 @@ Examples:
     {'mahalanobis': array([0.5])}
 """
 
+
 @dataclass
 class MahalanobisConfig(evaluate.info.Config):
 
     name: str = "default"
 
     reference_distribution: Optional[List] = None
-
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
@@ -86,7 +87,7 @@ class Mahalanobis(evaluate.Metric):
         )
 
     def _compute(self, X):
-        
+
         if self.config.reference_distribution is None:
             raise ValueError("You need to provide a `reference_distribution`.")
         else:

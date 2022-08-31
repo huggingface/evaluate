@@ -15,6 +15,7 @@
 
 from dataclasses import dataclass
 from typing import Optional
+
 import datasets
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trainer, TrainingArguments
@@ -55,6 +56,7 @@ Examples:
     [0.631, 0.645]
 """
 
+
 @dataclass
 class FRUGALSCOREConfig(evaluate.info.Config):
 
@@ -63,6 +65,7 @@ class FRUGALSCOREConfig(evaluate.info.Config):
     batch_size: int = 32
     max_length: int = 128
     device: Optional[str] = None
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class FRUGALSCORE(evaluate.Metric):
