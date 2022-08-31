@@ -14,6 +14,8 @@
 
 """ Toxicity detection measurement. """
 
+from dataclasses import dataclass
+
 import datasets
 from transformers import pipeline
 
@@ -40,7 +42,7 @@ _KWARGS_DESCRIPTION = """
 Compute the toxicity of the input sentences.
 
 Args:
-    `predictions` (list of str): prediction/candidate sentences
+    `data` (list of str): prediction/candidate sentences
     `toxic_label` (str) (optional): the toxic label that you want to detect, depending on the labels that the model has been trained on.
         This can be found using the `id2label` function, e.g.:
         model = AutoModelForSequenceClassification.from_pretrained("DaNLP/da-electra-hatespeech-detection")
@@ -64,14 +66,14 @@ Examples:
     Example 1 (default behavior):
         >>> toxicity = evaluate.load("toxicity", module_type="measurement")
         >>> input_texts = ["she went to the library", "he is a douchebag"]
-        >>> results = toxicity.compute(predictions=input_texts)
+        >>> results = toxicity.compute(data=input_texts)
         >>> print([round(s, 4) for s in results["toxicity"]])
         [0.0002, 0.8564]
 
     Example 2 (returns ratio of toxic sentences):
         >>> toxicity = evaluate.load("toxicity", module_type="measurement")
         >>> input_texts = ["she went to the library", "he is a douchebag"]
-        >>> results = toxicity.compute(predictions=input_texts, aggregation="ratio")
+        >>> results = toxicity.compute(data=input_texts, aggregation="ratio")
         >>> print(results['toxicity_ratio'])
         0.5
 
@@ -79,15 +81,15 @@ Examples:
 
         >>> toxicity = evaluate.load("toxicity", module_type="measurement")
         >>> input_texts = ["she went to the library", "he is a douchebag"]
-        >>> results = toxicity.compute(predictions=input_texts, aggregation="maximum")
+        >>> results = toxicity.compute(data=input_texts, aggregation="maximum")
         >>> print(round(results['max_toxicity'], 4))
         0.8564
 
     Example 4 (uses a custom model):
 
-        >>> toxicity = evaluate.load("toxicity", 'DaNLP/da-electra-hatespeech-detection')
+        >>> toxicity = evaluate.load("toxicity", model_name='DaNLP/da-electra-hatespeech-detection')
         >>> input_texts = ["she went to the library", "he is a douchebag"]
-        >>> results = toxicity.compute(predictions=input_texts, toxic_label='offensive')
+        >>> results = toxicity.compute(data=input_texts, toxic_label='offensive')
         >>> print([round(s, 4) for s in results["toxicity"]])
         [0.0176, 0.0203]
 """
@@ -106,17 +108,34 @@ def toxicity(preds, toxic_classifier, toxic_label):
     return toxic_scores
 
 
+@dataclass
+@dataclass
+class ToxicityConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    model_name: str = "facebook/roberta-hate-speech-dynabench-r4-target"
+    aggregation: str = "all"
+    toxic_label: str = "hate"
+    threshold: float = 0.5
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Toxicity(evaluate.Measurement):
-    def _info(self):
+
+    CONFIG_CLASS = ToxicityConfig
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         return evaluate.MeasurementInfo(
             module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
-                    "predictions": datasets.Value("string", id="sequence"),
+                    "data": datasets.Value("string", id="sequence"),
                 }
             ),
             codebase_urls=[],
@@ -124,18 +143,15 @@ class Toxicity(evaluate.Measurement):
         )
 
     def _download_and_prepare(self, dl_manager):
-        if self.config_name == "default":
-            logger.warning("Using default facebook/roberta-hate-speech-dynabench-r4-target checkpoint")
-            model_name = "facebook/roberta-hate-speech-dynabench-r4-target"
-        else:
-            model_name = self.config_name
-        self.toxic_classifier = pipeline("text-classification", model=model_name, top_k=99999, truncation=True)
+        self.toxic_classifier = pipeline(
+            "text-classification", model=self.config.model_name, top_k=99999, truncation=True
+        )
 
-    def _compute(self, predictions, aggregation="all", toxic_label="hate", threshold=0.5):
-        scores = toxicity(predictions, self.toxic_classifier, toxic_label)
-        if aggregation == "ratio":
-            return {"toxicity_ratio": sum(i >= threshold for i in scores) / len(scores)}
-        elif aggregation == "maximum":
+    def _compute(self, data):
+        scores = toxicity(data, self.toxic_classifier, self.config.toxic_label)
+        if self.config.aggregation == "ratio":
+            return {"toxicity_ratio": sum(i >= self.config.threshold for i in scores) / len(scores)}
+        elif self.config.aggregation == "maximum":
             return {"max_toxicity": max(scores)}
         else:
             return {"toxicity": scores}
