@@ -145,7 +145,9 @@ class Seqeval(evaluate.Metric):
                 scheme_module = importlib.import_module("seqeval.scheme")
                 scheme = getattr(scheme_module, self.config.scheme)
             except AttributeError:
-                raise ValueError(f"Scheme should be one of [IOB1, IOB2, IOE1, IOE2, IOBES, BILOU], got {self.config.scheme}")
+                raise ValueError(
+                    f"Scheme should be one of [IOB1, IOB2, IOE1, IOE2, IOBES, BILOU], got {self.config.scheme}"
+                )
         else:
             scheme = self.config.scheme
         report = classification_report(
