@@ -1,3 +1,4 @@
+import functools
 import os
 import tempfile
 import unittest
@@ -9,6 +10,7 @@ from pathlib import Path
 from unittest.mock import patch
 
 from evaluate import config
+from evaluate.loading import load
 
 
 def parse_flag_from_env(key, default=False):
@@ -185,6 +187,20 @@ def packaged(test_case):
     if not _run_packaged_tests or _run_packaged_tests == 0:
         test_case = unittest.skip("test is packaged")(test_case)
     return test_case
+
+
+def load_local_metrics(evaluation_module_name, *args, **kwargs):
+    return load(os.path.join("metrics", evaluation_module_name), *args, **kwargs)
+
+
+def use_local_metrics(f):
+    @patch("evaluate.evaluators.base.load", side_effect=load_local_metrics)
+    @patch("evaluate.load", side_effect=load_local_metrics)
+    @functools.wraps(f)
+    def functor(*args, **kwargs):
+        return f(args[0])
+
+    return functor
 
 
 def remote(test_case):

@@ -11,9 +11,10 @@ import transformers
 from datasets import load_dataset
 from transformers import AutoFeatureExtractor, AutoModelForImageClassification, Trainer, TrainingArguments, pipeline
 
-from evaluate import evaluator, load
+import evaluate
+from evaluate import evaluator
 
-from .utils import slow
+from .utils import slow, use_local_metrics
 
 
 class TestEvaluatorTrainerParity(unittest.TestCase):
@@ -33,6 +34,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
     def tearDown(self):
         shutil.rmtree(self.dir_path, ignore_errors=True)
 
+    @use_local_metrics
     def test_text_classification_parity(self):
         model_name = "philschmid/tiny-bert-sst2-distilled"
 
@@ -77,6 +79,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["accuracy"])
 
     @slow
+    @use_local_metrics
     def test_text_classification_parity_two_columns(self):
         model_name = "prajjwal1/bert-tiny-mnli"
         max_eval_samples = 150
@@ -121,6 +124,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["accuracy"])
 
+    @use_local_metrics
     def test_image_classification_parity(self):
         # we can not compare to the Pytorch transformers example, that uses custom preprocessing on the images
         model_name = "douwekiela/resnet-18-finetuned-dogfood"
@@ -140,7 +144,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             labels = torch.tensor([example["labels"] for example in examples])
             return {"pixel_values": pixel_values, "labels": labels}
 
-        metric = load("accuracy")
+        metric = evaluate.load("accuracy")
         trainer = Trainer(
             model=model,
             args=TrainingArguments(
@@ -179,6 +183,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
 
         self.assertEqual(transformers_results["eval_accuracy"], evaluator_results["accuracy"])
 
+    @use_local_metrics
     def test_question_answering_parity(self):
         model_name_v1 = "anas-awadalla/bert-tiny-finetuned-squad"
         model_name_v2 = "mrm8488/bert-tiny-finetuned-squadv2"
@@ -269,6 +274,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         self.assertEqual(transformers_results["eval_HasAns_f1"], evaluator_results["HasAns_f1"])
         self.assertEqual(transformers_results["eval_NoAns_f1"], evaluator_results["NoAns_f1"])
 
+    @use_local_metrics
     def test_token_classification_parity(self):
         model_name = "hf-internal-testing/tiny-bert-for-token-classification"
         n_samples = 500
