@@ -222,6 +222,10 @@ class TestTextClassificationEvaluator(TestCase):
         # Test that the data point returned is correct; this maps to the first example in the dataset
         self.assertEqual(data[0]["text"], "I love movies about whales!")
 
+        # Test loading subset of a dataset with the `name` field
+        data = self.evaluator.load_data("evaluate/glue-ci", subset="cola", split="test")
+        self.assertEqual(isinstance(data, Dataset), True)
+
     def test_overwrite_default_metric(self):
         accuracy = load("accuracy")
         results = self.evaluator.compute(
