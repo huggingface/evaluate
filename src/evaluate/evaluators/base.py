@@ -19,7 +19,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 # Lint as: python3
 from datasets import Dataset, load_dataset
 
-from evaluate.evaluator.utils import choose_split
+from evaluate.evaluators.utils import choose_split
 
 
 try:

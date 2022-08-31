@@ -26,7 +26,7 @@ SCRIPTS_VERSION = "main" if version.parse(__version__).is_devrelease else __vers
 
 del version
 
-from .evaluator import (
+from .evaluators import (
     Evaluator,
     ImageClassificationEvaluator,
     QuestionAnsweringEvaluator,
