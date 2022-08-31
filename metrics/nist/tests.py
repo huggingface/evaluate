@@ -1,6 +1,6 @@
 from _pytest.fixtures import fixture
-
 from nist import NIST
+
 
 nist = NIST()
 
@@ -17,7 +17,9 @@ def reference_sent1():
 
 @fixture
 def reference_sent2():
-    return "It is the guiding principle which guarantees the military forces always being under the command of the Party"
+    return (
+        "It is the guiding principle which guarantees the military forces always being under the command of the Party"
+    )
 
 
 def test_nist_sentence(hypothesis_sent1, reference_sent1, reference_sent2):

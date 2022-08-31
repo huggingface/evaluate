@@ -13,8 +13,9 @@
 # limitations under the License.
 """NLTK's NIST implementation on both the sentence and corpus level"""
 import datasets
-from datasets import Sequence, Value
 import nltk
+from datasets import Sequence, Value
+
 
 nltk.download("perluniprops")  # NISTTokenizer requirement
 
@@ -92,8 +93,9 @@ class NIST(evaluate.Metric):
                 datasets.Features(
                     {
                         "predictions": Sequence(Value("string", id="prediction"), id="predictions"),
-                        "references": Sequence(Sequence(Value("string", id="reference"), id="references"),
-                                               id="reference_corpus"),
+                        "references": Sequence(
+                            Sequence(Value("string", id="reference"), id="references"), id="reference_corpus"
+                        ),
                     }
                 ),
             ],
@@ -110,6 +112,8 @@ class NIST(evaluate.Metric):
             return {"nist": sentence_nist(references=references, hypothesis=predictions, n=n)}
         elif isinstance(predictions[0], str) and isinstance(references[0][0], str):  # corpus nist
             predictions = [tokenizer.tokenize(pred, return_str=False, **tokenize_kwargs) for pred in predictions]
-            references = [[tokenizer.tokenize(ref, return_str=False, **tokenize_kwargs) for ref in ref_sentences]
-                          for ref_sentences in references]
+            references = [
+                [tokenizer.tokenize(ref, return_str=False, **tokenize_kwargs) for ref in ref_sentences]
+                for ref_sentences in references
+            ]
             return {"nist": corpus_nist(list_of_references=references, hypotheses=predictions, n=n)}
