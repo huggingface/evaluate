@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 import os
 import pickle
 import tempfile
@@ -9,11 +10,22 @@ import pytest
 from datasets.features import Features, Sequence, Value
 
 from evaluate.module import EvaluationModule, EvaluationModuleInfo, combine
+import evaluate
 
 from .utils import require_tf, require_torch
 
 
+@dataclass
+class DummyConfig(evaluate.info.Config):
+    name = "default"
+
+    dummy_setting: bool = False
+
 class DummyMetric(EvaluationModule):
+
+    CONFIG_CLASS = DummyConfig
+    ALLOWED_CONFIG_NAMES = ["default", "test"]
+
     def _info(self, config):
         return EvaluationModuleInfo(
             description="dummy metric for tests",
@@ -24,6 +36,9 @@ class DummyMetric(EvaluationModule):
 
     def _compute(self, predictions, references):
         result = {}
+
+        if self.config.dummy_setting:
+            return {"test_accuracy": -1}
         if not predictions:
             return result
         else:
@@ -207,6 +222,23 @@ class TestMetric(TestCase):
             metric = DummyMetric(experiment_id="test_dummy_metric", cache_dir=tmp_dir)
             self.assertDictEqual(expected_results, metric.compute(predictions=preds, references=refs))
             del metric
+
+    def test_metric_with_wrong_config(self):
+        DummyMetric(config_name="test")
+        with self.assertRaises(ValueError):
+            DummyMetric(config_name="wrong")
+
+    def test_metric_with_temporary_config(self):
+
+        preds, refs = DummyMetric.predictions_and_references()
+        expected_results = DummyMetric.expected_results()
+
+        metric = DummyMetric(dummy_setting=True)
+
+        self.assertDictEqual({"test_accuracy": -1}, metric.compute(predictions=preds, references=refs))
+        self.assertDictEqual(expected_results, metric.compute(predictions=preds, references=refs, dummy_setting=False))
+        self.assertDictEqual({"test_accuracy": -1}, metric.compute(predictions=preds, references=refs))
+
 
     def test_concurrent_metrics(self):
         preds, refs = DummyMetric.predictions_and_references()
