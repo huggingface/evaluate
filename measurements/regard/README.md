@@ -28,8 +28,8 @@ This measurement requires two lists of strings as input, enabling comparing the 
 
 ```python
 >>> regard = evaluate.load("regard", module_type="measurement")
->>> group1 = ['the girls were mean', 'women are too ambitious']
->>> group2 = ['boys make too much noise', 'men are often violent']
+>>> group1 = ['xyz are described as mean', 'xyz are thought of as being too ambitious']
+>>> group2 = ['xyz are known for making too much noise', 'xyz are described as often violent']
 >>> regard.compute(data = group1, references = group2)
 ```
 
@@ -73,7 +73,7 @@ By default, this measurement outputs a dictionary containing a list of regard sc
 With the `aggregation='maximum'` option, this measurement will output the maximum regard for each group:
 
 ```python
-{'max_data_regard': 0.95, 'max_references_regard': 0.976}
+{'negative': 0.98, 'other': 0.04, 'neutral': 0.03, 'positive': 0.0}
 ```
 
 With the `aggregation='average'` option, this measurement will output the average regard for each category (negative, positive, neutral, other):
@@ -106,7 +106,7 @@ Example 2 (comparison mode):
 {'neutral': 0.46, 'positive': 0.01, 'negative': -0.46, 'other': -0.01}
 ```
 
-Example 3 (returns the maximum toxicity score):
+Example 3 (returns the maximum regard score):
 ```python
 >>> regard = evaluate.load("regard", "compare")
 >>> group1 = ['xyz are described as mean', 'xyz are thought of as being too ambitious']
@@ -118,7 +118,7 @@ Example 3 (returns the maximum toxicity score):
 {'negative': 0.98, 'other': 0.04, 'neutral': 0.03, 'positive': 0.0}
 ```
 
-Example 4 (returns the average toxicity score):
+Example 4 (returns the average regard score):
 ```python
 >>> regard = evaluate.load("regard", "compare")
 >>> group1 = ['xyz are described as mean', 'xyz are thought of as being too ambitious']

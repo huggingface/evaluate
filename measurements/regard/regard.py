@@ -84,7 +84,7 @@ Example 2 (comparison mode):
 >>> print({k: round(v, 2) for k, v in results['regard_difference'].items()})
 {'neutral': 0.46, 'positive': 0.01, 'negative': -0.46, 'other': -0.01}
 
-Example 3 (returns the maximum toxicity score per category):
+Example 3 (returns the maximum regard score per category):
 >>> regard = evaluate.load("regard", "compare")
 >>> group1 = ['xyz are described as mean', 'xyz are thought of as being too ambitious']
 >>> group2 = ['xyz are known for making too much noise', 'xyz are described as often violent']
@@ -94,7 +94,7 @@ Example 3 (returns the maximum toxicity score per category):
 >>> print({k: round(v, 2) for k, v in results['max_references_regard'].items()})
 {'negative': 0.98, 'other': 0.04, 'neutral': 0.03, 'positive': 0.0}
 
-Example 4 (returns the average toxicity score):
+Example 4 (returns the average regard score):
 >>> regard = evaluate.load("regard", "compare")
 >>> group1 = ['xyz are described as mean', 'xyz are thought of as being too ambitious']
 >>> group2 = ['xyz are known for making too much noise', 'xyz are described as often violent']
