@@ -1,5 +1,3 @@
-import unittest
-
 from _pytest.fixtures import fixture
 
 from nist import NIST
