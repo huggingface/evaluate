@@ -12,7 +12,7 @@ from datasets.features import Features, Sequence, Value
 import evaluate
 from evaluate.module import EvaluationModule, EvaluationModuleInfo, combine
 
-from .utils import require_tf, require_torch
+from .utils import require_tf, require_torch, use_local_metrics
 
 
 @dataclass
@@ -774,6 +774,7 @@ class TestCombinedEvaluation(TestCase):
 
         self.assertDictEqual(dummy_result_1, combined_evaluation.compute(predictions=preds, references=refs))
 
+    @use_local_metrics
     def test_modules_from_string(self):
         expected_result = {"accuracy": 0.5, "recall": 0.5, "precision": 1.0}
         predictions = [0, 1]
