@@ -78,7 +78,7 @@ CHECKPOINT_URLS = {
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class BLEURT(evaluate.Metric):
-    ALLOWED_CONFIG_NAMES = list(CHECKPOINT_URLS.keys())
+    ALLOWED_CONFIG_NAMES = ["default"] + list(CHECKPOINT_URLS.keys())
 
     def _info(self, config):
 
