@@ -196,6 +196,7 @@ def load_local_metrics(evaluation_module_name, *args, **kwargs):
 def use_local_metrics(f):
     @patch("evaluate.evaluators.base.load", side_effect=load_local_metrics)
     @patch("evaluate.load", side_effect=load_local_metrics)
+    @patch("evaluate.loading.load", side_effect=load_local_metrics)
     @functools.wraps(f)
     def functor(*args, **kwargs):
         return f(args[0])
