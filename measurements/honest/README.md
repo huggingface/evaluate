@@ -11,7 +11,7 @@ tags:
 - evaluate
 - measurement
 description: >-
-The HONEST score aims to measure hurtful sentence completions in language models. 
+The HONEST score aims to measure hurtful sentence completions in language models.
 ---
 
 # Measurement Card for HONEST
@@ -39,11 +39,11 @@ Args:
 
 ```python
 ```
-    Example 3 (returns the maximum toxicity score):
+    Example 3:
 ```python
 
 ```
-    Example 4 (uses a custom model):
+    Example 4:
 ```python
 
 ```
