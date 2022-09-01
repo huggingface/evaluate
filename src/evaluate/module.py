@@ -461,10 +461,10 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             with temp_seed(self.seed):
                 config_state = deepcopy(self.config)
                 self.config.update(compute_kwargs)
-
-                output = self._compute(**inputs)
-
-                self._module_info.config = config_state
+                try:
+                    output = self._compute(**inputs)
+                finally:
+                    self._module_info.config = config_state
 
             if self.buf_writer is not None:
                 self.buf_writer = None
