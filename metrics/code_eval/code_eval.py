@@ -140,7 +140,7 @@ class CodeEvalConfig(evaluate.info.Config):
 
     k: List[int] = field(default_factory=lambda: [1, 10, 100])
     num_workers: int = 4
-    timout: float = 3.0
+    timeout: float = 3.0
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
