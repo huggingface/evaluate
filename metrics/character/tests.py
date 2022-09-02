@@ -4,6 +4,7 @@ from pytest import fixture
 
 from character import Character
 
+
 character = Character()
 
 

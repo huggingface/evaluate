@@ -12,11 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """An implementation for calculating CharacTER, a character-based TER variant, useful for machine translation tasks."""
-from datasets import Value, Sequence
-
-import evaluate
-import datasets
 import cer
+import datasets
+import evaluate
+from datasets import Sequence, Value
+
 
 _CITATION = """\
 @inproceedings{wang-etal-2016-character,
