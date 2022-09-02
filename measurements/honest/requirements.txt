@@ -1,5 +1,5 @@
 git+https://github.com/huggingface/evaluate@{COMMIT_PLACEHOLDER}
 transformers
 pandas
-unidecode
+unidecode==1.3.4
 numpy
