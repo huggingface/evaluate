@@ -26,7 +26,7 @@ NIST was developed for machine translation evaluation.
 ## How to Use
 
 ```python
->>> nist = evaluate.load("nist")
+>>> nist = evaluate.load("nist_mt")
 >>> hypothesis1 = ['It', 'is', 'a', 'guide', 'to', 'action', 'which',
 ...               'ensures', 'that', 'the', 'military', 'always',
 ...               'obeys', 'the', 'commands', 'of', 'the', 'party']
@@ -45,7 +45,7 @@ NIST was developed for machine translation evaluation.
 ...               'of', 'the', 'party']
 
 >>> nist.compute(hypothesis1, [reference1, reference2])
-{'nist': 3.3709935957649324}
+{'nist_mt': 3.3709935957649324}
 ```
 
 ### Inputs
@@ -61,7 +61,7 @@ NIST was developed for machine translation evaluation.
 
 Output Example:
 ```python
-{'nist': 3.3709935957649324}
+{'nist_mt': 3.3709935957649324}
 ```
 
 

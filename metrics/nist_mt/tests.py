@@ -1,8 +1,8 @@
 from _pytest.fixtures import fixture
-from nist import NIST
+from nist_mt import Nist_mt
 
 
-nist = NIST()
+nist = Nist_mt()
 
 
 @fixture

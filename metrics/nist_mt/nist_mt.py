@@ -62,19 +62,19 @@ Args:
     n: highest n-gram order
     tokenize_kwargs: arguments passed to the tokenizer (see: https://github.com/nltk/nltk/blob/90fa546ea600194f2799ee51eaf1b729c128711e/nltk/tokenize/nist.py#L139)
 Returns:
-    'nist': nist score 
+    'nist_mt': nist_mt score 
 Examples:
-    >>> nist = evaluate.load("nist")
+    >>> nist_mt = evaluate.load("nist_mt")
     >>> hypothesis1 = "It is a guide to action which ensures that the military always obeys the commands of the party"
     >>> reference1 = "It is a guide to action that ensures that the military will forever heed Party commands"
     >>> reference2 = "It is the guiding principle which guarantees the military forces always being under the command of the Party"
-    >>> nist.compute(hypothesis1, [reference1, reference2])
-    {'nist': 3.3709935957649324}
+    >>> nist_mt.compute(hypothesis1, [reference1, reference2])
+    {'nist_mt': 3.3709935957649324}
 """
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class NIST(evaluate.Metric):
+class Nist_mt(evaluate.Metric):
     """A wrapper around NLTK's NIST implementation."""
 
     def _info(self):
@@ -106,14 +106,14 @@ class NIST(evaluate.Metric):
 
     def _compute(self, predictions, references, n: int = 5, **tokenize_kwargs):
         tokenizer = NISTTokenizer()
-        if isinstance(predictions, str) and isinstance(references[0], str):  # sentence nist
+        if isinstance(predictions, str) and isinstance(references[0], str):  # sentence nist_mt
             predictions = tokenizer.tokenize(predictions, return_str=False, **tokenize_kwargs)
             references = [tokenizer.tokenize(ref, return_str=False, **tokenize_kwargs) for ref in references]
-            return {"nist": sentence_nist(references=references, hypothesis=predictions, n=n)}
-        elif isinstance(predictions[0], str) and isinstance(references[0][0], str):  # corpus nist
+            return {"nist_mt": sentence_nist(references=references, hypothesis=predictions, n=n)}
+        elif isinstance(predictions[0], str) and isinstance(references[0][0], str):  # corpus nist_mt
             predictions = [tokenizer.tokenize(pred, return_str=False, **tokenize_kwargs) for pred in predictions]
             references = [
                 [tokenizer.tokenize(ref, return_str=False, **tokenize_kwargs) for ref in ref_sentences]
                 for ref_sentences in references
             ]
-            return {"nist": corpus_nist(list_of_references=references, hypotheses=predictions, n=n)}
+            return {"nist_mt": corpus_nist(list_of_references=references, hypotheses=predictions, n=n)}
