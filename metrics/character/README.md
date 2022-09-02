@@ -12,7 +12,13 @@ tags:
 - metric
 - machine-translation
 description: >-
-  CharacTer is a novel character level metric inspired by the commonly applied translation edit rate (TER). It is
+  CharacTer is a novel character level metric inspired by the commonly applied translation edit rate (TER).
+---
+
+# Metric Card for CharacTER
+
+## Metric Description
+CharacTer is a novel character level metric inspired by the commonly applied translation edit rate (TER). It is 
 defined as the minimum number of character edits required to adjust a hypothesis, until it completely matches the
 reference, normalized by the length of the hypothesis sentence. CharacTer calculates the character level edit
 distance while performing the shift edit on word level. Unlike the strict matching criterion in TER, a hypothesis
@@ -21,18 +27,38 @@ threshold value. The Levenshtein distance between the reference and the shifted 
 character level. In addition, the lengths of hypothesis sequences instead of reference sequences are used for
 normalizing the edit distance, which effectively counters the issue that shorter translations normally achieve lower
 TER.
----
 
-# Metric Card for CharacTER
-
-## Metric Description
-
+## Intended Uses
+CharacTER was developed for machine translation evaluation.
 
 ## How to Use
 
+```python
+import evaluate
+character = evaluate.load("metrics/character")
+preds = ["this week the saudis denied information published in the new york times",
+         "this is in fact an estimate"]
+refs = ["saudi arabia denied this week information published in the american new york times",
+        "this is actually an estimate"]
+results = character.compute(references=refs, predictions=preds)
+
+```
 ### Inputs
+- **predictions**: a single prediction or a list of predictions to score. Each prediction should be a string with
+     tokens separated by spaces.
+- **references**: a single reference or a list of reference for each prediction. Each reference should be a string with
+     tokens separated by spaces.
+
 
 ### Output Values
+- **count**: how many parallel sentences were processed
+- **mean**: the mean CharacTER score
+- **median**: the median score
+- **std**: standard deviation of the score
+- **min**: smallest score
+- **max**: largest score
+
+### Output Example
 ```python
 {
     'count': 2,
@@ -43,8 +69,6 @@ TER.
     'max': 0.36619718309859156
 }
 ```
-
-
 
 ## Citation
 ```bibtex
