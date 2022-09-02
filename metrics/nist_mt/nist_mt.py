@@ -12,12 +12,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """NLTK's NIST implementation on both the sentence and corpus level"""
+from typing import Dict, Optional
+
 import datasets
 import nltk
 from datasets import Sequence, Value
 
-
-nltk.download("perluniprops")  # NISTTokenizer requirement
+try:
+    nltk.data.find("perluniprops")
+except LookupError:
+    nltk.download("perluniprops", quiet=True)  # NISTTokenizer requirement
 
 from nltk.tokenize.nist import NISTTokenizer
 from nltk.translate.nist_score import corpus_nist, sentence_nist
