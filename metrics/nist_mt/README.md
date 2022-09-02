@@ -10,6 +10,7 @@ pinned: false
 tags:
 - evaluate
 - metric
+- machine-translation
 description: 
   DARPA commissioned NIST to develop an MT evaluation facility based on the BLEU score.
 ---
@@ -33,6 +34,7 @@ NIST was developed for machine translation evaluation.
 ## How to Use
 
 ```python
+import evaluate
 nist_mt = evaluate.load("nist_mt")
 hypothesis1 = "It is a guide to action which ensures that the military always obeys the commands of the party"
 reference1 = "It is a guide to action that ensures that the military will forever heed Party commands"
