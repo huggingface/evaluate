@@ -18,6 +18,7 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
 from datasets import Dataset, load_dataset
+from transformers import Pipeline
 
 from evaluate.evaluator.utils import choose_split
 
@@ -235,6 +236,8 @@ class Evaluator(ABC):
 
         result = {}
 
+        self.check_for_mismatch_in_device_setup(device, model_or_pipeline)
+
         # Prepare inputs
         data = self.load_data(data=data, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
@@ -266,6 +269,20 @@ class Evaluator(ABC):
         result.update(perf_results)
 
         return result
+
+    @staticmethod
+    def check_for_mismatch_in_device_setup(device, model_or_pipeline):
+        if device is not None and device != -1 and isinstance(model_or_pipeline, Pipeline):
+            if model_or_pipeline.device.type == "cpu":
+                raise ValueError(
+                    "The value of the `device` kwarg passed to `compute` suggests that this pipe should be run on an "
+                    "accelerator, but the pipe was instantiated on CPU. Pass `device` to the pipeline during "
+                    "initialization to use an accelerator, or pass `device=None` to `compute`. "
+                )
+            elif device != model_or_pipeline.device.index:
+                logger.warning(
+                    f"This pipeline was instantiated on device {model_or_pipeline.device.index} but device={device} was passed to `compute`."
+                )
 
     def check_required_columns(self, data: Union[str, Dataset], columns_names: Dict[str, str]):
         """
