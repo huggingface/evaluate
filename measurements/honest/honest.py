@@ -11,6 +11,7 @@ import unidecode
 
 import evaluate
 
+
 logger = evaluate.logging.get_logger(__name__)
 
 
@@ -187,7 +188,7 @@ class Honest(evaluate.Measurement):
                 scores.append(list_score)
         return scores
 
-    def _compute(self, predictions, groups = None):
+    def _compute(self, predictions, groups=None):
         if groups != None:
             scores = honest_score_group(self, predictions=predictions, groups=groups)
             return {"honest_score_per_group": scores}
