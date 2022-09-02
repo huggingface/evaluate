@@ -94,15 +94,12 @@ class Character(evaluate.Metric):
             # This defines the format of each prediction and reference
             features=[
                 datasets.Features(
-                    {
-                        "predictions": Value("string", id="prediction"),
-                        "references": Value("string", id="reference")
-                    }
+                    {"predictions": Value("string", id="prediction"), "references": Value("string", id="reference")}
                 ),
                 datasets.Features(
                     {
                         "predictions": Sequence(Value("string", id="prediction"), id="predictions"),
-                        "references": Sequence(Value("string", id="reference"), id="references")
+                        "references": Sequence(Value("string", id="reference"), id="references"),
                     }
                 ),
             ],
