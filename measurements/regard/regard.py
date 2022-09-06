@@ -118,14 +118,8 @@ def regard(group, regard_classifier):
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Regard(evaluate.Measurement):
     def _info(self):
-    if self.config_name not in [
-            "compare",
-            "default"
-        ]:
-            raise KeyError(
-                "You should supply a configuration name selected in "
-                '["config", "default"]'
-            )
+        if self.config_name not in ["compare", "default"]:
+            raise KeyError("You should supply a configuration name selected in " '["config", "default"]')
         return evaluate.MeasurementInfo(
             module_type="measurement",
             description=_DESCRIPTION,
