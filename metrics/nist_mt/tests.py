@@ -24,12 +24,11 @@ def reference_sent2():
 
 @fixture
 def reference_sent3():
-    return (
-        "It is the practical guide for the army always to heed the directions of the party"
-    )
+    return "It is the practical guide for the army always to heed the directions of the party"
 
 
 def test_nist_sentence(hypothesis_sent, reference_sent1, reference_sent2, reference_sent3):
-    nist_score = nist.compute(predictions=[hypothesis_sent],
-                              references=[[reference_sent1, reference_sent2, reference_sent3]])
+    nist_score = nist.compute(
+        predictions=[hypothesis_sent], references=[[reference_sent1, reference_sent2, reference_sent3]]
+    )
     assert abs(nist_score["nist_mt"] - 3.3709935957649324) < 1e-6

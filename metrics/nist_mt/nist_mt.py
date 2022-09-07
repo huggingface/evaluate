@@ -18,6 +18,7 @@ import datasets
 import nltk
 from datasets import Sequence, Value
 
+
 try:
     nltk.data.find("perluniprops")
 except LookupError:
