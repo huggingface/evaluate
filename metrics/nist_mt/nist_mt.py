@@ -70,10 +70,11 @@ Returns:
     'nist_mt': nist_mt score 
 Examples:
     >>> nist_mt = evaluate.load("nist_mt")
-    >>> hypothesis1 = "It is a guide to action which ensures that the military always obeys the commands of the party"
+    >>> hypothesis = "It is a guide to action which ensures that the military always obeys the commands of the party"
     >>> reference1 = "It is a guide to action that ensures that the military will forever heed Party commands"
     >>> reference2 = "It is the guiding principle which guarantees the military forces always being under the command of the Party"
-    >>> nist_mt.compute(hypothesis1, [reference1, reference2])
+    >>> reference3 = "It is the practical guide for the army always to heed the directions of the party"
+    >>> nist_mt.compute(predictions=[hypothesis], references=[[reference1, reference2, reference3]])
     {'nist_mt': 3.3709935957649324}
 """
 
