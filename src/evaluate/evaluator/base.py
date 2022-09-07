@@ -280,7 +280,7 @@ class Evaluator(ABC):
                     "initialization to use an accelerator, or pass `device=None` to `compute`. "
                 )
             elif device != model_or_pipeline.device.index:
-                logger.warning(
+                raise ValueError(
                     f"This pipeline was instantiated on device {model_or_pipeline.device.index} but device={device} was passed to `compute`."
                 )
 

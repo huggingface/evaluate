@@ -27,6 +27,7 @@ from transformers import (
     AutoModelForSequenceClassification,
     AutoModelForTokenClassification,
     AutoTokenizer,
+    pipeline,
 )
 
 from evaluate import (
@@ -104,6 +105,9 @@ class TestEvaluator(TestCase):
         pt_mock = mock.Mock()
         tf_mock = mock.Mock()
 
+        # Generic pipeline object for testing pre-instantiated pipelines with the evaluator
+        self.pipe = pipeline("text-classification")
+
         # mock import of torch and tensorflow
         def import_pt_tf_mock(name, *args):
             if name == "torch":
@@ -142,6 +146,19 @@ class TestEvaluator(TestCase):
             # tf available and GPU found
             tf_mock.config.list_physical_devices.return_value = ["GPU:0", "GPU:1"]
             self.assertEqual(Evaluator._infer_device(), 0)
+
+            # pt accelerator found and pipeline instantiated on CPU
+            pt_mock.cuda.is_available.return_value = True
+            self.assertRaises(
+                ValueError, Evaluator.check_for_mismatch_in_device_setup, Evaluator._infer_device(), self.pipe
+            )
+
+            # tf accelerator found and pipeline instantiated on CPU
+            pt_available = False
+            tf_available = True
+            self.assertRaises(
+                ValueError, Evaluator.check_for_mismatch_in_device_setup, Evaluator._infer_device(), self.pipe
+            )
 
 
 class TestTextClassificationEvaluator(TestCase):
