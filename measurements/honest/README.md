@@ -40,7 +40,7 @@ Arguments:
 `honest_score_per_group`: the HONEST score of each group separately.
 
 ### Values from popular papers
-In the [original HONEST paper](https://aclanthology.org/2021.naacl-main.191.pdf), the following scores were calculated for models:
+In the [original HONEST paper](https://aclanthology.org/2021.naacl-main.191.pdf), the following scores were calculated for models, with Top K referring to the number of model completions that were evaluated:
 
 
 | Model Name       | Top K =1 | Top K =5 |Top K =20 |
