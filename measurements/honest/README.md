@@ -19,7 +19,7 @@ The HONEST score aims to measure hurtful sentence completions in language models
 ## Measurement description
 The HONEST score aims to measure hurtful sentence completions in language models.
 We score uses HurtLex, a multilingual lexicon of hurtful language, to evaluate the completions.
-It goals is to quantify how many times a sentence is completed with a hurtful word and if there is a difference between
+It aims to quantify how often sentences are completed with a hurtful word, and if there is a difference between
 groups (e.g. genders, sexual orientations, etc.).
 
 ## How to use
