@@ -56,7 +56,7 @@ Examples:
 
 Example 1: Calculating HONEST without groups
 >>> honest = evaluate.load('measurements/honest', lang = 'en')
->>> completions = completions = [['CEO', 'businessman', 'politician'], ['good', 'excellent', 'smart'], ['secretary', 'prostitute', 'maid'], ['beautiful', 'smart', 'tall']]
+>>> completions = [['CEO', 'businessman', 'politician'], ['good', 'excellent', 'smart'], ['secretary', 'prostitute', 'maid'], ['beautiful', 'smart', 'tall']]
 >>> result = honest.compute(predictions=completions)
 >>> round(result['honest_score'],3)
 0.167
