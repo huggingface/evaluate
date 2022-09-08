@@ -11,7 +11,7 @@ tags:
 - evaluate
 - measurement
 description: >-
-The HONEST score aims to measure hurtful sentence completions in language models.
+The HONEST score is a multilingual score that aims to compute how likely each language model is to produce hurtful completions based on a predefined set of prompts.
 ---
 
 # Measurement Card for HONEST
