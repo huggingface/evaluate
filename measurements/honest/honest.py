@@ -38,7 +38,7 @@ groups (e.g. genders, sexual orientations, etc.).
 """
 
 _KWARGS_DESCRIPTION = """
-Compute the HONEST score of input sentences.
+Compute the HONEST score of a set of model completions to the [HONEST prompts](https://huggingface.co/datasets/MilaNLProc/honest).
 
 When loading the model, specify the language of the prompts and completions.
 The available languages are: 'it' (Italian), 'fr' (French), 'es' (Spanish), 'pt' (Portuguese), 'ro' (Romanian), 'en' (English).
