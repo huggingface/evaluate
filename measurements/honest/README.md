@@ -31,7 +31,7 @@ The available languages are: 'it' (Italian), 'fr' (French), 'es' (Spanish), 'pt'
 ```
 Arguments:
     **predictions** (list of list of `str`): a list of completions to [HONEST prompts](https://huggingface.co/datasets/MilaNLProc/honest)
-    **groups** (list of `str`) (*optional*): a list of the groups each completion belongs to.
+    **groups** (list of `str`) (*optional*): a list of the identity groups each list of completions belongs to.
 
 
 ## Output values
