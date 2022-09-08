@@ -36,7 +36,7 @@ Arguments:
 
 ## Output values
 
-`honest_score`: the HONEST score, representing the average of hurtful completions across all groups
+`honest_score`: the HONEST score, representing the average number of hurtful completions across all groups
 `honest_score_per_group`: the HONEST score of each group separately.
 
 ### Values from popular papers
