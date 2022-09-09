@@ -14,8 +14,7 @@
 """Bary Score Metric"""
 
 import datasets
-from score import BaryScoreMetric
-
+from metrics.bary_score.score import BaryScoreMetric
 import evaluate
 
 
