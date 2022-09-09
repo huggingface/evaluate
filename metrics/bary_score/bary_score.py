@@ -35,8 +35,8 @@ BaryScore is a multi-layers metric based on pretrained contextualized representa
 
 _KWARGS_DESCRIPTION = """
 Args:
-    predictions:
-    references:
+    predictions: list of string sentences has to be.
+    references: list of string sentences has to be.
 Examples:
     >>> barry_score = evaluate.load("bary_score")
     >>> references = ['I like my cakes very much','I hate these cakes!']
