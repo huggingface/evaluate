@@ -14,8 +14,9 @@
 """Bary Score Metric"""
 
 import datasets
-from metrics.bary_score.score import BaryScoreMetric
+
 import evaluate
+from metrics.bary_score.score import BaryScoreMetric
 
 
 _CITATION = """\
