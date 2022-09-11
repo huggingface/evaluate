@@ -14,8 +14,9 @@
 """An implementation for calculating CharacTER, a character-based TER variant, useful for machine translation tasks."""
 import cer
 import datasets
-import evaluate
 from datasets import Sequence, Value
+
+import evaluate
 
 
 _CITATION = """\

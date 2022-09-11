@@ -1,8 +1,7 @@
 from statistics import mean, median, stdev
 
-from pytest import fixture
-
 from character import Character
+from pytest import fixture
 
 
 character = Character()
