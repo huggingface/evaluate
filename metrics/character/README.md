@@ -35,7 +35,7 @@ CharacTER was developed for machine translation evaluation.
 
 ```python
 import evaluate
-character = evaluate.load("metrics/character")
+character = evaluate.load("character")
 preds = ["this week the saudis denied information published in the new york times",
          "this is in fact an estimate"]
 refs = ["saudi arabia denied this week information published in the american new york times",
@@ -90,5 +90,5 @@ results = character.compute(references=refs, predictions=preds)
 ```
 
 ## Further References
-- Repackaged version that is used in this HF implementation: https://github.com/bramvanroy/CharacTER
-- Original version: https://github.com/rwth-i6/CharacTER
+- Repackaged version that is used in this HF implementation: [https://github.com/bramvanroy/CharacTER](https://github.com/bramvanroy/CharacTER)
+- Original version: [https://github.com/rwth-i6/CharacTER](https://github.com/rwth-i6/CharacTER)
