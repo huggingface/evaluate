@@ -18,7 +18,6 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 
 # Lint as: python3
 from datasets import Dataset, load_dataset
-from transformers import Pipeline
 
 from evaluate.evaluator.utils import choose_split
 
@@ -32,7 +31,7 @@ except ImportError:
 
 try:
     import transformers
-    from transformers import pipeline
+    from transformers import pipeline, Pipeline
 
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
