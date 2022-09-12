@@ -31,7 +31,7 @@ except ImportError:
 
 try:
     import transformers
-    from transformers import pipeline, Pipeline
+    from transformers import Pipeline, pipeline
 
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
