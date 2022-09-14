@@ -87,12 +87,10 @@ class Character(evaluate.Metric):
 
     def _info(self):
         return evaluate.MetricInfo(
-            # This is the description that will appear on the modules page.
             module_type="metric",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            # This defines the format of each prediction and reference
             features=[
                 datasets.Features(
                     {"predictions": Value("string", id="prediction"), "references": Value("string", id="reference")}
@@ -104,9 +102,7 @@ class Character(evaluate.Metric):
                     }
                 ),
             ],
-            # Homepage of the module for documentation
             homepage="https://github.com/bramvanroy/CharacTER",
-            # Additional links to the codebase or references
             codebase_urls=["https://github.com/bramvanroy/CharacTER", "https://github.com/rwth-i6/CharacTER"],
         )
 
