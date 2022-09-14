@@ -18,7 +18,7 @@ description: >-
 # Metric Card for CharacTER
 
 ## Metric Description
-CharacTer is a novel character level metric inspired by the commonly applied translation edit rate (TER). It is 
+CharacTer is a character-level metric inspired by the translation edit rate (TER) metric. It is 
 defined as the minimum number of character edits required to adjust a hypothesis, until it completely matches the
 reference, normalized by the length of the hypothesis sentence. CharacTer calculates the character level edit
 distance while performing the shift edit on word level. Unlike the strict matching criterion in TER, a hypothesis
