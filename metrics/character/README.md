@@ -12,7 +12,7 @@ tags:
 - metric
 - machine-translation
 description: >-
-  CharacTer is a novel character level metric inspired by the commonly applied translation edit rate (TER).
+  CharacTer is a character-level metric inspired by the commonly applied translation edit rate (TER).
 ---
 
 # Metric Card for CharacTER
