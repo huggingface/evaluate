@@ -53,7 +53,7 @@ Calculates how good are predictions given some references, using certain scores
 Args:
     predictions: a single prediction or a list of predictions to score. Each prediction should be a string with
      tokens separated by spaces.
-    references: a single reference or a list of reference for each prediction. Each reference should be a string with
+    references: a single reference or a list of references for each prediction. Each reference should be a string with
      tokens separated by spaces.
 Returns:
     count: how many parallel sentences were processed,
