@@ -26,6 +26,7 @@ def test_character_single(example_saudis):
 
     assert abs(results["cer_score"] - example_saudis["cer"]) < 0.00000001
 
+
 def test_character_corpus(example_saudis, example_estimate):
     hyps = [example_saudis["hyp"], example_estimate["hyp"]]
     refs = [example_saudis["ref"], example_estimate["ref"]]
