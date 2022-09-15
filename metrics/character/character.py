@@ -55,13 +55,14 @@ Args:
      tokens separated by spaces.
     references: a single reference or a list of references for each prediction. Each reference should be a string with
      tokens separated by spaces.
-Returns:
-    count: how many parallel sentences were processed,
-    mean: the mean CharacTER score,
-    median: the median score,
-    std: standard deviation of the score,
-    min: smallest score,
-    max: largest score
+Returns (*=only when a list of references/hypotheses are given):
+    count (*) : how many parallel sentences were processed,
+    mean (*): the mean CharacTER score,
+    median (*): the median score,
+    std (*): standard deviation of the score,
+    min (*): smallest score,
+    max (*): largest score
+    cer_scores: all scores, one per ref/hyp pair
 Examples:
     >>> character = evaluate.load("character")
     >>> preds = ["this week the saudis denied information published in the new york times",
@@ -76,7 +77,8 @@ Examples:
         'median': 0.3127282211789254,
         'std': 0.07561653111280243,
         'min': 0.25925925925925924,
-        'max': 0.36619718309859156
+        'max': 0.36619718309859156,
+        'cer_scores': [0.36619718309859156, 0.25925925925925924]
     }
 """
 
@@ -112,7 +114,7 @@ class Character(evaluate.Metric):
         if isinstance(predictions, str) and isinstance(references, str):
             predictions = predictions.split()
             references = references.split()
-            return {"cer_score": cer.calculate_cer(predictions, references)}
+            return {"cer_scores": [cer.calculate_cer(predictions, references)]}
         else:
             predictions = [p.split() for p in predictions]
             references = [r.split() for r in references]

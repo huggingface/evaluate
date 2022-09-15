@@ -51,12 +51,16 @@ results = character.compute(references=refs, predictions=preds)
 
 
 ### Output Values
-- **count**: how many parallel sentences were processed
-- **mean**: the mean CharacTER score
-- **median**: the median score
-- **std**: standard deviation of the score
-- **min**: smallest score
-- **max**: largest score
+
+*=only when a list of references/hypotheses are given
+
+- **count** (*): how many parallel sentences were processed
+- **mean** (*): the mean CharacTER score
+- **median** (*): the median score
+- **std** (*): standard deviation of the score
+- **min** (*): smallest score
+- **max** (*): largest score
+- **cer_scores**: largest score
 
 ### Output Example
 ```python
@@ -66,7 +70,8 @@ results = character.compute(references=refs, predictions=preds)
     'median': 0.3127282211789254,
     'std': 0.07561653111280243,
     'min': 0.25925925925925924,
-    'max': 0.36619718309859156
+    'max': 0.36619718309859156,
+    'cer_scores': [0.36619718309859156, 0.25925925925925924]
 }
 ```
 
