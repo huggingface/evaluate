@@ -107,13 +107,14 @@ class Character(evaluate.Metric):
         )
 
     def _compute(self, predictions, references):
-        """Returns the scores"""
-        if isinstance(predictions, str):
-            predictions = [predictions]
-        predictions = [p.split() for p in predictions]
+        """Returns the scores. When more than one prediction/reference is given, we can use
+        the corpus-focused metric"""
+        if isinstance(predictions, str) and isinstance(references, str):
+            predictions = predictions.split()
+            references = references.split()
+            return {"cer_score": cer.calculate_cer(predictions, references)}
+        else:
+            predictions = [p.split() for p in predictions]
+            references = [r.split() for r in references]
 
-        if isinstance(references, str):
-            references = [references]
-        references = [r.split() for r in references]
-
-        return cer.calculate_cer_corpus(predictions, references)
+            return cer.calculate_cer_corpus(predictions, references)
