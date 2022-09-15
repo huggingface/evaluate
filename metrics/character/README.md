@@ -60,7 +60,7 @@ results = character.compute(references=refs, predictions=preds)
 - **std** (*): standard deviation of the score
 - **min** (*): smallest score
 - **max** (*): largest score
-- **cer_scores**: largest score
+- **cer_scores**: all scores, one per ref/hyp pair
 
 ### Output Example
 ```python
