@@ -36,13 +36,20 @@ CharacTER was developed for machine translation evaluation.
 ```python
 import evaluate
 character = evaluate.load("character")
+
+# Single hyp/ref 
+preds = ["this week the saudis denied information published in the new york times"]
+refs = ["saudi arabia denied this week information published in the american new york times"]
+results = character.compute(references=refs, predictions=preds)
+
+# Corpus example
 preds = ["this week the saudis denied information published in the new york times",
          "this is in fact an estimate"]
 refs = ["saudi arabia denied this week information published in the american new york times",
         "this is actually an estimate"]
 results = character.compute(references=refs, predictions=preds)
-
 ```
+
 ### Inputs
 - **predictions**: a single prediction or a list of predictions to score. Each prediction should be a string with
      tokens separated by spaces.
