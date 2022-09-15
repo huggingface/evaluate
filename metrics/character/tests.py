@@ -21,13 +21,17 @@ def example_estimate():
     return {"hyp": "this is in fact an estimate", "ref": "this is actually an estimate", "cer": 0.25925925925925924}
 
 
-def test_character(example_saudis, example_estimate):
+def test_character_single(example_saudis):
+    results = character.compute(predictions=example_saudis["hyp"], references=example_saudis["ref"])
+
+    assert abs(results["cer_score"] - example_saudis["cer"]) < 0.00000001
+
+def test_character_corpus(example_saudis, example_estimate):
     hyps = [example_saudis["hyp"], example_estimate["hyp"]]
     refs = [example_saudis["ref"], example_estimate["ref"]]
     results = character.compute(predictions=hyps, references=refs)
     real_results = [example_saudis["cer"], example_estimate["cer"]]
 
-    assert results["count"] == len(hyps)
     assert abs(results["mean"] - mean(real_results)) < 0.00000001
     assert abs(results["median"] - median(real_results)) < 0.00000001
     assert abs(results["std"] - stdev(real_results)) < 0.00000001
