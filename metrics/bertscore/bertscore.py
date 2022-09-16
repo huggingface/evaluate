@@ -167,8 +167,10 @@ class BERTScore(evaluate.Metric):
 
         if model_type is None:
             if lang is None:
-                raise ValueError("Either 'lang' (e.g. 'en') or 'model_type' (e.g. 'microsoft/deberta-xlarge-mnli')"
-                                 " must be specified")
+                raise ValueError(
+                    "Either 'lang' (e.g. 'en') or 'model_type' (e.g. 'microsoft/deberta-xlarge-mnli')"
+                    " must be specified"
+                )
             model_type = bert_score.utils.lang2model[lang.lower()]
 
         if num_layers is None:
