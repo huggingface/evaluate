@@ -316,12 +316,14 @@ class Evaluator(ABC):
             logger.warning(f"Dataset split not defined! Automatically evaluating with split: {split.upper()}")
         return split
 
-    def load_data(self, data: Union[str, Dataset], split: str = None):
+    def load_data(self, data: Union[str, Dataset], subset: str = None, split: str = None):
         """
-        Load dataset with given split.
+        Load dataset with given subset and split.
         Args:
             data (`Dataset` or `str`, defaults to None): Specifies the dataset we will run evaluation on. If it is of
             type `str`, we treat it as the dataset name, and load it. Otherwise we assume it represents a pre-loaded dataset.
+            subset (`str`, defaults to None): Specifies dataset subset to be passed to `name` in `load_dataset`. To be
+                used with datasets with several configurations (e.g. glue/sst2).
             split (`str`, defaults to None):
                 User-defined dataset split by name (e.g. train, validation, test). Supports slice-split (test[:n]).
                 If not defined and data is a `str` type, will automatically select the best one via `choose_split()`.
@@ -330,11 +332,11 @@ class Evaluator(ABC):
         """
         if isinstance(data, str):
             split = self.get_dataset_split(data, split)
-            data = load_dataset(data, split=split)
+            data = load_dataset(data, name=subset, split=split)
             return data
         elif isinstance(data, Dataset):
-            if split is not None:
-                logger.warning("`data` is a preloaded Dataset! Ignoring `split`.")
+            if split is not None or subset is not None:
+                logger.warning("`data` is a preloaded Dataset! Ignoring `subset` and `split`.")
             return data
         else:
             raise ValueError(
