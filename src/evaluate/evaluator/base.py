@@ -307,7 +307,7 @@ class Evaluator(ABC):
             data (`Dataset` or `str`, defaults to None): Specifies the dataset we will run evaluation on. If it is of
             type `str`, we treat it as the dataset name, and load it. Otherwise we assume it represents a pre-loaded dataset.
             subset (`str`, defaults to None): Specifies dataset subset to be passed to `name` in `load_dataset`. To be
-            used with datasets with several configurations (e.g. glue/sst2).
+                used with datasets with several configurations (e.g. glue/sst2).
             split (`str`, defaults to None):
                 User-defined dataset split by name (e.g. train, validation, test). Supports slice-split (test[:n]).
                 If not defined and data is a `str` type, will automatically select the best one via `choose_split()`.
