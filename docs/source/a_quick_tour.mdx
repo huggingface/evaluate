@@ -181,7 +181,7 @@ This solution allows 🤗 Evaluate to perform distributed predictions, which is 
 
 ## Configuration
 
-Some metrics can be configured with additional settings. E.g. `accuracy` has the extra setting `normalize` which defaults to `True`. To change it you have two options: pass it as a keyword argument with `load` or during `compute`. With `load` the setting is changed permanently for the module while passing it to `compute` only changes it for the duration of the `compute` call.
+Some metrics can be configured with additional settings. For example, `accuracy` has an extra `normalize` setting which returns the fraction of correctly classified samples and is set to `True` by default. To change it you have two options: pass it as a keyword argument with `load()` or during `compute()`. With `load()`, the setting is changed permanently for the module, while passing it to `compute()` only changes it for the duration of the `compute()` call.
 
 ```python
 
@@ -194,7 +194,7 @@ Some metrics can be configured with additional settings. E.g. `accuracy` has the
 (1.0, 0.5, 1.0)
 ```
 
-This is also useful for the following `combine` method since it allows to load modules with specific settings before combining them.
+This is also useful for the following `combine()` method since it allows to load modules with specific settings before combining them.
 
 ## Combining several evaluations
 
