@@ -11,7 +11,7 @@ tags:
 - evaluate
 - measurement
 description: >-
-Regard aims to measure language polarity towards and social perceptions of a demographic (e.g. gender, race, sexual orientation).
+  Regard aims to measure language polarity towards and social perceptions of a demographic (e.g. gender, race, sexual orientation).
 ---
 
 # Measurement Card for Regard
