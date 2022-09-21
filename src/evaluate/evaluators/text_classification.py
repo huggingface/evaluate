@@ -118,6 +118,8 @@ class TextClassificationEvaluator(Evaluator):
 
         result = {}
 
+        self.check_for_mismatch_in_device_setup(device, model_or_pipeline)
+
         # Prepare inputs
         metric_inputs, pipe_inputs = self.prepare_data(
             data=data, input_column=input_column, second_input_column=second_input_column, label_column=label_column

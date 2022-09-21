@@ -27,6 +27,7 @@ from transformers import (
     AutoModelForSequenceClassification,
     AutoModelForTokenClassification,
     AutoTokenizer,
+    pipeline,
 )
 
 import evaluate
@@ -106,6 +107,9 @@ class TestEvaluator(TestCase):
         pt_mock = mock.Mock()
         tf_mock = mock.Mock()
 
+        # Generic pipeline object for testing pre-instantiated pipelines with the evaluator
+        self.pipe = pipeline("text-classification")
+
         # mock import of torch and tensorflow
         def import_pt_tf_mock(name, *args):
             if name == "torch":
@@ -144,6 +148,19 @@ class TestEvaluator(TestCase):
             # tf available and GPU found
             tf_mock.config.list_physical_devices.return_value = ["GPU:0", "GPU:1"]
             self.assertEqual(Evaluator._infer_device(), 0)
+
+            # pt accelerator found and pipeline instantiated on CPU
+            pt_mock.cuda.is_available.return_value = True
+            self.assertRaises(
+                ValueError, Evaluator.check_for_mismatch_in_device_setup, Evaluator._infer_device(), self.pipe
+            )
+
+            # tf accelerator found and pipeline instantiated on CPU
+            pt_available = False
+            tf_available = True
+            self.assertRaises(
+                ValueError, Evaluator.check_for_mismatch_in_device_setup, Evaluator._infer_device(), self.pipe
+            )
 
 
 class TestTextClassificationEvaluator(TestCase):
@@ -228,6 +245,10 @@ class TestTextClassificationEvaluator(TestCase):
 
         # Test that the data point returned is correct; this maps to the first example in the dataset
         self.assertEqual(data[0]["text"], "I love movies about whales!")
+
+        # Test loading subset of a dataset with the `name` field
+        data = self.evaluator.load_data("evaluate/glue-ci", subset="cola", split="test")
+        self.assertEqual(isinstance(data, Dataset), True)
 
     @use_local_metrics
     def test_overwrite_default_metric(self):
