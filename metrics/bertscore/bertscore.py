@@ -183,13 +183,15 @@ class BERTScore(evaluate.Metric):
                 'You can install it with `pip install "bert-score>=0.3.10"`.'
             )
 
-        if model_type is None:
-            if lang is None:
+        if self.config.model_type is None:
+            if self.config.lang is None:
                 raise ValueError(
                     "Either 'lang' (e.g. 'en') or 'model_type' (e.g. 'microsoft/deberta-xlarge-mnli')"
                     " must be specified"
                 )
-            model_type = bert_score.utils.lang2model[lang.lower()]
+            model_type = bert_score.utils.lang2model[self.config.lang.lower()]
+        else:
+            model_type = self.config.model_type
 
         if self.config.num_layers is None:
             num_layers = bert_score.utils.model2layers[model_type]
