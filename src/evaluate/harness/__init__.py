@@ -28,7 +28,7 @@ class Harness:
     """
 
     def __init__(self, path):
-        """ Instantiates a Harness object from a JSON file which will be passed to the Evaluator to run evaluation for a
+        """Instantiates a Harness object from a JSON file which will be passed to the Evaluator to run evaluation for a
         model on this collection of tasks."""
 
         filename = list(filter(lambda x: x, path.replace(os.sep, "/").split("/")))[-1]
@@ -46,9 +46,9 @@ class Harness:
             self.config = json.load(open(json_filepath))
 
         self.tasks = []
-        for task_group in self.config['task_groups']:
-            for task in task_group['tasks']:
-                self.tasks.append(task_group['task_type'] + '/' + task['data'])
+        for task_group in self.config["task_groups"]:
+            for task in task_group["tasks"]:
+                self.tasks.append(task_group["task_type"] + "/" + task["data"])
 
     @classmethod
     def from_config(cls, path):
@@ -74,15 +74,15 @@ class Harness:
 
     def run(self, model_or_pipeline=None):
         results_all = {}
-        for task_group in self.config['task_groups']:
-            e = evaluator(task_group['task_type'])
+        for task_group in self.config["task_groups"]:
+            e = evaluator(task_group["task_type"])
 
             logger.info(f"Running harness: {self.config['harness_name']} with tasks {self.tasks}")
 
             for task in task_group["tasks"]:
                 logger.info(f"Running task: {task['data']}")
 
-                data = Dataset.from_dict(load_dataset(path=task['data'], name=task.get('name'))['test'][:5])
+                data = Dataset.from_dict(load_dataset(path=task["data"], name=task.get("name"))["test"][:5])
 
                 args_for_task = task["args_for_task"]
                 args_for_task["model_or_pipeline"] = model_or_pipeline
@@ -90,6 +90,6 @@ class Harness:
 
                 results = e.compute(**args_for_task)
 
-                task_id = task["data"] + '/' + task.get('name') if task.get('name') else task["data"]
+                task_id = task["data"] + "/" + task.get("name") if task.get("name") else task["data"]
                 results_all[task_id] = results
         return results_all
