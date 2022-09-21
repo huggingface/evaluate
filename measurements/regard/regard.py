@@ -130,7 +130,7 @@ class Regard(evaluate.Measurement):
     CONFIG_CLASS = RegardConfig
     ALLOWED_CONFIG_NAMES = ["default", "compare"]
 
-    def _info(self):
+    def _info(self, config):
         if self.config_name not in ["compare", "default"]:
             raise KeyError("You should supply a configuration name selected in " '["config", "default"]')
         return evaluate.MeasurementInfo(
@@ -138,6 +138,7 @@ class Regard(evaluate.Measurement):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "data": datasets.Value("string", id="sequence"),
