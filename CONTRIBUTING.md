@@ -36,7 +36,7 @@ There are four ways you can contribute to `evaluate`:
 * Contributing to the examples and documentation;
 * Submitting issues related to bugs or desired new features.
 
-Open issues are tracked directly on the repository [here](https://github.com/huggingface/datasets/issues).
+Open issues are tracked directly on the repository [here](https://github.com/huggingface/evaluate/issues).
 
 If you would like to work on any of the open issues:
 * Make sure it is not already assigned to someone else. The assignee (if any) is on the top right column of the Issue page. If it's not taken, self-assign it.
