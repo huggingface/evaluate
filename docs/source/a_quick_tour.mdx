@@ -65,6 +65,7 @@ All evalution modules come with a range of useful attributes that help to use a 
 |---|---|
 |`description`|A short description of the evaluation module.|
 |`citation`|A BibTex string for citation when available.|
+|`config` | A `dataclass` containing the settings of the module. | 
 |`features`|A `Features` object defining the input format.|
 |`inputs_description`|This is equivalent to the modules docstring.|
 |`homepage`|The homepage of the module.|
@@ -177,6 +178,23 @@ A common way to overcome this issue is to fallback on single process evaluation.
 🤗 Evaluate solves this issue by only computing the final metric on the first node. The predictions and references are computed and provided to the metric separately for each node. These are temporarily stored in an Apache Arrow table, avoiding cluttering the GPU or CPU memory. When you are ready to `compute()` the final metric, the first node is able to access the predictions and references stored on all the other nodes. Once it has gathered all the predictions and references, `compute()` will perform the final metric evaluation.
 
 This solution allows 🤗 Evaluate to perform distributed predictions, which is important for evaluation speed in distributed settings. At the same time, you can also use complex non-additive metrics without wasting valuable GPU or CPU memory.
+
+## Configuration
+
+Some metrics can be configured with additional settings. For example, `accuracy` has an extra `normalize` setting which returns the fraction of correctly classified samples and is set to `True` by default. To change it you have two options: pass it as a keyword argument with `load()` or during `compute()`. With `load()`, the setting is changed permanently for the module, while passing it to `compute()` only changes it for the duration of the `compute()` call.
+
+```python
+
+>>> metric = evaluate.load("accuracy", normalize=False)
+>>> refs, preds = [1, 1], [1, 0]
+>>> acc_1 = metric.compute(references=refs, predictions=preds)["accuracy"]
+>>> acc_2 = metric.compute(references=refs, predictions=preds, normalize=True)["accuracy"]
+>>> acc_3 = metric.compute(references=refs, predictions=preds)["accuracy"]
+>>> print((acc_1, acc_2, acc_3))
+(1.0, 0.5, 1.0)
+```
+
+This is also useful for the following `combine()` method since it allows to load modules with specific settings before combining them.
 
 ## Combining several evaluations
 

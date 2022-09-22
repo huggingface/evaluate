@@ -14,6 +14,7 @@
 """ seqeval metric. """
 
 import importlib
+from dataclasses import dataclass
 from typing import List, Optional, Union
 
 import datasets
@@ -99,14 +100,31 @@ Examples:
 """
 
 
+@dataclass
+class SeqevalConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    suffix: bool = False
+    scheme: Optional[str] = None
+    mode: Optional[str] = None
+    sample_weight: Optional[List[int]] = None
+    zero_division: Union[str, int] = "warn"
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Seqeval(evaluate.Metric):
-    def _info(self):
+
+    CONFIG_CLASS = SeqevalConfig
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="https://github.com/chakki-works/seqeval",
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Sequence(datasets.Value("string", id="label"), id="sequence"),
@@ -121,27 +139,26 @@ class Seqeval(evaluate.Metric):
         self,
         predictions,
         references,
-        suffix: bool = False,
-        scheme: Optional[str] = None,
-        mode: Optional[str] = None,
-        sample_weight: Optional[List[int]] = None,
-        zero_division: Union[str, int] = "warn",
     ):
-        if scheme is not None:
+        if self.config.scheme is not None:
             try:
                 scheme_module = importlib.import_module("seqeval.scheme")
-                scheme = getattr(scheme_module, scheme)
+                scheme = getattr(scheme_module, self.config.scheme)
             except AttributeError:
-                raise ValueError(f"Scheme should be one of [IOB1, IOB2, IOE1, IOE2, IOBES, BILOU], got {scheme}")
+                raise ValueError(
+                    f"Scheme should be one of [IOB1, IOB2, IOE1, IOE2, IOBES, BILOU], got {self.config.scheme}"
+                )
+        else:
+            scheme = self.config.scheme
         report = classification_report(
             y_true=references,
             y_pred=predictions,
-            suffix=suffix,
+            suffix=self.config.suffix,
             output_dict=True,
             scheme=scheme,
-            mode=mode,
-            sample_weight=sample_weight,
-            zero_division=zero_division,
+            mode=self.config.mode,
+            sample_weight=self.config.sample_weight,
+            zero_division=self.config.zero_division,
         )
         report.pop("macro avg")
         report.pop("weighted avg")

@@ -71,12 +71,15 @@ Examples:
 class TRECEval(evaluate.Metric):
     """Compute TREC evaluation scores."""
 
-    def _info(self):
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             module_type="metric",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "predictions": {

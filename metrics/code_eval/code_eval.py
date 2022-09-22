@@ -20,6 +20,8 @@ import itertools
 import os
 from collections import Counter, defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
+from typing import List
 
 import datasets
 import numpy as np
@@ -131,14 +133,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE."""
 
 
+@dataclass
+class CodeEvalConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    k: List[int] = field(default_factory=lambda: [1, 10, 100])
+    num_workers: int = 4
+    timeout: float = 3.0
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class CodeEval(evaluate.Metric):
-    def _info(self):
+    CONFIG_CLASS = CodeEvalConfig
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             # This is the description that will appear on the metrics page.
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             # This defines the format of each prediction and reference
             features=datasets.Features(
                 {
@@ -152,7 +168,7 @@ class CodeEval(evaluate.Metric):
             license=_LICENSE,
         )
 
-    def _compute(self, predictions, references, k=[1, 10, 100], num_workers=4, timeout=3.0):
+    def _compute(self, predictions, references):
         """Returns the scores"""
 
         if os.getenv("HF_ALLOW_CODE_EVAL", 0) != "1":
@@ -161,7 +177,7 @@ class CodeEval(evaluate.Metric):
         if os.name == "nt":
             raise NotImplementedError("This metric is currently not supported on Windows.")
 
-        with ThreadPoolExecutor(max_workers=num_workers) as executor:
+        with ThreadPoolExecutor(max_workers=self.config.num_workers) as executor:
             futures = []
             completion_id = Counter()
             n_samples = 0
@@ -170,7 +186,7 @@ class CodeEval(evaluate.Metric):
             for task_id, (candidates, test_case) in enumerate(zip(predictions, references)):
                 for candidate in candidates:
                     test_program = candidate + "\n" + test_case
-                    args = (test_program, timeout, task_id, completion_id[task_id])
+                    args = (test_program, self.config.timeout, task_id, completion_id[task_id])
                     future = executor.submit(check_correctness, *args)
                     futures.append(future)
                     completion_id[task_id] += 1
@@ -189,7 +205,7 @@ class CodeEval(evaluate.Metric):
         total = np.array(total)
         correct = np.array(correct)
 
-        ks = k
+        ks = self.config.k
         pass_at_k = {f"pass@{k}": estimate_pass_at_k(total, correct, k).mean() for k in ks if (total >= k).all()}
 
         return pass_at_k, results

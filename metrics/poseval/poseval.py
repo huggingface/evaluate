@@ -13,6 +13,7 @@
 # limitations under the License.
 """ seqeval metric. """
 
+from dataclasses import dataclass
 from typing import Union
 
 import datasets
@@ -80,14 +81,27 @@ Examples:
 """
 
 
+@dataclass
+class PosevalConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    zero_division: Union[str, int] = "warn"
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Poseval(evaluate.Metric):
-    def _info(self):
+
+    CONFIG_CLASS = PosevalConfig
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="https://scikit-learn.org",
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Sequence(datasets.Value("string", id="label"), id="sequence"),
@@ -101,13 +115,12 @@ class Poseval(evaluate.Metric):
         self,
         predictions,
         references,
-        zero_division: Union[str, int] = "warn",
     ):
         report = classification_report(
             y_true=[label for ref in references for label in ref],
             y_pred=[label for pred in predictions for label in pred],
             output_dict=True,
-            zero_division=zero_division,
+            zero_division=self.config.zero_division,
         )
 
         return report

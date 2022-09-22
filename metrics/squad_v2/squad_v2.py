@@ -13,6 +13,8 @@
 # limitations under the License.
 """ SQuAD v2 metric. """
 
+from dataclasses import dataclass
+
 import datasets
 
 import evaluate
@@ -87,13 +89,26 @@ Examples:
 """
 
 
+@dataclass
+class SquadV2Config(evaluate.info.Config):
+
+    name: str = "default"
+
+    no_answer_threshold: float = 1.0
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class SquadV2(evaluate.Metric):
-    def _info(self):
+
+    CONFIG_CLASS = SquadV2Config
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "predictions": {
@@ -113,7 +128,7 @@ class SquadV2(evaluate.Metric):
             reference_urls=["https://rajpurkar.github.io/SQuAD-explorer/"],
         )
 
-    def _compute(self, predictions, references, no_answer_threshold=1.0):
+    def _compute(self, predictions, references):
         no_answer_probabilities = {p["id"]: p["no_answer_probability"] for p in predictions}
         dataset = [{"paragraphs": [{"qas": references}]}]
         predictions = {p["id"]: p["prediction_text"] for p in predictions}
@@ -123,8 +138,12 @@ class SquadV2(evaluate.Metric):
         no_ans_qids = [k for k, v in qid_to_has_ans.items() if not v]
 
         exact_raw, f1_raw = get_raw_scores(dataset, predictions)
-        exact_thresh = apply_no_ans_threshold(exact_raw, no_answer_probabilities, qid_to_has_ans, no_answer_threshold)
-        f1_thresh = apply_no_ans_threshold(f1_raw, no_answer_probabilities, qid_to_has_ans, no_answer_threshold)
+        exact_thresh = apply_no_ans_threshold(
+            exact_raw, no_answer_probabilities, qid_to_has_ans, self.config.no_answer_threshold
+        )
+        f1_thresh = apply_no_ans_threshold(
+            f1_raw, no_answer_probabilities, qid_to_has_ans, self.config.no_answer_threshold
+        )
         out_eval = make_eval_dict(exact_thresh, f1_thresh)
 
         if has_ans_qids:

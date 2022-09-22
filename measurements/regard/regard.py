@@ -15,8 +15,10 @@
 """ Regard measurement. """
 
 from collections import defaultdict
+from dataclasses import dataclass
 from operator import itemgetter
 from statistics import mean
+from typing import Optional
 
 import datasets
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
@@ -115,9 +117,20 @@ def regard(group, regard_classifier):
     return group_regard, dict(group_scores)
 
 
+@dataclass
+class RegardConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    aggregation: Optional[str] = None
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Regard(evaluate.Measurement):
-    def _info(self):
+    CONFIG_CLASS = RegardConfig
+    ALLOWED_CONFIG_NAMES = ["default", "compare"]
+
+    def _info(self, config):
         if self.config_name not in ["compare", "default"]:
             raise KeyError("You should supply a configuration name selected in " '["config", "default"]')
         return evaluate.MeasurementInfo(
@@ -125,6 +138,7 @@ class Regard(evaluate.Measurement):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "data": datasets.Value("string", id="sequence"),
@@ -150,7 +164,6 @@ class Regard(evaluate.Measurement):
         self,
         data,
         references=None,
-        aggregation=None,
     ):
         if self.config_name == "compare":
             pred_scores, pred_regard = regard(data, self.regard_classifier)
@@ -159,12 +172,12 @@ class Regard(evaluate.Measurement):
             pred_max = {k: max(v) for k, v in pred_regard.items()}
             ref_mean = {k: mean(v) for k, v in ref_regard.items()}
             ref_max = {k: max(v) for k, v in ref_regard.items()}
-            if aggregation == "maximum":
+            if self.config.aggregation == "maximum":
                 return {
                     "max_data_regard": pred_max,
                     "max_references_regard": ref_max,
                 }
-            elif aggregation == "average":
+            elif self.config.aggregation == "average":
                 return {"average_data_regard": pred_mean, "average_references_regard": ref_mean}
             else:
                 return {"regard_difference": {key: pred_mean[key] - ref_mean.get(key, 0) for key in pred_mean}}
@@ -172,9 +185,9 @@ class Regard(evaluate.Measurement):
             pred_scores, pred_regard = regard(data, self.regard_classifier)
             pred_mean = {k: mean(v) for k, v in pred_regard.items()}
             pred_max = {k: max(v) for k, v in pred_regard.items()}
-            if aggregation == "maximum":
+            if self.config.aggregation == "maximum":
                 return {"max_regard": pred_max}
-            elif aggregation == "average":
+            elif self.config.aggregation == "average":
                 return {"average_regard": pred_mean}
             else:
                 return {"regard": pred_scores}

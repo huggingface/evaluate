@@ -14,6 +14,9 @@
 """ ROUGE metric from Google Research github repo. """
 
 # The dependencies in https://github.com/google-research/google-research/blob/master/rouge/requirements.txt
+from dataclasses import dataclass
+from typing import Callable, List, Optional
+
 import absl  # Here to have a nice missing dependency error message early on
 import datasets
 import nltk  # Here to have a nice missing dependency error message early on
@@ -90,13 +93,29 @@ class Tokenizer:
         return self.tokenizer_func(text)
 
 
+@dataclass
+class RougeConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    rouge_types: Optional[List[str]] = None
+    use_aggregator: bool = True
+    use_stemmer: bool = False
+    tokenizer: Optional[Callable] = None
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Rouge(evaluate.Metric):
-    def _info(self):
+
+    CONFIG_CLASS = RougeConfig
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=[
                 datasets.Features(
                     {
@@ -119,18 +138,26 @@ class Rouge(evaluate.Metric):
         )
 
     def _compute(
-        self, predictions, references, rouge_types=None, use_aggregator=True, use_stemmer=False, tokenizer=None
+        self,
+        predictions,
+        references,
     ):
-        if rouge_types is None:
+        if self.config.rouge_types is None:
             rouge_types = ["rouge1", "rouge2", "rougeL", "rougeLsum"]
+        else:
+            rouge_types = self.config.rouge_types
 
         multi_ref = isinstance(references[0], list)
 
-        if tokenizer is not None:
-            tokenizer = Tokenizer(tokenizer)
+        if self.config.tokenizer is not None:
+            tokenizer = Tokenizer(self.config.tokenizer)
+        else:
+            tokenizer = self.config.tokenizer
 
-        scorer = rouge_scorer.RougeScorer(rouge_types=rouge_types, use_stemmer=use_stemmer, tokenizer=tokenizer)
-        if use_aggregator:
+        scorer = rouge_scorer.RougeScorer(
+            rouge_types=rouge_types, use_stemmer=self.config.use_stemmer, tokenizer=tokenizer
+        )
+        if self.config.use_aggregator:
             aggregator = scoring.BootstrapAggregator()
         else:
             scores = []
@@ -140,12 +167,12 @@ class Rouge(evaluate.Metric):
                 score = scorer.score_multi(ref, pred)
             else:
                 score = scorer.score(ref, pred)
-            if use_aggregator:
+            if self.config.use_aggregator:
                 aggregator.add_scores(score)
             else:
                 scores.append(score)
 
-        if use_aggregator:
+        if self.config.use_aggregator:
             result = aggregator.aggregate()
             for key in result:
                 result[key] = result[key].mid.fmeasure

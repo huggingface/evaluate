@@ -13,6 +13,9 @@
 # limitations under the License.
 """MAE - Mean Absolute Error Metric"""
 
+from dataclasses import dataclass
+from typing import List, Optional, Union
+
 import datasets
 from sklearn.metrics import mean_absolute_error
 
@@ -81,13 +84,26 @@ Examples:
 """
 
 
+@dataclass
+class MaeConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    multioutput: str = "uniform_average"
+    sample_weight: Optional[List[float]] = None
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Mae(evaluate.Metric):
-    def _info(self):
+    CONFIG_CLASS = MaeConfig
+    ALLOWED_CONFIG_NAMES = ["default", "multilist"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(self._get_feature_types()),
             reference_urls=[
                 "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_absolute_error.html"
@@ -106,8 +122,10 @@ class Mae(evaluate.Metric):
                 "references": datasets.Value("float"),
             }
 
-    def _compute(self, predictions, references, sample_weight=None, multioutput="uniform_average"):
+    def _compute(self, predictions, references):
 
-        mae_score = mean_absolute_error(references, predictions, sample_weight=sample_weight, multioutput=multioutput)
+        mae_score = mean_absolute_error(
+            references, predictions, sample_weight=self.config.sample_weight, multioutput=self.config.multioutput
+        )
 
         return {"mae": mae_score}

@@ -30,7 +30,7 @@ The model should be compatible with the AutoModelForSequenceClassification class
 For more information, see [the AutoModelForSequenceClassification documentation]( https://huggingface.co/docs/transformers/master/en/model_doc/auto#transformers.AutoModelForSequenceClassification).
 
 Args:
-    `predictions` (list of str): prediction/candidate sentences
+    `data` (list of str): prediction/candidate sentences
     `toxic_label` (str) (optional): the toxic label that you want to detect, depending on the labels that the model has been trained on.
         This can be found using the `id2label` function, e.g.:
         ```python
@@ -47,7 +47,7 @@ Args:
 
 ## Output values
 
-    `toxicity`: a list of toxicity scores, one for each sentence in `predictions` (default behavior)
+    `toxicity`: a list of toxicity scores, one for each sentence in `data` (default behavior)
 
     `max_toxicity`: the maximum toxicity over all scores (if `aggregation` = `maximum`)
 
@@ -62,7 +62,7 @@ Args:
 ```python
 >>> toxicity = evaluate.load("toxicity", module_type="measurement")
 >>> input_texts = ["she went to the library", "he is a douchebag"]
->>> results = toxicity.compute(predictions=input_texts)
+>>> results = toxicity.compute(data=input_texts)
 >>> print([round(s, 4) for s in results["toxicity"]])
 [0.0002, 0.8564]
 ```
@@ -70,7 +70,7 @@ Args:
 ```python
 >>> toxicity = evaluate.load("toxicity", module_type="measurement")
 >>> input_texts = ["she went to the library", "he is a douchebag"]
->>> results = toxicity.compute(predictions=input_texts, aggregation="ratio")
+>>> results = toxicity.compute(data=input_texts, aggregation="ratio")
 >>> print(results['toxicity_ratio'])
 0.5
 ```
@@ -78,15 +78,15 @@ Args:
 ```python
 >>> toxicity = evaluate.load("toxicity", module_type="measurement")
 >>> input_texts = ["she went to the library", "he is a douchebag"]
->>> results = toxicity.compute(predictions=input_texts, aggregation="maximum")
+>>> results = toxicity.compute(data=input_texts, aggregation="maximum")
 >>> print(round(results['max_toxicity'], 4))
 0.8564
 ```
     Example 4 (uses a custom model):
 ```python
->>> toxicity = evaluate.load("toxicity", 'DaNLP/da-electra-hatespeech-detection')
+>>> toxicity = evaluate.load("toxicity", model_name='DaNLP/da-electra-hatespeech-detection')
 >>> input_texts = ["she went to the library", "he is a douchebag"]
->>> results = toxicity.compute(predictions=input_texts, toxic_label='offensive')
+>>> results = toxicity.compute(data=input_texts, toxic_label='offensive')
 >>> print([round(s, 4) for s in results["toxicity"]])
 [0.0176, 0.0203]
 ```

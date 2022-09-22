@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from dataclasses import dataclass
+from typing import Optional
+
 import datasets
 from sklearn.feature_extraction.text import CountVectorizer
 
@@ -41,18 +44,30 @@ Examples:
 _CITATION = ""
 
 
+@dataclass
+class WordCount(evaluate.info.Config):
+
+    name: str = "default"
+
+    max_vocab: Optional[int] = None
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class WordCount(evaluate.Measurement):
     """This measurement returns the total number of words and the number of unique words
     in the input string(s)."""
 
-    def _info(self):
+    CONFIG_CLASS = WordCount
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         return evaluate.MeasurementInfo(
             # This is the description that will appear on the modules page.
             module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "data": datasets.Value("string"),
@@ -60,9 +75,9 @@ class WordCount(evaluate.Measurement):
             ),
         )
 
-    def _compute(self, data, max_vocab=None):
+    def _compute(self, data):
         """Returns the number of unique words in the input data"""
-        count_vectorizer = CountVectorizer(max_features=max_vocab)
+        count_vectorizer = CountVectorizer(max_features=self.config.max_vocab)
         document_matrix = count_vectorizer.fit_transform(data)
         word_count = document_matrix.sum()
         unique_words = document_matrix.shape[1]

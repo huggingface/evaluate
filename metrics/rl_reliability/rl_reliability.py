@@ -13,6 +13,9 @@
 # limitations under the License.
 """Computes the RL Reliability Metrics."""
 
+from dataclasses import dataclass
+from typing import List, Optional
+
 import datasets
 import numpy as np
 from rl_reliability_metrics.evaluation import eval_metrics
@@ -81,11 +84,27 @@ Examples:
 """
 
 
+@dataclass
+class RLReliabilityConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    baseline: str = "default"
+    freq_thresh: float = 0.01
+    window_size: int = 100000
+    window_size_trimmed: int = 99000
+    alpha: float = 0.05
+    eval_points: Optional[List] = None
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class RLReliability(evaluate.Metric):
     """Computes the RL Reliability Metrics."""
 
-    def _info(self):
+    CONFIG_CLASS = RLReliabilityConfig
+    ALLOWED_CONFIG_NAMES = ["online", "offline"]
+
+    def _info(self, config):
         if self.config_name not in ["online", "offline"]:
             raise KeyError("""You should supply a configuration name selected in '["online", "offline"]'""")
 
@@ -94,6 +113,7 @@ class RLReliability(evaluate.Metric):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "timesteps": datasets.Sequence(datasets.Value("int64")),
@@ -107,17 +127,18 @@ class RLReliability(evaluate.Metric):
         self,
         timesteps,
         rewards,
-        baseline="default",
-        freq_thresh=0.01,
-        window_size=100000,
-        window_size_trimmed=99000,
-        alpha=0.05,
-        eval_points=None,
     ):
         if len(timesteps) < N_RUNS_RECOMMENDED:
             logger.warning(
                 f"For robust statistics it is recommended to use at least {N_RUNS_RECOMMENDED} runs whereas you provided {len(timesteps)}."
             )
+
+        baseline = self.config.baseline
+        freq_thresh = self.config.freq_thresh
+        window_size = self.config.window_size
+        window_size_trimmed = self.config.window_size_trimmed
+        alpha = self.config.alpha
+        eval_points = self.config.eval_points
 
         curves = []
         for timestep, reward in zip(timesteps, rewards):

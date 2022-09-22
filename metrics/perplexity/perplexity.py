@@ -13,6 +13,9 @@
 # limitations under the License.
 """Perplexity Metric."""
 
+from dataclasses import dataclass
+from typing import Optional
+
 import datasets
 import numpy as np
 import torch
@@ -84,14 +87,30 @@ Examples:
 """
 
 
+@dataclass
+class PerplexityConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    model_id: str = "binary"
+    batch_size: int = 16
+    add_start_token: bool = True
+    device: Optional[str] = None
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Perplexity(evaluate.Metric):
-    def _info(self):
+
+    CONFIG_CLASS = PerplexityConfig
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             module_type="metric",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("string"),
@@ -100,7 +119,12 @@ class Perplexity(evaluate.Metric):
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
-    def _compute(self, predictions, model_id, batch_size: int = 16, add_start_token: bool = True, device=None):
+    def _compute(self, predictions):
+
+        model_id = self.config.model_id
+        device = self.config.device
+        batch_size = self.config.batch_size
+        add_start_token = self.config.add_start_token
 
         if device is not None:
             assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."

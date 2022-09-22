@@ -19,6 +19,7 @@ import itertools
 import os
 import types
 import uuid
+from copy import deepcopy
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -33,7 +34,7 @@ from datasets.utils.filelock import BaseFileLock, FileLock, Timeout
 from datasets.utils.py_utils import copyfunc, temp_seed, zip_dict
 
 from . import config
-from .info import EvaluationModuleInfo
+from .info import Config, EvaluationModuleInfo
 from .naming import camelcase_to_snakecase
 from .utils.file_utils import DownloadConfig
 from .utils.logging import get_logger
@@ -141,6 +142,10 @@ class EvaluationModuleInfoMixin:
     def module_type(self) -> str:
         return self._module_info.module_type
 
+    @property
+    def config(self) -> str:
+        return self._module_info.config
+
 
 class EvaluationModule(EvaluationModuleInfoMixin):
     """A EvaluationModule is the base class and common API for metrics, comparisons, and measurements.
@@ -163,6 +168,9 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
     """
 
+    ALLOWED_CONFIG_NAMES = ["default"]
+    CONFIG_CLASS = Config
+
     def __init__(
         self,
         config_name: Optional[str] = None,
@@ -179,10 +187,20 @@ class EvaluationModule(EvaluationModuleInfoMixin):
     ):
         # prepare info
         self.config_name = config_name or "default"
-        info = self._info()
+        if self.ALLOWED_CONFIG_NAMES is not None and self.config_name not in self.ALLOWED_CONFIG_NAMES:
+            raise ValueError(
+                f"The config name '{self.config_name}' not in list of allowed config names: {self.ALLOWED_CONFIG_NAMES}."
+            )
+        if kwargs is None:
+            kwargs = {"name": self.config_name}
+        else:
+            kwargs.update({"name": self.config_name})
+        info = self._info(self.CONFIG_CLASS(**kwargs))
         info.module_name = camelcase_to_snakecase(self.__class__.__name__)
         info.config_name = self.config_name
         info.experiment_id = experiment_id or "default_experiment"
+
+        info.config.update(kwargs)
         EvaluationModuleInfoMixin.__init__(self, info)  # For easy access on low level
 
         # Safety checks on num_process and process_id
@@ -441,7 +459,12 @@ class EvaluationModule(EvaluationModuleInfoMixin):
 
             inputs = {input_name: self.data[input_name] for input_name in self._feature_names()}
             with temp_seed(self.seed):
-                output = self._compute(**inputs, **compute_kwargs)
+                config_state = deepcopy(self.config)
+                self.config.update(compute_kwargs)
+                try:
+                    output = self._compute(**inputs)
+                finally:
+                    self._module_info.config = config_state
 
             if self.buf_writer is not None:
                 self.buf_writer = None
@@ -616,7 +639,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             else:
                 self._check_rendez_vous()  # wait for master to be ready and to let everyone go
 
-    def _info(self) -> EvaluationModuleInfo:
+    def _info(self, config) -> EvaluationModuleInfo:
         """Construct the EvaluationModuleInfo object. See `EvaluationModuleInfo` for details.
 
         Warning: This function is only called once and the result is cached for all

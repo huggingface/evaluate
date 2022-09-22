@@ -12,7 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from dataclasses import dataclass
 from statistics import mean
+from typing import Callable, Optional
 
 import datasets
 from nltk import word_tokenize
@@ -52,11 +54,22 @@ year={2020}
 """
 
 
+@dataclass
+class WordLengthConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    tokenizer: Optional[Callable] = None
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class WordLength(evaluate.Measurement):
     """This measurement returns the average number of words in the input string(s)."""
 
-    def _info(self):
+    CONFIG_CLASS = WordLengthConfig
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         # TODO: Specifies the evaluate.MeasurementInfo object
         return evaluate.MeasurementInfo(
             # This is the description that will appear on the modules page.
@@ -64,6 +77,7 @@ class WordLength(evaluate.Measurement):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             # This defines the format of each prediction and reference
             features=datasets.Features(
                 {
@@ -77,8 +91,12 @@ class WordLength(evaluate.Measurement):
 
         nltk.download("punkt")
 
-    def _compute(self, data, tokenizer=word_tokenize):
+    def _compute(self, data):
         """Returns the average word length of the input data"""
+        if self.config.tokenizer is None:
+            tokenizer = word_tokenize
+        else:
+            tokenizer = self.config.tokenizer
         lengths = [len(tokenizer(d)) for d in data]
         average_length = mean(lengths)
         return {"average_word_length": average_length}

@@ -14,6 +14,9 @@
 # limitations under the License.
 """ MAUVE metric from https://github.com/krishnap25/mauve. """
 
+from dataclasses import dataclass
+from typing import List, Optional, Union
+
 import datasets
 import faiss  # Here to have a nice missing dependency error message early on
 import numpy  # Here to have a nice missing dependency error message early on
@@ -85,14 +88,47 @@ Examples:
 """
 
 
+@dataclass
+class MauveConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    pos_label: Union[str, int] = 1
+    average: str = "binary"
+    labels: Optional[List[str]] = None
+    sample_weight: Optional[List[float]] = None
+
+    p_features: Optional[List] = None
+    q_features: Optional[List] = None
+    p_tokens: Optional[List] = None
+    q_tokens: Optional[List] = None
+    num_buckets: str = "auto"
+    pca_max_data: int = -1
+    kmeans_explained_var: float = 0.9
+    kmeans_num_redo: int = 5
+    kmeans_max_iter: int = 500
+    featurize_model_name: str = "gpt2-large"
+    device_id: int = (-1,)
+    max_text_length: int = 1024
+    divergence_curve_discretization_size: int = 25
+    mauve_scaling_factor: int = 5
+    verbose: bool = True
+    seed: int = 25
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Mauve(evaluate.Metric):
-    def _info(self):
+
+    CONFIG_CLASS = MauveConfig
+    ALLOWED_CONFIG_NAMES = ["default"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="https://github.com/krishnap25/mauve",
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("string", id="sequence"),
@@ -106,45 +142,25 @@ class Mauve(evaluate.Metric):
             ],
         )
 
-    def _compute(
-        self,
-        predictions,
-        references,
-        p_features=None,
-        q_features=None,
-        p_tokens=None,
-        q_tokens=None,
-        num_buckets="auto",
-        pca_max_data=-1,
-        kmeans_explained_var=0.9,
-        kmeans_num_redo=5,
-        kmeans_max_iter=500,
-        featurize_model_name="gpt2-large",
-        device_id=-1,
-        max_text_length=1024,
-        divergence_curve_discretization_size=25,
-        mauve_scaling_factor=5,
-        verbose=True,
-        seed=25,
-    ):
+    def _compute(self, predictions, references):
         out = compute_mauve(
             p_text=predictions,
             q_text=references,
-            p_features=p_features,
-            q_features=q_features,
-            p_tokens=p_tokens,
-            q_tokens=q_tokens,
-            num_buckets=num_buckets,
-            pca_max_data=pca_max_data,
-            kmeans_explained_var=kmeans_explained_var,
-            kmeans_num_redo=kmeans_num_redo,
-            kmeans_max_iter=kmeans_max_iter,
-            featurize_model_name=featurize_model_name,
-            device_id=device_id,
-            max_text_length=max_text_length,
-            divergence_curve_discretization_size=divergence_curve_discretization_size,
-            mauve_scaling_factor=mauve_scaling_factor,
-            verbose=verbose,
-            seed=seed,
+            p_features=self.config.p_features,
+            q_features=self.config.q_features,
+            p_tokens=self.config.p_tokens,
+            q_tokens=self.config.q_tokens,
+            num_buckets=self.config.num_buckets,
+            pca_max_data=self.config.pca_max_data,
+            kmeans_explained_var=self.config.kmeans_explained_var,
+            kmeans_num_redo=self.config.kmeans_num_redo,
+            kmeans_max_iter=self.config.kmeans_max_iter,
+            featurize_model_name=self.config.featurize_model_name,
+            device_id=self.config.device_id,
+            max_text_length=self.config.max_text_length,
+            divergence_curve_discretization_size=self.config.divergence_curve_discretization_size,
+            mauve_scaling_factor=self.config.mauve_scaling_factor,
+            verbose=self.config.verbose,
+            seed=self.config.seed,
         )
         return out

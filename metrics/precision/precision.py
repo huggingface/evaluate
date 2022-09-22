@@ -13,6 +13,9 @@
 # limitations under the License.
 """Precision metric."""
 
+from dataclasses import dataclass
+from typing import List, Optional, Union
+
 import datasets
 from sklearn.metrics import precision_score
 
@@ -102,13 +105,30 @@ _CITATION = """
 """
 
 
+@dataclass
+class PrecisionConfig(evaluate.info.Config):
+
+    name: str = "default"
+
+    pos_label: Union[str, int] = 1
+    average: str = "binary"
+    labels: Optional[List[str]] = None
+    sample_weight: Optional[List[float]] = None
+    zero_division: str = "warn"
+
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Precision(evaluate.Metric):
-    def _info(self):
+
+    CONFIG_CLASS = PrecisionConfig
+    ALLOWED_CONFIG_NAMES = ["default", "multilabel"]
+
+    def _info(self, config):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
+            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Sequence(datasets.Value("int32")),
@@ -127,19 +147,14 @@ class Precision(evaluate.Metric):
         self,
         predictions,
         references,
-        labels=None,
-        pos_label=1,
-        average="binary",
-        sample_weight=None,
-        zero_division="warn",
     ):
         score = precision_score(
             references,
             predictions,
-            labels=labels,
-            pos_label=pos_label,
-            average=average,
-            sample_weight=sample_weight,
-            zero_division=zero_division,
+            labels=self.config.labels,
+            pos_label=self.config.pos_label,
+            average=self.config.average,
+            sample_weight=self.config.sample_weight,
+            zero_division=self.config.zero_division,
         )
         return {"precision": float(score) if score.size == 1 else score}
