@@ -46,15 +46,9 @@ class Harness:
             self.config = json.load(open(json_filepath))
 
         self.tasks = []
-<<<<<<< Updated upstream
-        for task_group in self.config["task_groups"]:
-            for task in task_group["tasks"]:
-                self.tasks.append(task_group["task_type"] + "/" + task["data"])
-=======
         for task_group in self.config['task_groups']:
             for task in task_group['tasks']:
                 self.tasks.append(task_group['task_type'] + '/' + task['data'])
->>>>>>> Stashed changes
 
     @classmethod
     def from_config(cls, path):
@@ -80,24 +74,15 @@ class Harness:
 
     def run(self, model_or_pipeline=None):
         results_all = {}
-<<<<<<< Updated upstream
-        for task_group in self.config["task_groups"]:
-            e = evaluator(task_group["task_type"])
-=======
         for task_group in self.config['task_groups']:
             e = evaluator(task_group['task_type'])
->>>>>>> Stashed changes
 
             logger.info(f"Running harness: {self.config['harness_name']} with tasks {self.tasks}")
 
             for task in task_group["tasks"]:
                 logger.info(f"Running task: {task['data']}")
 
-<<<<<<< Updated upstream
-                data = Dataset.from_dict(load_dataset(path=task["data"], name=task.get("name"))["test"][:5])
-=======
-                data = Dataset.from_dict(load_dataset(task['data'])["test"][:5])
->>>>>>> Stashed changes
+                data = load_dataset(path=task["data"], name=task.get("name"))
 
                 args_for_task = task["args_for_task"]
                 args_for_task["model_or_pipeline"] = model_or_pipeline
@@ -105,10 +90,6 @@ class Harness:
 
                 results = e.compute(**args_for_task)
 
-<<<<<<< Updated upstream
                 task_id = task["data"] + "/" + task.get("name") if task.get("name") else task["data"]
                 results_all[task_id] = results
-=======
-                results_all[task["data"]] = results
->>>>>>> Stashed changes
         return results_all
