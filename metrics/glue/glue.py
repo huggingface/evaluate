@@ -104,28 +104,30 @@ def pearson_and_spearman(preds, labels):
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Glue(evaluate.Metric):
-
-    ALLOWED_CONFIG_NAMES = [
-        "sst2",
-        "mnli",
-        "mnli_mismatched",
-        "mnli_matched",
-        "cola",
-        "stsb",
-        "mrpc",
-        "qqp",
-        "qnli",
-        "rte",
-        "wnli",
-        "hans",
-    ]
-
-    def _info(self, config):
+    def _info(self):
+        if self.config_name not in [
+            "sst2",
+            "mnli",
+            "mnli_mismatched",
+            "mnli_matched",
+            "cola",
+            "stsb",
+            "mrpc",
+            "qqp",
+            "qnli",
+            "rte",
+            "wnli",
+            "hans",
+        ]:
+            raise KeyError(
+                "You should supply a configuration name selected in "
+                '["sst2", "mnli", "mnli_mismatched", "mnli_matched", '
+                '"cola", "stsb", "mrpc", "qqp", "qnli", "rte", "wnli", "hans"]'
+            )
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("int64" if self.config_name != "stsb" else "float32"),

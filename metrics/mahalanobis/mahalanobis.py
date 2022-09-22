@@ -13,9 +13,6 @@
 # limitations under the License.
 """Mahalanobis metric."""
 
-from dataclasses import dataclass
-from typing import List, Optional
-
 import datasets
 import numpy as np
 
@@ -60,25 +57,13 @@ Examples:
 """
 
 
-@dataclass
-class MahalanobisConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    reference_distribution: Optional[List] = None
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Mahalanobis(evaluate.Metric):
-    CONFIG_CLASS = MahalanobisConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "X": datasets.Sequence(datasets.Value("float", id="sequence"), id="X"),
@@ -86,12 +71,7 @@ class Mahalanobis(evaluate.Metric):
             ),
         )
 
-    def _compute(self, X):
-
-        if self.config.reference_distribution is None:
-            raise ValueError("You need to provide a `reference_distribution`.")
-        else:
-            reference_distribution = self.config.reference_distribution
+    def _compute(self, X, reference_distribution):
 
         # convert to numpy arrays
         X = np.array(X)

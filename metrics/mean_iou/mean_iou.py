@@ -13,7 +13,6 @@
 # limitations under the License.
 """Mean IoU (Intersection-over-Union) metric."""
 
-from dataclasses import dataclass
 from typing import Dict, Optional
 
 import datasets
@@ -274,29 +273,13 @@ def mean_iou(
     return metrics
 
 
-@dataclass
-class MeanIoUConfig(evaluate.info.Config):
-    name: str = "default"
-
-    num_labels: int = None
-    ignore_index: int = None
-    nan_to_num: Optional[int] = None
-    label_map: Optional[Dict[int, int]] = None
-    reduce_labels: bool = False
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class MeanIoU(evaluate.Metric):
-
-    CONFIG_CLASS = MeanIoUConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 # 1st Seq - height dim, 2nd - width dim
                 {
@@ -313,20 +296,19 @@ class MeanIoU(evaluate.Metric):
         self,
         predictions,
         references,
+        num_labels: int,
+        ignore_index: bool,
+        nan_to_num: Optional[int] = None,
+        label_map: Optional[Dict[int, int]] = None,
+        reduce_labels: bool = False,
     ):
-
-        if self.config.num_labels is None:
-            raise ValueError("You have to specify a value for `num_labels`.")
-        if self.config.ignore_index is None:
-            raise ValueError("You have to specify a value for `ignore_index`.")
-
         iou_result = mean_iou(
             results=predictions,
             gt_seg_maps=references,
-            num_labels=self.config.num_labels,
-            ignore_index=self.config.ignore_index,
-            nan_to_num=self.config.nan_to_num,
-            label_map=self.config.label_map,
-            reduce_labels=self.config.reduce_labels,
+            num_labels=num_labels,
+            ignore_index=ignore_index,
+            nan_to_num=nan_to_num,
+            label_map=label_map,
+            reduce_labels=reduce_labels,
         )
         return iou_result

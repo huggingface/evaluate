@@ -30,7 +30,6 @@ from transformers import (
     pipeline,
 )
 
-import evaluate
 from evaluate import (
     Evaluator,
     ImageClassificationEvaluator,
@@ -38,9 +37,8 @@ from evaluate import (
     TextClassificationEvaluator,
     TokenClassificationEvaluator,
     evaluator,
+    load,
 )
-
-from .utils import use_local_metrics
 
 
 class DummyTextClassificationPipeline:
@@ -176,7 +174,6 @@ class TestTextClassificationEvaluator(TestCase):
         self.evaluator = evaluator("text-classification")
         self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
 
-    @use_local_metrics
     def test_pipe_init(self):
         results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
@@ -187,7 +184,6 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 1.0)
 
-    @use_local_metrics
     def test_model_init(self):
         results = self.evaluator.compute(
             model_or_pipeline=self.default_model,
@@ -207,7 +203,6 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 1.0)
 
-    @use_local_metrics
     def test_class_init(self):
         evaluator = TextClassificationEvaluator()
         self.assertEqual(evaluator.task, "text-classification")
@@ -221,7 +216,6 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["f1"], 1.0)
 
-    @use_local_metrics
     def test_default_pipe_init(self):
         results = self.evaluator.compute(
             data=self.data,
@@ -229,7 +223,6 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 1.0)
 
-    @use_local_metrics
     def test_data_loading(self):
 
         # Test passing in dataset by name with split
@@ -250,9 +243,8 @@ class TestTextClassificationEvaluator(TestCase):
         data = self.evaluator.load_data("evaluate/glue-ci", subset="cola", split="test")
         self.assertEqual(isinstance(data, Dataset), True)
 
-    @use_local_metrics
     def test_overwrite_default_metric(self):
-        accuracy = evaluate.load("accuracy")
+        accuracy = load("accuracy")
         results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
@@ -268,7 +260,6 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 1.0)
 
-    @use_local_metrics
     def test_bootstrap(self):
         data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
 
@@ -287,7 +278,6 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.68326, 5)
         self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.24595, 5)
 
-    @use_local_metrics
     def test_perf(self):
         results = self.evaluator.compute(
             model_or_pipeline=self.perf_pipe,
@@ -305,7 +295,6 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertAlmostEqual(results["samples_per_second"], len(self.data) / results["total_time_in_seconds"], 5)
         self.assertAlmostEqual(results["latency_in_seconds"], results["total_time_in_seconds"] / len(self.data), 5)
 
-    @use_local_metrics
     def test_bootstrap_and_perf(self):
         data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
 
@@ -350,7 +339,6 @@ class TestTextClassificationEvaluatorTwoColumns(TestCase):
         self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
         self.label_mapping2 = {"LABEL_0": 0, "LABEL_1": 1, "LABEL_2": 2}
 
-    @use_local_metrics
     def test_pipe_init(self):
         results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
@@ -362,7 +350,6 @@ class TestTextClassificationEvaluatorTwoColumns(TestCase):
         )
         self.assertEqual(results["accuracy"], 1.0)
 
-    @use_local_metrics
     def test_model_init(self):
         results = self.evaluator.compute(
             model_or_pipeline=self.default_model,
@@ -399,7 +386,6 @@ class TestImageClassificationEvaluator(TestCase):
         self.evaluator = evaluator("image-classification")
         self.label_mapping = AutoConfig.from_pretrained(self.default_model).label2id
 
-    @use_local_metrics
     def test_pipe_init(self):
         results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
@@ -408,7 +394,6 @@ class TestImageClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 0)
 
-    @use_local_metrics
     def test_model_init(self):
         results = self.evaluator.compute(
             model_or_pipeline=self.default_model,
@@ -428,7 +413,6 @@ class TestImageClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 0)
 
-    @use_local_metrics
     def test_class_init(self):
         evaluator = ImageClassificationEvaluator()
         self.assertEqual(evaluator.task, "image-classification")
@@ -442,7 +426,6 @@ class TestImageClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 0)
 
-    @use_local_metrics
     def test_default_pipe_init(self):
         results = self.evaluator.compute(
             data=self.data,
@@ -450,9 +433,8 @@ class TestImageClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 0)
 
-    @use_local_metrics
     def test_overwrite_default_metric(self):
-        accuracy = evaluate.load("accuracy")
+        accuracy = load("accuracy")
         results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
@@ -493,7 +475,6 @@ class TestQuestionAnsweringEvaluator(TestCase):
         self.pipe_v2 = DummyQuestionAnsweringPipeline(v2=True)
         self.evaluator = evaluator("question-answering")
 
-    @use_local_metrics
     def test_pipe_init(self):
         # squad_v1-like dataset
         results = self.evaluator.compute(
@@ -503,7 +484,6 @@ class TestQuestionAnsweringEvaluator(TestCase):
         self.assertEqual(results["exact_match"], 100.0)
         self.assertEqual(results["f1"], 100.0)
 
-    @use_local_metrics
     def test_model_init(self):
         # squad_v1-like dataset
         results = self.evaluator.compute(
@@ -525,7 +505,6 @@ class TestQuestionAnsweringEvaluator(TestCase):
         self.assertEqual(results["exact_match"], 0)
         self.assertEqual(results["f1"], 100 / 3)
 
-    @use_local_metrics
     def test_class_init(self):
         # squad_v1-like dataset
         evaluator = QuestionAnsweringEvaluator()
@@ -554,7 +533,6 @@ class TestQuestionAnsweringEvaluator(TestCase):
             {key: results[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 100.0}
         )
 
-    @use_local_metrics
     def test_default_pipe_init(self):
         # squad_v1-like dataset
         results = self.evaluator.compute(
@@ -572,7 +550,6 @@ class TestQuestionAnsweringEvaluator(TestCase):
             {key: results[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 0.0}
         )
 
-    @use_local_metrics
     def test_data_loading(self):
         # Test passing in dataset by name with data_split
         data = self.evaluator.load_data("evaluate/squad-ci", split="validation[:1]")
@@ -592,10 +569,9 @@ class TestQuestionAnsweringEvaluator(TestCase):
         # Test that the data point returned is correct; this maps to the first example in the squad-ci dataset
         self.assertEqual(data[0]["id"], "56be4db0acb8001400a502ec")
 
-    @use_local_metrics
     def test_overwrite_default_metric(self):
         # squad_v1-like dataset
-        squad = evaluate.load("squad")
+        squad = load("squad")
         results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,
@@ -633,7 +609,6 @@ class TestTokenClassificationEvaluator(TestCase):
         self.pipe = DummyTokenClassificationPipeline()
         self.evaluator = evaluator("token-classification")
 
-    @use_local_metrics
     def test_model_init(self):
         results = self.evaluator.compute(
             model_or_pipeline=self.default_model,
@@ -652,7 +627,6 @@ class TestTokenClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["overall_accuracy"], 0.5)
 
-    @use_local_metrics
     def test_class_init(self):
         evaluator = TokenClassificationEvaluator()
         self.assertEqual(evaluator.task, "token-classification")
@@ -665,16 +639,14 @@ class TestTokenClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["overall_accuracy"], 1.0)
 
-    @use_local_metrics
     def test_default_pipe_init(self):
         results = self.evaluator.compute(
             data=self.data,
         )
         self.assertEqual(results["overall_accuracy"], 2 / 3)
 
-    @use_local_metrics
     def test_overwrite_default_metric(self):
-        accuracy = evaluate.load("seqeval")
+        accuracy = load("seqeval")
         results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
             data=self.data,

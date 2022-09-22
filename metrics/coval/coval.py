@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ CoVal metric. """
-from dataclasses import dataclass
-
 import coval  # From: git+https://github.com/ns-moosavi/coval.git noqa: F401
 import datasets
 from coval.conll import reader, util
@@ -271,29 +269,13 @@ def check_gold_parse_annotation(key_lines):
     return has_gold_parse
 
 
-@dataclass
-class CovalConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    keep_singletons: bool = True
-    NP_only: bool = False
-    min_span: bool = False
-    remove_nested: bool = False
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Coval(evaluate.Metric):
-
-    CONFIG_CLASS = CovalConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Sequence(datasets.Value("string")),
@@ -308,7 +290,9 @@ class Coval(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references):
+    def _compute(
+        self, predictions, references, keep_singletons=True, NP_only=False, min_span=False, remove_nested=False
+    ):
         allmetrics = [
             ("mentions", evaluator.mentions),
             ("muc", evaluator.muc),
@@ -317,7 +301,7 @@ class Coval(evaluate.Metric):
             ("lea", evaluator.lea),
         ]
 
-        if self.config.min_span:
+        if min_span:
             has_gold_parse = util.check_gold_parse_annotation(references)
             if not has_gold_parse:
                 raise NotImplementedError("References should have gold parse annotation to use 'min_span'.")
@@ -328,10 +312,10 @@ class Coval(evaluate.Metric):
             key_lines=references,
             sys_lines=predictions,
             metrics=allmetrics,
-            NP_only=self.config.NP_only,
-            remove_nested=self.config.remove_nested,
-            keep_singletons=self.config.keep_singletons,
-            min_span=self.config.min_span,
+            NP_only=NP_only,
+            remove_nested=remove_nested,
+            keep_singletons=keep_singletons,
+            min_span=min_span,
         )
 
         return score

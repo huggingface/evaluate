@@ -13,7 +13,6 @@
 # limitations under the License.
 """ Character Error Ratio (CER) metric. """
 
-from dataclasses import dataclass
 from typing import List
 
 import datasets
@@ -116,26 +115,13 @@ Examples:
 """
 
 
-@dataclass
-class CERConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    concatenate_texts: bool = False
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class CER(evaluate.Metric):
-
-    CONFIG_CLASS = CERConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("string", id="sequence"),
@@ -149,8 +135,8 @@ class CER(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references):
-        if self.config.concatenate_texts:
+    def _compute(self, predictions, references, concatenate_texts=False):
+        if concatenate_texts:
             return jiwer.compute_measures(
                 references,
                 predictions,

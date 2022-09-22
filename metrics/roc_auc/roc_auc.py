@@ -13,9 +13,6 @@
 # limitations under the License.
 """Accuracy metric."""
 
-from dataclasses import dataclass
-from typing import List, Optional, Union
-
 import datasets
 from sklearn.metrics import roc_auc_score
 
@@ -145,31 +142,13 @@ year={2011}
 """
 
 
-@dataclass
-class ROCAUCConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    pos_label: Union[str, int] = 1
-    average: str = "macro"
-    labels: Optional[List[str]] = None
-    sample_weight: Optional[List[float]] = None
-    max_fpr: Optional[float] = None
-    multi_class: str = "raise"
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class ROCAUC(evaluate.Metric):
-
-    CONFIG_CLASS = ROCAUCConfig
-    ALLOWED_CONFIG_NAMES = ["default", "multilabel", "multiclass"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "prediction_scores": datasets.Sequence(datasets.Value("float")),
@@ -193,15 +172,20 @@ class ROCAUC(evaluate.Metric):
         self,
         references,
         prediction_scores,
+        average="macro",
+        sample_weight=None,
+        max_fpr=None,
+        multi_class="raise",
+        labels=None,
     ):
         return {
             "roc_auc": roc_auc_score(
                 references,
                 prediction_scores,
-                average=self.config.average,
-                sample_weight=self.config.sample_weight,
-                max_fpr=self.config.max_fpr,
-                multi_class=self.config.multi_class,
-                labels=self.config.labels,
+                average=average,
+                sample_weight=sample_weight,
+                max_fpr=max_fpr,
+                multi_class=multi_class,
+                labels=labels,
             )
         }

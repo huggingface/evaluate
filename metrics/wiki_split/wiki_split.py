@@ -322,26 +322,20 @@ def compute_sacrebleu(
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class WikiSplit(evaluate.Metric):
-
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=[
                 datasets.Features(
                     {
-                        "sources": datasets.Value("string", id="sequence"),
                         "predictions": datasets.Value("string", id="sequence"),
                         "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
                     }
                 ),
                 datasets.Features(
                     {
-                        "sources": datasets.Value("string", id="sequence"),
                         "predictions": datasets.Value("string", id="sequence"),
                         "references": datasets.Value("string", id="sequence"),
                     }

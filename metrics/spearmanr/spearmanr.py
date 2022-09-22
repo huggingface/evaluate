@@ -13,8 +13,6 @@
 # limitations under the License.
 """Spearman correlation coefficient metric."""
 
-from dataclasses import dataclass
-
 import datasets
 from scipy.stats import spearmanr
 
@@ -98,26 +96,13 @@ _CITATION = r"""\
 """
 
 
-@dataclass
-class SpearmanrConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    return_pvalue: bool = False
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Spearmanr(evaluate.Metric):
-
-    CONFIG_CLASS = SpearmanrConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("float"),
@@ -127,9 +112,9 @@ class Spearmanr(evaluate.Metric):
             reference_urls=["https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.spearmanr.html"],
         )
 
-    def _compute(self, predictions, references):
+    def _compute(self, predictions, references, return_pvalue=False):
         results = spearmanr(references, predictions)
-        if self.config.return_pvalue:
+        if return_pvalue:
             return {"spearmanr": results[0], "spearmanr_pvalue": results[1]}
         else:
             return {"spearmanr": results[0]}

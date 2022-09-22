@@ -13,8 +13,6 @@
 # limitations under the License.
 """ Word Error Ratio (WER) metric. """
 
-from dataclasses import dataclass
-
 import datasets
 from jiwer import compute_measures
 
@@ -76,26 +74,13 @@ Examples:
 """
 
 
-@dataclass
-class WERConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    concatenate_texts: bool = False
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class WER(evaluate.Metric):
-
-    CONFIG_CLASS = WERConfig
-    ALLOWED_CONFIG_NAMES = ["default", "multilabel"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("string", id="sequence"),
@@ -108,8 +93,8 @@ class WER(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions=None, references=None):
-        if self.config.concatenate_texts:
+    def _compute(self, predictions=None, references=None, concatenate_texts=False):
+        if concatenate_texts:
             return compute_measures(references, predictions)["wer"]
         else:
             incorrect = 0

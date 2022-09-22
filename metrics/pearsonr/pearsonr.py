@@ -13,8 +13,6 @@
 # limitations under the License.
 """Pearson correlation coefficient metric."""
 
-from dataclasses import dataclass
-
 import datasets
 from scipy.stats import pearsonr
 
@@ -85,26 +83,13 @@ doi = {10.1038/s41592-019-0686-2},
 """
 
 
-@dataclass
-class PearsonrConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    return_pvalue: bool = True
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Pearsonr(evaluate.Metric):
-
-    CONFIG_CLASS = PearsonrConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("float"),
@@ -114,8 +99,8 @@ class Pearsonr(evaluate.Metric):
             reference_urls=["https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html"],
         )
 
-    def _compute(self, predictions, references):
-        if self.config.return_pvalue:
+    def _compute(self, predictions, references, return_pvalue=False):
+        if return_pvalue:
             results = pearsonr(references, predictions)
             return {"pearsonr": results[0], "p-value": results[1]}
         else:
