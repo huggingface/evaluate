@@ -13,9 +13,6 @@
 # limitations under the License.
 """FrugalScore metric."""
 
-from dataclasses import dataclass
-from typing import Optional
-
 import datasets
 import torch
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trainer, TrainingArguments
@@ -57,28 +54,13 @@ Examples:
 """
 
 
-@dataclass
-class FRUGALSCOREConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    batch_size: int = 32
-    max_length: int = 128
-    device: Optional[str] = None
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class FRUGALSCORE(evaluate.Metric):
-
-    CONFIG_CLASS = FRUGALSCOREConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("string"),
@@ -96,20 +78,26 @@ class FRUGALSCORE(evaluate.Metric):
         self.model = AutoModelForSequenceClassification.from_pretrained(checkpoint)
         self.tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 
-    def _compute(self, predictions, references):
+    def _compute(
+        self,
+        predictions,
+        references,
+        batch_size=32,
+        max_length=128,
+        device=None,
+    ):
         """Returns the scores"""
         assert len(predictions) == len(
             references
         ), "predictions and references should have the same number of sentences."
-        if self.config.device is not None:
-            assert self.config.device in ["gpu", "cpu"], "device should be either gpu or cpu."
-            device = self.config.device
+        if device is not None:
+            assert device in ["gpu", "cpu"], "device should be either gpu or cpu."
         else:
             device = "gpu" if torch.cuda.is_available() else "cpu"
         training_args = TrainingArguments(
             "trainer",
             fp16=(device == "gpu"),
-            per_device_eval_batch_size=self.config.batch_size,
+            per_device_eval_batch_size=batch_size,
             report_to="all",
             no_cuda=(device == "cpu"),
             log_level="warning",
@@ -119,7 +107,7 @@ class FRUGALSCORE(evaluate.Metric):
 
         def tokenize_function(data):
             return self.tokenizer(
-                data["sentence1"], data["sentence2"], max_length=self.config.max_length, truncation=True, padding=True
+                data["sentence1"], data["sentence2"], max_length=max_length, truncation=True, padding=True
             )
 
         tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)

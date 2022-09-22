@@ -2,44 +2,27 @@ import os
 import pickle
 import tempfile
 import time
-from dataclasses import dataclass
 from multiprocessing import Pool
 from unittest import TestCase, mock
 
 import pytest
 from datasets.features import Features, Sequence, Value
 
-import evaluate
 from evaluate.module import EvaluationModule, EvaluationModuleInfo, combine
 
-from .utils import require_tf, require_torch, use_local_metrics
-
-
-@dataclass
-class DummyConfig(evaluate.info.Config):
-    name = "default"
-
-    dummy_setting: bool = False
+from .utils import require_tf, require_torch
 
 
 class DummyMetric(EvaluationModule):
-
-    CONFIG_CLASS = DummyConfig
-    ALLOWED_CONFIG_NAMES = ["default", "test"]
-
-    def _info(self, config):
+    def _info(self):
         return EvaluationModuleInfo(
             description="dummy metric for tests",
             citation="insert citation here",
             features=Features({"predictions": Value("int64"), "references": Value("int64")}),
-            config=config,
         )
 
     def _compute(self, predictions, references):
         result = {}
-
-        if self.config.dummy_setting:
-            return {"test_accuracy": -1}
         if not predictions:
             return result
         else:
@@ -88,11 +71,10 @@ class DummyMetric(EvaluationModule):
 
 
 class AnotherDummyMetric(EvaluationModule):
-    def _info(self, config):
+    def _info(self):
         return EvaluationModuleInfo(
             description="another dummy metric for tests",
             citation="insert citation here",
-            config=config,
             features=Features({"predictions": Value("int64"), "references": Value("int64")}),
         )
 
@@ -223,22 +205,6 @@ class TestMetric(TestCase):
             metric = DummyMetric(experiment_id="test_dummy_metric", cache_dir=tmp_dir)
             self.assertDictEqual(expected_results, metric.compute(predictions=preds, references=refs))
             del metric
-
-    def test_metric_with_wrong_config(self):
-        DummyMetric(config_name="test")
-        with self.assertRaises(ValueError):
-            DummyMetric(config_name="wrong")
-
-    def test_metric_with_temporary_config(self):
-
-        preds, refs = DummyMetric.predictions_and_references()
-        expected_results = DummyMetric.expected_results()
-
-        metric = DummyMetric(dummy_setting=True)
-
-        self.assertDictEqual({"test_accuracy": -1}, metric.compute(predictions=preds, references=refs))
-        self.assertDictEqual(expected_results, metric.compute(predictions=preds, references=refs, dummy_setting=False))
-        self.assertDictEqual({"test_accuracy": -1}, metric.compute(predictions=preds, references=refs))
 
     def test_concurrent_metrics(self):
         preds, refs = DummyMetric.predictions_and_references()
@@ -602,13 +568,10 @@ class TestMetric(TestCase):
 
 
 class MetricWithMultiLabel(EvaluationModule):
-    ALLOWED_CONFIG_NAMES = ["default", "multilabel"]
-
-    def _info(self, config):
+    def _info(self):
         return EvaluationModuleInfo(
             description="dummy metric for tests",
             citation="insert citation here",
-            config=config,
             features=Features(
                 {"predictions": Sequence(Value("int64")), "references": Sequence(Value("int64"))}
                 if self.config_name == "multilabel"
@@ -654,11 +617,10 @@ def test_safety_checks_process_vars():
 
 
 class AccuracyWithNonStandardFeatureNames(EvaluationModule):
-    def _info(self, config):
+    def _info(self):
         return EvaluationModuleInfo(
             description="dummy metric for tests",
             citation="insert citation here",
-            config=config,
             features=Features({"inputs": Value("int64"), "targets": Value("int64")}),
         )
 
@@ -707,7 +669,7 @@ def test_metric_with_non_standard_feature_names_compute(tmp_path):
     assert results == AccuracyWithNonStandardFeatureNames.expected_results()
 
 
-class TestCombinedEvaluation(TestCase):
+class TestEvaluationcombined_evaluation(TestCase):
     def test_single_module(self):
         preds, refs = DummyMetric.predictions_and_references()
         expected_results = DummyMetric.expected_results()
@@ -774,7 +736,6 @@ class TestCombinedEvaluation(TestCase):
 
         self.assertDictEqual(dummy_result_1, combined_evaluation.compute(predictions=preds, references=refs))
 
-    @use_local_metrics
     def test_modules_from_string(self):
         expected_result = {"accuracy": 0.5, "recall": 0.5, "precision": 1.0}
         predictions = [0, 1]

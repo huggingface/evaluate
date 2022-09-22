@@ -70,13 +70,12 @@ _CITATION = """\
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class LabelDistribution(evaluate.Measurement):
-    def _info(self, config):
+    def _info(self):
         return evaluate.MeasurementInfo(
             module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=[
                 datasets.Features({"data": datasets.Value("int32")}),
                 datasets.Features({"data": datasets.Value("string")}),

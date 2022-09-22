@@ -13,9 +13,6 @@
 # limitations under the License.
 """ BLEU metric. """
 
-from dataclasses import dataclass
-from typing import Callable, Optional
-
 import datasets
 
 import evaluate
@@ -87,27 +84,13 @@ Examples:
 """
 
 
-@dataclass
-class BleuConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    tokenizer: Optional[Callable] = None
-    max_order: int = 4
-    smooth: bool = False
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Bleu(evaluate.Metric):
-    CONFIG_CLASS = BleuConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=[
                 datasets.Features(
                     {
@@ -129,12 +112,7 @@ class Bleu(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references):
-        if self.config.tokenizer is None:
-            tokenizer = Tokenizer13a()
-        else:
-            tokenizer = self.config.tokenizer
-
+    def _compute(self, predictions, references, tokenizer=Tokenizer13a(), max_order=4, smooth=False):
         # if only one reference is provided make sure we still use list of lists
         if isinstance(references[0], str):
             references = [[ref] for ref in references]
@@ -142,10 +120,7 @@ class Bleu(evaluate.Metric):
         references = [[tokenizer(r) for r in ref] for ref in references]
         predictions = [tokenizer(p) for p in predictions]
         score = compute_bleu(
-            reference_corpus=references,
-            translation_corpus=predictions,
-            max_order=self.config.max_order,
-            smooth=self.config.smooth,
+            reference_corpus=references, translation_corpus=predictions, max_order=max_order, smooth=smooth
         )
         (bleu, precisions, bp, ratio, translation_length, reference_length) = score
         return {

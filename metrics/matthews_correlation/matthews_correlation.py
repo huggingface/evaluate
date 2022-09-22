@@ -13,9 +13,6 @@
 # limitations under the License.
 """Matthews Correlation metric."""
 
-from dataclasses import dataclass
-from typing import List, Optional
-
 import datasets
 from sklearn.metrics import matthews_corrcoef
 
@@ -82,26 +79,13 @@ _CITATION = """\
 """
 
 
-@dataclass
-class MatthewsCorrelationConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    sample_weight: Optional[List] = None
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class MatthewsCorrelation(evaluate.Metric):
-
-    CONFIG_CLASS = MatthewsCorrelationConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("int32"),
@@ -113,9 +97,7 @@ class MatthewsCorrelation(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references):
+    def _compute(self, predictions, references, sample_weight=None):
         return {
-            "matthews_correlation": float(
-                matthews_corrcoef(references, predictions, sample_weight=self.config.sample_weight)
-            ),
+            "matthews_correlation": float(matthews_corrcoef(references, predictions, sample_weight=sample_weight)),
         }

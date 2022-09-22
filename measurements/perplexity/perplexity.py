@@ -13,9 +13,6 @@
 # limitations under the License.
 """Perplexity Metric."""
 
-from dataclasses import dataclass
-from typing import Optional
-
 import datasets
 import numpy as np
 import torch
@@ -87,29 +84,14 @@ Examples:
 """
 
 
-@dataclass
-class PerplexityConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    batch_size: int = 16
-    model_id: str = "gpt2"
-    add_start_token: bool = True
-    device: Optional[str] = None
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Perplexity(evaluate.Measurement):
-    CONFIG_CLASS = PerplexityConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MeasurementInfo(
             module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "data": datasets.Value("string"),
@@ -118,9 +100,8 @@ class Perplexity(evaluate.Measurement):
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
-    def _compute(self, data):
+    def _compute(self, data, model_id, batch_size: int = 16, add_start_token: bool = True, device=None):
 
-        device = self.config.device
         if device is not None:
             assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
             if device == "gpu":
@@ -128,15 +109,15 @@ class Perplexity(evaluate.Measurement):
         else:
             device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        model = AutoModelForCausalLM.from_pretrained(self.config.model_id)
+        model = AutoModelForCausalLM.from_pretrained(model_id)
         model = model.to(device)
 
-        tokenizer = AutoTokenizer.from_pretrained(self.config.model_id)
+        tokenizer = AutoTokenizer.from_pretrained(model_id)
 
         # if batch_size > 1 (which generally leads to padding being required), and
         # if there is not an already assigned pad_token, assign an existing
         # special token to also be the padding token
-        if tokenizer.pad_token is None and self.config.batch_size > 1:
+        if tokenizer.pad_token is None and batch_size > 1:
             existing_special_tokens = list(tokenizer.special_tokens_map_extended.values())
             # check that the model already has at least one special token defined
             assert (
@@ -145,7 +126,7 @@ class Perplexity(evaluate.Measurement):
             # assign one of the special tokens to also be the pad token
             tokenizer.add_special_tokens({"pad_token": existing_special_tokens[0]})
 
-        if self.config.add_start_token:
+        if add_start_token:
             # leave room for <BOS> token to be added:
             assert (
                 tokenizer.bos_token is not None
@@ -168,7 +149,7 @@ class Perplexity(evaluate.Measurement):
         attn_masks = encodings["attention_mask"]
 
         # check that each input is long enough:
-        if self.config.add_start_token:
+        if add_start_token:
             assert torch.all(torch.ge(attn_masks.sum(1), 1)), "Each input text must be at least one token long."
         else:
             assert torch.all(
@@ -178,12 +159,12 @@ class Perplexity(evaluate.Measurement):
         ppls = []
         loss_fct = CrossEntropyLoss(reduction="none")
 
-        for start_index in logging.tqdm(range(0, len(encoded_texts), self.config.batch_size)):
-            end_index = min(start_index + self.config.batch_size, len(encoded_texts))
+        for start_index in logging.tqdm(range(0, len(encoded_texts), batch_size)):
+            end_index = min(start_index + batch_size, len(encoded_texts))
             encoded_batch = encoded_texts[start_index:end_index]
             attn_mask = attn_masks[start_index:end_index]
 
-            if self.config.add_start_token:
+            if add_start_token:
                 bos_tokens_tensor = torch.tensor([[tokenizer.bos_token_id]] * encoded_batch.size(dim=0)).to(device)
                 encoded_batch = torch.cat([bos_tokens_tensor, encoded_batch], dim=1)
                 attn_mask = torch.cat(

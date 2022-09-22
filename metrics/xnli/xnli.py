@@ -68,15 +68,11 @@ def simple_accuracy(preds, labels):
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Xnli(evaluate.Metric):
-
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("int64" if self.config_name != "sts-b" else "float32"),

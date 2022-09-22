@@ -78,16 +78,13 @@ CHECKPOINT_URLS = {
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class BLEURT(evaluate.Metric):
-    ALLOWED_CONFIG_NAMES = ["default"] + list(CHECKPOINT_URLS.keys())
-
-    def _info(self, config):
+    def _info(self):
 
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="https://github.com/google-research/bleurt",
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("string", id="sequence"),

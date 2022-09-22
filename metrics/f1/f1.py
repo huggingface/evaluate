@@ -13,9 +13,6 @@
 # limitations under the License.
 """F1 metric."""
 
-from dataclasses import dataclass
-from typing import List, Optional, Union
-
 import datasets
 from sklearn.metrics import f1_score
 
@@ -55,34 +52,30 @@ Examples:
         {'f1': 0.5}
 
     Example 2-The same simple binary example as in Example 1, but with `pos_label` set to `0`.
-        >>> f1_metric = evaluate.load("f1", pos_label=0)
-        >>> results = f1_metric.compute(references=[0, 1, 0, 1, 0], predictions=[0, 0, 1, 1, 0])
+        >>> f1_metric = evaluate.load("f1")
+        >>> results = f1_metric.compute(references=[0, 1, 0, 1, 0], predictions=[0, 0, 1, 1, 0], pos_label=0)
         >>> print(round(results['f1'], 2))
         0.67
 
     Example 3-The same simple binary example as in Example 1, but with `sample_weight` included.
-        >>> f1_metric = evaluate.load("f1", sample_weight=[0.9, 0.5, 3.9, 1.2, 0.3])
-        >>> results = f1_metric.compute(references=[0, 1, 0, 1, 0], predictions=[0, 0, 1, 1, 0])
+        >>> f1_metric = evaluate.load("f1")
+        >>> results = f1_metric.compute(references=[0, 1, 0, 1, 0], predictions=[0, 0, 1, 1, 0], sample_weight=[0.9, 0.5, 3.9, 1.2, 0.3])
         >>> print(round(results['f1'], 2))
         0.35
 
     Example 4-A multiclass example, with different values for the `average` input.
-        >>> f1_metric = evaluate.load("f1", average="macro")
         >>> predictions = [0, 2, 1, 0, 0, 1]
         >>> references = [0, 1, 2, 0, 1, 2]
-        >>> results = f1_metric.compute(predictions=predictions, references=references)
+        >>> results = f1_metric.compute(predictions=predictions, references=references, average="macro")
         >>> print(round(results['f1'], 2))
         0.27
-        >>> f1_metric = evaluate.load("f1", average="micro")
-        >>> results = f1_metric.compute(predictions=predictions, references=references)
+        >>> results = f1_metric.compute(predictions=predictions, references=references, average="micro")
         >>> print(round(results['f1'], 2))
         0.33
-        >>> f1_metric = evaluate.load("f1", average="weighted")
-        >>> results = f1_metric.compute(predictions=predictions, references=references)
+        >>> results = f1_metric.compute(predictions=predictions, references=references, average="weighted")
         >>> print(round(results['f1'], 2))
         0.27
-        >>> f1_metric = evaluate.load("f1", average=None)
-        >>> results = f1_metric.compute(predictions=predictions, references=references)
+        >>> results = f1_metric.compute(predictions=predictions, references=references, average=None)
         >>> print(results)
         {'f1': array([0.8, 0. , 0. ])}
 
@@ -109,29 +102,13 @@ _CITATION = """
 """
 
 
-@dataclass
-class F1Config(evaluate.info.Config):
-
-    name: str = "default"
-
-    pos_label: Union[str, int] = 1
-    average: str = "binary"
-    labels: Optional[List[str]] = None
-    sample_weight: Optional[List[float]] = None
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class F1(evaluate.Metric):
-
-    CONFIG_CLASS = F1Config
-    ALLOWED_CONFIG_NAMES = ["default", "multilabel"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Sequence(datasets.Value("int32")),
@@ -146,13 +123,8 @@ class F1(evaluate.Metric):
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html"],
         )
 
-    def _compute(self, predictions, references):
+    def _compute(self, predictions, references, labels=None, pos_label=1, average="binary", sample_weight=None):
         score = f1_score(
-            references,
-            predictions,
-            labels=self.config.labels,
-            pos_label=self.config.pos_label,
-            average=self.config.average,
-            sample_weight=self.config.sample_weight,
+            references, predictions, labels=labels, pos_label=pos_label, average=average, sample_weight=sample_weight
         )
         return {"f1": float(score) if score.size == 1 else score}

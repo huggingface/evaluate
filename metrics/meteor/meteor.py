@@ -13,8 +13,6 @@
 # limitations under the License.
 """ METEOR metric. """
 
-from dataclasses import dataclass
-
 import datasets
 import numpy as np
 from datasets.config import importlib_metadata, version
@@ -84,28 +82,13 @@ Examples:
 """
 
 
-@dataclass
-class MeteorConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    alpha: float = 0.9
-    beta: float = 3.0
-    gamma: float = 0.5
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Meteor(evaluate.Metric):
-
-    CONFIG_CLASS = MeteorConfig
-    ALLOWED_CONFIG_NAMES = ["default", "multilabel"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=[
                 datasets.Features(
                     {
@@ -136,7 +119,7 @@ class Meteor(evaluate.Metric):
         if NLTK_VERSION >= version.Version("3.6.6"):
             nltk.download("omw-1.4")
 
-    def _compute(self, predictions, references):
+    def _compute(self, predictions, references, alpha=0.9, beta=3, gamma=0.5):
         multiple_refs = isinstance(references[0], list)
         if NLTK_VERSION >= version.Version("3.6.5"):
             # the version of METEOR in NLTK version 3.6.5 and earlier expect tokenized inputs
@@ -145,20 +128,16 @@ class Meteor(evaluate.Metric):
                     meteor_score.meteor_score(
                         [word_tokenize(ref) for ref in refs],
                         word_tokenize(pred),
-                        alpha=self.config.alpha,
-                        beta=self.config.beta,
-                        gamma=self.config.gamma,
+                        alpha=alpha,
+                        beta=beta,
+                        gamma=gamma,
                     )
                     for refs, pred in zip(references, predictions)
                 ]
             else:
                 scores = [
                     meteor_score.single_meteor_score(
-                        word_tokenize(ref),
-                        word_tokenize(pred),
-                        alpha=self.config.alpha,
-                        beta=self.config.beta,
-                        gamma=self.config.gamma,
+                        word_tokenize(ref), word_tokenize(pred), alpha=alpha, beta=beta, gamma=gamma
                     )
                     for ref, pred in zip(references, predictions)
                 ]
@@ -168,17 +147,15 @@ class Meteor(evaluate.Metric):
                     meteor_score.meteor_score(
                         [[word_tokenize(ref) for ref in group] for group in references][0],
                         word_tokenize(pred),
-                        alpha=self.config.alpha,
-                        beta=self.config.beta,
-                        gamma=self.config.gamma,
+                        alpha=alpha,
+                        beta=beta,
+                        gamma=gamma,
                     )
                     for ref, pred in zip(references, predictions)
                 ]
             else:
                 scores = [
-                    meteor_score.single_meteor_score(
-                        ref, pred, alpha=self.config.alpha, beta=self.config.beta, gamma=self.config.gamma
-                    )
+                    meteor_score.single_meteor_score(ref, pred, alpha=alpha, beta=beta, gamma=gamma)
                     for ref, pred in zip(references, predictions)
                 ]
 

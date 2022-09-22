@@ -14,8 +14,6 @@
 """Exact Match metric."""
 import re
 import string
-from dataclasses import dataclass
-from typing import Optional
 
 import datasets
 import numpy as np
@@ -85,29 +83,13 @@ _CITATION = """
 """
 
 
-@dataclass
-class ExactMatchConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    regexes_to_ignore: Optional[str] = None
-    ignore_case: bool = False
-    ignore_punctuation: bool = False
-    ignore_numbers: bool = False
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class ExactMatchConfig(evaluate.Metric):
-
-    CONFIG_CLASS = ExactMatchConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+class ExactMatch(evaluate.Metric):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("string", id="sequence"),
@@ -121,26 +103,30 @@ class ExactMatchConfig(evaluate.Metric):
         self,
         predictions,
         references,
+        regexes_to_ignore=None,
+        ignore_case=False,
+        ignore_punctuation=False,
+        ignore_numbers=False,
     ):
 
-        if self.config.regexes_to_ignore is not None:
-            for s in self.config.regexes_to_ignore:
+        if regexes_to_ignore is not None:
+            for s in regexes_to_ignore:
                 predictions = np.array([re.sub(s, "", x) for x in predictions])
                 references = np.array([re.sub(s, "", x) for x in references])
         else:
             predictions = np.asarray(predictions)
             references = np.asarray(references)
 
-        if self.config.ignore_case:
+        if ignore_case:
             predictions = np.char.lower(predictions)
             references = np.char.lower(references)
 
-        if self.config.ignore_punctuation:
+        if ignore_punctuation:
             repl_table = string.punctuation.maketrans("", "", string.punctuation)
             predictions = np.char.translate(predictions, table=repl_table)
             references = np.char.translate(references, table=repl_table)
 
-        if self.config.ignore_numbers:
+        if ignore_numbers:
             repl_table = string.digits.maketrans("", "", string.digits)
             predictions = np.char.translate(predictions, table=repl_table)
             references = np.char.translate(references, table=repl_table)

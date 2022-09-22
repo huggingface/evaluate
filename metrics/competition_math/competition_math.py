@@ -67,14 +67,11 @@ Examples:
 class CompetitionMathMetric(evaluate.Metric):
     """Accuracy metric for the MATH dataset."""
 
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("string"),

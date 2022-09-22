@@ -104,29 +104,32 @@ def precision_at_10(en_sentvecs, in_sentvecs):
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class IndicGlue(evaluate.Metric):
-
-    ALLOWED_CONFIG_NAMES = [
-        "wnli",
-        "copa",
-        "sna",
-        "csqa",
-        "wstp",
-        "inltkh",
-        "bbca",
-        "cvit-mkb-clsr",
-        "iitp-mr",
-        "iitp-pr",
-        "actsa-sc",
-        "md",
-        "wiki-ner",
-    ]
-
-    def _info(self, config):
+    def _info(self):
+        if self.config_name not in [
+            "wnli",
+            "copa",
+            "sna",
+            "csqa",
+            "wstp",
+            "inltkh",
+            "bbca",
+            "cvit-mkb-clsr",
+            "iitp-mr",
+            "iitp-pr",
+            "actsa-sc",
+            "md",
+            "wiki-ner",
+        ]:
+            raise KeyError(
+                "You should supply a configuration name selected in "
+                '["wnli", "copa", "sna", "csqa", "wstp", "inltkh", "bbca", '
+                '"cvit-mkb-clsr", "iitp-mr", "iitp-pr", "actsa-sc", "md", '
+                '"wiki-ner"]'
+            )
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Value("int64")

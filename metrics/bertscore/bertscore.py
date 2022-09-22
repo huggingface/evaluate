@@ -15,8 +15,6 @@
 
 import functools
 from contextlib import contextmanager
-from dataclasses import dataclass
-from typing import List, Optional, Union
 
 import bert_score
 import datasets
@@ -99,42 +97,14 @@ Examples:
 """
 
 
-@dataclass
-class BERTScoreConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    pos_label: Union[str, int] = 1
-    average: str = "binary"
-    lang: Optional[str] = None
-    sample_weight: Optional[List[float]] = None
-
-    lang: Optional[str] = None
-    model_type: Optional[str] = None
-    num_layers: Optional[int] = None
-    verbose: bool = False
-    idf = bool = False
-    device: Optional[str] = None
-    batch_size: int = 64
-    nthreads: int = 4
-    all_layers: bool = False
-    rescale_with_baseline: bool = False
-    baseline_path: Optional[str] = None
-    use_fast_tokenizer: bool = False
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class BERTScore(evaluate.Metric):
-    CONFIG_CLASS = BERTScoreConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
             homepage="https://github.com/Tiiiger/bert_score",
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=[
                 datasets.Features(
                     {
@@ -160,12 +130,24 @@ class BERTScore(evaluate.Metric):
         self,
         predictions,
         references,
+        lang=None,
+        model_type=None,
+        num_layers=None,
+        verbose=False,
+        idf=False,
+        device=None,
+        batch_size=64,
+        nthreads=4,
+        all_layers=False,
+        rescale_with_baseline=False,
+        baseline_path=None,
+        use_fast_tokenizer=False,
     ):
 
         if isinstance(references[0], str):
             references = [[ref] for ref in references]
 
-        if self.config.idf:
+        if idf:
             idf_sents = [r for ref in references for r in ref]
         else:
             idf_sents = None
@@ -174,34 +156,32 @@ class BERTScore(evaluate.Metric):
         scorer = bert_score.BERTScorer
 
         if version.parse(bert_score.__version__) >= version.parse("0.3.10"):
-            get_hash = functools.partial(get_hash, use_fast_tokenizer=self.config.use_fast_tokenizer)
-            scorer = functools.partial(scorer, use_fast_tokenizer=self.config.use_fast_tokenizer)
-        elif self.config.use_fast_tokenizer:
+            get_hash = functools.partial(get_hash, use_fast_tokenizer=use_fast_tokenizer)
+            scorer = functools.partial(scorer, use_fast_tokenizer=use_fast_tokenizer)
+        elif use_fast_tokenizer:
             raise ImportWarning(
                 "To use a fast tokenizer, the module `bert-score>=0.3.10` is required, and the current version of "
                 "`bert-score` doesn't match this condition.\n"
                 'You can install it with `pip install "bert-score>=0.3.10"`.'
             )
 
-        if self.config.model_type is None:
-            if self.config.lang is None:
+        if model_type is None:
+            if lang is None:
                 raise ValueError(
                     "Either 'lang' (e.g. 'en') or 'model_type' (e.g. 'microsoft/deberta-xlarge-mnli')"
                     " must be specified"
                 )
-            model_type = bert_score.utils.lang2model[self.config.lang.lower()]
-        else:
-            model_type = self.config.model_type
+            model_type = bert_score.utils.lang2model[lang.lower()]
 
-        if self.config.num_layers is None:
+        if num_layers is None:
             num_layers = bert_score.utils.model2layers[model_type]
 
         hashcode = get_hash(
             model=model_type,
             num_layers=num_layers,
-            idf=self.config.idf,
-            rescale_with_baseline=self.config.rescale_with_baseline,
-            use_custom_baseline=self.config.baseline_path is not None,
+            idf=idf,
+            rescale_with_baseline=rescale_with_baseline,
+            use_custom_baseline=baseline_path is not None,
         )
 
         with filter_logging_context():
@@ -209,22 +189,22 @@ class BERTScore(evaluate.Metric):
                 self.cached_bertscorer = scorer(
                     model_type=model_type,
                     num_layers=num_layers,
-                    batch_size=self.config.batch_size,
-                    nthreads=self.config.nthreads,
-                    all_layers=self.config.all_layers,
-                    idf=self.config.idf,
+                    batch_size=batch_size,
+                    nthreads=nthreads,
+                    all_layers=all_layers,
+                    idf=idf,
                     idf_sents=idf_sents,
-                    device=self.config.device,
-                    lang=self.config.lang,
-                    rescale_with_baseline=self.config.rescale_with_baseline,
-                    baseline_path=self.config.baseline_path,
+                    device=device,
+                    lang=lang,
+                    rescale_with_baseline=rescale_with_baseline,
+                    baseline_path=baseline_path,
                 )
 
         (P, R, F) = self.cached_bertscorer.score(
             cands=predictions,
             refs=references,
-            verbose=self.config.verbose,
-            batch_size=self.config.batch_size,
+            verbose=verbose,
+            batch_size=batch_size,
         )
         output_dict = {
             "precision": P.tolist(),

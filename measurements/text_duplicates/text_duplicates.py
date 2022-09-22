@@ -14,7 +14,6 @@
 
 import hashlib
 from collections import Counter
-from dataclasses import dataclass
 
 import datasets
 
@@ -58,29 +57,18 @@ def get_hash(example):
     return hashlib.md5(example.strip().encode("utf-8")).hexdigest()
 
 
-@dataclass
-class TextDuplicatesConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    list_duplicates: bool = False
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class TextDuplicates(evaluate.Measurement):
     """This measurement returns the duplicate strings contained in the input(s)."""
 
-    CONFIG_CLASS = TextDuplicatesConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
+        # TODO: Specifies the evaluate.MeasurementInfo object
         return evaluate.MeasurementInfo(
             # This is the description that will appear on the modules page.
             module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             # This defines the format of each prediction and reference
             features=datasets.Features(
                 {
@@ -89,9 +77,9 @@ class TextDuplicates(evaluate.Measurement):
             ),
         )
 
-    def _compute(self, data):
+    def _compute(self, data, list_duplicates=False):
         """Returns the duplicates contained in the input data and the number of times they are repeated."""
-        if self.config.list_duplicates == True:
+        if list_duplicates == True:
             logger.warning("This functionality can be memory-intensive for large datasets!")
             n_dedup = len(set([get_hash(d) for d in data]))
             c = Counter(data)

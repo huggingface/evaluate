@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """ Chrf(++) metric as available in sacrebleu. """
-from dataclasses import dataclass
-
 import datasets
 import sacrebleu as scb
 from packaging import version
@@ -125,25 +123,9 @@ Examples:
 """
 
 
-@dataclass
-class ChrFConfig(evaluate.info.Config):
-
-    name: str = "default"
-
-    char_order: int = CHRF.CHAR_ORDER
-    word_order: int = CHRF.WORD_ORDER
-    beta: int = CHRF.BETA
-    lowercase: bool = False
-    whitespace: bool = False
-    eps_smoothing: bool = False
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class ChrF(evaluate.Metric):
-    CONFIG_CLASS = ChrFConfig
-    ALLOWED_CONFIG_NAMES = ["default"]
-
-    def _info(self, config):
+    def _info(self):
         if version.parse(scb.__version__) < version.parse("1.4.12"):
             raise ImportWarning(
                 "To use `sacrebleu`, the module `sacrebleu>=1.4.12` is required, and the current version of `sacrebleu` doesn't match this condition.\n"
@@ -154,7 +136,6 @@ class ChrF(evaluate.Metric):
             citation=_CITATION,
             homepage="https://github.com/mjpost/sacreBLEU#chrf--chrf",
             inputs_description=_KWARGS_DESCRIPTION,
-            config=config,
             features=[
                 datasets.Features(
                     {
@@ -175,7 +156,17 @@ class ChrF(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references):
+    def _compute(
+        self,
+        predictions,
+        references,
+        char_order: int = CHRF.CHAR_ORDER,
+        word_order: int = CHRF.WORD_ORDER,
+        beta: int = CHRF.BETA,
+        lowercase: bool = False,
+        whitespace: bool = False,
+        eps_smoothing: bool = False,
+    ):
         # if only one reference is provided make sure we still use list of lists
         if isinstance(references[0], str):
             references = [[ref] for ref in references]
@@ -186,14 +177,7 @@ class ChrF(evaluate.Metric):
             )
         transformed_references = [[refs[i] for refs in references] for i in range(references_per_prediction)]
 
-        sb_chrf = CHRF(
-            self.config.char_order,
-            self.config.word_order,
-            self.config.beta,
-            self.config.lowercase,
-            self.config.whitespace,
-            self.config.eps_smoothing,
-        )
+        sb_chrf = CHRF(char_order, word_order, beta, lowercase, whitespace, eps_smoothing)
         output = sb_chrf.corpus_score(predictions, transformed_references)
 
         return {
