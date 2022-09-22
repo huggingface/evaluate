@@ -88,7 +88,7 @@ def parse_test_cases(test_cases, feature_names, input_types):
 
 
 def launch_gradio_widget(metric: EvaluationModule, **interface_params):
-    """Launches `metric` widget with Gradio. Optionally pass additional parameters 
+    """Launches `metric` widget with Gradio. Optionally pass additional parameters
     accepted by the `gradio.Interface` constructor to customize the interface."""
 
     try:
@@ -108,19 +108,20 @@ def launch_gradio_widget(metric: EvaluationModule, **interface_params):
     def compute(data):
         return metric.compute(**parse_gradio_data(data, gradio_input_types))
 
-    inputs = interface_params.pop("inputs", 
-                                  gr.inputs.Dataframe(
-                                      headers=feature_names,
-                                      col_count=len(feature_names),
-                                      row_count=2,
-                                      datatype=json_to_string_type(gradio_input_types),
-                                  )
+    inputs = interface_params.pop(
+        "inputs",
+        gr.inputs.Dataframe(
+            headers=feature_names,
+            col_count=len(feature_names),
+            row_count=2,
+            datatype=json_to_string_type(gradio_input_types),
+        ),
     )
     outputs = interface_params.pop("outputs", gr.outputs.Textbox(label=metric.name))
     description = interface_params.pop("description", parse_readme(local_path / "README.md"))
     title = interface_params.pop("title", f"Metric: {metric.name}")
     article = interface_params.pop("article", parse_readme(local_path / "README.md"))
-    
+
     iface = gr.Interface(
         fn=compute,
         inputs=inputs,
