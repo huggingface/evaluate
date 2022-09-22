@@ -6,8 +6,9 @@ from pathlib import Path
 
 from datasets import Value
 
-from .logging import get_logger
 from ..module import EvaluationModule
+from .logging import get_logger
+
 
 logger = get_logger(__name__)
 
