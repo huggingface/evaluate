@@ -48,24 +48,16 @@ Following these guidelines when submitting an issue or a feature
 request will make it easier for us to come back to you quickly and with good
 feedback.
 
-### Did you find a bug?
-
-Thank you for reporting an issue. First, we would really appreciate it if you could **make sure the bug was not
-already reported** (use the search bar on Github under Issues).
-
-If it's not already logged, please open an issue with these details:
-
-* Include your **OS type and version**, the versions of **Python**, **PyTorch** and
-  **Tensorflow** when applicable;
-* A short, self-contained, code snippet that allows us to reproduce the bug in
-  less than 30s;
-* Provide the *full* traceback if an exception is raised.
-
 ### Do you want to implement a new metric?
 
-All evaluation modules, be it metrics, comparisons, or measurements live on the 🤗 Hub in a [Space](https://huggingface.co/docs/hub/spaces) (see for example [Accuracy](https://huggingface.co/spaces/evaluate-metric/accuracy)). Please see our guide to adding a new evaluation module [here](https://huggingface.co/docs/evaluate/creating_and_sharing)!
+All evaluation modules, be it metrics, comparisons, or measurements live on the 🤗 Hub in a [Space](https://huggingface.co/docs/hub/spaces) (see for example [Accuracy](https://huggingface.co/spaces/evaluate-metric/accuracy)). Evaluation modules can be either **community** or **canonical**. 
 
-We encourage contributors to share new evaluation modules they contribute broadly! If they become widely adopted then they will be integrated into the core `evaluate` library.
+* **Canonical** metrics are well-established metrics which already broadly adopted. 
+* **Community** metrics are new or custom metrics. It is simple to add a new community metric to use with `evaluate`. Please see our guide to adding a new evaluation metric [here](https://huggingface.co/docs/evaluate/creating_and_sharing)! 
+
+The only functional difference is that canonical metrics are integrated into the `evaluate` library directly and do not require a namespace when being loaded. 
+
+We encourage contributors to share new evaluation modules they contribute broadly! If they become widely adopted then they will be integrated into the core `evaluate` library as a canonical module.
 
 ### Do you want to request a new feature (that is not a metric)?
 
@@ -83,9 +75,17 @@ We would appreciate it if your feature request addresses the following points:
 4. In case this is related to a paper, please attach a link;
 5. Attach any additional information (drawings, screenshots, etc.) you think may help.
 
-6. We have added **templates** to guide you in the process of adding a new example script for training or testing the
-models in the library. You can find them in the [`templates`](https://github.com/huggingface/transformers/tree/main/templates)
-folder.
+### Did you find a bug?
+
+Thank you for reporting an issue. If the bug is related to a community metric, please open an issue or pull request directly on the repository of the metric on the Hugging Face Hub. 
+
+If the bug is related to the `evaluate` library and not a community metric, we would really appreciate it if you could **make sure the bug was not already reported** (use the search bar on Github under Issues). If it's not already logged, please open an issue with these details:
+
+* Include your **OS type and version**, the versions of **Python**, **PyTorch** and
+  **Tensorflow** when applicable;
+* A short, self-contained, code snippet that allows us to reproduce the bug in
+  less than 30s;
+* Provide the *full* traceback if an exception is raised.
 
 ## Start contributing! (Pull Requests)
 
