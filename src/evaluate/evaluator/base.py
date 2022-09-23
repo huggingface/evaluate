@@ -302,18 +302,19 @@ class Evaluator(ABC):
                 )
 
     @staticmethod
-    def get_dataset_split(data, split):
+    def get_dataset_split(data, subset, split):
         """
         Infers which split to use if None is given.
 
         Args:
              data (`str`): Name of dataset
+             subset (`str`): Name of config for datasets with multiple configurations (e.g. 'glue/cola')
              split (`str`, defaults to None): Split to use
         Returns:
             `split`: `str` containing which split to use
         """
         if split is None:
-            split = choose_split(data)
+            split = choose_split(data, subset)
             logger.warning(f"Dataset split not defined! Automatically evaluating with split: {split.upper()}")
         return split
 
@@ -332,7 +333,7 @@ class Evaluator(ABC):
             data (`Dataset`): Loaded dataset which will be used for evaluation.
         """
         if isinstance(data, str):
-            split = self.get_dataset_split(data, split)
+            split = self.get_dataset_split(data, subset, split)
             data = load_dataset(data, name=subset, split=split)
             return data
         elif isinstance(data, Dataset):
