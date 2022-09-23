@@ -243,6 +243,10 @@ class TestTextClassificationEvaluator(TestCase):
         data = self.evaluator.load_data("evaluate/glue-ci", subset="cola", split="test")
         self.assertEqual(isinstance(data, Dataset), True)
 
+        # Test loading subset of a dataset with the `name` field and having it infer the split
+        data = self.evaluator.load_data("evaluate/glue-ci", subset="cola")
+        self.assertEqual(isinstance(data, Dataset), True)
+
     def test_overwrite_default_metric(self):
         accuracy = load("accuracy")
         results = self.evaluator.compute(
