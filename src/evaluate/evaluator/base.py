@@ -302,7 +302,7 @@ class Evaluator(ABC):
                 )
 
     @staticmethod
-    def get_dataset_split(data, subset, split):
+    def get_dataset_split(data, subset=None, split=None):
         """
         Infers which split to use if None is given.
 
