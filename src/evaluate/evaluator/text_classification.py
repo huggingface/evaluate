@@ -90,6 +90,7 @@ class TextClassificationEvaluator(Evaluator):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
+        subset: Optional[str] = None,
         split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
@@ -122,7 +123,7 @@ class TextClassificationEvaluator(Evaluator):
         self.check_for_mismatch_in_device_setup(device, model_or_pipeline)
 
         # Prepare inputs
-        data = self.load_data(data=data, split=split)
+        data = self.load_data(data=data, subset=subset, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(
             data=data, input_column=input_column, second_input_column=second_input_column, label_column=label_column
         )

@@ -1,8 +1,6 @@
 import json
 import os
 
-from datasets import Dataset, load_dataset
-
 from evaluate import evaluator
 from evaluate.loading import convert_hf_hub_path, relative_to_absolute_path
 from evaluate.utils.file_utils import cached_path, is_relative_path
@@ -28,7 +26,7 @@ class Harness:
     """
 
     def __init__(self, path):
-        """ Instantiates a Harness object from a JSON file which will be passed to the Evaluator to run evaluation for a
+        """Instantiates a Harness object from a JSON file which will be passed to the Evaluator to run evaluation for a
         model on this collection of tasks."""
 
         filename = list(filter(lambda x: x, path.replace(os.sep, "/").split("/")))[-1]
@@ -46,9 +44,9 @@ class Harness:
             self.config = json.load(open(json_filepath))
 
         self.tasks = []
-        for task_group in self.config['task_groups']:
-            for task in task_group['tasks']:
-                self.tasks.append(task_group['task_type'] + '/' + task['data'])
+        for task_group in self.config["task_groups"]:
+            for task in task_group["tasks"]:
+                self.tasks.append(task_group["task_type"] + "/" + task["data"])
 
     @classmethod
     def from_config(cls, path):
@@ -74,19 +72,18 @@ class Harness:
 
     def run(self, model_or_pipeline=None):
         results_all = {}
-        for task_group in self.config['task_groups']:
-            e = evaluator(task_group['task_type'])
+        for task_group in self.config["task_groups"]:
+            e = evaluator(task_group["task_type"])
 
             logger.info(f"Running harness: {self.config['harness_name']} with tasks {self.tasks}")
 
             for task in task_group["tasks"]:
                 logger.info(f"Running task: {task['data']}")
 
-                # data = load_dataset(path=task["data"], name=task.get("name"))
-
                 args_for_task = task["args_for_task"]
                 args_for_task["model_or_pipeline"] = model_or_pipeline
-                args_for_task["data"] = task["data"] #data
+                args_for_task["data"] = task["data"]
+                args_for_task["subset"] = task.get("name")
 
                 results = e.compute(**args_for_task)
 
