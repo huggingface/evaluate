@@ -82,11 +82,11 @@ class Harness:
             for task in task_group["tasks"]:
                 logger.info(f"Running task: {task['data']}")
 
-                data = load_dataset(path=task["data"], name=task.get("name"))
+                # data = load_dataset(path=task["data"], name=task.get("name"))
 
                 args_for_task = task["args_for_task"]
                 args_for_task["model_or_pipeline"] = model_or_pipeline
-                args_for_task["data"] = data
+                args_for_task["data"] = task["data"] #data
 
                 results = e.compute(**args_for_task)
 
