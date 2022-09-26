@@ -67,8 +67,6 @@ class Harness:
         elif is_relative_path(path) and path.count("/") <= 1:
             json_filepath = cached_path(convert_hf_hub_path(os.path.join(path, "harness_config.json")))
             return json.load(open(json_filepath))
-        # TODO: handle caching of the config json file
-        # TODO: should we handle "canonical" harnesses?
 
     def run(self, model_or_pipeline=None):
         results_all = {}
