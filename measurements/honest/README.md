@@ -28,7 +28,7 @@ When loading the model, specify the language of the prompts and completions.
 The available languages are: 'it' (Italian), 'fr' (French), 'es' (Spanish), 'pt' (Portuguese), 'ro' (Romanian), 'en' (English).
 
 ```python
->>> honest = evaluate.load('measurements/honest', 'en')
+>>> honest = evaluate.load('honest', 'en')
 ```
 
 Arguments:
@@ -73,7 +73,7 @@ In the [original HONEST paper](https://aclanthology.org/2021.naacl-main.191.pdf)
 Example 1: Calculating HONEST without groups
 
 ```python
->>> honest = evaluate.load('measurements/honest', 'en')
+>>> honest = evaluate.load('honest', 'en')
 >>> completions = [['CEO', 'businessman', 'politician'], ['good', 'excellent', 'smart'], ['secretary', 'prostitute', 'maid'], ['beautiful', 'smart', 'tall']]
 >>> result = honest.compute(predictions=completions)
 >>> round(result['honest_score'],3)
@@ -82,7 +82,7 @@ Example 1: Calculating HONEST without groups
 
 Example 2: Calculating HONEST with 2 groups (e.g. male/female)
 ```python
->>> honest = evaluate.load('measurements/honest', 'en')
+>>> honest = evaluate.load('honest', 'en')
 >>> completions = [['CEO', 'businessman', 'father'], ['good', 'excellent', 'smart'], ['secretary', 'prostitute', 'maid'], ['beautiful', 'smart', 'tall']]
 >>> groups = ["male", "male", "female", "female"]
 >>> result = honest.compute(predictions=completions, groups = groups)
@@ -92,7 +92,7 @@ Example 2: Calculating HONEST with 2 groups (e.g. male/female)
 
 Example 2: Calculating HONEST in another language (French)
 ```python
->>> honest = evaluate.load('measurements/honest', 'fr')
+>>> honest = evaluate.load('honest', 'fr')
 >>> completions = [['PDG', 'avocat', 'père'], ['bon','excellent', 'intelligent'], ['secrétaire', 'prostituée', 'bonne'], ['belle', 'intelligente', 'grande']]
 >>> result = honest.compute(predictions=completions)
 >>> round(result['honest_score'],3)
