@@ -42,6 +42,7 @@ Compute the HONEST score of a set of model completions to the [HONEST prompts](h
 
 When loading the evaluation module, specify the language of the lexicon which should be loaded for assessing this set of completions.
 The available languages are: 'it' (Italian), 'fr' (French), 'es' (Spanish), 'pt' (Portuguese), 'ro' (Romanian), 'en' (English).
+
 >>> honest = evaluate.load('measurements/honest', 'en')
 
 Args:
@@ -55,24 +56,24 @@ Returns:
 Examples:
 
 Example 1: Calculating HONEST without groups
->>> honest = evaluate.load('measurements/honest', lang = 'en')
+>>> honest = evaluate.load('measurements/honest', 'en')
 >>> completions = [['CEO', 'businessman', 'politician'], ['good', 'excellent', 'smart'], ['secretary', 'prostitute', 'maid'], ['beautiful', 'smart', 'tall']]
 >>> result = honest.compute(predictions=completions)
 >>> round(result['honest_score'],3)
 0.167
 
 
-Example 2: Calculating HONEST with 2 groups (male/female)
->>> honest = evaluate.load('measurements/honest', lang = 'en')
+Example 2: Calculating HONEST with 2 groups (e.g. male/female)
+>>> honest = evaluate.load('measurements/honest', 'en')
 >>> completions = [['CEO', 'businessman', 'father'], ['good', 'excellent', 'smart'], ['secretary', 'prostitute', 'maid'], ['beautiful', 'smart', 'tall']]
 >>> groups = ["male", "male", "female", "female"]
->>> results = honest.compute(predictions=completions, groups = groups)
+>>> result = honest.compute(predictions=completions, groups = groups)
 >>> {g:round(s,3) for g,s in result['honest_score_per_group'].items()}
 {'male': 0.0, 'female': 0.167}
 
 
 Example 2: Calculating HONEST in another language (French)
->>> honest = evaluate.load('measurements/honest', lang = 'fr')
+>>> honest = evaluate.load('measurements/honest', 'fr')
 >>> completions = [['PDG', 'avocat', 'père'], ['bon','excellent', 'intelligent'], ['secrétaire', 'prostituée', 'bonne'], ['belle', 'intelligente', 'grande']]
 >>> result = honest.compute(predictions=completions)
 >>> round(result['honest_score'],3)
@@ -109,17 +110,9 @@ def honest_score_group(self, predictions, groups):
     return honest_group
 
 
-"""
-@dataclass
-class HonestConfig(evaluate.info.Config):
-    lang: str = "en"
-"""
-
-
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Honest(evaluate.Measurement):
-    # CONFIG_CLASS = HonestConfig
-    ALLOWED_CONFIG_NAMES = ["it", "fr", "es", "pt", "ro", "en"]
+    langs = ["it", "fr", "es", "pt", "ro", "en"]
 
     def _info(self):
         return evaluate.MeasurementInfo(
@@ -127,7 +120,6 @@ class Honest(evaluate.Measurement):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            # config=config,
             features=datasets.Features(
                 {
                     "predictions": datasets.Sequence(datasets.Value("string", id="sequence"), id="predictions"),
@@ -138,7 +130,14 @@ class Honest(evaluate.Measurement):
         )
 
     def _download_and_prepare(self, dl_manager):
-        assert self.config_name in ["it", "fr", "es", "pt", "ro", "en"]
+        assert self.config_name in [
+            "it",
+            "fr",
+            "es",
+            "pt",
+            "ro",
+            "en",
+        ], 'Please specify the language from the following list: ["it", "fr", "es", "pt", "ro", "en"]'
         language = self.config_name
         self.hurtlex = pd.read_csv(
             f"https://raw.githubusercontent.com/MilaNLProc/hurtlex/master/lexica/{language.upper()}/1.2/hurtlex_{language.upper()}.tsv",
