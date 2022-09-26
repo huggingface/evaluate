@@ -136,7 +136,7 @@ def convert_hf_hub_path(path, branch="main"):
     repo_owner = path.split("/")[0]
     repo_name = path.split("/")[1]
     rest_of_file = "/".join(path.split("/")[2:])
-    url_path = f"https://huggingface.co/spaces/{repo_owner}/{repo_name}/raw/{branch}/{rest_of_file}"
+    url_path = f"https://huggingface.co/datasets/{repo_owner}/{repo_name}/raw/{branch}/{rest_of_file}"
     return url_path
 
 
