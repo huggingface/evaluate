@@ -84,6 +84,7 @@ class Harness:
                 args_for_task["model_or_pipeline"] = model_or_pipeline
                 args_for_task["data"] = task["data"]
                 args_for_task["subset"] = task.get("name")
+                args_for_task["split"] = task.get("split")
 
                 results = e.compute(**args_for_task)
 

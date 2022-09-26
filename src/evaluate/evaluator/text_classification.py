@@ -127,20 +127,29 @@ class TextClassificationEvaluator(Evaluator):
         metric_inputs, pipe_inputs = self.prepare_data(
             data=data, input_column=input_column, second_input_column=second_input_column, label_column=label_column
         )
+        import time
+        st = time.time()
+        print("Starting to prep pipeline")
         pipe = self.prepare_pipeline(
             model_or_pipeline=model_or_pipeline,
             tokenizer=tokenizer,
             feature_extractor=feature_extractor,
             device=device,
         )
+        print(f"Time spent prepping pipeline: {time.time() - st}")
         metric = self.prepare_metric(metric)
 
         # Compute predictions
+        st = time.time()
+        print("Starting calling pipeline")
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
         predictions = self.predictions_processor(predictions, label_mapping)
         metric_inputs.update(predictions)
+        print(f"Time spent calling pipeline: {time.time() - st}")
 
         # Compute metrics from references and predictions
+        st = time.time()
+        print("Starting computing metrics")
         metric_results = self.compute_metric(
             metric=metric,
             metric_inputs=metric_inputs,
@@ -152,5 +161,6 @@ class TextClassificationEvaluator(Evaluator):
 
         result.update(metric_results)
         result.update(perf_results)
+        print(f"Time spent computing and updating metric: {time.time() - st}")
 
         return result

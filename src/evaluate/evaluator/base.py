@@ -241,12 +241,16 @@ class Evaluator(ABC):
         # Prepare inputs
         data = self.load_data(data=data, subset=subset, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
+        import time
+        st = time.time()
+        print("Starting to prep pipeline")
         pipe = self.prepare_pipeline(
             model_or_pipeline=model_or_pipeline,
             tokenizer=tokenizer,
             feature_extractor=feature_extractor,
             device=device,
         )
+        print(f"Time spent prepping pipeline: {time.time() - st}")
         metric = self.prepare_metric(metric)
 
         # Compute predictions
@@ -332,7 +336,7 @@ class Evaluator(ABC):
             data (`Dataset`): Loaded dataset which will be used for evaluation.
         """
         if isinstance(data, str):
-            split = self.get_dataset_split(data, subset)
+            split = self.get_dataset_split(data, subset, split)
             data = load_dataset(data, name=subset, split=split)
             return data
         elif isinstance(data, Dataset):
