@@ -160,12 +160,17 @@ class BERTScore(evaluate.Metric):
             scorer = functools.partial(scorer, use_fast_tokenizer=use_fast_tokenizer)
         elif use_fast_tokenizer:
             raise ImportWarning(
-                "To use a fast tokenizer, the module `bert-score>=0.3.10` is required, and the current version of `bert-score` doesn't match this condition.\n"
+                "To use a fast tokenizer, the module `bert-score>=0.3.10` is required, and the current version of "
+                "`bert-score` doesn't match this condition.\n"
                 'You can install it with `pip install "bert-score>=0.3.10"`.'
             )
 
         if model_type is None:
-            assert lang is not None, "either lang or model_type should be specified"
+            if lang is None:
+                raise ValueError(
+                    "Either 'lang' (e.g. 'en') or 'model_type' (e.g. 'microsoft/deberta-xlarge-mnli')"
+                    " must be specified"
+                )
             model_type = bert_score.utils.lang2model[lang.lower()]
 
         if num_layers is None:

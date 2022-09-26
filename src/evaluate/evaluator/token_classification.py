@@ -238,6 +238,8 @@ class TokenClassificationEvaluator(Evaluator):
         """
         result = {}
 
+        self.check_for_mismatch_in_device_setup(device, model_or_pipeline)
+
         # Prepare inputs
         data = self.load_data(data=data, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(
