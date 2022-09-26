@@ -148,6 +148,7 @@ class QuestionAnsweringEvaluator(Evaluator):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
+        subset: Optional[str] = None,
         split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
@@ -181,7 +182,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         result = {}
         self.check_for_mismatch_in_device_setup(device, model_or_pipeline)
 
-        data = self.load_data(data=data, split=split)
+        data = self.load_data(data=data, subset=subset, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(
             data=data,
             question_column=question_column,

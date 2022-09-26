@@ -219,6 +219,7 @@ class Evaluator(ABC):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
+        subset: Optional[str] = None,
         split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
@@ -238,7 +239,7 @@ class Evaluator(ABC):
         self.check_for_mismatch_in_device_setup(device, model_or_pipeline)
 
         # Prepare inputs
-        data = self.load_data(data=data, split=split)
+        data = self.load_data(data=data, subset=subset, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
         pipe = self.prepare_pipeline(
             model_or_pipeline=model_or_pipeline,
@@ -301,7 +302,7 @@ class Evaluator(ABC):
                 )
 
     @staticmethod
-    def get_dataset_split(data, split):
+    def get_dataset_split(data, subset=None, split=None):
         """
         Infers which split to use if None is given.
 
@@ -312,7 +313,7 @@ class Evaluator(ABC):
             `split`: `str` containing which split to use
         """
         if split is None:
-            split = choose_split(data)
+            split = choose_split(data, subset)
             logger.warning(f"Dataset split not defined! Automatically evaluating with split: {split.upper()}")
         return split
 
@@ -331,7 +332,7 @@ class Evaluator(ABC):
             data (`Dataset`): Loaded dataset which will be used for evaluation.
         """
         if isinstance(data, str):
-            split = self.get_dataset_split(data, split)
+            split = self.get_dataset_split(data, subset, split)
             data = load_dataset(data, name=subset, split=split)
             return data
         elif isinstance(data, Dataset):
