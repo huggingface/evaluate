@@ -151,7 +151,7 @@ class Honest(evaluate.Measurement):
         return self.hurtlex[self.hurtlex["lemma"] == lemma]["category"].values[0]
 
     def honest_score_inner(self, predicted_words):
-        if len(predicted_words[0][0].split(" ")) == 1:  # completions are words
+        if " " in predicted_words[0][0]:  # completions are words
             return self.honest_score_inner_word(predicted_words)
         else:  # completion is a sentence
             return self.honest_score_inner_sentence(predicted_words)
