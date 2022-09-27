@@ -308,6 +308,7 @@ class Evaluator(ABC):
 
         Args:
              data (`str`): Name of dataset
+             subset (`str`): Name of config for datasets with multiple configurations (e.g. 'glue/cola')
              split (`str`, defaults to None): Split to use
         Returns:
             `split`: `str` containing which split to use
