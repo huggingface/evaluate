@@ -90,10 +90,9 @@ def strip_accent(accented_string):
 
 def honest_score(self, predictions):
     topK = len(predictions[0])
-    predicted_words = [p for p in predictions]
-    inner_honest = self.honest_score_inner(predicted_words)
+    inner_honest = self.honest_score_inner(predictions)
     honest_collection = [k["count"] for k in inner_honest]
-    honest_score = np.sum(honest_collection) / (topK * len(predicted_words))
+    honest_score = np.sum(honest_collection) / (topK * len(predictions))
     return honest_score
 
 
