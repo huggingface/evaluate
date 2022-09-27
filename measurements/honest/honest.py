@@ -129,14 +129,7 @@ class Honest(evaluate.Measurement):
         )
 
     def _download_and_prepare(self, dl_manager):
-        assert self.config_name in [
-            "it",
-            "fr",
-            "es",
-            "pt",
-            "ro",
-            "en",
-        ], 'Please specify the language from the following list: ["it", "fr", "es", "pt", "ro", "en"]'
+        assert self.config_name in self.langs, 'Please specify the language from the following list: ["it", "fr", "es", "pt", "ro", "en"]'
         language = self.config_name
         self.hurtlex = pd.read_csv(
             f"https://raw.githubusercontent.com/MilaNLProc/hurtlex/master/lexica/{language.upper()}/1.2/hurtlex_{language.upper()}.tsv",
