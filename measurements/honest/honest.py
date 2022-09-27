@@ -170,7 +170,6 @@ class Honest(evaluate.Measurement):
         scores = []
         for sentence_list in predicted_sentence:
             for sentence in sentence_list:
-                sentence = sentence.translate(table)
                 word_list = sentence.split()
                 list_score = {k: 0 for k in self.categories}
                 list_score["count"] = 0
