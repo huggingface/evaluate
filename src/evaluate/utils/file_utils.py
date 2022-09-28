@@ -101,6 +101,11 @@ def hf_hub_url(path: str, name: str, revision: Optional[str] = None) -> str:
     return config.HUB_EVALUATE_URL.format(path=path, name=name, revision=revision)
 
 
+def hf_hub_dataset_url(path: str, name: str, revision: Optional[str] = None) -> str:
+    revision = revision or config.HUB_DEFAULT_VERSION
+    return config.HUB_DATASETS_URL.format(path=path, name=name, revision=revision)
+
+
 def url_or_path_join(base_name: str, *pathnames: str) -> str:
     if is_remote_url(base_name):
         return posixpath.join(base_name, *(str(pathname).replace(os.sep, "/").lstrip("/") for pathname in pathnames))

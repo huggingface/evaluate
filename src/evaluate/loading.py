@@ -131,15 +131,6 @@ def convert_github_url(url_path: str) -> Tuple[str, Optional[str]]:
     return url_path, sub_directory
 
 
-def convert_hf_hub_path(path, branch="main"):
-    """Finds raw version of some file in the form {USER/REPO/FILE.FILETYPE}"""
-    repo_owner = path.split("/")[0]
-    repo_name = path.split("/")[1]
-    rest_of_file = "/".join(path.split("/")[2:])
-    url_path = f"https://huggingface.co/datasets/{repo_owner}/{repo_name}/raw/{branch}/{rest_of_file}"
-    return url_path
-
-
 def increase_load_count(name: str, resource_type: str):
     """Update the download count of a dataset or metric."""
     if not config.HF_EVALUATE_OFFLINE and config.HF_UPDATE_DOWNLOAD_COUNTS:

@@ -1,26 +1,30 @@
 import json
 import os
 
-from evaluate import evaluator
-from evaluate.loading import convert_hf_hub_path, relative_to_absolute_path
-from evaluate.utils.file_utils import cached_path, is_relative_path
-from evaluate.utils.logging import get_logger
+from ..evaluator import evaluator
+from ..loading import relative_to_absolute_path
+from ..utils.file_utils import cached_path, hf_hub_dataset_url, is_relative_path
+from ..utils.logging import get_logger
 
 
 logger = get_logger(__name__)
+
+
+def load_harness(path):
+    return Harness(path)
 
 
 class Harness:
     """
     This class instantiates an evaluation harness made up of multiple tasks, where each task consists of a dataset and
     an associated metric, and runs evaluation on a model or pipeline. Harnesses can be instantiated from a JSON file
-    named harness_config.json found either locally or uploaded as a dataset on the Hugging Face Hub.
+    named <module_name>.json found either locally or uploaded as a dataset on the Hugging Face Hub.
 
     Usage:
     ```python
-    >>> from evaluate.harness import Harness
+    >>> from evaluate.harness import load_harness
 
-    >>> harness = Harness('mathemakitten/glue-harness')
+    >>> harness = load_harness('mathemakitten/glue-harness')
     >>> results = harness.run(model_or_pipeline='gpt2')
     ```
     """
@@ -32,15 +36,18 @@ class Harness:
         filename = list(filter(lambda x: x, path.replace(os.sep, "/").split("/")))[-1]
         if not filename.endswith(".json"):
             filename = filename + ".json"
+        combined_path = os.path.join(path, filename)
         if path.endswith(filename):  # Try locally
             if os.path.isfile(path):
                 json_filepath = path
                 self.config = json.load(open(json_filepath))
             else:
                 raise FileNotFoundError(f"Couldn't find a configuration file at {relative_to_absolute_path(path)}")
+        elif os.path.isfile(combined_path):
+            self.config = json.load(open(combined_path))
         # Load from a dataset on the Hub
         elif is_relative_path(path) and path.count("/") <= 1:
-            json_filepath = cached_path(convert_hf_hub_path(os.path.join(path, "harness_config.json")))
+            json_filepath = cached_path(hf_hub_dataset_url(path=path, name=f"{path.split('/')[-1]}.json"))
             self.config = json.load(open(json_filepath))
 
         self.tasks = []
@@ -51,7 +58,7 @@ class Harness:
     def run(self, model_or_pipeline=None):
         results_all = {}
         for task_group in self.config["task_groups"]:
-            e = evaluator(task_group["task_type"])
+            task_evaluator = evaluator(task_group["task_type"])
 
             logger.info(f"Running harness: {self.config['harness_name']} with tasks {self.tasks}")
 
@@ -64,7 +71,7 @@ class Harness:
                 args_for_task["subset"] = task.get("name")
                 args_for_task["split"] = task.get("split")
 
-                results = e.compute(**args_for_task)
+                results = task_evaluator.compute(**args_for_task)
 
                 task_id = task["data"] + "/" + task.get("name") if task.get("name") else task["data"]
                 results_all[task_id] = results
