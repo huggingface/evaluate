@@ -1,0 +1,3 @@
+git+https://github.com/huggingface/evaluate@{COMMIT_PLACEHOLDER}
+transformers
+unidecode==1.3.4
