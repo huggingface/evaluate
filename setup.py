@@ -129,6 +129,7 @@ TESTS_REQUIRE = [
     "requests_file>=1.5.1",
     "tldextract>=3.1.0",
     "texttable>=1.6.3",
+    "unidecode>=1.3.4",
     "Werkzeug>=1.0.1",
     "six~=1.15.0",
 ]
