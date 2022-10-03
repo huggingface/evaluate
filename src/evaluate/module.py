@@ -492,7 +492,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                 error_msg = (
                     f"Mismatch in the number of {col0} ({len(batch[col0])}) and {bad_col} ({len(batch[bad_col])})"
                 )
-            elif sorted(self.current_features) != ["references", "predictions"]:
+            elif set(self.current_features) != {"references", "predictions"}:
                 error_msg = (
                     f"Module inputs don't match the expected format.\n" f"Expected format: {self.current_features },\n"
                 )
