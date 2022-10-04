@@ -494,7 +494,8 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                 )
             elif set(self.selected_feature_format) != {"references", "predictions"}:
                 error_msg = (
-                    f"Module inputs don't match the expected format.\n" f"Expected format: {self.selected_feature_format },\n"
+                    f"Module inputs don't match the expected format.\n"
+                    f"Expected format: {self.selected_feature_format },\n"
                 )
                 error_msg_inputs = ",\n".join(
                     f"Input {input_name}: {summarize_if_long_list(batch[input_name])}"
@@ -606,7 +607,9 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                 self.filelock = filelock
 
             self.writer = ArrowWriter(
-                features=self.selected_feature_format, path=self.cache_file_name, writer_batch_size=self.writer_batch_size
+                features=self.selected_feature_format,
+                path=self.cache_file_name,
+                writer_batch_size=self.writer_batch_size,
             )
         # Setup rendez-vous here if
         if self.num_process > 1:
