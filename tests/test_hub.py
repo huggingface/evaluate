@@ -1,8 +1,10 @@
+import glob
 from unittest import TestCase
 from unittest.mock import patch
 
 import pytest
 import requests
+import yaml
 
 from evaluate.hub import get_allowed_tasks, push_to_hub
 from tests.test_metric import DummyMetric
@@ -183,3 +185,13 @@ def test_get_allowed_tasks(tasks_dict, expected):
     tasks = get_allowed_tasks(tasks_dict)
 
     assert tasks == expected
+
+
+class ValidateYaml(TestCase):
+    readme_filepaths = []
+    for glob_path in ["measurements/*/README.md", "metrics/*/README.md", "comparisons/*/README.md"]:
+        readme_filepaths.extend(glob.glob(glob_path))
+    for readme_file in readme_filepaths:
+        with open(readme_file) as f_yaml:
+            x = yaml.safe_load_all(f_yaml)
+            assert type(next(x)) == dict
