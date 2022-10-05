@@ -54,6 +54,7 @@ extras_metadata = {
 }
 
 
+@patch("evaluate.config.HF_HUB_ALLOWED_TASKS", lambda x: ["dummy-task"])
 @patch("evaluate.hub.dataset_info", lambda x: True)
 @patch("evaluate.hub.model_info", lambda x: True)
 @patch("evaluate.hub.metadata_update")
