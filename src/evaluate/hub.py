@@ -1,18 +1,14 @@
 from typing import Dict
 
 import requests
-from datasets.utils.metadata import known_task_ids
 from huggingface_hub import dataset_info, model_info
 from huggingface_hub.repocard import metadata_update
 
+from .config import HF_HUB_ALLOWED_TASKS
 from .utils.logging import get_logger
 
 
 logger = get_logger(__name__)
-
-
-def get_allowed_tasks(tasks_dict):
-    return list(tasks_dict.keys())
 
 
 def push_to_hub(
@@ -70,10 +66,8 @@ def push_to_hub(
     ...     task_name="Text Generation"
     ... )
     ```"""
-    tasks = get_allowed_tasks(known_task_ids)
-
-    if task_type not in tasks:
-        raise ValueError(f"Task type not supported. Task has to be one of {tasks}")
+    if task_type not in HF_HUB_ALLOWED_TASKS:
+        raise ValueError(f"Task type not supported. Task has to be one of {HF_HUB_ALLOWED_TASKS}")
 
     try:
         dataset_info(dataset_type)
