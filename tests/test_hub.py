@@ -194,4 +194,4 @@ class ValidateYaml(TestCase):
     for readme_file in readme_filepaths:
         with open(readme_file) as f_yaml:
             x = yaml.safe_load_all(f_yaml)
-            assert type(next(x)) == dict
+            self.assertIsInstance(next(x), dict)
