@@ -57,7 +57,6 @@ extras_metadata = {
 @patch("evaluate.hub.dataset_info", lambda x: True)
 @patch("evaluate.hub.model_info", lambda x: True)
 @patch("evaluate.hub.metadata_update")
-@patch("evaluate.hub.known_task_ids")
 class TestHub(TestCase):
     @pytest.fixture(autouse=True)
     def inject_fixtures(self, caplog):
@@ -69,7 +68,7 @@ class TestHub(TestCase):
         self.args = {"hello": 1, "world": 2}
         self.result = self.metric.compute()
 
-    def test_push_metric_required_arguments(self, known_task_ids, metadata_update):
+    def test_push_metric_required_arguments(self, metadata_update):
         push_to_hub(
             model_id="username/repo",
             metric_value=self.result["accuracy"],
@@ -82,7 +81,7 @@ class TestHub(TestCase):
 
         metadata_update.assert_called_once_with(repo_id="username/repo", metadata=minimum_metadata, overwrite=False)
 
-    def test_push_metric_missing_arguments(self, known_task_ids, metadata_update):
+    def test_push_metric_missing_arguments(self, metadata_update):
         with pytest.raises(TypeError):
             push_to_hub(
                 model_id="username/repo",
@@ -93,7 +92,7 @@ class TestHub(TestCase):
                 dataset_type="dummy-task",
             )
 
-    def test_push_metric_invalid_arguments(self, known_task_ids, metadata_update):
+    def test_push_metric_invalid_arguments(self, metadata_update):
         with pytest.raises(TypeError):
             push_to_hub(
                 model_id="username/repo",
@@ -106,7 +105,7 @@ class TestHub(TestCase):
                 random_value="incorrect",
             )
 
-    def test_push_metric_extra_arguments(self, known_task_ids, metadata_update):
+    def test_push_metric_extra_arguments(self, metadata_update):
         push_to_hub(
             model_id="username/repo",
             metric_value=self.result["accuracy"],
@@ -126,7 +125,7 @@ class TestHub(TestCase):
 
         metadata_update.assert_called_once_with(repo_id="username/repo", metadata=extras_metadata, overwrite=False)
 
-    def test_push_metric_invalid_task_type(self, known_task_ids, metadata_update):
+    def test_push_metric_invalid_task_type(self, metadata_update):
         with pytest.raises(ValueError):
             push_to_hub(
                 model_id="username/repo",
@@ -138,7 +137,7 @@ class TestHub(TestCase):
                 task_type="audio-classification",
             )
 
-    def test_push_metric_invalid_dataset_type(self, known_task_ids, metadata_update):
+    def test_push_metric_invalid_dataset_type(self, metadata_update):
         with patch("evaluate.hub.dataset_info") as mock_dataset_info:
             mock_dataset_info.side_effect = requests.HTTPError()
             push_to_hub(
@@ -156,7 +155,7 @@ class TestHub(TestCase):
                 repo_id="username/repo", metadata=minimum_metadata, overwrite=False
             )
 
-    def test_push_metric_invalid_model_id(self, known_task_ids, metadata_update):
+    def test_push_metric_invalid_model_id(self, metadata_update):
         with patch("evaluate.hub.model_info") as mock_model_info:
             mock_model_info.side_effect = requests.HTTPError()
             with pytest.raises(ValueError):
