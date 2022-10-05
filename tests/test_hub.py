@@ -4,7 +4,7 @@ from unittest.mock import patch
 import pytest
 import requests
 
-from evaluate.hub import get_allowed_tasks, push_to_hub
+from evaluate.hub import push_to_hub
 from tests.test_metric import DummyMetric
 
 
@@ -54,7 +54,6 @@ extras_metadata = {
 }
 
 
-@patch("evaluate.hub.get_allowed_tasks", lambda x: ["dummy-task"])
 @patch("evaluate.hub.dataset_info", lambda x: True)
 @patch("evaluate.hub.model_info", lambda x: True)
 @patch("evaluate.hub.metadata_update")
@@ -170,16 +169,3 @@ class TestHub(TestCase):
                     dataset_type="dataset_type",
                     task_type="dummy-task",
                 )
-
-
-@pytest.mark.parametrize(
-    "tasks_dict, expected",
-    [
-        ({"a": {"subtasks": ["b", "c"]}}, ["a"]),
-        ({"a": {}, "b": {"subtasks": ["c", "d"]}, "e": {}}, ["a", "b", "e"]),
-    ],
-)
-def test_get_allowed_tasks(tasks_dict, expected):
-    tasks = get_allowed_tasks(tasks_dict)
-
-    assert tasks == expected
