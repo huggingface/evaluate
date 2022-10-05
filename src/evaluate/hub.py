@@ -34,7 +34,7 @@ def push_to_hub(
     Args:
         model_id (``str``): Model id from https://hf.co/models.
         task_type (``str``): Task id, refer to
-            https://github.com/huggingface/datasets/blob/master/src/datasets/utils/resources/tasks.json for allowed values.
+            https://github.com/huggingface/evaluate/blob/main/src/evaluate/config.py#L154 for allowed values.
         dataset_type (``str``): Dataset id from https://hf.co/datasets.
         dataset_name (``str``): Pretty name for the dataset.
         metric_type (``str``): Metric id from https://hf.co/metrics.
