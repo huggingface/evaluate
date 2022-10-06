@@ -173,24 +173,15 @@ class TestHub(TestCase):
                 )
 
 
-@pytest.mark.parametrize(
-    "tasks_dict, expected",
-    [
-        ({"a": {"subtasks": ["b", "c"]}}, ["a"]),
-        ({"a": {}, "b": {"subtasks": ["c", "d"]}, "e": {}}, ["a", "b", "e"]),
-    ],
-)
-def test_get_allowed_tasks(tasks_dict, expected):
-    tasks = get_allowed_tasks(tasks_dict)
-
-    assert tasks == expected
-
-
 class ValidateYaml(TestCase):
-    readme_filepaths = []
-    for glob_path in ["measurements/*/README.md", "metrics/*/README.md", "comparisons/*/README.md"]:
-        readme_filepaths.extend(glob.glob(glob_path))
-    for readme_file in readme_filepaths:
-        with open(readme_file) as f_yaml:
-            x = yaml.safe_load_all(f_yaml)
-            self.assertIsInstance(next(x), dict)
+    def setUp(self):
+        pass
+
+    def testLoadingCards(self):
+        readme_filepaths = []
+        for glob_path in ["measurements/*/README.md", "metrics/*/README.md", "comparisons/*/README.md"]:
+            readme_filepaths.extend(glob.glob(glob_path))
+        for readme_file in readme_filepaths:
+            with open(readme_file) as f_yaml:
+                x = yaml.safe_load_all(f_yaml)
+                self.assertIsInstance(next(x), dict)
