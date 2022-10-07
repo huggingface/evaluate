@@ -28,7 +28,7 @@ TASK_DOCUMENTATION_TEXT2TEXT = r"""
     >>> from evaluate import evaluator
     >>> from datasets import load_dataset
     >>> task_evaluator = evaluator("text2text-generation")
-    >>> data = load_dataset("dailymail_cnn", "3.0.0", split="test[:40]")
+    >>> data = load_dataset("cnn_dailymail", "3.0.0", split="test[:40]")
     >>> results = task_evaluator.compute(
     >>>     model_or_pipeline="facebook/bart-large-cnn",
     >>>     data=data,
@@ -45,7 +45,7 @@ TASK_DOCUMENTATION_SUMMARIZATION = r"""
     >>> from evaluate import evaluator
     >>> from datasets import load_dataset
     >>> task_evaluator = evaluator("summarization")
-    >>> data = load_dataset("dailymail_cnn", "3.0.0", split="test[:40]")
+    >>> data = load_dataset("cnn_dailymail", "3.0.0", split="test[:40]")
     >>> results = task_evaluator.compute(
     >>>     model_or_pipeline="facebook/bart-large-cnn",
     >>>     data=data,
@@ -61,7 +61,7 @@ TASK_DOCUMENTATION_TRANSLATION = r"""
     >>> from evaluate import evaluator
     >>> from datasets import load_dataset
     >>> task_evaluator = evaluator("translation")
-    >>> data = load_dataset("wmt19", "fr-de", split="test[:40]")
+    >>> data = load_dataset("wmt19", "fr-de", split="validation[:40]")
     >>> data = data.map(lambda x: {"text": x["translation"]["de"], "label": x["translation"]["fr"]})
     >>> results = task_evaluator.compute(
     >>>     model_or_pipeline="Helsinki-NLP/opus-mt-de-fr",
@@ -76,7 +76,7 @@ class Text2TextGenerationEvaluator(Evaluator):
     Text2Text generation evaluator.
     This Text2Text generation evaluator can currently be loaded from [`evaluator`] using the default task name
     `text2text`.
-    Methods in this class assume a data format compatible with the [`Text2TextGenerationPileine`].
+    Methods in this class assume a data format compatible with the [`Text2TextGenerationPipeline`].
     """
 
     PREDICTION_PREFIX = "generated"
