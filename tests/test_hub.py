@@ -182,6 +182,6 @@ class ValidateYaml(TestCase):
         for glob_path in ["measurements/*/README.md", "metrics/*/README.md", "comparisons/*/README.md"]:
             readme_filepaths.extend(glob.glob(glob_path))
         for readme_file in readme_filepaths:
-            with open(readme_file, encoding='utf8') as f_yaml:
+            with open(readme_file, encoding="utf8") as f_yaml:
                 x = yaml.safe_load_all(f_yaml)
                 self.assertIsInstance(next(x), dict)
