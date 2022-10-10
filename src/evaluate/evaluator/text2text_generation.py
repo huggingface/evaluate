@@ -37,7 +37,7 @@ class Text2TextGenerationEvaluator(Evaluator):
     Text2Text generation evaluator.
     This Text2Text generation evaluator can currently be loaded from [`evaluator`] using the default task name
     `text2text`.
-    Methods in this class assume a data format compatible with the [`Text2TextGenerationPileine`].
+    Methods in this class assume a data format compatible with the [`Text2TextGenerationPipeline`].
     """
 
     PREDICTION_PREFIX = "generated"
