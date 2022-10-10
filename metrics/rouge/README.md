@@ -42,6 +42,15 @@ At minimum, this metric takes as input a list of predictions and a list of refer
 {'rouge1': 1.0, 'rouge2': 1.0, 'rougeL': 1.0, 'rougeLsum': 1.0}
 ```
 
+One can also pass a custom tokenizer which is especially useful for non-latin languages.
+```python
+>>> results = rouge.compute(predictions=predictions,
+...                         references=references,
+                            tokenizer=lambda x: x.split())
+>>> print(results)
+{'rouge1': 1.0, 'rouge2': 1.0, 'rougeL': 1.0, 'rougeLsum': 1.0}
+```
+
 It can also deal with lists of references for each predictions:
 ```python
 >>> rouge = evaluate.load('rouge')
