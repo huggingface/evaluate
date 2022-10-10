@@ -58,6 +58,8 @@ class Text2TextGenerationEvaluator(Evaluator):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
+        subset: Optional[str] = None,
+        split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -92,6 +94,8 @@ class Text2TextGenerationEvaluator(Evaluator):
         result = super().compute(
             model_or_pipeline=model_or_pipeline,
             data=data,
+            subset=subset,
+            split=split,
             metric=metric,
             tokenizer=tokenizer,
             strategy=strategy,
@@ -129,6 +133,8 @@ class SummarizationEvaluator(Text2TextGenerationEvaluator):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
+        subset: Optional[str] = None,
+        split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -159,6 +165,8 @@ class SummarizationEvaluator(Text2TextGenerationEvaluator):
         result = super().compute(
             model_or_pipeline=model_or_pipeline,
             data=data,
+            subset=subset,
+            split=split,
             metric=metric,
             tokenizer=tokenizer,
             strategy=strategy,
@@ -168,7 +176,6 @@ class SummarizationEvaluator(Text2TextGenerationEvaluator):
             random_state=random_state,
             input_column=input_column,
             label_column=label_column,
-            generation_kwargs=generation_kwargs,
         )
 
         return result
@@ -197,6 +204,8 @@ class TranslationEvaluator(Text2TextGenerationEvaluator):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
+        subset: Optional[str] = None,
+        split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -226,6 +235,8 @@ class TranslationEvaluator(Text2TextGenerationEvaluator):
         result = super().compute(
             model_or_pipeline=model_or_pipeline,
             data=data,
+            subset=subset,
+            split=split,
             metric=metric,
             tokenizer=tokenizer,
             strategy=strategy,
@@ -235,7 +246,6 @@ class TranslationEvaluator(Text2TextGenerationEvaluator):
             random_state=random_state,
             input_column=input_column,
             label_column=label_column,
-            generation_kwargs=generation_kwargs,
         )
 
         return result
