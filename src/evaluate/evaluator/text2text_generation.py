@@ -18,56 +18,17 @@ from datasets import Dataset
 from typing_extensions import Literal
 
 from ..module import EvaluationModule
-from ..utils.file_utils import add_end_docstrings, add_start_docstrings
+from ..utils.file_utils import add_start_docstrings
 from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOCSTRING, Evaluator
 
 
-TASK_DOCUMENTATION_TEXT2TEXT = r"""
-    Examples:
-    ```python
-    >>> from evaluate import evaluator
-    >>> from datasets import load_dataset
-    >>> task_evaluator = evaluator("text2text-generation")
-    >>> data = load_dataset("dailymail_cnn", "3.0.0", split="test[:40]")
-    >>> results = task_evaluator.compute(
-    >>>     model_or_pipeline="facebook/bart-large-cnn",
-    >>>     data=data,
-    >>>     label_column="article",
-    >>>     label_column="highlights",
-    >>>     metric="rouge",
-    >>> )
-    ```
-"""
-
-TASK_DOCUMENTATION_SUMMARIZATION = r"""
-    Examples:
-    ```python
-    >>> from evaluate import evaluator
-    >>> from datasets import load_dataset
-    >>> task_evaluator = evaluator("summarization")
-    >>> data = load_dataset("dailymail_cnn", "3.0.0", split="test[:40]")
-    >>> results = task_evaluator.compute(
-    >>>     model_or_pipeline="facebook/bart-large-cnn",
-    >>>     data=data,
-    >>>     label_column="article",
-    >>>     label_column="highlights",
-    >>> )
-    ```
-"""
-
-TASK_DOCUMENTATION_TRANSLATION = r"""
-    Examples:
-    ```python
-    >>> from evaluate import evaluator
-    >>> from datasets import load_dataset
-    >>> task_evaluator = evaluator("translation")
-    >>> data = load_dataset("wmt19", "fr-de", split="test[:40]")
-    >>> data = data.map(lambda x: {"text": x["translation"]["de"], "label": x["translation"]["fr"]})
-    >>> results = task_evaluator.compute(
-    >>>     model_or_pipeline="Helsinki-NLP/opus-mt-de-fr",
-    >>>     data=data,
-    >>> )
-    ```
+TASK_DOCUMENTATION_KWARGS = r"""
+        input_column (`str`, defaults to `"text"`):
+            the name of the column containing the input text in the dataset specified by `data`.
+        label_column (`str`, defaults to `"label"`):
+            the name of the column containing the labels in the dataset specified by `data`.
+        generation_kwargs (`Dict`, *optional*, defaults to `None`):
+            The generation kwargs are passed to the pipeline and set the text generation strategy.
 """
 
 
@@ -88,8 +49,9 @@ class Text2TextGenerationEvaluator(Evaluator):
     def predictions_processor(self, predictions, label_mapping):
         return {"predictions": [pred[f"{self.PREDICTION_PREFIX}_text"] for pred in predictions]}
 
-    @add_start_docstrings(EVALUTOR_COMPUTE_START_DOCSTRING)
-    @add_end_docstrings(EVALUATOR_COMPUTE_RETURN_DOCSTRING, TASK_DOCUMENTATION_TEXT2TEXT)
+    @add_start_docstrings(
+        EVALUTOR_COMPUTE_START_DOCSTRING, TASK_DOCUMENTATION_KWARGS, EVALUATOR_COMPUTE_RETURN_DOCSTRING
+    )
     def compute(
         self,
         model_or_pipeline: Union[
@@ -107,14 +69,21 @@ class Text2TextGenerationEvaluator(Evaluator):
         label_column: str = "label",
         generation_kwargs: dict = None,
     ) -> Tuple[Dict[str, float], Any]:
-
         """
-        input_column (`str`, defaults to `"text"`):
-            the name of the column containing the input text in the dataset specified by `data`.
-        label_column (`str`, defaults to `"label"`):
-            the name of the column containing the labels in the dataset specified by `data`.
-        generation_kwargs (`Dict`, *optional*, defaults to `None`):
-            The generation kwargs are passed to the pipeline and set the text generation strategy.
+        Examples:
+        ```python
+        >>> from evaluate import evaluator
+        >>> from datasets import load_dataset
+        >>> task_evaluator = evaluator("text2text-generation")
+        >>> data = load_dataset("dailymail_cnn", "3.0.0", split="validation[:40]")
+        >>> results = task_evaluator.compute(
+        >>>     model_or_pipeline="facebook/bart-large-cnn",
+        >>>     data=data,
+        >>>     input_column="article",
+        >>>     label_column="highlights",
+        >>>     metric="rouge",
+        >>> )
+        ```
         """
 
         if generation_kwargs is not None:
@@ -137,12 +106,12 @@ class Text2TextGenerationEvaluator(Evaluator):
         return result
 
 
-class SummarizationEvaluator(Evaluator):
+class SummarizationEvaluator(Text2TextGenerationEvaluator):
     """
-    Text2Text generation evaluator.
-    This Text2Text generation evaluator can currently be loaded from [`evaluator`] using the default task name
-    `text2text`.
-    Methods in this class assume a data format compatible with the [`Text2TextGenerationPileine`].
+    Text summarization evaluator.
+    This text summarization evaluator can currently be loaded from [`evaluator`] using the default task name
+    `summarization`.
+    Methods in this class assume a data format compatible with the [`SummarizationEvaluator`].
     """
 
     PREDICTION_PREFIX = "summary"
@@ -151,11 +120,9 @@ class SummarizationEvaluator(Evaluator):
     def __init__(self, task="summarization", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
-    def predictions_processor(self, predictions, label_mapping):
-        return {"predictions": [pred[f"{self.PREDICTION_PREFIX}_text"] for pred in predictions]}
-
-    @add_start_docstrings(EVALUTOR_COMPUTE_START_DOCSTRING)
-    @add_end_docstrings(EVALUATOR_COMPUTE_RETURN_DOCSTRING, TASK_DOCUMENTATION_SUMMARIZATION)
+    @add_start_docstrings(
+        EVALUTOR_COMPUTE_START_DOCSTRING, TASK_DOCUMENTATION_KWARGS, EVALUATOR_COMPUTE_RETURN_DOCSTRING
+    )
     def compute(
         self,
         model_or_pipeline: Union[
@@ -173,18 +140,21 @@ class SummarizationEvaluator(Evaluator):
         label_column: str = "label",
         generation_kwargs: dict = None,
     ) -> Tuple[Dict[str, float], Any]:
-
         """
-        input_column (`str`, defaults to `"text"`):
-            the name of the column containing the input text in the dataset specified by `data`.
-        label_column (`str`, defaults to `"label"`):
-            the name of the column containing the labels in the dataset specified by `data`.
-        generation_kwargs (`Dict`, *optional*, defaults to `None`):
-            The generation kwargs are passed to the pipeline and set the text generation strategy.
+        Examples:
+        ```python
+        >>> from evaluate import evaluator
+        >>> from datasets import load_dataset
+        >>> task_evaluator = evaluator("summarization")
+        >>> data = load_dataset("dailymail_cnn", "3.0.0", split="validation[:40]")
+        >>> results = task_evaluator.compute(
+        >>>     model_or_pipeline="facebook/bart-large-cnn",
+        >>>     data=data,
+        >>>     input_column="article",
+        >>>     label_column="highlights",
+        >>> )
+        ```
         """
-
-        if generation_kwargs is not None:
-            self.PIPELINE_KWARGS.update(generation_kwargs)
 
         result = super().compute(
             model_or_pipeline=model_or_pipeline,
@@ -198,16 +168,17 @@ class SummarizationEvaluator(Evaluator):
             random_state=random_state,
             input_column=input_column,
             label_column=label_column,
+            generation_kwargs=generation_kwargs,
         )
 
         return result
 
 
-class TranslationEvaluator(Evaluator):
+class TranslationEvaluator(Text2TextGenerationEvaluator):
     """
     Translation evaluator.
     This translation generation evaluator can currently be loaded from [`evaluator`] using the default task name
-    `text2text`.
+    `translation`.
     Methods in this class assume a data format compatible with the [`TranslationPileine`].
     """
 
@@ -217,11 +188,9 @@ class TranslationEvaluator(Evaluator):
     def __init__(self, task="translation", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
-    def predictions_processor(self, predictions, label_mapping):
-        return {"predictions": [pred[f"{self.PREDICTION_PREFIX}_text"] for pred in predictions]}
-
-    @add_start_docstrings(EVALUTOR_COMPUTE_START_DOCSTRING)
-    @add_end_docstrings(EVALUATOR_COMPUTE_RETURN_DOCSTRING, TASK_DOCUMENTATION_TRANSLATION)
+    @add_start_docstrings(
+        EVALUTOR_COMPUTE_START_DOCSTRING, TASK_DOCUMENTATION_KWARGS, EVALUATOR_COMPUTE_RETURN_DOCSTRING
+    )
     def compute(
         self,
         model_or_pipeline: Union[
@@ -239,18 +208,20 @@ class TranslationEvaluator(Evaluator):
         label_column: str = "label",
         generation_kwargs: dict = None,
     ) -> Tuple[Dict[str, float], Any]:
-
         """
-        input_column (`str`, defaults to `"text"`):
-            the name of the column containing the input text in the dataset specified by `data`.
-        label_column (`str`, defaults to `"label"`):
-            the name of the column containing the labels in the dataset specified by `data`.
-        generation_kwargs (`Dict`, *optional*, defaults to `None`):
-            The generation kwargs are passed to the pipeline and set the text generation strategy.
+        Examples:
+        ```python
+        >>> from evaluate import evaluator
+        >>> from datasets import load_dataset
+        >>> task_evaluator = evaluator("translation")
+        >>> data = load_dataset("wmt19", "fr-de", split="test[:40]")
+        >>> data = data.map(lambda x: {"text": x["translation"]["de"], "label": x["translation"]["fr"]})
+        >>> results = task_evaluator.compute(
+        >>>     model_or_pipeline="Helsinki-NLP/opus-mt-de-fr",
+        >>>     data=data,
+        >>> )
+        ```
         """
-
-        if generation_kwargs is not None:
-            self.PIPELINE_KWARGS.update(generation_kwargs)
 
         result = super().compute(
             model_or_pipeline=model_or_pipeline,
@@ -264,6 +235,7 @@ class TranslationEvaluator(Evaluator):
             random_state=random_state,
             input_column=input_column,
             label_column=label_column,
+            generation_kwargs=generation_kwargs,
         )
 
         return result
