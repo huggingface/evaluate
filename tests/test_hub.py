@@ -1,8 +1,10 @@
+import glob
 from unittest import TestCase
 from unittest.mock import patch
 
 import pytest
 import requests
+import yaml
 
 from evaluate.hub import push_to_hub
 from tests.test_metric import DummyMetric
@@ -169,3 +171,17 @@ class TestHub(TestCase):
                     dataset_type="dataset_type",
                     task_type="dummy-task",
                 )
+
+
+class ValidateYaml(TestCase):
+    def setUp(self):
+        pass
+
+    def testLoadingCards(self):
+        readme_filepaths = []
+        for glob_path in ["measurements/*/README.md", "metrics/*/README.md", "comparisons/*/README.md"]:
+            readme_filepaths.extend(glob.glob(glob_path))
+        for readme_file in readme_filepaths:
+            with open(readme_file, encoding="utf8") as f_yaml:
+                x = yaml.safe_load_all(f_yaml)
+                self.assertIsInstance(next(x), dict)
