@@ -77,7 +77,7 @@ class Text2TextGenerationEvaluator(Evaluator):
         >>> from evaluate import evaluator
         >>> from datasets import load_dataset
         >>> task_evaluator = evaluator("text2text-generation")
-        >>> data = load_dataset("dailymail_cnn", "3.0.0", split="validation[:40]")
+        >>> data = load_dataset("cnn_dailymail", "3.0.0", split="validation[:40]")
         >>> results = task_evaluator.compute(
         >>>     model_or_pipeline="facebook/bart-large-cnn",
         >>>     data=data,
@@ -152,7 +152,7 @@ class SummarizationEvaluator(Text2TextGenerationEvaluator):
         >>> from evaluate import evaluator
         >>> from datasets import load_dataset
         >>> task_evaluator = evaluator("summarization")
-        >>> data = load_dataset("dailymail_cnn", "3.0.0", split="validation[:40]")
+        >>> data = load_dataset("cnn_dailymail", "3.0.0", split="validation[:40]")
         >>> results = task_evaluator.compute(
         >>>     model_or_pipeline="facebook/bart-large-cnn",
         >>>     data=data,
@@ -223,7 +223,7 @@ class TranslationEvaluator(Text2TextGenerationEvaluator):
         >>> from evaluate import evaluator
         >>> from datasets import load_dataset
         >>> task_evaluator = evaluator("translation")
-        >>> data = load_dataset("wmt19", "fr-de", split="test[:40]")
+        >>> data = load_dataset("wmt19", "fr-de", split="validation[:40]")
         >>> data = data.map(lambda x: {"text": x["translation"]["de"], "label": x["translation"]["fr"]})
         >>> results = task_evaluator.compute(
         >>>     model_or_pipeline="Helsinki-NLP/opus-mt-de-fr",
