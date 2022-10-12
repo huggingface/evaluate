@@ -61,8 +61,10 @@ EVALUTOR_COMPUTE_START_DOCSTRING = r"""
         data (`str` or `Dataset`, defaults to `None`):
             Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
             name, and load it. Otherwise we assume it represents a pre-loaded dataset.
-        split (`str`, defaults to None):
-            Defines which dataset split to load. If None is passed, infers based on the `choose_split` function.
+        subset (`str`, defaults to `None`):
+            Defines which dataset subset to load. If `None` is passed the default subset is loaded.
+        split (`str`, defaults to `None`):
+            Defines which dataset split to load. If `None` is passed, infers based on the `choose_split` function.
         metric (`str` or `EvaluationModule`, defaults to `None`):
             Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
             load it. Otherwise we assume it represents a pre-loaded metric.
@@ -82,7 +84,7 @@ EVALUTOR_COMPUTE_START_DOCSTRING = r"""
             The `n_resamples` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
         device (`int`, defaults to `None`):
             Device ordinal for CPU/GPU support of the pipeline. Setting this to -1 will leverage CPU, a positive
-            integer will run the model on the associated CUDA device ID. If`None` is provided it will be inferred and
+            integer will run the model on the associated CUDA device ID. If `None` is provided it will be inferred and
             CUDA:0 used if available, CPU otherwise.
         random_state (`int`, *optional*, defaults to `None`):
             The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
@@ -410,7 +412,7 @@ class Evaluator(ABC):
                 pipe = model_or_pipeline
             if tokenizer is not None and feature_extractor is not None:
                 logger.warning("Ignoring the value of the preprocessor argument (`tokenizer` or `feature_extractor`).")
-        if pipe.task != self.task:
+        if (pipe.task != self.task) and not (self.task == "translation" and pipe.task.startswith("translation")):
             raise ValueError(
                 f"Incompatible `model_or_pipeline`. Please specify `model_or_pipeline` compatible with the `{self.task}` task."
             )
