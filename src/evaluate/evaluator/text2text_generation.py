@@ -36,7 +36,7 @@ class Text2TextGenerationEvaluator(Evaluator):
     """
     Text2Text generation evaluator.
     This Text2Text generation evaluator can currently be loaded from [`evaluator`] using the default task name
-    `text2text`.
+    `text2text-generation`.
     Methods in this class assume a data format compatible with the [`Text2TextGenerationPipeline`].
     """
 
@@ -186,7 +186,7 @@ class TranslationEvaluator(Text2TextGenerationEvaluator):
     Translation evaluator.
     This translation generation evaluator can currently be loaded from [`evaluator`] using the default task name
     `translation`.
-    Methods in this class assume a data format compatible with the [`TranslationPileine`].
+    Methods in this class assume a data format compatible with the [`TranslationPipeline`].
     """
 
     PREDICTION_PREFIX = "translation"
