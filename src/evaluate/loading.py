@@ -33,7 +33,7 @@ from datasets.packaged_modules import _EXTENSION_TO_MODULE, _hash_python_lines
 from datasets.utils.filelock import FileLock
 from datasets.utils.version import Version
 
-from . import config
+from . import SCRIPTS_VERSION, config
 from .module import EvaluationModule
 from .utils.file_utils import (
     DownloadConfig,
@@ -464,20 +464,26 @@ class HubEvaluationModuleFactory(_EvaluationModuleFactory):
         assert self.name.count("/") == 1
         increase_load_count(name, resource_type="metric")
 
-    def download_loading_script(self) -> str:
-        file_path = hf_hub_url(path=self.name, name=self.name.split("/")[1] + ".py", revision=self.revision)
+    def download_loading_script(self, revision) -> str:
+        file_path = hf_hub_url(path=self.name, name=self.name.split("/")[1] + ".py", revision=revision)
         download_config = self.download_config.copy()
         if download_config.download_desc is None:
             download_config.download_desc = "Downloading builder script"
         return cached_path(file_path, download_config=download_config)
 
     def get_module(self) -> ImportableModule:
+        revision = self.revision or os.getenv("HF_SCRIPTS_VERSION", SCRIPTS_VERSION)
+
+        if re.match(r"\d*\.\d*\.\d*", revision):  # revision is version number (three digits separated by full stops)
+            revision = "v" + revision  # tagging convention on evaluate repository starts with v
+
         # get script and other files
-        local_path = self.download_loading_script()
+        local_path = self.download_loading_script(revision)
+
         imports = get_imports(local_path)
         local_imports = _download_additional_modules(
             name=self.name,
-            base_path=hf_hub_url(path=self.name, name="", revision=self.revision),
+            base_path=hf_hub_url(path=self.name, name="", revision=revision),
             imports=imports,
             download_config=self.download_config,
         )
