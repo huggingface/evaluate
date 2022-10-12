@@ -7,9 +7,12 @@ Currently supported tasks are:
 - `"token-classification"`: will use the [`TokenClassificationEvaluator`].
 - `"question-answering"`: will use the [`QuestionAnsweringEvaluator`].
 - `"image-classification"`: will use the [`ImageClassificationEvaluator`].
+- `"text2text-generation"`: will use the [`Text2TextGenerationEvaluator`].
+- `"summarization"`: will use the [`SummarizationEvaluator`].
+- `"translation"`: will use the [`TranslationEvaluator`].
 
 
-Each task has its own set of requirements for the dataset format and pipeline output, make sure to check them out for your custom use case. Let's have a look at each one of them and see how you can use the evaluator to evalute a single or multiple of models, datasets, and metrics at the same time.
+Each task has its own set of requirements for the dataset format and pipeline output, make sure to check them out for your custom use case. Let's have a look at some of them and see how you can use the evaluator to evalute a single or multiple of models, datasets, and metrics at the same time.
 
 ## Text classification
 

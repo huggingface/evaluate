@@ -27,6 +27,7 @@ from typing import Dict, List
 from .base import Evaluator
 from .image_classification import ImageClassificationEvaluator
 from .question_answering import QuestionAnsweringEvaluator
+from .text2text_generation import SummarizationEvaluator, Text2TextGenerationEvaluator, TranslationEvaluator
 from .text_classification import TextClassificationEvaluator
 from .token_classification import TokenClassificationEvaluator
 
@@ -47,6 +48,18 @@ SUPPORTED_EVALUATOR_TASKS = {
     "token-classification": {
         "implementation": TokenClassificationEvaluator,
         "default_metric_name": "seqeval",
+    },
+    "text2text-generation": {
+        "implementation": Text2TextGenerationEvaluator,
+        "default_metric_name": "bleu",
+    },
+    "summarization": {
+        "implementation": SummarizationEvaluator,
+        "default_metric_name": "rouge",
+    },
+    "translation": {
+        "implementation": TranslationEvaluator,
+        "default_metric_name": "bleu",
     },
 }
 
