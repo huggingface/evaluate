@@ -478,7 +478,15 @@ class HubEvaluationModuleFactory(_EvaluationModuleFactory):
             revision = "v" + revision  # tagging convention on evaluate repository starts with v
 
         # get script and other files
-        local_path = self.download_loading_script(revision)
+        try:
+            local_path = self.download_loading_script(revision)
+        except FileNotFoundError as err:
+            # if there is no file found with current revision tag try to load main
+            if self.revision is None and os.getenv("HF_SCRIPTS_VERSION", SCRIPTS_VERSION) != "main":
+                revision = "main"
+                local_path = self.download_loading_script(revision)
+            else:
+                raise err
 
         imports = get_imports(local_path)
         local_imports = _download_additional_modules(
