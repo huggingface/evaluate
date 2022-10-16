@@ -30,6 +30,7 @@ from .question_answering import QuestionAnsweringEvaluator
 from .text2text_generation import SummarizationEvaluator, Text2TextGenerationEvaluator, TranslationEvaluator
 from .text_classification import TextClassificationEvaluator
 from .token_classification import TokenClassificationEvaluator
+from .fill_mask import FillMaskEvaluator
 
 
 SUPPORTED_EVALUATOR_TASKS = {
@@ -61,6 +62,10 @@ SUPPORTED_EVALUATOR_TASKS = {
         "implementation": TranslationEvaluator,
         "default_metric_name": "bleu",
     },
+    "fill-mask": {
+        "implementation": FillMaskEvaluator,
+        "default_metric_name": "pseudo_perplexity" # TODO: Needs implementation
+    }
 }
 
 
