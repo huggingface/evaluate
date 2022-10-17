@@ -40,7 +40,7 @@ class EvaluationSuite:
         if path.endswith(filename):  # Try locally
             if os.path.isfile(path):
                 json_filepath = path
-                self.config = json.load(open(json_filepath))
+                self.config = json.load(open(json_filepath, encoding="utf-8"))
             else:
                 raise FileNotFoundError(f"Couldn't find a configuration file at {relative_to_absolute_path(path)}")
         elif os.path.isfile(combined_path):
