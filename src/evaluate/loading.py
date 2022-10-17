@@ -591,7 +591,7 @@ def evaluation_module_factory(
     download_config.extract_compressed_file = True
     download_config.force_extract = True
 
-    filename = list(filter(lambda x: x, path.replace(os.sep, "/").split("/")))[-1]
+    filename = os.path.basename(path)
     if not filename.endswith(".py"):
         filename = filename + ".py"
     combined_path = os.path.join(path, filename)

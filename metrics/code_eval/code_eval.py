@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """The CodeEval metric estimates the pass@k metric for code synthesis.
-This is an evaluation harness for the HumanEval problem solving dataset
+This is an evaluation evaluation_suite for the HumanEval problem solving dataset
 described in the paper "Evaluating Large Language Models Trained on Code"
 (https://arxiv.org/abs/2107.03374)."""
 
@@ -56,7 +56,7 @@ and Sam McCandlish and Ilya Sutskever and Wojciech Zaremba},
 """
 
 _DESCRIPTION = """\
-This metric implements the evaluation harness for the HumanEval problem solving dataset
+This metric implements the evaluation evaluation_suite for the HumanEval problem solving dataset
 described in the paper "Evaluating Large Language Models Trained on Code"
 (https://arxiv.org/abs/2107.03374).
 """

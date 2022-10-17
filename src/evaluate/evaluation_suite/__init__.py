@@ -10,30 +10,30 @@ from ..utils.logging import get_logger
 logger = get_logger(__name__)
 
 
-def load_harness(path):
-    return Harness(path)
+def load_evaluation_suite(path):
+    return EvaluationSuite(path)
 
 
-class Harness:
+class EvaluationSuite:
     """
-    This class instantiates an evaluation harness made up of multiple tasks, where each task consists of a dataset and
-    an associated metric, and runs evaluation on a model or pipeline. Harnesses can be instantiated from a JSON file
+    This class instantiates an evaluation suite made up of multiple tasks, where each task consists of a dataset and
+    an associated metric, and runs evaluation on a model or pipeline. Evaluation suites can be instantiated from a JSON
     named <module_name>.json found either locally or uploaded as a dataset on the Hugging Face Hub.
 
     Usage:
     ```python
-    >>> from evaluate.harness import load_harness
+    >>> from evaluate.evaluation_suite import load_evaluation_suite
 
-    >>> harness = load_harness('mathemakitten/glue-harness')
-    >>> results = harness.run(model_or_pipeline='gpt2')
+    >>> evaluation_suite = load_evaluation_suite('mathemakitten/glue-evaluation_suite')
+    >>> results = evaluation_suite.run(model_or_pipeline='gpt2')
     ```
     """
 
     def __init__(self, path):
-        """Instantiates a Harness object from a JSON file which will be passed to the Evaluator to run evaluation for a
-        model on this collection of tasks."""
+        """Instantiates an EvaluationSuite object from a JSON file which will be passed to the Evaluator to run
+        evaluation for a model on this collection of tasks."""
 
-        filename = list(filter(lambda x: x, path.replace(os.sep, "/").split("/")))[-1]
+        filename = os.path.basename(path)
         if not filename.endswith(".json"):
             filename = filename + ".json"
         combined_path = os.path.join(path, filename)
@@ -60,7 +60,7 @@ class Harness:
         for task_group in self.config["task_groups"]:
             task_evaluator = evaluator(task_group["task_type"])
 
-            logger.info(f"Running harness: {self.config['harness_name']} with tasks {self.tasks}")
+            logger.info(f"Running evaluation_suite: {self.config['evaluation_suite_name']} with tasks {self.tasks}")
 
             for task in task_group["tasks"]:
                 logger.info(f"Running task: {task['data']}")
