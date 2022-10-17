@@ -24,7 +24,7 @@ class EvaluationSuite:
     ```python
     >>> from evaluate.evaluation_suite import load_evaluation_suite
 
-    >>> evaluation_suite = load_evaluation_suite('mathemakitten/glue-evaluation_suite')
+    >>> evaluation_suite = load_evaluation_suite('mathemakitten/glue_suite')
     >>> results = evaluation_suite.run(model_or_pipeline='gpt2')
     ```
     """
