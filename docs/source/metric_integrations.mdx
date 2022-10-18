@@ -1,8 +1,10 @@
-# Metric Integrations
+# Using 🤗 Evaluate in other frameworks
 
 This guide outlines how `evaluate` metrics can be used with popular machine learning frameworks.
 
-## 🤗 Trainer
+## 🤗 Transformers
+
+### Trainer
 
 The metrics in `evaluate` can be easily integrated in the [`~transformers.Trainer`]. The `Trainer` accepts a `compute_metrics` keyword argument where a function to compute metrics can be passed. One can specify the evaluation interval with `evaluation_strategy` in the [`~transformers.TrainerArguments`] and based on that the model is applied to the evaluation said and the predictions and labels passed to `compute_metrics`.
 
@@ -46,6 +48,8 @@ trainer = Trainer(
 
 trainer.train()
 ```
+
+### Seq2SeqTrainer
 
 For sequence-to-sequence tasks such as translation or summarization the [`~transformers.Seq2SeqTrainer`] is useful. It allows for the use of the generate method when setting `predict_with_generate=True`. That means we evaluate generated text within the `compute_metric` function, we just need to decode the predictions and labels first.
 
