@@ -13,6 +13,8 @@
     title: Choosing the right metric
   - local: creating_and_sharing
     title: Adding new evaluations
+  - local: metric_integrations
+    title: Using 🤗 Evaluate in other frameworks
   - local: base_evaluator
     title: Using the evaluator
   - local: custom_evaluator
