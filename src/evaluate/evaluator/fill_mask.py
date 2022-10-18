@@ -59,9 +59,19 @@ class FillMaskEvaluator(Evaluator):
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
 
-        self.check_required_columns(data, {"input_column": input_column})
-
         data = load_dataset(data) if isinstance(data, str) else data
+
+        import re
+
+        def preprocess_function(example):
+            # TODO: This is TEMPORARY. Only handles DistilBERT and BERT right now.
+            # Would be cool for it to receive the MASK token as a param
+            example["text"] = re.sub(r"\[M]", "[MASK]", example["template_masked"])
+            return example
+
+        data = data.map(preprocess_function)
+
+        self.check_required_columns(data, {"input_column": input_column})
 
         return {}, DatasetColumn(data, input_column)
 
@@ -120,8 +130,10 @@ class FillMaskEvaluator(Evaluator):
 
         if generation_kwargs is not None:
             self.PIPELINE_KWARGS.update(generation_kwargs)
-        if metric_kwargs is not None:
-            self.METRIC_KWARGS.update(metric_kwargs)
+        # if metric_kwargs is not None:
+        #     self.METRIC_KWARGS.update(metric_kwargs)
+            # TODO: Maybe this should be called METRIC_COMPUTE_ARGS instead?
+            # To differentiate between the ones used to init, vs. compute
 
         result = super().compute(
             model_or_pipeline=model_or_pipeline,
@@ -129,6 +141,7 @@ class FillMaskEvaluator(Evaluator):
             subset=subset,
             split=split,
             metric=metric,
+            metric_kwargs=metric_kwargs,
             tokenizer=tokenizer,
             strategy=strategy,
             confidence_level=confidence_level,

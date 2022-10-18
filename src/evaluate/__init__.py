@@ -45,3 +45,4 @@ from .module import CombinedEvaluations, Comparison, EvaluationModule, Measureme
 from .saving import save
 from .utils import *
 from .utils import gradio, logging
+from .evaluation_suite import *

@@ -224,6 +224,7 @@ class Evaluator(ABC):
         subset: Optional[str] = None,
         split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
+        metric_kwargs: Dict = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -418,7 +419,7 @@ class Evaluator(ABC):
             )
         return pipe
 
-    def prepare_metric(self, metric: Union[str, EvaluationModule]):
+    def prepare_metric(self, metric: Union[str, EvaluationModule], metric_kwargs):
         """
         Prepare metric.
 
@@ -426,6 +427,7 @@ class Evaluator(ABC):
             metric (`str` or `EvaluationModule`, defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
+            metric_kwargs: Passed on to the metric
 
         Returns:
             The loaded metric.
@@ -438,7 +440,7 @@ class Evaluator(ABC):
                 )
             metric = load(self.default_metric_name)
         elif isinstance(metric, str):
-            metric = load(metric)
+            metric = load(metric, **metric_kwargs)
 
         return metric
 
