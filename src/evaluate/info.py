@@ -22,7 +22,7 @@ import os
 from dataclasses import asdict, dataclass, field
 from typing import List, Optional, Union
 
-from datasets.features import Features, Value
+from datasets.features import Features
 
 from . import config
 from .utils.logging import get_logger
@@ -59,15 +59,6 @@ class EvaluationModuleInfo:
     module_name: Optional[str] = None
     config_name: Optional[str] = None
     experiment_id: Optional[str] = None
-
-    def __post_init__(self):
-        if self.format is not None:
-            for key, value in self.features.items():
-                if not isinstance(value, Value):
-                    raise ValueError(
-                        f"When using 'numpy' format, all features should be a `datasets.Value` feature. "
-                        f"Here {key} is an instance of {value.__class__.__name__}"
-                    )
 
     def write_to_directory(self, metric_info_dir):
         """Write `EvaluationModuleInfo` as JSON to `metric_info_dir`.
