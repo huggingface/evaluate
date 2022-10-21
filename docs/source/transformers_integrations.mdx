@@ -25,8 +25,8 @@ def tokenize_function(examples):
 
 tokenized_datasets = dataset.map(tokenize_function, batched=True)
 
-small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(1000))
-small_eval_dataset = tokenized_datasets["test"].shuffle(seed=42).select(range(1000))
+small_train_dataset = tokenized_datasets["train"].shuffle(seed=42).select(range(200))
+small_eval_dataset = tokenized_datasets["test"].shuffle(seed=42).select(range(200))
 
 # Setup evaluation 
 metric = evaluate.load("accuracy")
@@ -64,7 +64,7 @@ from transformers import AutoTokenizer, DataCollatorForSeq2Seq
 from transformers import AutoModelForSeq2SeqLM, Seq2SeqTrainingArguments, Seq2SeqTrainer
 
 # Prepare and tokenize dataset
-billsum = load_dataset("billsum", split="ca_test")
+billsum = load_dataset("billsum", split="ca_test").shuffle(seed=42).select(range(200))
 billsum = billsum.train_test_split(test_size=0.2)
 tokenizer = AutoTokenizer.from_pretrained("t5-small")
 prefix = "summarize: "
