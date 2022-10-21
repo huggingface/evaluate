@@ -13,14 +13,14 @@
     title: Choosing the right metric
   - local: creating_and_sharing
     title: Adding new evaluations
-  - sections:
-    - local: transformers_integrations
-      title: Transformers
-    title: Using 🤗 Evaluate with other ML frameworks
   - local: base_evaluator
     title: Using the evaluator
   - local: custom_evaluator
     title: Using the evaluator with custom pipelines
+  - sections:
+    - local: transformers_integrations
+      title: Transformers
+  title: Using 🤗 Evaluate with other ML frameworks
   title: "How-to guides"
 - sections:
     - local: types_of_evaluations
