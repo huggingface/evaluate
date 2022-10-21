@@ -1,8 +1,4 @@
-# Using 🤗 Evaluate in other frameworks
-
-This guide outlines how `evaluate` metrics can be used with popular machine learning frameworks.
-
-## 🤗 Transformers
+# 🤗 Transformers
 
 To run the 🤗 Transformers examples make sure you have installed the following libraries:
 
@@ -10,7 +6,7 @@ To run the 🤗 Transformers examples make sure you have installed the following
 pip install datasets transformers torch evaluate nltk rouge_score
 ```
 
-### Trainer
+## Trainer
 
 The metrics in `evaluate` can be easily integrated with the [`~transformers.Trainer`]. The `Trainer` accepts a `compute_metrics` keyword argument that passes a function to compute metrics. One can specify the evaluation interval with `evaluation_strategy` in the [`~transformers.TrainerArguments`], and based on that, the model is evaluated accordingly, and the predictions and labels passed to `compute_metrics`.
 
@@ -55,9 +51,9 @@ trainer = Trainer(
 trainer.train()
 ```
 
-### Seq2SeqTrainer
+## Seq2SeqTrainer
 
-We can use the [`~transformers.Seq2SeqTrainer`] for sequence-to-sequence tasks such as translation or summarization. It allows for the use of the generate method when setting `predict_with_generate=True`. That means we evaluate generated text within the `compute_metric` function. We just need to decode the predictions and labels first.
+We can use the [`~transformers.Seq2SeqTrainer`] for sequence-to-sequence tasks such as translation or summarization. For such generative tasks usually metrics such as ROUGE or BLEU are evaluated. However, these metrics require that we generate some text with the model rather than a single forward pass as with e.g. classification. The `Seq2SeqTrainer` allows for the use of the generate method when setting `predict_with_generate=True` which will generate text for each sample in the evaluation set. That means we evaluate generated text within the `compute_metric` function. We just need to decode the predictions and labels first.
 
 ```python
 import nltk
@@ -133,4 +129,4 @@ trainer = Seq2SeqTrainer(
 trainer.train()
 ```
 
-You can use any `evaluate` metric with the `Trainer` and `Seq2SeqTrainer` as long as they are compatible with the task and predictions.
+You can use any `evaluate` metric with the `Trainer` and `Seq2SeqTrainer` as long as they are compatible with the task and predictions. In case you don't want to train a model but just evaluate an existing model you can replace `trainer.train()` with `trainer.evaluate()` in the above scripts.

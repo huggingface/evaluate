@@ -13,7 +13,9 @@
     title: Choosing the right metric
   - local: creating_and_sharing
     title: Adding new evaluations
-  - local: metric_integrations
+  - sections:
+    - local: transformers_integrations
+      title: Transformers
     title: Using 🤗 Evaluate with other ML frameworks
   - local: base_evaluator
     title: Using the evaluator
