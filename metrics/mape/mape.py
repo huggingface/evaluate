@@ -74,7 +74,7 @@ Examples:
     >>> references = [[0, 2], [-1, 2], [8, -5]]
     >>> results = mape_metric.compute(predictions=predictions, references=references)
     >>> print(results)
-    {'mape': 0.3273}
+    {'mape': 0.3273809523809524}
     >>> results = mape_metric.compute(predictions=predictions, references=references, multioutput='raw_values')
     >>> print(results)
     {'mape': array([0.5, 1. ])}
