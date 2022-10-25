@@ -20,7 +20,7 @@
   - sections:
     - local: transformers_integrations
       title: Transformers
-  title: Using 🤗 Evaluate with other ML frameworks
+    title: Using 🤗 Evaluate with other ML frameworks
   title: "How-to guides"
 - sections:
     - local: types_of_evaluations
