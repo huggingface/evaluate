@@ -97,7 +97,7 @@ Example with multi-dimensional lists, and the `raw_values` config:
 ```
 
 ## Limitations and Bias
-One limitation of MAPE is that it cannot be used if the ground truth is zero or close to zero. This metric is also asymmetric in that it putts heavier penalty on predictions less than the ground truth and less on predictions bigger than the ground truth and thus can lead to a bias of methods being select which under-predict.
+One limitation of MAPE is that it cannot be used if the ground truth is zero or close to zero. This metric is also asymmetric in that it puts a heavier penalty on predictions less than the ground truth and a smaller penalty on predictions bigger than the ground truth and thus can lead to a bias of methods being select which under-predict if selected via this metric.
 
 ## Citation(s)
 ```bibtex
