@@ -65,19 +65,19 @@ Examples:
     >>> references = [3, -0.5, 2, 7]
     >>> results = mape_metric.compute(predictions=predictions, references=references)
     >>> print(results)
-    {'mape': 0.5}
+    {'mape': 0.3273...}
 
     If you're using multi-dimensional lists, then set the config as follows :
 
     >>> mape_metric = evaluate.load("mape", "multilist")
     >>> predictions = [[0.5, 1], [-1, 1], [7, -6]]
-    >>> references = [[0, 2], [-1, 2], [8, -5]]
+    >>> references = [[0.1, 2], [-1, 2], [8, -5]]
     >>> results = mape_metric.compute(predictions=predictions, references=references)
     >>> print(results)
-    {'mape': 0.3273809523809524}
+    {'mape': 0.8874...}
     >>> results = mape_metric.compute(predictions=predictions, references=references, multioutput='raw_values')
     >>> print(results)
-    {'mape': array([0.5, 1. ])}
+    {'mape': array([1.3749..., 0.4])}
 """
 
 
@@ -106,7 +106,9 @@ class Mape(evaluate.Metric):
                 "references": datasets.Value("float"),
             }
 
-    def _compute(self, predictions, references, sample_weight=None, multioutput="uniform_average"):
+    def _compute(
+        self, predictions, references, sample_weight=None, multioutput="uniform_average"
+    ):
 
         mape_score = mean_absolute_percentage_error(
             references,
