@@ -32,7 +32,7 @@ _CITATION = """\
 """
 
 _DESCRIPTION = """\
-Symmetric Mean Absolute Percentage Error (sMAPE) is the symmetric mean percentage error 
+Symmetric Mean Absolute Percentage Error (sMAPE) is the symmetric mean percentage error
 difference between the predicted and actual values as defined by Chen and Yang (2004),
 based on the metric by Armstrong (1985) and Makridakis (1993).
 """
