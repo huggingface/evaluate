@@ -20,7 +20,7 @@ description: >-
 
 ## Metric Description
 
-Mean Absolute Error (MAPE) is the mean of the percentage error of difference between the predicted and actual numeric values:
+Mean Absolute Error (MAPE) is the mean of the percentage error of difference between the predicted $x_i$ and actual $y_i$ numeric values:
 
 $$
 M = \frac{1}{n} \sum_{i=1}^{n} \left| \frac{x_i - y_i}{y_i} \right|.
