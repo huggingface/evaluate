@@ -22,7 +22,7 @@ description: >-
 Symmetric Mean Absolute Error (sMAPE) is the symmetric mean of the percentage error of difference between the predicted and actual numeric values:
 
 $$
-M = \frac{1}{n} \sum_{i=1}^{n} 2 \left| \frac{x_i - y_i}{|x_i| + |y_i|} \right|.
+M = \frac{1}{n} \sum_{i=1}^{n} 2 \frac{|x_i - y_i|}{|x_i| + |y_i|}.
 $$
 
 
