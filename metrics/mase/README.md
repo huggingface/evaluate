@@ -86,7 +86,7 @@ Example with the `uniform_average` config:
 >>> predictions = [2.5, 0.0, 2, 8]
 >>> references = [3, -0.5, 2, 7]
 >>> training = [5, 0.5, 4, 6, 3, 5, 2]
->>> results = mase_metric.compute(predictions=predictions, references=references, trianing=training)
+>>> results = mase_metric.compute(predictions=predictions, references=references, training=training)
 >>> print(results)
 {'mase': 0.1833...}
 ```
