@@ -137,6 +137,6 @@ class Mase(evaluate.Metric):
         )
 
         epsilon = np.finfo(np.float64).eps
-        mase_scoe = mae_score / np.maximum(mae_naive, epsilon)
+        mase_score = mae_score / np.maximum(mae_naive, epsilon)
 
-        return {"mase": mase_scoe}
+        return {"mase": mase_score}
