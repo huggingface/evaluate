@@ -99,7 +99,7 @@ class Mase(evaluate.Metric):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(self._get_feature_types()),
-            reference_urls=["https://otexts.com/fpp2/accuracy.html#scaled-errors"],
+            reference_urls=["https://otexts.com/fpp3/accuracy.html#scaled-errors"],
         )
 
     def _get_feature_types(self):
