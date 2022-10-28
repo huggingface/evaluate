@@ -99,9 +99,7 @@ class Mase(evaluate.Metric):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(self._get_feature_types()),
-            reference_urls=[
-                "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_absolute_error.html"
-            ],
+            reference_urls=["https://otexts.com/fpp2/accuracy.html#scaled-errors"],
         )
 
     def _get_feature_types(self):
