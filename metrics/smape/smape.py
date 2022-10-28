@@ -68,15 +68,15 @@ Examples:
 
     If you're using multi-dimensional lists, then set the config as follows :
 
-    >>> smape_metric = evaluate.load("mape", "multilist")
+    >>> smape_metric = evaluate.load("smape", "multilist")
     >>> predictions = [[0.5, 1], [-1, 1], [7, -6]]
     >>> references = [[0.1, 2], [-1, 2], [8, -5]]
     >>> results = smape_metric.compute(predictions=predictions, references=references)
     >>> print(results)
-    {'smape': 0.8874999875823658}
+    {'smape': 0.49696969558995985}
     >>> results = smape_metric.compute(predictions=predictions, references=references, multioutput='raw_values')
     >>> print(results)
-    {'smape': array([1.37499998, 0.4       ])}
+    {'smape': array([0.48888889, 0.50505051])}
 """
 
 
