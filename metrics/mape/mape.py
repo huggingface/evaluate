@@ -65,7 +65,7 @@ Examples:
     >>> references = [3, -0.5, 2, 7]
     >>> results = mape_metric.compute(predictions=predictions, references=references)
     >>> print(results)
-    {'mape': 0.3273...}
+    {'mape': 0.3273809523809524}
 
     If you're using multi-dimensional lists, then set the config as follows :
 
@@ -74,10 +74,10 @@ Examples:
     >>> references = [[0.1, 2], [-1, 2], [8, -5]]
     >>> results = mape_metric.compute(predictions=predictions, references=references)
     >>> print(results)
-    {'mape': 0.8874...}
+    {'mape': 0.8874999875823658}
     >>> results = mape_metric.compute(predictions=predictions, references=references, multioutput='raw_values')
     >>> print(results)
-    {'mape': array([1.3749..., 0.4])}
+    {'mape': array([1.37499998, 0.4       ])}
 """
 
 
