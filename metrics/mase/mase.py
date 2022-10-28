@@ -46,7 +46,7 @@ Args:
         Estimated target values.
     references: array-like of shape (n_samples,) or (n_samples, n_outputs)
         Ground truth (correct) target values.
-    training: array-like of shape (n_samples,) or (n_samples, n_outputs)
+    training: array-like of shape (n_train_samples,) or (n_train_samples, n_outputs)
         In sample training data for naive forecast.
     periodicity: int, default=1
         Seasonal periodicity of training data.
