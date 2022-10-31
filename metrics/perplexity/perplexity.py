@@ -100,7 +100,9 @@ class Perplexity(evaluate.Metric):
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
-    def _compute(self, predictions, model_id, batch_size: int = 16, add_start_token: bool = True, device=None, max_length=None):
+    def _compute(
+        self, predictions, model_id, batch_size: int = 16, add_start_token: bool = True, device=None, max_length=None
+    ):
 
         if device is not None:
             assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
