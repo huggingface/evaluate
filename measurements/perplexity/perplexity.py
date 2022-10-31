@@ -100,7 +100,7 @@ class Perplexity(evaluate.Measurement):
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
-    def _compute(self, data, model_id, batch_size: int = 16, add_start_token: bool = True, device=None):
+    def _compute(self, data, model_id, batch_size: int = 16, add_start_token: bool = True, device=None, max_length=None):
 
         if device is not None:
             assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
@@ -131,15 +131,15 @@ class Perplexity(evaluate.Measurement):
             assert (
                 tokenizer.bos_token is not None
             ), "Input model must already have a BOS token if using add_start_token=True. Please use a different model, or set add_start_token=False"
-            max_tokenized_len = model.config.max_length - 1
+            max_tokenized_len = max_length - 1
         else:
-            max_tokenized_len = model.config.max_length
+            max_tokenized_len = max_length
 
         encodings = tokenizer(
             data,
             add_special_tokens=False,
             padding=True,
-            truncation=True,
+            truncation=True if max_tokenized_len else False,
             max_length=max_tokenized_len,
             return_tensors="pt",
             return_attention_mask=True,
