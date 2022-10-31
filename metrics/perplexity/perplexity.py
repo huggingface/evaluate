@@ -128,7 +128,7 @@ class Perplexity(evaluate.Metric):
             # assign one of the special tokens to also be the pad token
             tokenizer.add_special_tokens({"pad_token": existing_special_tokens[0]})
 
-        if add_start_token:
+        if add_start_token and max_length:
             # leave room for <BOS> token to be added:
             assert (
                 tokenizer.bos_token is not None
