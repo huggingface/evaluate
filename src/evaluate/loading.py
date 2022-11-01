@@ -541,7 +541,7 @@ class CachedEvaluationModuleFactory(_EvaluationModuleFactory):
         # get most recent
 
         def _get_modification_time(module_hash):
-            return (Path(importable_directory_path) / module_hash / (self.name + ".py")).stat().st_mtime
+            return (Path(importable_directory_path) / module_hash / (self.name.split("--")[-1] + ".py")).stat().st_mtime
 
         hash = sorted(hashes, key=_get_modification_time)[-1]
         logger.warning(
@@ -550,7 +550,7 @@ class CachedEvaluationModuleFactory(_EvaluationModuleFactory):
             f"couldn't be found locally at {self.name}, or remotely on the Hugging Face Hub."
         )
         # make the new module to be noticed by the import system
-        module_path = ".".join([os.path.basename(dynamic_modules_path), self.module_type, self.name, hash, self.name])
+        module_path = ".".join([os.path.basename(dynamic_modules_path), self.module_type, self.name, hash, self.name.split("--")[-1]])
         importlib.invalidate_caches()
         return ImportableModule(module_path, hash)
 
@@ -658,15 +658,23 @@ def evaluation_module_factory(
                     dynamic_modules_path=dynamic_modules_path,
                 ).get_module()
         except Exception as e1:  # noqa: all the attempts failed, before raising the error we should check if the module is already cached.
-            try:
-                return CachedEvaluationModuleFactory(path, dynamic_modules_path=dynamic_modules_path).get_module()
-            except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
-                if not isinstance(e1, (ConnectionError, FileNotFoundError)):
-                    raise e1 from None
-                raise FileNotFoundError(
-                    f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}. "
-                    f"Module '{path}' doesn't exist on the Hugging Face Hub either."
-                ) from None
+            if path.count("/") == 0:
+                for current_type in ["metric", "comparison", "measurement"]:
+                    try:
+                        return CachedEvaluationModuleFactory(f"evaluate-{current_type}--{path}", dynamic_modules_path=dynamic_modules_path).get_module()
+                    except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
+                        raise e2
+            elif path.count("/") == 1:
+                try:
+                    return CachedEvaluationModuleFactory(path.replace("/", "--"), dynamic_modules_path=dynamic_modules_path).get_module()
+                except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
+                    pass
+            if not isinstance(e1, (ConnectionError, FileNotFoundError)):
+                raise e1 from None
+            raise FileNotFoundError(
+                f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}. "
+                f"Module '{path}' doesn't exist on the Hugging Face Hub either."
+            ) from None
     else:
         raise FileNotFoundError(f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}.")
 
