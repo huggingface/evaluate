@@ -74,8 +74,7 @@ def init_dynamic_modules(
 
 def import_main_class(module_path) -> Optional[Union[Type[DatasetBuilder], Type[EvaluationModule]]]:
     """Import a module at module_path and return its main class:
-    - a DatasetBuilder if dataset is True
-    - a Metric if dataset is False
+    - a Metric or EvaluationSuite by default
     """
     module = importlib.import_module(module_path)
     main_cls_type = EvaluationModule
