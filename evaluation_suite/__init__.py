@@ -39,7 +39,6 @@ class EvaluationSuite(EvaluationModule):
 
         suite.setup()
         for task in suite.suite:
-            print(task)
             task_evaluator = evaluator("text-classification")
             args_for_task = task.args_for_task
             args_for_task["model_or_pipeline"] = model_or_pipeline
@@ -51,23 +50,3 @@ class EvaluationSuite(EvaluationModule):
             task_id = task.data # TODO FIX THIS + "/" + task.get("name") if task.get("name") else task["data"]
             results_all[task_id] = results
         return results_all
-
-
-from typing import Optional, Union, Callable
-from dataclasses import dataclass
-from datasets import Dataset
-import dataclasses
-
-@dataclass
-class SubTask:
-    data: Optional[Union[str, Dataset]] = None
-    subset: Optional[str] = None
-    split: Optional[str] = None
-    data_preprocessor: Optional[Callable] = None
-    args_for_task: Optional[dict] = None
-    #
-    # def __init__(self, **kwargs):
-    #     names = set([f.name for f in dataclasses.fields(self)])
-    #     for k, v in kwargs.items():
-    #         if k in names:
-    #             setattr(self, k, v)
