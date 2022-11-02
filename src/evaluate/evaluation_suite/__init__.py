@@ -7,10 +7,10 @@ from typing import Callable, Optional, Union
 from datasets import Dataset, DownloadMode, load_dataset
 from datasets.utils.version import Version
 
-from evaluate.evaluator import evaluator
-from evaluate.loading import evaluation_module_factory
-from evaluate.utils.file_utils import DownloadConfig
-from evaluate.utils.logging import get_logger
+from ..evaluator import evaluator
+from ..loading import evaluation_module_factory
+from ..utils.file_utils import DownloadConfig
+from ..utils.logging import get_logger
 
 
 logger = get_logger(__name__)
@@ -57,8 +57,9 @@ class EvaluationSuite:
     def __init__(self, name):
         self.name = name
 
+    @staticmethod
     def load(
-        path,
+        path: str,
         download_mode: Optional[DownloadMode] = None,
         revision: Optional[Union[str, Version]] = None,
         download_config: Optional[DownloadConfig] = None,
