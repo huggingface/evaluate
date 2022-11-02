@@ -44,12 +44,12 @@ def import_main_class(module_path):
 class EvaluationSuite:
     """
     This class instantiates an evaluation suite made up of multiple tasks, where each task consists of a dataset and
-    an associated metric, and runs evaluation on a model or pipeline. Evaluation suites with a Python script found
-    either locally or uploaded as a dataset on the Hugging Face Hub.
+    an associated metric, and runs evaluation on a model or pipeline. Evaluation suites can be a Python script found
+    either locally or uploaded as a Space on the Hugging Face Hub.
     Usage:
     ```python
-    from evaluate.evaluation_suite import load_evaluation_suite
-    suite = load_evaluation_suite('mathemakitten/glue-suite-v2')
+    from evaluate import EvaluationSuite
+    suite = EvaluationSuite.load('mathemakitten/glue-evaluation-suite')
     results = suite.run("gpt2")
     ```
     """
