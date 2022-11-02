@@ -853,5 +853,6 @@ class TestText2TextGenerationEvaluator(TestCase):
 
 
 class TestEvaluationSuite(TestCase):
-    suite = EvaluationSuite.load("evaluate/evaluation-suite-ci")
-    suite.run("gpt2")
+    def test_suite(self):
+        suite = EvaluationSuite.load("evaluate/evaluation-suite-ci")
+        suite.run("gpt2")

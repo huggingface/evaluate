@@ -2,15 +2,15 @@ import importlib
 import inspect
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Callable, Dict, Optional, Union
 
 from datasets import Dataset, DownloadMode, load_dataset
 from datasets.utils.version import Version
 
-from evaluate.evaluator import evaluator
-from evaluate.loading import evaluation_module_factory
-from evaluate.utils.file_utils import DownloadConfig
-from evaluate.utils.logging import get_logger
+from ..evaluator import evaluator
+from ..loading import evaluation_module_factory
+from ..utils.file_utils import DownloadConfig
+from ..utils.logging import get_logger
 
 
 logger = get_logger(__name__)
@@ -44,12 +44,12 @@ def import_main_class(module_path):
 class EvaluationSuite:
     """
     This class instantiates an evaluation suite made up of multiple tasks, where each task consists of a dataset and
-    an associated metric, and runs evaluation on a model or pipeline. Evaluation suites with a Python script found
-    either locally or uploaded as a dataset on the Hugging Face Hub.
+    an associated metric, and runs evaluation on a model or pipeline. Evaluation suites can be a Python script found
+    either locally or uploaded as a Space on the Hugging Face Hub.
     Usage:
     ```python
-    from evaluate.evaluation_suite import load_evaluation_suite
-    suite = load_evaluation_suite('mathemakitten/glue-suite-v2')
+    from evaluate import EvaluationSuite
+    suite = EvaluationSuite.load('mathemakitten/glue-evaluation-suite')
     results = suite.run("gpt2")
     ```
     """
@@ -57,8 +57,9 @@ class EvaluationSuite:
     def __init__(self, name):
         self.name = name
 
+    @staticmethod
     def load(
-        path,
+        path: str,
         download_mode: Optional[DownloadMode] = None,
         revision: Optional[Union[str, Version]] = None,
         download_config: Optional[DownloadConfig] = None,
@@ -77,10 +78,14 @@ class EvaluationSuite:
         tasks = [task.data + "/" + task.subset if task.subset else task.data for task in self.suite]
         return f'EvaluationSuite name: "{self.name}", ' f"Tasks: {tasks})"
 
-    def run(self, model_or_pipeline):
+    def run(
+        self, model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"]  # noqa: F821
+    ) -> Dict[str, float]:
 
         results_all = {}
         for task in self.suite:
+
+            task_name = task.data
 
             if task.data_preprocessor:  # task requires extra preprocessing
                 ds = load_dataset(task.data, name=task.subset, split=task.split)
@@ -94,6 +99,6 @@ class EvaluationSuite:
             args_for_task["split"] = task.split
             results = task_evaluator.compute(**args_for_task)
 
-            task_id = task.data + "/" + task.subset if task.subset else task.data
+            task_id = task_name + "/" + task.subset if task.subset else task_name
             results_all[task_id] = results
         return results_all
