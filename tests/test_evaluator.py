@@ -31,6 +31,7 @@ from transformers import (
 )
 
 from evaluate import (
+    EvaluationSuite,
     Evaluator,
     ImageClassificationEvaluator,
     QuestionAnsweringEvaluator,
@@ -849,3 +850,8 @@ class TestText2TextGenerationEvaluator(TestCase):
             data=self.data,
         )
         self.assertEqual(results["bleu"], 0)
+
+
+class TestEvaluationSuite(TestCase):
+    suite = EvaluationSuite.load("evaluate/evaluation-suite-ci")
+    suite.run("gpt2")

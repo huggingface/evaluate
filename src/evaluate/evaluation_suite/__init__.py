@@ -41,23 +41,6 @@ def import_main_class(module_path):
     return module_main_cls
 
 
-def load(
-    path,
-    download_mode: Optional[DownloadMode] = None,
-    revision: Optional[Union[str, Version]] = None,
-    download_config: Optional[DownloadConfig] = None,
-):
-    download_mode = DownloadMode(download_mode or DownloadMode.REUSE_DATASET_IF_EXISTS)
-    evaluation_module = evaluation_module_factory(
-        path, module_type=None, revision=revision, download_config=download_config, download_mode=download_mode
-    )
-    name = Path(path).stem
-    evaluation_cls = import_main_class(evaluation_module.module_path)
-    evaluation_instance = evaluation_cls(name)
-
-    return evaluation_instance
-
-
 class EvaluationSuite:
     """
     This class instantiates an evaluation suite made up of multiple tasks, where each task consists of a dataset and
@@ -74,15 +57,33 @@ class EvaluationSuite:
     def __init__(self, name):
         self.name = name
 
-    def run(self, model_or_pipeline=None):
+    def load(
+        path,
+        download_mode: Optional[DownloadMode] = None,
+        revision: Optional[Union[str, Version]] = None,
+        download_config: Optional[DownloadConfig] = None,
+    ):
+        download_mode = DownloadMode(download_mode or DownloadMode.REUSE_DATASET_IF_EXISTS)
+        evaluation_module = evaluation_module_factory(
+            path, module_type=None, revision=revision, download_config=download_config, download_mode=download_mode
+        )
+        name = Path(path).stem
+        evaluation_cls = import_main_class(evaluation_module.module_path)
+        evaluation_instance = evaluation_cls(name)
 
-        self.setup()
+        return evaluation_instance
+
+    def __repr__(self):
+        tasks = [task.data + "/" + task.subset if task.subset else task.data for task in self.suite]
+        return f'EvaluationSuite name: "{self.name}", ' f"Tasks: {tasks})"
+
+    def run(self, model_or_pipeline):
 
         results_all = {}
         for task in self.suite:
 
             if task.data_preprocessor:  # task requires extra preprocessing
-                ds = load_dataset(task.data, split=task.split)
+                ds = load_dataset(task.data, name=task.subset, split=task.split)
                 task.data = ds.map(task.data_preprocessor)
 
             task_evaluator = evaluator(task.task_type)
