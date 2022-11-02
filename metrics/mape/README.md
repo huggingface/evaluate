@@ -56,7 +56,7 @@ This metric outputs a dictionary, containing the mean absolute error score, whic
 - `float`: if multioutput is `uniform_average` or an ndarray of weights, then the weighted average of all output errors is returned.
 - numeric array-like of shape (`n_outputs,`): if multioutput is `raw_values`, then the score is returned for each output separately. 
 
-Each MAPE `float` value ranges from `0.0` to `1.0`, with the best value being 0.0.
+Each MAPE `float` value is postive with the best value being 0.0.
 
 Output Example(s):
 ```python
