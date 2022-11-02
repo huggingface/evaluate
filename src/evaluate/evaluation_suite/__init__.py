@@ -2,7 +2,7 @@ import importlib
 import inspect
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Callable, Optional, Union
+from typing import Callable, Dict, Optional, Union
 
 from datasets import Dataset, DownloadMode, load_dataset
 from datasets.utils.version import Version
@@ -78,7 +78,9 @@ class EvaluationSuite:
         tasks = [task.data + "/" + task.subset if task.subset else task.data for task in self.suite]
         return f'EvaluationSuite name: "{self.name}", ' f"Tasks: {tasks})"
 
-    def run(self, model_or_pipeline):
+    def run(
+        self, model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"]  # noqa: F821
+    ) -> Dict[str, float]:
 
         results_all = {}
         for task in self.suite:
