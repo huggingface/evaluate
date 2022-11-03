@@ -859,7 +859,16 @@ class CombinedEvaluations:
         for evaluation_module in self.evaluation_modules:
             batch = {"predictions": predictions, "references": references, **kwargs}
             batch = {input_name: batch[input_name] for input_name in evaluation_module._feature_names()}
-            results.append(evaluation_module.compute(**batch))
+            # Compute results
+            eval_results = {}
+            for score_name, score_value in evaluation_module.compute(**batch):
+                # If the metric's name is the same as the key, add a "_score" to it.
+                if evaluation_module.name == score_name:
+                    score_name = f"{evaluation_module.name}_score"
+                else: # Otherwise, prefix the metric's name to the score_name.
+                    score_name = f"{evaluation_module.name}_{score_name}"
+                eval_results[score_name] = score_value
+            results.append(eval_results)
 
         return self._merge_results(results)
 
