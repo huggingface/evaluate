@@ -1,0 +1,50 @@
+# Creating an EvaluationSuite
+
+The `EvaluationSuite` provides a way to compose any number of ([evaluator](base_evaluator), dataset, metric) tuples to evaluate a model on a collection of several evaluation tasks.
+
+A new `EvaluationSuite` is made up of `SubTask` classes, and can be defined by subclassing the `EvaluationSuite` class. Files can be uploaded to a Space on the Hugging Face Hub or saved locally.
+
+Datasets which require additional preprocessing before being used with an `Evaluator` can be processed with `datasets` transformations by setting the `preprocessor` attribute to a preprocessing function. Keyword arguments for the `Evaluator` can be passed down through `args_for_task`.
+
+```python
+import evaluate
+from evaluate.evaluation_suite import SubTask
+
+class Suite(evaluate.EvaluationSuite):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.preprocessor = lambda x: {"text": x["text"].lower()}
+        self.suite = [
+            SubTask(
+                task_type="text-classification",
+                data="glue",
+                subset="cola",
+                split="test[:10]",
+                args_for_task={
+                    "metric": "accuracy",
+                    "input_column": "sentence",
+                    "label_column": "label",
+                    "label_mapping": {
+                        "LABEL_0": 0.0,
+                        "LABEL_1": 1.0
+                    }
+                }
+            )
+        ]
+```
+
+An `EvaluationSuite` can be loaded by name from the Hugging Face Hub, or locally by providing a path, and run with `.run(model_or_pipeline)`.
+
+```python
+from evaluate import EvaluationSuite
+
+suite = EvaluationSuite.load('mathemakitten/glue')
+results = suite.run("gpt2")
+```
+
+The evaluation results are printed along with their task names and information about the time it took to obtain predictions through the pipeline.
+
+```python
+{'glue/cola': {'accuracy': 0.0, 'total_time_in_seconds': 0.9766696180449799, 'samples_per_second': 10.238876909079256, 'latency_in_seconds': 0.09766696180449798}, 'glue/sst2': {'accuracy': 0.5, 'total_time_in_seconds': 1.1422595420153812, 'samples_per_second': 8.754577775166744, 'latency_in_seconds': 0.11422595420153811}, 'glue/qqp': {'accuracy': 0.6, 'total_time_in_seconds': 1.3553926559980027, 'samples_per_second': 7.377935800188323, 'latency_in_seconds': 0.13553926559980026}, 'glue/mrpc': {'accuracy': 0.6, 'total_time_in_seconds': 2.021696529001929, 'samples_per_second': 4.946340786832532, 'latency_in_seconds': 0.2021696529001929}, 'glue/mnli': {'accuracy': 0.2, 'total_time_in_seconds': 2.0380110969999805, 'samples_per_second': 4.9067446270142145, 'latency_in_seconds': 0.20380110969999807}, 'glue/qnli': {'accuracy': 0.3, 'total_time_in_seconds': 2.082032073987648, 'samples_per_second': 4.802999975330509, 'latency_in_seconds': 0.20820320739876477}, 'glue/rte': {'accuracy': 0.7, 'total_time_in_seconds': 2.8592985830036923, 'samples_per_second': 3.4973612267855576, 'latency_in_seconds': 0.2859298583003692}, 'glue/wnli': {'accuracy': 0.5, 'total_time_in_seconds': 1.5406486629508436, 'samples_per_second': 6.490772517107661, 'latency_in_seconds': 0.15406486629508437}}
+```

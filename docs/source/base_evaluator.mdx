@@ -11,6 +11,7 @@ Currently supported tasks are:
 - `"summarization"`: will use the [`SummarizationEvaluator`].
 - `"translation"`: will use the [`TranslationEvaluator`].
 
+To run an `Evaluator` with several tasks in a single call, use the [EvaluationSuite](evaluation_suite), which runs evaluation on a collection of `SubTask`s.
 
 Each task has its own set of requirements for the dataset format and pipeline output, make sure to check them out for your custom use case. Let's have a look at some of them and see how you can use the evaluator to evalute a single or multiple of models, datasets, and metrics at the same time.
 

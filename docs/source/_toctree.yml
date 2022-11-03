@@ -17,6 +17,8 @@
     title: Using the evaluator
   - local: custom_evaluator
     title: Using the evaluator with custom pipelines
+  - local: evaluation_suite
+    title: Creating an EvaluationSuite
   title: "How-to guides"
 - sections:
     - local: types_of_evaluations
