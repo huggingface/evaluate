@@ -20,6 +20,7 @@ description: >-
 ## Metric Description
 
 Symmetric Mean Absolute Error (sMAPE) is the symmetric mean of the percentage error of difference between the predicted $x_i$ and actual $y_i$ numeric values:
+
 ![eab4a696c01c6c68763f76488fb623bb](https://user-images.githubusercontent.com/8100/200009801-ae8be6c8-facf-401b-8df0-3f80a458b9f4.png)
 
 
