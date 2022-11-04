@@ -19,7 +19,7 @@ description: >-
 ## Metric Description
 
 Mean Absolute Scaled Error (MASE) is the mean absolute error of the forecast values, divided by the mean absolute error of the in-sample one-step naive forecast. For prediction $x_i$ and corresponding ground truth $y_i$ as well as training data $z_t$ with seasonality $p$ the metric is given by:
-![ca62d24f9bdc2a2e666d15ad90c7b129](https://user-images.githubusercontent.com/8100/200009284-7ce4ccaa-373c-42f0-acbb-f81d52a97512.png)
+![image](https://user-images.githubusercontent.com/8100/200009284-7ce4ccaa-373c-42f0-acbb-f81d52a97512.png)
 
 
 This metric is:
