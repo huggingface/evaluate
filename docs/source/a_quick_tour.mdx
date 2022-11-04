@@ -265,9 +265,9 @@ metric = evaluate.load("accuracy")
 Then you can create an evaluator for text classification and pass the three objects to the `compute()` method. With the label mapping `evaluate` provides a method to align the pipeline outputs with the label column in the dataset:
 
 ```python
->>> eval = evaluator("text-classification")
+>>> task_evaluator = evaluator("text-classification")
 
->>> results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric,
+>>> results = task_evaluator.compute(model_or_pipeline=pipe, data=data, metric=metric,
 ...                        label_mapping={"NEGATIVE": 0, "POSITIVE": 1},)
 
 >>> print(results)
