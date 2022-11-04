@@ -81,7 +81,7 @@ Examples:
 
 
 def symmetric_mean_absolute_percentage_error(y_true, y_pred, *, sample_weight=None, multioutput="uniform_average"):
-    """Symmetric Mean absolute percentage error (sMAPE) metric.
+    """Symmetric Mean absolute percentage error (sMAPE) metric using sklearn's api and helpers.
 
     Parameters
     ----------
