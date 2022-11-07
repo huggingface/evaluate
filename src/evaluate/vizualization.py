@@ -180,7 +180,12 @@ class ComplexRadar():
 
 def radar_plot(data, model_names, invert_range):
     """
-TODO: figure out how to get invert_range to work
+    `data`: list of `dict`s of metric + value pairs.
+        E.g. data = [{"accuracy": 0.9, "precision":0.8},{"accuracy": 0.7, "precision":0.6},]
+    `names`: list of `str`s with model names
+        E.g. names = ["model1", "model 2", ...]
+    `invert_range`: list of `str`s with the metrics to invert (in cases when lower is better, e.g. latency)
+        E.g. invert_range=["latency"]
     """
     df = pd.DataFrame(data)
     min_max_per_variable = data.describe().T[['min', 'max']]
@@ -189,6 +194,7 @@ TODO: figure out how to get invert_range to work
 
     variables = data.columns
     ranges = list(min_max_per_variable.itertuples(index=False, name=None))
+    ranges = [(min_value, max_value) if var in invert_range else (max_value, min_value) for var,(min_value, max_value) in zip(variables, ranges)]
     format_cfg = {
         'rad_ln_args': {'visible':True},
         'outer_ring': {'visible':True},
