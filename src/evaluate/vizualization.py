@@ -178,23 +178,25 @@ class ComplexRadar():
         """Set a title"""
         self.ax.set_title(title,pad=pad, **kwargs)
 
-def radar_plot(data, model_names, invert_range):
+def radar_plot(data, model_names, invert_range=[]):
     """
     `data`: list of `dict`s of metric + value pairs.
         E.g. data = [{"accuracy": 0.9, "precision":0.8},{"accuracy": 0.7, "precision":0.6},]
     `names`: list of `str`s with model names
         E.g. names = ["model1", "model 2", ...]
-    `invert_range`: list of `str`s with the metrics to invert (in cases when lower is better, e.g. latency)
-        E.g. invert_range=["latency"]
+    `invert_range`: list of `str`s with the metrics to invert (in cases when lower is better, e.g. speed)
+        E.g. invert_range=["latency_in_seconds"]
     """
     df = pd.DataFrame(data)
+    variables = data.columns
+    if not all(x in variables for x in invert_range):
+        raise ValueError("All of the metrics in `invert_range` should be in the data provided.")
     min_max_per_variable = data.describe().T[['min', 'max']]
     min_max_per_variable['min'] = min_max_per_variable['min']-0.1*(min_max_per_variable['max']-min_max_per_variable['min'])
     min_max_per_variable['max'] = min_max_per_variable['max']+0.1*(min_max_per_variable['max']-min_max_per_variable['min'])
 
-    variables = data.columns
     ranges = list(min_max_per_variable.itertuples(index=False, name=None))
-    ranges = [(min_value, max_value) if var in invert_range else (max_value, min_value) for var,(min_value, max_value) in zip(variables, ranges)]
+    ranges = [(max_value,min_value) if var in invert_range else (min_value, max_value) for var,(min_value, max_value) in zip(variables, ranges)]
     format_cfg = {
         'rad_ln_args': {'visible':True},
         'outer_ring': {'visible':True},
