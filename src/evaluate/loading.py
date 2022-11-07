@@ -662,6 +662,7 @@ def evaluation_module_factory(
                     dynamic_modules_path=dynamic_modules_path,
                 ).get_module()
         except Exception as e1:  # noqa: all the attempts failed, before raising the error we should check if the module is already cached.
+            # if it's a canonical module we need to check if it's any of the types
             if path.count("/") == 0:
                 for current_type in ["metric", "comparison", "measurement"]:
                     try:
@@ -670,6 +671,7 @@ def evaluation_module_factory(
                         ).get_module()
                     except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
                         pass
+            # if it's a community module we just need to check on path
             elif path.count("/") == 1:
                 try:
                     return CachedEvaluationModuleFactory(
