@@ -669,7 +669,7 @@ def evaluation_module_factory(
                             f"evaluate-{current_type}--{path}", dynamic_modules_path=dynamic_modules_path
                         ).get_module()
                     except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
-                        raise e2
+                        pass
             elif path.count("/") == 1:
                 try:
                     return CachedEvaluationModuleFactory(
