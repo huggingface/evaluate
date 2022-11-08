@@ -187,9 +187,11 @@ def radar_plot(data, model_names, invert_range=[]):
     `invert_range`: list of `str`s with the metrics to invert (in cases when lower is better, e.g. speed)
         E.g. invert_range=["latency_in_seconds"]
     """
-    variables = data.columns
+    variables = data.keys()
     if all(x in variables for x in invert_range) is False:
         raise ValueError("All of the metrics in `invert_range` should be in the data provided.")
+    if isinstance(data, list) is False:
+        raise ValueError("The input must be a list of dicts of metric + value pairs")
     min_max_per_variable = data.describe().T[["min", "max"]]
     min_max_per_variable["min"] = min_max_per_variable["min"] - 0.1 * (
         min_max_per_variable["max"] - min_max_per_variable["min"]
