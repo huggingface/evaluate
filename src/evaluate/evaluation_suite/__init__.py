@@ -19,11 +19,27 @@ logger = get_logger(__name__)
 @dataclass
 class SubTask:
     task_type: str
-    data: Optional[Union[str, Dataset]] = None
+    data: [Union[str, Dataset]] = None
     subset: Optional[str] = None
     split: Optional[str] = None
     data_preprocessor: Optional[Callable] = None
     args_for_task: Optional[dict] = None
+
+    def __post_init__(self):
+        if type(self.task_type) is not str:
+            raise ValueError(f"'task_type' must be type 'str', got {type(self.task_type)}")
+        if type(self.data) not in [Dataset, str]:
+            raise ValueError(
+                f"'data' must be an already-instantiated Dataset object or type 'str', got {type(self.data)}"
+            )
+        if self.subset and type(self.subset) is not str:
+            raise ValueError(f"'subset' must be type 'str', got {type(self.subset)}")
+        if self.split and type(self.split) is not str:
+            raise ValueError(f"'split' must be type 'str', got {type(self.split)}")
+        if self.data_preprocessor and not callable(self.data_preprocessor):
+            raise ValueError(f"'data_preprocessor' must be a Callable', got {self.data_preprocessor}")
+        if self.args_for_task and type(self.args_for_task) is not dict:
+            raise ValueError(f"'args_for_task' must be type 'dict', got {type(self.args_for_task)}")
 
 
 def import_main_class(module_path):
@@ -78,9 +94,17 @@ class EvaluationSuite:
         tasks = [task.data + "/" + task.subset if task.subset else task.data for task in self.suite]
         return f'EvaluationSuite name: "{self.name}", ' f"Tasks: {tasks})"
 
+    def assert_suite_nonempty(self):
+        if not self.suite:
+            raise ValueError(
+                "No evaluation tasks found. The EvaluationSuite must include at least one SubTask definition."
+            )
+
     def run(
         self, model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"]  # noqa: F821
     ) -> Dict[str, float]:
+
+        self.assert_suite_nonempty()
 
         results_all = {}
         for task in self.suite:
@@ -98,6 +122,7 @@ class EvaluationSuite:
             args_for_task["subset"] = task.subset
             args_for_task["split"] = task.split
             results = task_evaluator.compute(**args_for_task)
+            results["data_preprocessor"] = task.data_preprocessor
 
             task_id = task_name + "/" + task.subset if task.subset else task_name
             results_all[task_id] = results
