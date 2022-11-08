@@ -2,6 +2,7 @@ import textwrap
 
 import matplotlib.pyplot as plt
 import numpy as np
+import pandas as pd
 
 
 class ComplexRadar:
@@ -181,12 +182,13 @@ class ComplexRadar:
 def radar_plot(data, model_names, invert_range=[]):
     """
     `data`: list of `dict`s of metric + value pairs.
-        E.g. data = [{"accuracy": 0.9, "precision":0.8},{"accuracy": 0.7, "precision":0.6},]
+        E.g. data = [{"accuracy": 0.9, "precision":0.8},{"accuracy": 0.7, "precision":0.6}]
     `names`: list of `str`s with model names
         E.g. names = ["model1", "model 2", ...]
     `invert_range`: list of `str`s with the metrics to invert (in cases when lower is better, e.g. speed)
         E.g. invert_range=["latency_in_seconds"]
     """
+    data = pd.DataFrame(data)
     variables = data.keys()
     if all(x in variables for x in invert_range) is False:
         raise ValueError("All of the metrics in `invert_range` should be in the data provided.")
