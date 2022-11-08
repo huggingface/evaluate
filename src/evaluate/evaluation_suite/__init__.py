@@ -91,8 +91,8 @@ class EvaluationSuite:
         return evaluation_instance
 
     def __repr__(self):
-        self.tasks = [str(task) for task in self.suite]
-        return f'EvaluationSuite name: "{self.name}", ' f"Tasks: {self.tasks})"
+        tasks = [task.data + "/" + task.subset if task.subset else task.data for task in self.suite]
+        return f'EvaluationSuite name: "{self.name}", ' f"Tasks: {tasks})"
 
     def assert_suite_nonempty(self):
         if not self.suite:
