@@ -5,6 +5,7 @@ from pathlib import Path
 from typing import Callable, Dict, Optional, Union
 
 from datasets import Dataset, DownloadMode, load_dataset
+from datasets.fingerprint import Hasher
 from datasets.utils.version import Version
 
 from ..evaluator import evaluator
@@ -72,6 +73,7 @@ class EvaluationSuite:
 
     def __init__(self, name):
         self.name = name
+        self.hasher = Hasher()
 
     @staticmethod
     def load(
@@ -91,8 +93,8 @@ class EvaluationSuite:
         return evaluation_instance
 
     def __repr__(self):
-        tasks = [task.data + "/" + task.subset if task.subset else task.data for task in self.suite]
-        return f'EvaluationSuite name: "{self.name}", ' f"Tasks: {tasks})"
+        self.tasks = [str(task) for task in self.suite]
+        return f'EvaluationSuite name: "{self.name}", ' f"Tasks: {self.tasks})"
 
     def assert_suite_nonempty(self):
         if not self.suite:
@@ -110,6 +112,8 @@ class EvaluationSuite:
         for task in self.suite:
 
             task_name = task.data
+            task_id = "task_" + self.hasher.hash((str(task)))
+            results_all[task_id] = {}
 
             if task.data_preprocessor:  # task requires extra preprocessing
                 ds = load_dataset(task.data, name=task.subset, split=task.split)
@@ -122,8 +126,10 @@ class EvaluationSuite:
             args_for_task["subset"] = task.subset
             args_for_task["split"] = task.split
             results = task_evaluator.compute(**args_for_task)
-            results["data_preprocessor"] = task.data_preprocessor
 
-            task_id = task_name + "/" + task.subset if task.subset else task_name
-            results_all[task_id] = results
+            results_all[task_id]["task_name"] = task_name + "/" + task.subset if task.subset else task_name
+            results_all[task_id]["data_preprocessor"] = (
+                str(task.data_preprocessor) if task.data_preprocessor is not None else None
+            )
+            results_all[task_id]["result"] = results
         return results_all
