@@ -224,6 +224,7 @@ class Evaluator(ABC):
         subset: Optional[str] = None,
         split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
+        metric_init_kwargs: Optional[Dict] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -249,7 +250,7 @@ class Evaluator(ABC):
             feature_extractor=feature_extractor,
             device=device,
         )
-        metric = self.prepare_metric(metric)
+        metric = self.prepare_metric(metric, metric_init_kwargs)
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
@@ -418,7 +419,7 @@ class Evaluator(ABC):
             )
         return pipe
 
-    def prepare_metric(self, metric: Union[str, EvaluationModule]):
+    def prepare_metric(self, metric: Union[str, EvaluationModule], init_kwargs: Optional[Dict] = None):
         """
         Prepare metric.
 
@@ -426,19 +427,24 @@ class Evaluator(ABC):
             metric (`str` or `EvaluationModule`, defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
+            init_kwargs (`Dict`, defaults to `None`):
+                Spread and passed to the load function
 
         Returns:
             The loaded metric.
         """
+        if init_kwargs is None:
+            init_kwargs = {}
+
         # Prepare metric.
         if metric is None:
             if self.default_metric_name is None:
                 raise ValueError(
                     "`Evaluator` doesn't specify a default metric. Please specify a valid `metric` argument."
                 )
-            metric = load(self.default_metric_name)
+            metric = load(self.default_metric_name, **init_kwargs)
         elif isinstance(metric, str):
-            metric = load(metric)
+            metric = load(metric, **init_kwargs)
 
         return metric
 
