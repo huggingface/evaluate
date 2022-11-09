@@ -19,6 +19,7 @@ from datasets import Dataset
 from .base import Evaluator
 from .utils import DatasetColumn
 
+
 TASK_DOCUMENTATION_KWARGS = r"""
         input_column (`str`, defaults to `"text"`):
             the name of the column containing the input text in the dataset specified by `data`.
@@ -43,12 +44,7 @@ class TextGenerationEvaluator(Evaluator):
         else:
             raise ValueError("Predictions must be returned in the format specified by TextGenerationPipeline.")
 
-    def __init__(
-            self,
-            task="text-generation",
-            default_metric_name=None,
-            predictions_prefix: str = "generated"
-    ):
+    def __init__(self, task="text-generation", default_metric_name=None, predictions_prefix: str = "generated"):
         super().__init__(task=task, default_metric_name=default_metric_name)
         self.predictions_prefix = predictions_prefix
 

@@ -27,9 +27,9 @@ from typing import Dict, List
 from .base import Evaluator
 from .image_classification import ImageClassificationEvaluator
 from .question_answering import QuestionAnsweringEvaluator
-from .text_generation import TextGenerationEvaluator
 from .text2text_generation import SummarizationEvaluator, Text2TextGenerationEvaluator, TranslationEvaluator
 from .text_classification import TextClassificationEvaluator
+from .text_generation import TextGenerationEvaluator
 from .token_classification import TokenClassificationEvaluator
 
 
