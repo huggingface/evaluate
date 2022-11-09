@@ -11,7 +11,9 @@ class TestEvaluationSuite(TestCase):
         results = self.evaluation_suite.run("lvwerra/distilbert-imdb")
 
         # Check that the results are correct and task ids are generated as expected
-        self.assertEqual(results["task_d868de929b011184"]["result"]["accuracy"], 1.0)
+        for task_id, task in results.items():
+            if task == "imdb":
+                self.assertEqual(task["result"]["accuracy"], 1.0)
 
         # Check that correct number of tasks were run
         self.assertEqual(len(list(results.keys())), 2)
