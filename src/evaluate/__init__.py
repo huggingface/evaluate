@@ -31,6 +31,7 @@ from .evaluator import (
     ImageClassificationEvaluator,
     QuestionAnsweringEvaluator,
     SummarizationEvaluator,
+    TextGenerationEvaluator,
     Text2TextGenerationEvaluator,
     TextClassificationEvaluator,
     TokenClassificationEvaluator,

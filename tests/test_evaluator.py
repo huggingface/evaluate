@@ -34,6 +34,7 @@ from evaluate import (
     Evaluator,
     ImageClassificationEvaluator,
     QuestionAnsweringEvaluator,
+    TextGenerationEvaluator,
     Text2TextGenerationEvaluator,
     TextClassificationEvaluator,
     TokenClassificationEvaluator,
@@ -42,13 +43,18 @@ from evaluate import (
 )
 
 
-class DummyText2TextGenerationPipeline:
-    def __init__(self, prefix="generated", task="text2text-generation"):
+class DummyTextGenerationPipeline:
+    def __init__(self, prefix="generated", task="text-generation"):
         self.task = task
         self.prefix = prefix
 
     def __call__(self, inputs, **kwargs):
         return [{f"{self.prefix}_text": "Lorem ipsum"} for _ in inputs]
+
+
+class DummyText2TextGenerationPipeline(DummyTextGenerationPipeline):
+    def __init__(self, task="text2text-generation", *args, **kwargs):
+        super().__init__(task=task, *args, **kwargs)
 
 
 class DummyTextClassificationPipeline:
@@ -779,6 +785,44 @@ class TestTokenClassificationEvaluator(TestCase):
         ]
         predictions = task_evaluator.predictions_processor(predictions, words, join_by)
         self.assertListEqual(predictions["predictions"][0], ["B-LOC", "O", "O", "O", "B-LOC", "O"])
+
+
+class TestTextGenerationEvaluator(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict({"text": ["Lorem ipsum"]})
+        self.pipe = DummyTextGenerationPipeline()
+        self.evaluator = evaluator("text-generation")
+
+    def test_class_init(self):
+        evaluator = TextGenerationEvaluator()
+        self.assertEqual(evaluator.task, "text-generation")
+        self.assertIsNone(evaluator.default_metric_name)
+
+        results = evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="word_count",
+        )
+        self.assertIsInstance(results["unique_words"], int)
+
+    def test_default_pipe_init(self):
+        results = self.evaluator.compute(data=self.data)
+        self.assertIsInstance(results["unique_words"], int)
+
+    def test_overwrite_default_metric(self):
+        word_length = load("word_length")
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric=word_length,
+        )
+        self.assertIsInstance(results["average_word_length"], int)
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="word_length",
+        )
+        self.assertIsInstance(results["average_word_length"], int)
 
 
 class TestText2TextGenerationEvaluator(TestCase):

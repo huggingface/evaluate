@@ -224,6 +224,7 @@ class Evaluator(ABC):
         subset: Optional[str] = None,
         split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
+        module_type: Optional[str] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -234,7 +235,7 @@ class Evaluator(ABC):
         input_column: str = "text",
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
-    ) -> Tuple[Dict[str, float], Any]:
+    ) -> Dict[str, float]:
 
         result = {}
 
@@ -249,7 +250,7 @@ class Evaluator(ABC):
             feature_extractor=feature_extractor,
             device=device,
         )
-        metric = self.prepare_metric(metric)
+        metric = self.prepare_metric(metric, module_type)
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
@@ -347,7 +348,7 @@ class Evaluator(ABC):
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
 
-    def prepare_data(self, data: Dataset, input_column: str, label_column: str):
+    def prepare_data(self, data: Dataset, input_column: str, label_column: str, *args, **kwargs):
         """
         Prepare data.
 
@@ -418,7 +419,7 @@ class Evaluator(ABC):
             )
         return pipe
 
-    def prepare_metric(self, metric: Union[str, EvaluationModule]):
+    def prepare_metric(self, metric: Union[str, EvaluationModule], module_type: Optional[str] = None):
         """
         Prepare metric.
 
@@ -426,6 +427,9 @@ class Evaluator(ABC):
             metric (`str` or `EvaluationModule`, defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
+            module_type (Optional `str`):
+                Used when `metric` is a string, to disambiguate between metrics, measurements, and comparisons.
+                Valid values are "metric", "measurement", and "comparison".
 
         Returns:
             The loaded metric.
@@ -438,7 +442,7 @@ class Evaluator(ABC):
                 )
             metric = load(self.default_metric_name)
         elif isinstance(metric, str):
-            metric = load(metric)
+            metric = load(metric, module_type=module_type)
 
         return metric
 
