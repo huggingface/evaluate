@@ -68,6 +68,3 @@ class TextGenerationEvaluator(Evaluator):
         self.check_required_columns(data, {"input_column": input_column})
 
         return {}, DatasetColumn(data, input_column)
-
-    def compute(self, module_type="measurement", *args, **kwargs) -> Dict[str, float]:
-        return super().compute(module_type=module_type, *args, **kwargs)

@@ -224,7 +224,6 @@ class Evaluator(ABC):
         subset: Optional[str] = None,
         split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
-        module_type: Optional[str] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -250,7 +249,7 @@ class Evaluator(ABC):
             feature_extractor=feature_extractor,
             device=device,
         )
-        metric = self.prepare_metric(metric, module_type)
+        metric = self.prepare_metric(metric)
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
@@ -419,7 +418,7 @@ class Evaluator(ABC):
             )
         return pipe
 
-    def prepare_metric(self, metric: Union[str, EvaluationModule], module_type: Optional[str] = None):
+    def prepare_metric(self, metric: Union[str, EvaluationModule]):
         """
         Prepare metric.
 
@@ -427,9 +426,6 @@ class Evaluator(ABC):
             metric (`str` or `EvaluationModule`, defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
-            module_type (Optional `str`):
-                Used when `metric` is a string, to disambiguate between metrics, measurements, and comparisons.
-                Valid values are "metric", "measurement", and "comparison".
 
         Returns:
             The loaded metric.
@@ -442,7 +438,7 @@ class Evaluator(ABC):
                 )
             metric = load(self.default_metric_name)
         elif isinstance(metric, str):
-            metric = load(metric, module_type=module_type)
+            metric = load(metric)
 
         return metric
 
