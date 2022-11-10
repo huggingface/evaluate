@@ -37,12 +37,14 @@ class TextGenerationEvaluator(Evaluator):
     """
 
     def predictions_processor(self, predictions, *args, **kwargs):
-        if isinstance(predictions[0], list):
-            return {"data": [pred[0][f"{self.predictions_prefix}_text"] for pred in predictions]}
-        elif isinstance(predictions[0], dict):
-            return {"data": [pred[f"{self.predictions_prefix}_text"] for pred in predictions]}
-        else:
-            raise ValueError("Predictions must be returned in the format specified by TextGenerationPipeline.")
+        """
+        Args:
+            predictions: A list of lists of dicts
+
+        Returns:
+            `dict`: All the generated texts are flattened and stored under the "data" key.
+        """
+        return {"data": [pred[f"{self.predictions_prefix}_text"] for pred_list in predictions for pred in pred_list]}
 
     def __init__(self, task="text-generation", default_metric_name=None, predictions_prefix: str = "generated"):
         super().__init__(task=task, default_metric_name=default_metric_name)

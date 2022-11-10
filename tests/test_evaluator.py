@@ -49,12 +49,16 @@ class DummyTextGenerationPipeline:
         self.prefix = prefix
 
     def __call__(self, inputs, **kwargs):
+        return [[{f"{self.prefix}_text": "Lorem ipsum"}] for _ in inputs]
+
+
+class DummyText2TextGenerationPipeline:
+    def __init__(self, prefix="generated", task="text2text-generation"):
+        self.task = task
+        self.prefix = prefix
+
+    def __call__(self, inputs, **kwargs):
         return [{f"{self.prefix}_text": "Lorem ipsum"} for _ in inputs]
-
-
-class DummyText2TextGenerationPipeline(DummyTextGenerationPipeline):
-    def __init__(self, task="text2text-generation", *args, **kwargs):
-        super().__init__(task=task, *args, **kwargs)
 
 
 class DummyTextClassificationPipeline:
