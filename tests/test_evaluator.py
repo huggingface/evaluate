@@ -44,12 +44,13 @@ from evaluate import (
 
 
 class DummyTextGenerationPipeline:
-    def __init__(self, prefix="generated", task="text-generation"):
+    def __init__(self, prefix="generated", task="text-generation", num_return_sequences=1):
         self.task = task
         self.prefix = prefix
+        self.num_return_sequences = num_return_sequences
 
     def __call__(self, inputs, **kwargs):
-        return [[{f"{self.prefix}_text": "Lorem ipsum"}] for _ in inputs]
+        return [[{f"{self.prefix}_text": "Lorem ipsum"} for _ in range(self.num_return_sequences)] for _ in inputs]
 
 
 class DummyText2TextGenerationPipeline:
@@ -794,7 +795,7 @@ class TestTokenClassificationEvaluator(TestCase):
 class TestTextGenerationEvaluator(TestCase):
     def setUp(self):
         self.data = Dataset.from_dict({"text": ["Lorem ipsum"]})
-        self.pipe = DummyTextGenerationPipeline()
+        self.pipe = DummyTextGenerationPipeline(num_return_sequences=4)
         self.evaluator = evaluator("text-generation")
 
     def test_class_init(self):
@@ -828,6 +829,14 @@ class TestTextGenerationEvaluator(TestCase):
         )
         self.assertIsInstance(results["average_word_length"], int)
 
+    def test_process_predictions_multiple_return_sequences(self):
+        processed_predictions = self.evaluator.predictions_processor([
+            [{"generated_text": "A"}, {"generated_text": "B"}],
+            [{"generated_text": "C"}, {"generated_text": "D"}],
+        ])
+        self.assertEqual(processed_predictions, {
+            "data": ["A", "B", "C", "D"]
+        })
 
 class TestText2TextGenerationEvaluator(TestCase):
     def setUp(self):
