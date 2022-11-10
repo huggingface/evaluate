@@ -830,13 +830,14 @@ class TestTextGenerationEvaluator(TestCase):
         self.assertIsInstance(results["average_word_length"], int)
 
     def test_process_predictions_multiple_return_sequences(self):
-        processed_predictions = self.evaluator.predictions_processor([
-            [{"generated_text": "A"}, {"generated_text": "B"}],
-            [{"generated_text": "C"}, {"generated_text": "D"}],
-        ])
-        self.assertEqual(processed_predictions, {
-            "data": ["A", "B", "C", "D"]
-        })
+        processed_predictions = self.evaluator.predictions_processor(
+            [
+                [{"generated_text": "A"}, {"generated_text": "B"}],
+                [{"generated_text": "C"}, {"generated_text": "D"}],
+            ]
+        )
+        self.assertEqual(processed_predictions, {"data": ["A", "B", "C", "D"]})
+
 
 class TestText2TextGenerationEvaluator(TestCase):
     def setUp(self):
