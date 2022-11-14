@@ -108,12 +108,10 @@ class EvaluationSuite:
 
         self.assert_suite_nonempty()
 
-        results_all = {}
+        results_all = []
         for task in self.suite:
 
             task_name = task.data
-            task_id = "task_" + self.hasher.hash((str(task)))
-            results_all[task_id] = {}
 
             if task.data_preprocessor:  # task requires extra preprocessing
                 ds = load_dataset(task.data, name=task.subset, split=task.split)
@@ -127,9 +125,7 @@ class EvaluationSuite:
             args_for_task["split"] = task.split
             results = task_evaluator.compute(**args_for_task)
 
-            results_all[task_id]["task_name"] = task_name + "/" + task.subset if task.subset else task_name
-            results_all[task_id]["data_preprocessor"] = (
-                str(task.data_preprocessor) if task.data_preprocessor is not None else None
-            )
-            results_all[task_id]["result"] = results
+            results["task_name"] = task_name + "/" + task.subset if task.subset else task_name
+            results["data_preprocessor"] = str(task.data_preprocessor) if task.data_preprocessor is not None else None
+            results_all.append(results)
         return results_all
