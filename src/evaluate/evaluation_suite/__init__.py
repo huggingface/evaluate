@@ -5,7 +5,6 @@ from pathlib import Path
 from typing import Callable, Dict, Optional, Union
 
 from datasets import Dataset, DownloadMode, load_dataset
-from datasets.fingerprint import Hasher
 from datasets.utils.version import Version
 
 from ..evaluator import evaluator

@@ -5,7 +5,6 @@ from tests.test_evaluator import DummyTextClassificationPipeline
 
 
 class TestEvaluationSuite(TestCase):
-
     def setUp(self):
         # Check that the EvaluationSuite loads successfully
         self.evaluation_suite = EvaluationSuite.load("evaluate/evaluation-suite-ci")
