@@ -66,14 +66,13 @@ class EvaluationSuite:
     Usage:
     ```python
     from evaluate import EvaluationSuite
-    suite = EvaluationSuite.load('mathemakitten/glue-evaluation-suite')
-    results = suite.run("gpt2")
+    suite = EvaluationSuite.load("evaluate/evaluation-suite-ci")
+    results = suite.run("lvwerra/distilbert-imdb")
     ```
     """
 
     def __init__(self, name):
         self.name = name
-        self.hasher = Hasher()
 
     @staticmethod
     def load(
