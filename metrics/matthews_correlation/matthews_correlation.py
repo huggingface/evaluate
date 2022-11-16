@@ -66,12 +66,14 @@ Examples:
         ...                                     sample_weight=[0.5, 1, 0, 0, 0, 1])
         >>> print(round(results['matthews_correlation'], 2))
         -0.25
+
     Example 4, Multi-label without averaging:
         >>> matthews_metric = evaluate.load("matthews_correlation", config_name="multilabel")
         >>> results = matthews_metric.compute(references=[[0,1], [1,0], [1,1]],
         ...                                     predictions=[[0,1], [1,1], [0,1]])
         >>> print(results['matthews_correlation'])
         [0.5, 0.0]
+
     Example 5, Multi-label with averaging:
         >>> matthews_metric = evaluate.load("matthews_correlation", config_name="multilabel")
         >>> results = matthews_metric.compute(references=[[0,1], [1,0], [1,1]],
