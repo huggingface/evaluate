@@ -36,6 +36,9 @@ _KWARGS_DESCRIPTION = """
 Args:
     predictions (list of int): Predicted labels, as returned by a model.
     references (list of int): Ground truth labels.
+    average (`string`): This parameter is required for multilabel targets. If set to `None`, the scores for each feature are returned. Otherwise, this determines the type of averaging performed on the data. Defaults to `'macro'`.
+        - 'micro': Calculate metrics globally by considering all (samples x features) as independent predictions. This is suitable if the distributions are similar.
+        - 'macro': Calculate metrics for each feature, and find their unweighted mean. 
     sample_weight (list of int, float, or bool): Sample weights. Defaults to `None`.
 Returns:
     matthews_correlation (dict containing float): Matthews correlation.
@@ -88,6 +91,11 @@ class MatthewsCorrelation(evaluate.Metric):
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
                 {
+                    "predictions": datasets.Sequence(datasets.Value("int32")),
+                    "references": datasets.Sequence(datasets.Value("int32")),
+                }
+                if self.config_name == "multilabel"
+                else {
                     "predictions": datasets.Value("int32"),
                     "references": datasets.Value("int32"),
                 }
@@ -97,7 +105,19 @@ class MatthewsCorrelation(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references, sample_weight=None):
+    def _compute(self, predictions, references, average="macro", sample_weight=None):
+        if self.config_name == "multilabel":
+            references = np.array(references)
+            predictions = np.array(predictions)
+            if average == "micro":
+                references = references.ravel()
+                predictions = predictions.ravel()
+            elif average in [None, "macro"]:
+                by_feature = [self._compute(predictions[:, i], references[:, i]) for i in range(references.shape[1])]
+                return {"matthews_correlation": by_feature if average is None else np.mean(by_feature)}
+            else:
+                raise ValueError(f"Invalid `average`: expected `micro` or `macro`")
+
         return {
             "matthews_correlation": float(matthews_corrcoef(references, predictions, sample_weight=sample_weight)),
         }
