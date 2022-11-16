@@ -39,7 +39,7 @@ Args:
     references (list of int): Ground truth labels.
     average (`string`): This parameter is used for multilabel configs. Defaults to `None`.
         - None (default): Returns an array of Matthews correlation coefficients, one for each feature
-        - 'macro': Calculate metrics for each feature, and find their unweighted mean. 
+        - 'macro': Calculate metrics for each feature, and find their unweighted mean.
     sample_weight (list of int, float, or bool): Sample weights. Defaults to `None`.
 Returns:
     matthews_correlation (dict containing float): Matthews correlation.
@@ -66,6 +66,19 @@ Examples:
         ...                                     sample_weight=[0.5, 1, 0, 0, 0, 1])
         >>> print(round(results['matthews_correlation'], 2))
         -0.25
+    Example 4, Multi-label without averaging:
+        >>> matthews_metric = evaluate.load("matthews_correlation", config_name="multilabel")
+        >>> results = matthews_metric.compute(references=[[0,1], [1,0], [1,1]],
+        ...                                     predictions=[[0,1], [1,1], [0,1]])
+        >>> print(results['matthews_correlation'])
+        [0.5, 0.0]
+    Example 5, Multi-label with averaging:
+        >>> matthews_metric = evaluate.load("matthews_correlation", config_name="multilabel")
+        >>> results = matthews_metric.compute(references=[[0,1], [1,0], [1,1]],
+        ...                                     predictions=[[0,1], [1,1], [0,1]],
+        ...                                     average='macro')
+        >>> print(round(results['matthews_correlation'], 2))
+        0.25
 """
 
 _CITATION = """\
@@ -119,7 +132,7 @@ class MatthewsCorrelation(evaluate.Metric):
             if average == "macro":
                 matthews_corr = np.mean(matthews_corr)
             elif average is not None:
-                raise ValueError(f"Invalid `average`: expected `macro`, or None ")
+                raise ValueError("Invalid `average`: expected `macro`, or None ")
         else:
             matthews_corr = float(matthews_corrcoef(references, predictions, sample_weight=sample_weight))
         return {"matthews_correlation": matthews_corr}
