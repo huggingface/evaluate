@@ -125,7 +125,7 @@ class MatthewsCorrelation(evaluate.Metric):
         if self.config_name == "multilabel":
             references = np.array(references)
             predictions = np.array(predictions)
-            if references.ndim != 2 or predictions.ndim != 2:
+            if not (references.ndim == 2 and predictions.ndim == 2):
                 raise ValueError("For multi-label inputs, both references and predictions should be 2-dimensional")
             matthews_corr = [
                 matthews_corrcoef(predictions[:, i], references[:, i], sample_weight=sample_weight)
