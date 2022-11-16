@@ -14,6 +14,7 @@
 """Matthews Correlation metric."""
 
 import datasets
+import numpy as np
 from sklearn.metrics import matthews_corrcoef
 
 import evaluate
@@ -36,8 +37,8 @@ _KWARGS_DESCRIPTION = """
 Args:
     predictions (list of int): Predicted labels, as returned by a model.
     references (list of int): Ground truth labels.
-    average (`string`): This parameter is required for multilabel targets. If set to `None`, the scores for each feature are returned. Otherwise, this determines the type of averaging performed on the data. Defaults to `'macro'`.
-        - 'micro': Calculate metrics globally by considering all (samples x features) as independent predictions. This is suitable if the distributions are similar.
+    average (`string`): This parameter is used for multilabel configs. Defaults to `None`.
+        - None (default): Returns an array of Matthews correlation coefficients, one for each feature
         - 'macro': Calculate metrics for each feature, and find their unweighted mean. 
     sample_weight (list of int, float, or bool): Sample weights. Defaults to `None`.
 Returns:
@@ -105,19 +106,18 @@ class MatthewsCorrelation(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references, average="macro", sample_weight=None):
+    def _compute(self, predictions, references, average=None, sample_weight=None):
         if self.config_name == "multilabel":
             references = np.array(references)
             predictions = np.array(predictions)
-            if average == "micro":
-                references = references.ravel()
-                predictions = predictions.ravel()
-            elif average in [None, "macro"]:
-                by_feature = [self._compute(predictions[:, i], references[:, i]) for i in range(references.shape[1])]
-                return {"matthews_correlation": by_feature if average is None else np.mean(by_feature)}
-            else:
-                raise ValueError(f"Invalid `average`: expected `micro` or `macro`")
-
-        return {
-            "matthews_correlation": float(matthews_corrcoef(references, predictions, sample_weight=sample_weight)),
-        }
+            matthews_corr = [
+                matthews_corrcoef(predictions[:, i], references[:, i], sample_weight=sample_weight)
+                for i in range(references.shape[1])
+            ]
+            if average is "macro":
+                matthews_corr = np.mean(matthews_corr)
+            elif average is not None:
+                raise ValueError(f"Invalid `average`: expected `macro`, or None ")
+        else:
+            matthews_corr = float(matthews_corrcoef(references, predictions, sample_weight=sample_weight))
+        return {"matthews_correlation": matthews_corr}
