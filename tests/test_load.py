@@ -6,7 +6,12 @@ from unittest import TestCase
 import pytest
 
 import evaluate
-from evaluate.loading import CachedEvaluationModuleFactory, HubEvaluationModuleFactory, LocalEvaluationModuleFactory
+from evaluate.loading import (
+    CachedEvaluationModuleFactory,
+    HubEvaluationModuleFactory,
+    LocalEvaluationModuleFactory,
+    evaluation_module_factory,
+)
 from evaluate.utils.file_utils import DownloadConfig
 
 from .utils import OfflineSimulationMode, offline
@@ -109,3 +114,27 @@ class ModuleFactoryTest(TestCase):
                 )
                 module_factory_result = factory.get_module()
                 assert importlib.import_module(module_factory_result.module_path) is not None
+
+    def test_cache_with_remote_canonical_module(self):
+        metric = "accuracy"
+        evaluation_module_factory(
+            metric, download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
+        )
+
+        for offline_mode in OfflineSimulationMode:
+            with offline(offline_mode):
+                evaluation_module_factory(
+                    metric, download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
+                )
+
+    def test_cache_with_remote_community_module(self):
+        metric = "lvwerra/test"
+        evaluation_module_factory(
+            metric, download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
+        )
+
+        for offline_mode in OfflineSimulationMode:
+            with offline(offline_mode):
+                evaluation_module_factory(
+                    metric, download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
+                )
