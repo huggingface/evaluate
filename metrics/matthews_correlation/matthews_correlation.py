@@ -121,7 +121,7 @@ class MatthewsCorrelation(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references, average=None, sample_weight=None):
+    def _compute(self, predictions, references, sample_weight=None, average=None):
         if self.config_name == "multilabel":
             references = np.array(references)
             predictions = np.array(predictions)
