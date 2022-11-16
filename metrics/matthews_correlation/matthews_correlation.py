@@ -110,11 +110,13 @@ class MatthewsCorrelation(evaluate.Metric):
         if self.config_name == "multilabel":
             references = np.array(references)
             predictions = np.array(predictions)
+            if references.ndim != 2 or predictions.ndim != 2:
+                raise ValueError("For multi-label inputs, both references and predictions should be 2-dimensional")
             matthews_corr = [
                 matthews_corrcoef(predictions[:, i], references[:, i], sample_weight=sample_weight)
                 for i in range(references.shape[1])
             ]
-            if average is "macro":
+            if average == "macro":
                 matthews_corr = np.mean(matthews_corr)
             elif average is not None:
                 raise ValueError(f"Invalid `average`: expected `macro`, or None ")
