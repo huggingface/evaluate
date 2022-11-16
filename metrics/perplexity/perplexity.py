@@ -101,7 +101,13 @@ class Perplexity(evaluate.Metric):
         )
 
     def _compute(
-        self, predictions, model_id: str = "gpt2", batch_size: int = 16, add_start_token: bool = True, device=None, max_length=None
+        self,
+        predictions,
+        model_id: str = "gpt2",
+        batch_size: int = 16,
+        add_start_token: bool = True,
+        device=None,
+        max_length=None,
     ):
 
         if device is not None:
