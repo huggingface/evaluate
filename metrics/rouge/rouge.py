@@ -60,7 +60,7 @@ Args:
         Valid names:
         `"rouge{n}"` (e.g. `"rouge1"`, `"rouge2"`) where: {n} is the n-gram based scoring,
         `"rougeL"`: Longest common subsequence based scoring.
-        `"rougeLSum"`: rougeLsum splits text using `"\n"`.
+        `"rougeLSum"`: rougeLSum splits text using `"\n"`.
         See details in https://github.com/huggingface/datasets/issues/617
     use_stemmer: Bool indicating whether Porter stemmer should be used to strip word suffixes.
     use_aggregator: Return aggregates if this is set to True
@@ -68,7 +68,7 @@ Returns:
     rouge1: rouge_1 (f1),
     rouge2: rouge_2 (f1),
     rougeL: rouge_l (f1),
-    rougeLsum: rouge_lsum (f1)
+    rougeLSum: rouge_lsum (f1)
 Examples:
 
     >>> rouge = evaluate.load('rouge')
@@ -76,7 +76,7 @@ Examples:
     >>> references = ["hello there", "general kenobi"]
     >>> results = rouge.compute(predictions=predictions, references=references)
     >>> print(results)
-    {'rouge1': 1.0, 'rouge2': 1.0, 'rougeL': 1.0, 'rougeLsum': 1.0}
+    {'rouge1': 1.0, 'rouge2': 1.0, 'rougeL': 1.0, 'rougeLSum': 1.0}
 """
 
 
@@ -122,7 +122,7 @@ class Rouge(evaluate.Metric):
         self, predictions, references, rouge_types=None, use_aggregator=True, use_stemmer=False, tokenizer=None
     ):
         if rouge_types is None:
-            rouge_types = ["rouge1", "rouge2", "rougeL", "rougeLsum"]
+            rouge_types = ["rouge1", "rouge2", "rougeL", "rougeLSum"]
 
         multi_ref = isinstance(references[0], list)
 
