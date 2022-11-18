@@ -1,9 +1,9 @@
 import importlib
 import inspect
+from abc import ABC, abstractmethod
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable, Dict, Optional, Union
-from abc import ABC, abstractmethod
 
 from datasets import Dataset, DownloadMode, load_dataset
 from datasets.utils.version import Version
@@ -18,6 +18,9 @@ logger = get_logger(__name__)
 
 
 class Preprocessor(ABC):
+    def __repr__(self):
+        return self.__class__.__name__
+
     @abstractmethod
     def run(self, dataset: Dataset) -> Dataset:
         pass
@@ -43,8 +46,10 @@ class SubTask:
             raise ValueError(f"'subset' must be type 'str', got {type(self.subset)}")
         if self.split and type(self.split) is not str:
             raise ValueError(f"'split' must be type 'str', got {type(self.split)}")
-        if self.data_preprocessor and not callable(self.data_preprocessor):
-            raise ValueError(f"'data_preprocessor' must be a Callable', got {self.data_preprocessor}")
+        if self.data_preprocessor and not (
+            callable(self.data_preprocessor) or isinstance(self.data_preprocessor, Preprocessor)
+        ):
+            raise ValueError(f"'data_preprocessor' must be a Callable or Preprocessor', got {self.data_preprocessor}")
         if self.args_for_task and type(self.args_for_task) is not dict:
             raise ValueError(f"'args_for_task' must be type 'dict', got {type(self.args_for_task)}")
 
@@ -120,7 +125,7 @@ class EvaluationSuite:
 
             if task.data_preprocessor:  # task requires extra preprocessing
                 ds = load_dataset(task.data, name=task.subset, split=task.split)
-                if issubclass(type(task.data_preprocessor), Preprocessor):
+                if isinstance(task.data_preprocessor, Preprocessor):
                     task.data = task.data_preprocessor.run(ds)
                 else:
                     task.data = ds.map(task.data_preprocessor)
