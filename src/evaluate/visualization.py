@@ -6,10 +6,7 @@ import pandas as pd
 
 
 class ComplexRadar:
-    """
-    Create a complex radar chart with different scales for each variable
-    Source: https://towardsdatascience.com/how-to-create-and-visualize-complex-radar-charts-f7764d0f3652
-
+    """Create a complex radar chart with different scales for each variable
     Parameters
     ----------
     fig : figure object
@@ -24,7 +21,6 @@ class ComplexRadar:
         Indicates if we the ranges for each variable are plotted
     format_cfg: dict, defaults to None
         A dictionary with formatting configurations
-
     """
 
     def __init__(self, fig, variables, ranges, n_ring_levels=5, show_scales=True, format_cfg=None):
@@ -165,33 +161,49 @@ class ComplexRadar:
         self.ax1.plot(self.angle, np.r_[sdata, sdata[0]], *args, **kwargs)
         self.plot_counter = self.plot_counter + 1
 
-    def fill(self, data, *args, **kwargs):
-        """Plots an area"""
-        sdata = self._scale_data(data, self.ranges)
-        self.ax1.fill(self.angle, np.r_[sdata, sdata[0]], *args, **kwargs)
-
     def use_legend(self, *args, **kwargs):
         """Shows a legend"""
         self.ax1.legend(*args, **kwargs)
 
-    def set_title(self, title, pad=25, **kwargs):
-        """Set a title"""
-        self.ax.set_title(title, pad=pad, **kwargs)
 
-
-def radar_plot(data, model_names, invert_range=[]):
-    """
+def radar_plot(data, model_names, invert_range=[], config=None, fig=None):
+    """Create a complex radar chart with different scales for each variable
+    Source: https://towardsdatascience.com/how-to-create-and-visualize-complex-radar-charts-f7764d0f3652
+    Inputs:
     `data`: list of `dict`s of metric + value pairs.
         E.g. data = [{"accuracy": 0.9, "precision":0.8},{"accuracy": 0.7, "precision":0.6}]
     `names`: list of `str`s with model names
         E.g. names = ["model1", "model 2", ...]
+    It also optionally takes the following parameters:
     `invert_range`: list of `str`s with the metrics to invert (in cases when lower is better, e.g. speed)
         E.g. invert_range=["latency_in_seconds"]
+    `config` : a dictionary specifying the formatting configurations, namely:
+        `rad_ln_args`: The visibility of the radial (circle) lines.
+            Default: {"visible": True}
+        `outer_ring`: The visibility of the outer ring.
+            Default: {"visible": True}
+        "angle_ln_args": The visibility of the angle lines.
+            Default: {"visible": True}
+        `rgrid_tick_lbls_args`: The font size of the tick labels on the scales.
+            Default: {"fontsize": 12}
+        `theta_tick_lbls`: The font size of the variable labels on the plot.
+            Default: {"fontsize": 12}
+        `theta_tick_lbls_pad`: The padding of the variable labels on the plot.
+            Default: 3
+        "theta_tick_lbls_brk_lng_wrds": Whether long words in the label are broken up or not.
+            Default: True
+    `fig`: the size and resolution of the output figure, specifying:
+        `figsize`: the height and width of the figure.
+            Default: (6, 12)
+        `dpi`: the resolution (in dots per inch) of the figure.
+            Default: dpi=300
+
+    The output of the function is a matplotlib figure, which can be looked at using `plot.show()` and saved using `plot.savefig()`.
     """
     if isinstance(data, list) is False:
         raise ValueError("The input must be a list of dicts of metric + value pairs")
     data = pd.DataFrame(data)
-    data.index= model_names
+    data.index = model_names
     variables = data.keys()
     if all(x in variables for x in invert_range) is False:
         raise ValueError("All of the metrics in `invert_range` should be in the data provided.")
@@ -217,7 +229,12 @@ def radar_plot(data, model_names, invert_range=[]):
         "theta_tick_lbls_pad": 3,
         "theta_tick_lbls_brk_lng_wrds": True,
     }
-    fig = plt.figure(figsize=(6, 12), dpi=300)
+    if config is not None:
+        format_cfg.update(config)
+    if fig is None:
+        fig = plt.figure(figsize=(6, 12), dpi=300)
+    else:
+        print("TODO")
     radar = ComplexRadar(fig, variables, ranges, n_ring_levels=3, show_scales=True, format_cfg=format_cfg)
     for g in zip(data.index):
         radar.plot(data.loc[g].values, label=g, marker="o", markersize=3)
