@@ -191,6 +191,7 @@ def radar_plot(data, model_names, invert_range=[]):
     if isinstance(data, list) is False:
         raise ValueError("The input must be a list of dicts of metric + value pairs")
     data = pd.DataFrame(data)
+    data.index= model_names
     variables = data.keys()
     if all(x in variables for x in invert_range) is False:
         raise ValueError("All of the metrics in `invert_range` should be in the data provided.")
