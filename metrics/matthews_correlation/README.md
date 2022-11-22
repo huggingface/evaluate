@@ -48,9 +48,10 @@ At minimum, this metric requires a list of predictions and a list of references:
 - **`predictions`** (`list` of `int`s): Predicted class labels.
 - **`references`** (`list` of `int`s): Ground truth labels.
 - **`sample_weight`** (`list` of `int`s, `float`s, or `bool`s): Sample weights. Defaults to `None`.
+- **`average`**(`None` or `macro`): For the multilabel case, whether to return one correlation coefficient per feature (`average=None`), or the average of them (`average='macro'`). Defaults to `None`.
 
 ### Output Values
-- **`matthews_correlation`** (`float`): Matthews correlation coefficient.
+- **`matthews_correlation`** (`float` or `list` of `float`s): Matthews correlation coefficient, or list of them in the multilabel case without averaging.
 
 The metric output takes the following form:
 ```python

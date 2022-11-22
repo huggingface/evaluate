@@ -1,5 +1,5 @@
 ---
-title: MAE
+title: MAPE
 emoji: 🤗 
 colorFrom: blue
 colorTo: red
@@ -11,28 +11,27 @@ tags:
 - evaluate
 - metric
 description: >-
-  Mean Absolute Error (MAE) is the mean of the magnitude of difference between the predicted and actual
+  Mean Absolute Percentage Error (MAPE) is the mean percentage error difference between the predicted and actual
   values.
 ---
 
-# Metric Card for MAE
+# Metric Card for MAPE
 
 
 ## Metric Description
 
-Mean Absolute Error (MAE) is the mean of the magnitude of difference between the predicted and actual numeric values:
-![image](https://user-images.githubusercontent.com/14205986/165824243-e1078dfd-489d-456c-a0da-cbaa28726220.png)
-
+Mean Absolute Error (MAPE) is the mean of the percentage error of difference between the predicted $x_i$ and actual $y_i$ numeric values:
+![image](https://user-images.githubusercontent.com/8100/200005316-c3975d32-8978-40f3-b541-c2ef57ec7c5b.png)
 
 ## How to Use
 
 At minimum, this metric requires predictions and references as inputs.
 
 ```python
->>> mae_metric = evaluate.load("mae")
+>>> mape_metric = evaluate.load("mape")
 >>> predictions = [2.5, 0.0, 2, 8]
 >>> references = [3, -0.5, 2, 7]
->>> results = mae_metric.compute(predictions=predictions, references=references)
+>>> results = mape_metric.compute(predictions=predictions, references=references)
 ```
 
 ### Inputs
@@ -53,16 +52,16 @@ This metric outputs a dictionary, containing the mean absolute error score, whic
 - `float`: if multioutput is `uniform_average` or an ndarray of weights, then the weighted average of all output errors is returned.
 - numeric array-like of shape (`n_outputs,`): if multioutput is `raw_values`, then the score is returned for each output separately. 
 
-Each MAE `float` value ranges from `0.0` to `+inf`, with the best value being 0.0.
+Each MAPE `float` value is postive with the best value being 0.0.
 
 Output Example(s):
 ```python
-{'mae': 0.5}
+{'mape': 0.5}
 ```
 
 If `multioutput="raw_values"`:
 ```python
-{'mae': array([0.5, 1. ])}
+{'mape': array([0.5, 1. ])}
 ```
 
 #### Values from Popular Papers
@@ -72,31 +71,29 @@ If `multioutput="raw_values"`:
 
 Example with the `uniform_average` config:
 ```python
->>> mae_metric = evaluate.load("mae")
+>>> mape_metric = evaluate.load("mape")
 >>> predictions = [2.5, 0.0, 2, 8]
 >>> references = [3, -0.5, 2, 7]
->>> results = mae_metric.compute(predictions=predictions, references=references)
+>>> results = mape_metric.compute(predictions=predictions, references=references)
 >>> print(results)
-{'mae': 0.5}
+{'mape': 0.3273...}
 ```
 
 Example with multi-dimensional lists, and the `raw_values` config:
 ```python
->>> mae_metric = evaluate.load("mae", "multilist")
+>>> mape_metric = evaluate.load("mape", "multilist")
 >>> predictions = [[0.5, 1], [-1, 1], [7, -6]]
->>> references = [[0, 2], [-1, 2], [8, -5]]
->>> results = mae_metric.compute(predictions=predictions, references=references)
+>>> references = [[0.1, 2], [-1, 2], [8, -5]]
+>>> results = mape_metric.compute(predictions=predictions, references=references)
 >>> print(results)
-{'mae': 0.75}
->>> results = mae_metric.compute(predictions=predictions, references=references, multioutput='raw_values')
+{'mape': 0.8874...}
+>>> results = mape_metric.compute(predictions=predictions, references=references, multioutput='raw_values')
 >>> print(results)
-{'mae': array([0.5, 1. ])}
+{'mape': array([1.3749..., 0.4])}
 ```
 
 ## Limitations and Bias
-One limitation of MAE is that the relative size of the error is not always obvious, meaning that it can be difficult to tell a big error from a smaller one -- metrics such as Mean Absolute Percentage Error (MAPE) have been proposed to calculate MAE in percentage terms.
-
-Also, since it calculates the mean, MAE may underestimate the impact of big, but infrequent, errors -- metrics such as the Root Mean Square Error (RMSE) compensate for this by taking the root of error values. 
+One limitation of MAPE is that it cannot be used if the ground truth is zero or close to zero. This metric is also asymmetric in that it puts a heavier penalty on predictions less than the ground truth and a smaller penalty on predictions bigger than the ground truth and thus can lead to a bias of methods being select which under-predict if selected via this metric.
 
 ## Citation(s)
 ```bibtex
@@ -114,16 +111,19 @@ Also, since it calculates the mean, MAE may underestimate the impact of big, but
 ```
 
 ```bibtex
-@article{willmott2005advantages,
-  title={Advantages of the mean absolute error (MAE) over the root mean square error (RMSE) in assessing average model performance},
-  author={Willmott, Cort J and Matsuura, Kenji},
-  journal={Climate research},
-  volume={30},
-  number={1},
-  pages={79--82},
-  year={2005}
+@article{DEMYTTENAERE201638,
+    title = {Mean Absolute Percentage Error for regression models},
+    journal = {Neurocomputing},
+    volume = {192},
+    pages = {38--48},
+    year = {2016},
+    note = {Advances in artificial neural networks, machine learning and computational intelligence},
+    issn = {0925-2312},
+    doi = {https://doi.org/10.1016/j.neucom.2015.12.114},
+    url = {https://www.sciencedirect.com/science/article/pii/S0925231216003325},
+    author = {Arnaud {de Myttenaere} and Boris Golden and Bénédicte {Le Grand} and Fabrice Rossi},
 }
 ```
 
 ## Further References
-- [Mean Absolute Error - Wikipedia](https://en.wikipedia.org/wiki/Mean_absolute_error)
+- [Mean absolute percentage error - Wikipedia](https://en.wikipedia.org/wiki/Mean_absolute_percentage_error)
