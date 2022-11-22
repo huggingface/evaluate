@@ -200,8 +200,6 @@ def radar_plot(data, model_names, invert_range=[], config=None, fig=None):
 
     The output of the function is a matplotlib figure, which can be looked at using `plot.show()` and saved using `plot.savefig()`.
     """
-    if isinstance(data, list) is False:
-        raise ValueError("The input must be a list of dicts of metric + value pairs")
     data = pd.DataFrame(data)
     data.index = model_names
     variables = data.keys()
