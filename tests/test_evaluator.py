@@ -893,7 +893,10 @@ class TestText2TextGenerationEvaluator(TestCase):
         self.assertEqual(results["bleu"], 0)
 
     def test_default_pipe_init(self):
-        results = self.evaluator.compute(data=self.data)
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="bleu",)
         self.assertEqual(results["bleu"], 0)
 
     def test_overwrite_default_metric(self):
