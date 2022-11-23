@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
+import unittest
 # Lint as: python3
 
 from time import sleep
@@ -344,7 +344,6 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertEqual(results1.keys(), results2.keys())
         self.assertEqual(results1["accuracy"], results2["accuracy"])
-        self.assertEqual(len(predictions), len(self.data))
         self.assertEqual(predictions[0]["label"], 1)
         self.assertEqual(predictions[0]["prediction"], 1)
         self.assertEqual(predictions[0]["text"], "I love movies about whales!")
@@ -944,3 +943,7 @@ class TestText2TextGenerationEvaluator(TestCase):
             return_predictions=True,
         )
         self.assertEqual(results2["bleu"], 0)
+
+
+if __name__ == "__main__":
+    unittest.main()
