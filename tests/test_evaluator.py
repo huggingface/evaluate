@@ -181,7 +181,7 @@ class TestTextClassificationEvaluator(TestCase):
         self.perf_pipe = DummyTextClassificationPipeline(sleep_time=0.1)
         self.model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
         self.tokenizer = AutoTokenizer.from_pretrained(self.default_model)
-        self.evaluator = evaluator("text-classification")
+        self.evaluator: Evaluator = evaluator("text-classification")
         self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
 
     def test_pipe_init(self):
@@ -332,6 +332,23 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertAlmostEqual(results["samples_per_second"], len(data) / results["total_time_in_seconds"], 5)
         self.assertAlmostEqual(results["latency_in_seconds"], results["total_time_in_seconds"] / len(data), 5)
 
+    def test_return_predictions(self):
+        results1 = self.evaluator.compute(
+            data=self.data,
+            label_mapping=self.label_mapping,
+        )
+        results2, predictions = self.evaluator.compute(
+            data=self.data,
+            label_mapping=self.label_mapping,
+            return_predictions=True,
+        )
+        self.assertEqual(results1.keys(), results2.keys())
+        self.assertEqual(results1["accuracy"], results2["accuracy"])
+        self.assertEqual(len(predictions), len(self.data))
+        self.assertEqual(predictions[0]["label"], 1)
+        self.assertEqual(predictions[0]["prediction"], 1)
+        self.assertEqual(predictions[0]["text"], "I love movies about whales!")
+
 
 class TestTextClassificationEvaluatorTwoColumns(TestCase):
     def setUp(self):
@@ -385,6 +402,27 @@ class TestTextClassificationEvaluatorTwoColumns(TestCase):
             label_mapping=self.label_mapping2,
         )
         self.assertEqual(results["accuracy"], 1.0)
+
+    def test_return_predictions(self):
+        results1 = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            input_column=self.input_column,
+            second_input_column=self.second_input_column,
+            label_column="label",
+            label_mapping=self.label_mapping,
+        )
+        results2, predictions = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            input_column=self.input_column,
+            second_input_column=self.second_input_column,
+            label_column="label",
+            label_mapping=self.label_mapping,
+            return_predictions=True,
+        )
+        self.assertEqual(results1.keys(), results2.keys())
+        self.assertEqual(results1["accuracy"], results2["accuracy"])
 
 
 class TestImageClassificationEvaluator(TestCase):
@@ -463,6 +501,19 @@ class TestImageClassificationEvaluator(TestCase):
             label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 0)
+
+    def test_return_predictions(self):
+        results1 = self.evaluator.compute(
+            data=self.data,
+            label_mapping=self.label_mapping,
+        )
+        results2, predictions = self.evaluator.compute(
+            data=self.data,
+            label_mapping=self.label_mapping,
+            return_predictions=True,
+        )
+        self.assertEqual(results1.keys(), results2.keys())
+        self.assertEqual(results1["accuracy"], results2["accuracy"])
 
 
 class TestQuestionAnsweringEvaluator(TestCase):
@@ -601,6 +652,22 @@ class TestQuestionAnsweringEvaluator(TestCase):
         )
         self.assertEqual(results["exact_match"], 100.0)
         self.assertEqual(results["f1"], 100.0)
+
+    def test_return_predictions(self):
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+        )
+        self.assertEqual(results["exact_match"], 100.0)
+        self.assertEqual(results["f1"], 100.0)
+        results2, predictions = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            return_predictions=True,
+        )
+        self.assertEqual(results2["exact_match"], 100.0)
+        self.assertEqual(results2["f1"], 100.0)
+        self.assertEqual(len(predictions), 1)
 
 
 class TestTokenClassificationEvaluator(TestCase):
@@ -780,6 +847,21 @@ class TestTokenClassificationEvaluator(TestCase):
         predictions = task_evaluator.predictions_processor(predictions, words, join_by)
         self.assertListEqual(predictions["predictions"][0], ["B-LOC", "O", "O", "O", "B-LOC", "O"])
 
+    def test_return_predictions(self):
+        results1 = self.evaluator.compute(
+            model_or_pipeline=self.default_model,
+            data=self.data,
+            metric="seqeval",
+        )
+        self.assertEqual(results1["overall_accuracy"], 0.5)
+        results2, predictions = self.evaluator.compute(
+            model_or_pipeline=self.default_model,
+            data=self.data,
+            metric="seqeval",
+            return_predictions=True,
+        )
+        self.assertEqual(results2["overall_accuracy"], 0.5)
+
 
 class TestText2TextGenerationEvaluator(TestCase):
     def setUp(self):
@@ -849,3 +931,16 @@ class TestText2TextGenerationEvaluator(TestCase):
             data=self.data,
         )
         self.assertEqual(results["bleu"], 0)
+
+    def test_return_predictions(self):
+        results1 = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+        )
+        self.assertEqual(results1["bleu"], 0)
+        results2, predictions = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            return_predictions=True,
+        )
+        self.assertEqual(results2["bleu"], 0)
