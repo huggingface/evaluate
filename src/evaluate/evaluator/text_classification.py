@@ -104,6 +104,7 @@ class TextClassificationEvaluator(Evaluator):
         second_input_column: Optional[str] = None,
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
+        return_predictions: bool = False,
     ) -> Tuple[Dict[str, float], Any]:
         """
         input_column (`str`, *optional*, defaults to `"text"`):
@@ -152,5 +153,8 @@ class TextClassificationEvaluator(Evaluator):
 
         result.update(metric_results)
         result.update(perf_results)
+
+        if return_predictions:
+            return result, predictions
 
         return result

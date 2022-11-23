@@ -89,6 +89,9 @@ EVALUTOR_COMPUTE_START_DOCSTRING = r"""
         random_state (`int`, *optional*, defaults to `None`):
             The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
             debugging.
+        return_predictions (`bool`, defaults to `False`):
+            If `True`, the function will return the predictions (after proccessing by predictions_processor) 
+            made by the pipeline along with the metric scores as a tuple: [METRIC_SCORES, PREDICTIONS].
 """
 
 EVALUATOR_COMPUTE_RETURN_DOCSTRING = r"""
@@ -234,6 +237,7 @@ class Evaluator(ABC):
         input_column: str = "text",
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
+        return_predictions: bool = False,
     ) -> Tuple[Dict[str, float], Any]:
 
         result = {}
@@ -269,7 +273,8 @@ class Evaluator(ABC):
 
         result.update(metric_results)
         result.update(perf_results)
-
+        if return_predictions:
+            return result, predictions
         return result
 
     @staticmethod

@@ -70,6 +70,7 @@ class Text2TextGenerationEvaluator(Evaluator):
         input_column: str = "text",
         label_column: str = "label",
         generation_kwargs: dict = None,
+        return_predictions: bool = False,
     ) -> Tuple[Dict[str, float], Any]:
         """
         Examples:
@@ -105,6 +106,7 @@ class Text2TextGenerationEvaluator(Evaluator):
             random_state=random_state,
             input_column=input_column,
             label_column=label_column,
+            return_predictions=return_predictions,
         )
 
         return result
