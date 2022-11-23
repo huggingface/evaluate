@@ -344,9 +344,6 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertEqual(results1.keys(), results2.keys())
         self.assertEqual(results1["accuracy"], results2["accuracy"])
-        self.assertEqual(predictions[0]["label"], 1)
-        self.assertEqual(predictions[0]["prediction"], 1)
-        self.assertEqual(predictions[0]["text"], "I love movies about whales!")
 
 
 class TestTextClassificationEvaluatorTwoColumns(TestCase):
