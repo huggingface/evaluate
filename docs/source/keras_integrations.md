@@ -2,7 +2,7 @@
 
 
 
-Evaluate can be easily intergrated into your Keras and Tensorflow workflow. We'll demonstrate two ways of incorporating Evaluate into model training, using the Fashion MNIST example dataset. We'll train a standard classifier to predict two classes from this dataset, and show how to use a metric as a callback during training or after for evaluation. 
+Evaluate can be easily intergrated into your Keras and Tensorflow workflow. We'll demonstrate two ways of incorporating Evaluate into model training, using the Fashion MNIST example dataset. We'll train a standard classifier to predict two classes from this dataset, and show how to use a metric as a callback during training or afterwards for evaluation. 
 
 
 ```python

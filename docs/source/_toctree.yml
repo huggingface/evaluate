@@ -20,7 +20,7 @@
   - sections:
     - local: transformers_integrations
       title: Transformers
-    - local: keras_integrations
+    - local: tf_keras_integrations
       title: Keras and Tensorflow
     title: Using 🤗 Evaluate with other ML frameworks
   title: "How-to guides"
