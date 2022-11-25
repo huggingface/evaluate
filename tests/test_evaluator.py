@@ -218,18 +218,12 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertIsNone(evaluator.default_metric_name)
 
         results = evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="f1",
-            label_mapping=self.label_mapping,
+            model_or_pipeline=self.pipe, data=self.data, metric="f1", label_mapping=self.label_mapping,
         )
         self.assertEqual(results["f1"], 1.0)
 
     def test_default_pipe_init(self):
-        results = self.evaluator.compute(
-            data=self.data,
-            label_mapping=self.label_mapping,
-        )
+        results = self.evaluator.compute(data=self.data, label_mapping=self.label_mapping,)
         self.assertEqual(results["accuracy"], 1.0)
 
     def test_data_loading(self):
@@ -259,17 +253,11 @@ class TestTextClassificationEvaluator(TestCase):
     def test_overwrite_default_metric(self):
         accuracy = load("accuracy")
         results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric=accuracy,
-            label_mapping=self.label_mapping,
+            model_or_pipeline=self.pipe, data=self.data, metric=accuracy, label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 1.0)
         results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="accuracy",
-            label_mapping=self.label_mapping,
+            model_or_pipeline=self.pipe, data=self.data, metric="accuracy", label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 1.0)
 
@@ -332,14 +320,9 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertAlmostEqual(results["latency_in_seconds"], results["total_time_in_seconds"] / len(data), 5)
 
     def test_return_predictions(self):
-        results1 = self.evaluator.compute(
-            data=self.data,
-            label_mapping=self.label_mapping,
-        )
+        results1 = self.evaluator.compute(data=self.data, label_mapping=self.label_mapping,)
         results2, predictions = self.evaluator.compute(
-            data=self.data,
-            label_mapping=self.label_mapping,
-            return_predictions=True,
+            data=self.data, label_mapping=self.label_mapping, return_predictions=True,
         )
         self.assertEqual(results1.keys(), results2.keys())
         self.assertEqual(results1["accuracy"], results2["accuracy"])
@@ -435,18 +418,13 @@ class TestImageClassificationEvaluator(TestCase):
 
     def test_pipe_init(self):
         results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            label_mapping=self.label_mapping,
+            model_or_pipeline=self.pipe, data=self.data, label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 0)
 
     def test_model_init(self):
         results = self.evaluator.compute(
-            model_or_pipeline=self.default_model,
-            data=self.data,
-            metric="accuracy",
-            label_mapping=self.label_mapping,
+            model_or_pipeline=self.default_model, data=self.data, metric="accuracy", label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 0)
         model = AutoModelForImageClassification.from_pretrained(self.default_model)
@@ -466,46 +444,29 @@ class TestImageClassificationEvaluator(TestCase):
         self.assertIsNone(evaluator.default_metric_name)
 
         results = evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="accuracy",
-            label_mapping=self.label_mapping,
+            model_or_pipeline=self.pipe, data=self.data, metric="accuracy", label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 0)
 
     def test_default_pipe_init(self):
-        results = self.evaluator.compute(
-            data=self.data,
-            label_mapping=self.label_mapping,
-        )
+        results = self.evaluator.compute(data=self.data, label_mapping=self.label_mapping,)
         self.assertEqual(results["accuracy"], 0)
 
     def test_overwrite_default_metric(self):
         accuracy = load("accuracy")
         results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric=accuracy,
-            label_mapping=self.label_mapping,
+            model_or_pipeline=self.pipe, data=self.data, metric=accuracy, label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 0)
         results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="accuracy",
-            label_mapping=self.label_mapping,
+            model_or_pipeline=self.pipe, data=self.data, metric="accuracy", label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 0)
 
     def test_return_predictions(self):
-        results1 = self.evaluator.compute(
-            data=self.data,
-            label_mapping=self.label_mapping,
-        )
+        results1 = self.evaluator.compute(data=self.data, label_mapping=self.label_mapping,)
         results2, predictions = self.evaluator.compute(
-            data=self.data,
-            label_mapping=self.label_mapping,
-            return_predictions=True,
+            data=self.data, label_mapping=self.label_mapping, return_predictions=True,
         )
         self.assertEqual(results1.keys(), results2.keys())
         self.assertEqual(results1["accuracy"], results2["accuracy"])
@@ -537,31 +498,19 @@ class TestQuestionAnsweringEvaluator(TestCase):
 
     def test_pipe_init(self):
         # squad_v1-like dataset
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-        )
+        results = self.evaluator.compute(model_or_pipeline=self.pipe, data=self.data,)
         self.assertEqual(results["exact_match"], 100.0)
         self.assertEqual(results["f1"], 100.0)
 
     def test_model_init(self):
         # squad_v1-like dataset
-        results = self.evaluator.compute(
-            model_or_pipeline=self.default_model,
-            data=self.data,
-            metric="squad",
-        )
+        results = self.evaluator.compute(model_or_pipeline=self.default_model, data=self.data, metric="squad",)
         self.assertEqual(results["exact_match"], 0)
         self.assertEqual(results["f1"], 100 / 3)
 
         model = AutoModelForQuestionAnswering.from_pretrained(self.default_model)
         tokenizer = AutoTokenizer.from_pretrained(self.default_model)
-        results = self.evaluator.compute(
-            model_or_pipeline=model,
-            data=self.data,
-            metric="squad",
-            tokenizer=tokenizer,
-        )
+        results = self.evaluator.compute(model_or_pipeline=model, data=self.data, metric="squad", tokenizer=tokenizer,)
         self.assertEqual(results["exact_match"], 0)
         self.assertEqual(results["f1"], 100 / 3)
 
@@ -571,11 +520,7 @@ class TestQuestionAnsweringEvaluator(TestCase):
         self.assertEqual(evaluator.task, "question-answering")
         self.assertIsNone(evaluator.default_metric_name)
 
-        results = evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="squad",
-        )
+        results = evaluator.compute(model_or_pipeline=self.pipe, data=self.data, metric="squad",)
         self.assertEqual(results["exact_match"], 100.0)
         self.assertEqual(results["f1"], 100.0)
 
@@ -584,28 +529,19 @@ class TestQuestionAnsweringEvaluator(TestCase):
         self.assertEqual(evaluator.task, "question-answering")
         self.assertIsNone(evaluator.default_metric_name)
 
-        results = evaluator.compute(
-            model_or_pipeline=self.pipe_v2,
-            data=self.data_v2,
-            metric="squad_v2",
-        )
+        results = evaluator.compute(model_or_pipeline=self.pipe_v2, data=self.data_v2, metric="squad_v2",)
         self.assertDictEqual(
             {key: results[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 100.0}
         )
 
     def test_default_pipe_init(self):
         # squad_v1-like dataset
-        results = self.evaluator.compute(
-            data=self.data,
-        )
+        results = self.evaluator.compute(data=self.data,)
         self.assertEqual(results["exact_match"], 100.0)
         self.assertEqual(results["f1"], 100.0)
 
         # squad_v2-like dataset
-        results = self.evaluator.compute(
-            data=self.data_v2,
-            metric="squad_v2",
-        )
+        results = self.evaluator.compute(data=self.data_v2, metric="squad_v2",)
         self.assertDictEqual(
             {key: results[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 0.0}
         )
@@ -632,33 +568,20 @@ class TestQuestionAnsweringEvaluator(TestCase):
     def test_overwrite_default_metric(self):
         # squad_v1-like dataset
         squad = load("squad")
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric=squad,
-        )
+        results = self.evaluator.compute(model_or_pipeline=self.pipe, data=self.data, metric=squad,)
         self.assertEqual(results["exact_match"], 100.0)
         self.assertEqual(results["f1"], 100.0)
 
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="squad",
-        )
+        results = self.evaluator.compute(model_or_pipeline=self.pipe, data=self.data, metric="squad",)
         self.assertEqual(results["exact_match"], 100.0)
         self.assertEqual(results["f1"], 100.0)
 
     def test_return_predictions(self):
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-        )
+        results = self.evaluator.compute(model_or_pipeline=self.pipe, data=self.data,)
         self.assertEqual(results["exact_match"], 100.0)
         self.assertEqual(results["f1"], 100.0)
         results2, predictions = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            return_predictions=True,
+            model_or_pipeline=self.pipe, data=self.data, return_predictions=True,
         )
         self.assertEqual(results2["exact_match"], 100.0)
         self.assertEqual(results2["f1"], 100.0)
@@ -675,10 +598,7 @@ class TestTokenClassificationEvaluator(TestCase):
         )
 
         self.data = Dataset.from_dict(
-            {
-                "tokens": [["New", "York", "a", "nice", "City", "."]],
-                "ner_tags": [[1, 2, 0, 0, 1, 0]],
-            },
+            {"tokens": [["New", "York", "a", "nice", "City", "."]], "ner_tags": [[1, 2, 0, 0, 1, 0]],},
             features=features,
         )
         self.default_model = "hf-internal-testing/tiny-bert-for-token-classification"
@@ -686,20 +606,13 @@ class TestTokenClassificationEvaluator(TestCase):
         self.evaluator = evaluator("token-classification")
 
     def test_model_init(self):
-        results = self.evaluator.compute(
-            model_or_pipeline=self.default_model,
-            data=self.data,
-            metric="seqeval",
-        )
+        results = self.evaluator.compute(model_or_pipeline=self.default_model, data=self.data, metric="seqeval",)
         self.assertEqual(results["overall_accuracy"], 0.5)
 
         model = AutoModelForTokenClassification.from_pretrained(self.default_model)
         tokenizer = AutoTokenizer.from_pretrained(self.default_model)
         results = self.evaluator.compute(
-            model_or_pipeline=model,
-            data=self.data,
-            metric="seqeval",
-            tokenizer=tokenizer,
+            model_or_pipeline=model, data=self.data, metric="seqeval", tokenizer=tokenizer,
         )
         self.assertEqual(results["overall_accuracy"], 0.5)
 
@@ -708,51 +621,31 @@ class TestTokenClassificationEvaluator(TestCase):
         self.assertEqual(evaluator.task, "token-classification")
         self.assertIsNone(evaluator.default_metric_name)
 
-        results = evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="seqeval",
-        )
+        results = evaluator.compute(model_or_pipeline=self.pipe, data=self.data, metric="seqeval",)
         self.assertEqual(results["overall_accuracy"], 1.0)
 
     def test_default_pipe_init(self):
-        results = self.evaluator.compute(
-            data=self.data,
-        )
+        results = self.evaluator.compute(data=self.data,)
         self.assertEqual(results["overall_accuracy"], 2 / 3)
 
     def test_overwrite_default_metric(self):
         accuracy = load("seqeval")
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric=accuracy,
-        )
+        results = self.evaluator.compute(model_or_pipeline=self.pipe, data=self.data, metric=accuracy,)
         self.assertEqual(results["overall_accuracy"], 1.0)
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="seqeval",
-        )
+        results = self.evaluator.compute(model_or_pipeline=self.pipe, data=self.data, metric="seqeval",)
         self.assertEqual(results["overall_accuracy"], 1.0)
 
     def test_data_loading(self):
         # Test passing in dataset by name with data_split
         data = self.evaluator.load_data("evaluate/conll2003-ci", split="validation[:1]")
         self.evaluator.prepare_data(
-            data=data,
-            input_column="tokens",
-            label_column="ner_tags",
-            join_by=" ",
+            data=data, input_column="tokens", label_column="ner_tags", join_by=" ",
         )
 
         # Test passing in dataset by name without data_split and inferring the optimal split
         data = self.evaluator.load_data("evaluate/conll2003-ci")
         self.evaluator.prepare_data(
-            data=data,
-            input_column="tokens",
-            label_column="ner_tags",
-            join_by=" ",
+            data=data, input_column="tokens", label_column="ner_tags", join_by=" ",
         )
 
         # Test that it chooses the correct one (e.g. conll2003 has train, validation, test but should select test)
@@ -843,37 +736,22 @@ class TestTokenClassificationEvaluator(TestCase):
         self.assertListEqual(predictions["predictions"][0], ["B-LOC", "O", "O", "O", "B-LOC", "O"])
 
     def test_return_predictions(self):
-        results1 = self.evaluator.compute(
-            model_or_pipeline=self.default_model,
-            data=self.data,
-            metric="seqeval",
-        )
+        results1 = self.evaluator.compute(model_or_pipeline=self.default_model, data=self.data, metric="seqeval",)
         self.assertEqual(results1["overall_accuracy"], 0.5)
         results2, predictions = self.evaluator.compute(
-            model_or_pipeline=self.default_model,
-            data=self.data,
-            metric="seqeval",
-            return_predictions=True,
+            model_or_pipeline=self.default_model, data=self.data, metric="seqeval", return_predictions=True,
         )
         self.assertEqual(results2["overall_accuracy"], 0.5)
 
 
 class TestText2TextGenerationEvaluator(TestCase):
     def setUp(self):
-        self.data = Dataset.from_dict(
-            {
-                "text": ["Lorem ipsum"] * 4,
-                "label": ["Ipsum Lorem"] * 4,
-            }
-        )
+        self.data = Dataset.from_dict({"text": ["Lorem ipsum"] * 4, "label": ["Ipsum Lorem"] * 4,})
         self.pipe = DummyText2TextGenerationPipeline()
         self.evaluator = evaluator("text2text-generation")
 
     def test_pipe_init(self):
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-        )
+        results = self.evaluator.compute(model_or_pipeline=self.pipe, data=self.data,)
         self.assertEqual(results["bleu"], 0)
 
     def test_class_init(self):
@@ -881,64 +759,38 @@ class TestText2TextGenerationEvaluator(TestCase):
         self.assertEqual(evaluator.task, "text2text-generation")
         self.assertIsNone(evaluator.default_metric_name)
 
-        results = evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="bleu",
-        )
+        results = evaluator.compute(model_or_pipeline=self.pipe, data=self.data, metric="bleu",)
         self.assertEqual(results["bleu"], 0)
 
     def test_default_pipe_init(self):
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="bleu",)
+        results = self.evaluator.compute(model_or_pipeline=self.pipe, data=self.data, metric="bleu",)
         self.assertEqual(results["bleu"], 0)
 
     def test_overwrite_default_metric(self):
         rouge = load("rouge")
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric=rouge,
-        )
+        results = self.evaluator.compute(model_or_pipeline=self.pipe, data=self.data, metric=rouge,)
         self.assertEqual(results["rouge1"], 1.0)
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="rouge",
-        )
+        results = self.evaluator.compute(model_or_pipeline=self.pipe, data=self.data, metric="rouge",)
         self.assertEqual(results["rouge1"], 1.0)
 
     def test_summarization(self):
         pipe = DummyText2TextGenerationPipeline(task="summarization", prefix="summary")
         e = evaluator("summarization")
 
-        results = e.compute(
-            model_or_pipeline=pipe,
-            data=self.data,
-        )
+        results = e.compute(model_or_pipeline=pipe, data=self.data,)
         self.assertEqual(results["rouge1"], 1.0)
 
     def test_translation(self):
         pipe = DummyText2TextGenerationPipeline(task="translation", prefix="translation")
         e = evaluator("translation")
 
-        results = e.compute(
-            model_or_pipeline=pipe,
-            data=self.data,
-        )
+        results = e.compute(model_or_pipeline=pipe, data=self.data,)
         self.assertEqual(results["bleu"], 0)
 
     def test_return_predictions(self):
-        results1 = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-        )
+        results1 = self.evaluator.compute(model_or_pipeline=self.pipe, data=self.data,)
         self.assertEqual(results1["bleu"], 0)
         results2, predictions = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            return_predictions=True,
+            model_or_pipeline=self.pipe, data=self.data, return_predictions=True,
         )
         self.assertEqual(results2["bleu"], 0)
