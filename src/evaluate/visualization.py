@@ -230,7 +230,7 @@ def radar_plot(data, model_names, invert_range=[], config=None, fig=None):
     if config is not None:
         format_cfg.update(config)
     if fig is None:
-        fig = plt.figure(figsize=(6, 12), dpi=300)
+        fig = plt.figure()
     else:
         print("TODO")
     radar = ComplexRadar(fig, variables, ranges, n_ring_levels=3, show_scales=True, format_cfg=format_cfg)
