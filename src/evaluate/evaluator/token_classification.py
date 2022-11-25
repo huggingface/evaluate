@@ -226,6 +226,7 @@ class TokenClassificationEvaluator(Evaluator):
         input_column: str = "tokens",
         label_column: str = "ner_tags",
         join_by: Optional[str] = " ",
+        return_predictions: bool = False,
     ) -> Tuple[Dict[str, float], Any]:
         """
         input_column (`str`, defaults to `"tokens"`):
@@ -265,5 +266,7 @@ class TokenClassificationEvaluator(Evaluator):
 
         result.update(metric_results)
         result.update(perf_results)
+        if return_predictions:
+            return result, predictions
 
         return result

@@ -82,6 +82,7 @@ class ImageClassificationEvaluator(Evaluator):
         input_column: str = "image",
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
+        return_predictions: bool = False,
     ) -> Tuple[Dict[str, float], Any]:
 
         """
@@ -110,6 +111,7 @@ class ImageClassificationEvaluator(Evaluator):
             input_column=input_column,
             label_column=label_column,
             label_mapping=label_mapping,
+            return_predictions=return_predictions,
         )
 
         return result

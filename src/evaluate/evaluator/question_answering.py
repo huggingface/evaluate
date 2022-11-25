@@ -162,6 +162,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         id_column: str = "id",
         label_column: str = "answers",
         squad_v2_format: Optional[bool] = None,
+        return_predictions: bool = False,
     ) -> Tuple[Dict[str, float], Any]:
         """
         question_column (`str`, defaults to `"question"`):
@@ -231,5 +232,8 @@ class QuestionAnsweringEvaluator(Evaluator):
 
         result.update(metric_results)
         result.update(perf_results)
+
+        if return_predictions:
+            return result, predictions
 
         return result
