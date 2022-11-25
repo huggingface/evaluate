@@ -12,6 +12,7 @@ However, these metrics require that we generate the predictions from the model. 
 
 ```python
 import numpy as np
+np.random.seed(0)
 import evaluate
 from sklearn.compose import ColumnTransformer
 from sklearn.datasets import fetch_openml
@@ -20,19 +21,24 @@ from sklearn.impute import SimpleImputer
 from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import train_test_split
+```
 
-np.random.seed(0)
+Load data from https://www.openml.org/d/40945
 
-# Load data from https://www.openml.org/d/40945
-
+```python
 X, y = fetch_openml("titanic", version=1, as_frame=True, return_X_y=True)
+```
 
-# Alternatively X and y can be obtained directly from the frame attribute:
-# X = titanic.frame.drop('survived', axis=1)
-# y = titanic.frame['survived']
+Alternatively X and y can be obtained directly from the frame attribute:
 
-# We create the preprocessing pipelines for both numeric and categorical data. Note that pclass could either be treated as a categorical or numeric feature.
+```python
+X = titanic.frame.drop('survived', axis=1)
+y = titanic.frame['survived']
+```
 
+We create the preprocessing pipelines for both numeric and categorical data. Note that pclass could either be treated as a categorical or numeric feature.
+
+```python
 numeric_features = ["age", "fare"]
 numeric_transformer = Pipeline(
     steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]
@@ -47,9 +53,11 @@ preprocessor = ColumnTransformer(
         ("cat", categorical_transformer, categorical_features),
     ]
 )
+```
 
-# Append classifier to preprocessing pipeline. Now we have a full prediction pipeline.
+Append classifier to preprocessing pipeline. Now we have a full prediction pipeline.
 
+```python
 clf = Pipeline(
     steps=[("preprocessor", preprocessor), ("classifier", LogisticRegression())]
 )
@@ -75,6 +83,5 @@ accuracy_metric = evaluate.load("accuracy")
 accuracy = accuracy_metric.compute(references=y_test, predictions=y_pred)
 print(accuracy)
 ```
-
 
 You can use any suitable `evaluate` metric with the estimators as long as they are compatible with the task and predictions. 
