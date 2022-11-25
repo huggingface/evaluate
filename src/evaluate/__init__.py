@@ -34,6 +34,7 @@ from .evaluator import (
     SummarizationEvaluator,
     Text2TextGenerationEvaluator,
     TextClassificationEvaluator,
+    TextGenerationEvaluator,
     TokenClassificationEvaluator,
     TranslationEvaluator,
     evaluator,

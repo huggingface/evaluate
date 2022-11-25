@@ -14,7 +14,7 @@
 
 from abc import ABC, abstractmethod
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 # Lint as: python3
 from datasets import Dataset, load_dataset
@@ -234,7 +234,7 @@ class Evaluator(ABC):
         input_column: str = "text",
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
-    ) -> Tuple[Dict[str, float], Any]:
+    ) -> Dict[str, float]:
 
         result = {}
 
@@ -347,7 +347,7 @@ class Evaluator(ABC):
                 "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
             )
 
-    def prepare_data(self, data: Dataset, input_column: str, label_column: str):
+    def prepare_data(self, data: Dataset, input_column: str, label_column: str, *args, **kwargs):
         """
         Prepare data.
 
