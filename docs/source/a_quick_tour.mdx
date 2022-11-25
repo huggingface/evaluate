@@ -296,7 +296,7 @@ The evaluator expects a `"text"` and `"label"` column for the data input. If you
 
 ### Visualization
 
-When comparing several models, sometimes it's hard to spot the differences in their performance simply by looking at their scores. We are gradually adding different visualization approaches, such as plots, to make this easier.
+When comparing several models, sometimes it's hard to spot the differences in their performance simply by looking at their scores. Also often there is not a single best model but there are trade-offs between e.g. latency and accuracy as larger models might have better performance but are also slower. We are gradually adding different visualization approaches, such as plots, to make choosing the best model for a use-case easier.
 
 For instance, if you have a list of results from multiple models (as dictionaries), you can feed them into the `radar_plot()` function:
 
