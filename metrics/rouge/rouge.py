@@ -68,7 +68,7 @@ Returns:
     rouge1: rouge_1 (f1),
     rouge2: rouge_2 (f1),
     rougeL: rouge_l (f1),
-    rougeLSum: rouge_lsum (f1)
+    rougeLsum: rouge_lsum (f1)
 Examples:
 
     >>> rouge = evaluate.load('rouge')
