@@ -122,7 +122,7 @@ class Rouge(evaluate.Metric):
         self, predictions, references, rouge_types=None, use_aggregator=True, use_stemmer=False, tokenizer=None
     ):
         if rouge_types is None:
-            rouge_types = ["rouge1", "rouge2", "rougeL", "rougeLSum"]
+            rouge_types = ["rouge1", "rouge2", "rougeL", "rougeLsum"]
 
         multi_ref = isinstance(references[0], list)
 
