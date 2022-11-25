@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import unittest
 # Lint as: python3
 
 from time import sleep
@@ -943,7 +942,3 @@ class TestText2TextGenerationEvaluator(TestCase):
             return_predictions=True,
         )
         self.assertEqual(results2["bleu"], 0)
-
-
-if __name__ == "__main__":
-    unittest.main()
