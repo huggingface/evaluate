@@ -60,7 +60,7 @@ Args:
         Valid names:
         `"rouge{n}"` (e.g. `"rouge1"`, `"rouge2"`) where: {n} is the n-gram based scoring,
         `"rougeL"`: Longest common subsequence based scoring.
-        `"rougeLSum"`: rougeLSum splits text using `"\n"`.
+        `"rougeLsum"`: rougeLsum splits text using `"\n"`.
         See details in https://github.com/huggingface/datasets/issues/617
     use_stemmer: Bool indicating whether Porter stemmer should be used to strip word suffixes.
     use_aggregator: Return aggregates if this is set to True
