@@ -182,7 +182,6 @@ This solution allows 🤗 Evaluate to perform distributed predictions, which is 
 
 Often one wants to not only evaluate a single metric but a range of different metrics capturing different aspects of a model. E.g. for classification it is usually a good idea to compute F1-score, recall, and precision in addition to accuracy to get a better picture of model performance. Naturally, you can load a bunch of metrics and call them sequentially. However, a more convenient way is to use the [`~evaluate.combine`] function to bundle them together:
 
-
 ```python
 >>> clf_metrics = evaluate.combine(["accuracy", "f1", "precision", "recall"])
 ```
@@ -198,6 +197,47 @@ The `combine` function accepts both the list of names of the metrics as well as 
   'precision': 1.0,
   'recall': 0.5
 }
+```
+
+## Running evaluation on a suite of tasks
+
+It can be useful to evaluate models on a variety of different tasks to understand their downstream performance. The [EvaluationSuite](evaluation_suite) enables evaluation of models on a collection of tasks. Tasks can be constructed as ([evaluator](base_evaluator), dataset, metric) tuples and passed to an [EvaluationSuite](evaluation_suite) stored on the Hugging Face Hub as a Space. See the [evaluator documentation](base_evaluator) for a list of currently supported tasks.
+
+`EvaluationSuite` scripts can be defined as follows, and supports Python code for data preprocessing.
+
+```python
+import evaluate
+from evaluate.evaluation_suite import SubTask
+
+class Suite(evaluate.EvaluationSuite):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.preprocessor = lambda x: {"text": x["text"].lower()}
+        self.suite = [
+            SubTask(
+                task_type="text-classification",
+                data="glue",
+                subset="cola",
+                split="test[:10]",
+                args_for_task={
+                    "metric": "accuracy",
+                    "input_column": "sentence",
+                    "label_column": "label",
+                    "label_mapping": {
+                        "LABEL_0": 0.0,
+                        "LABEL_1": 1.0
+                    }
+                }
+            )]
+```
+
+Evaluation can be run by loading the `EvaluationSuite` and calling `.suite.run()` with a model or pipeline.
+
+```python
+from evaluate import EvaluationSuite
+suite = EvaluationSuite.load('mathemakitten/glue-evaluation-suite')
+results = suite.run("gpt2")
 ```
 
 ## Save and push to the Hub
