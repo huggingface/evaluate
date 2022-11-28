@@ -37,10 +37,21 @@ from evaluate import (
     QuestionAnsweringEvaluator,
     Text2TextGenerationEvaluator,
     TextClassificationEvaluator,
+    TextGenerationEvaluator,
     TokenClassificationEvaluator,
     evaluator,
     load,
 )
+
+
+class DummyTextGenerationPipeline:
+    def __init__(self, prefix="generated", task="text-generation", num_return_sequences=1):
+        self.task = task
+        self.prefix = prefix
+        self.num_return_sequences = num_return_sequences
+
+    def __call__(self, inputs, **kwargs):
+        return [[{f"{self.prefix}_text": "Lorem ipsum"} for _ in range(self.num_return_sequences)] for _ in inputs]
 
 
 class DummyText2TextGenerationPipeline:
@@ -780,6 +791,53 @@ class TestTokenClassificationEvaluator(TestCase):
         ]
         predictions = task_evaluator.predictions_processor(predictions, words, join_by)
         self.assertListEqual(predictions["predictions"][0], ["B-LOC", "O", "O", "O", "B-LOC", "O"])
+
+
+class TestTextGenerationEvaluator(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict({"text": ["Lorem ipsum"]})
+        self.pipe = DummyTextGenerationPipeline(num_return_sequences=4)
+        self.evaluator = evaluator("text-generation")
+
+    def test_class_init(self):
+        evaluator = TextGenerationEvaluator()
+        self.assertEqual(evaluator.task, "text-generation")
+        self.assertIsNone(evaluator.default_metric_name)
+
+        results = evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="word_count",
+        )
+        self.assertIsInstance(results["unique_words"], int)
+
+    def test_default_pipe_init(self):
+        results = self.evaluator.compute(data=self.data)
+        self.assertIsInstance(results["unique_words"], int)
+
+    def test_overwrite_default_metric(self):
+        word_length = load("word_length")
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric=word_length,
+        )
+        self.assertIsInstance(results["average_word_length"], int)
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="word_length",
+        )
+        self.assertIsInstance(results["average_word_length"], int)
+
+    def test_process_predictions_multiple_return_sequences(self):
+        processed_predictions = self.evaluator.predictions_processor(
+            [
+                [{"generated_text": "A"}, {"generated_text": "B"}],
+                [{"generated_text": "C"}, {"generated_text": "D"}],
+            ]
+        )
+        self.assertEqual(processed_predictions, {"data": ["A", "B", "C", "D"]})
 
 
 class TestText2TextGenerationEvaluator(TestCase):

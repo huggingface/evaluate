@@ -4,6 +4,7 @@ import re
 import sys
 from pathlib import Path
 
+import numpy as np
 from datasets import Value
 
 from .logging import get_logger
@@ -55,6 +56,7 @@ def parse_readme(filepath):
 def parse_gradio_data(data, input_types):
     """Parses data from gradio Dataframe for use in metric."""
     metric_inputs = {}
+    data.replace("", np.nan, inplace=True)
     data.dropna(inplace=True)
     for feature_name, input_type in zip(data, input_types):
         if input_type == "json":
@@ -112,7 +114,7 @@ def launch_gradio_widget(metric):
         inputs=gr.inputs.Dataframe(
             headers=feature_names,
             col_count=len(feature_names),
-            row_count=2,
+            row_count=1,
             datatype=json_to_string_type(gradio_input_types),
         ),
         outputs=gr.outputs.Textbox(label=metric.name),
