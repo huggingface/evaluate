@@ -35,9 +35,8 @@ For more information, see https://huggingface.co/docs/transformers/perplexity
 """
 
 _KWARGS_DESCRIPTION = """
-Perplexity can be calculated by passing in a set of logits, labels, and attention mask tensors to the `compute()` function,
-or by passing in a `model_id` and a list of texts to `texts` in the `compute_perplexity_with_pretrained_model()` function,
-which will load a pretrained model and run inference.
+Perplexity can be calculated by passing in a set of logits, labels, and attention mask tensors to the `compute()` function.
+To run inference and calculate perplexities with a pretrained model, use the measurement version of this metric instead.
 Args for `compute`:
     logits (`ndarray`): Tensor-like, of shape [batch size, sequence length, vocab size]
     labels (`ndarray`): Tensor-like, of shape [batch, sequence length]
@@ -58,12 +57,21 @@ class Perplexity(evaluate.Metric):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            features=datasets.Features(
-                {
-                    "predictions": datasets.Value("float"),
-                    "references": datasets.Value("float"),
-                }
-            ),
+            features=[
+            #     datasets.Features(
+            #     {
+            #         "predictions": datasets.Value("float"),
+            #         "references": datasets.Value("float"),
+            #     }
+            # ),
+                         datasets.Features(
+                             {
+                                 "predictions": datasets.Value("float"),
+                                 "references": datasets.Value("float"),
+                                 "attention_mask": datasets.Value("float"),
+                             }
+                         )
+                     ],
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
@@ -87,3 +95,18 @@ class Perplexity(evaluate.Metric):
             / attention_mask.sum(1)
         ).tolist()
         return {"perplexities": ppls, "mean_perplexity": np.mean(ppls)}
+
+ppl = Perplexity()
+# results = ppl._compute(
+#     predictions=torch.tensor(np.random.uniform(-100, 0, (4, 12, 50257))),
+#     references=torch.tensor(np.random.randint(1, 10000, (4, 12))),
+#     attention_mask=torch.ones((4, 12)),
+# )
+results = ppl.compute(
+    predictions=torch.tensor(np.random.uniform(-100, 0, (4, 12, 50257))),
+    references=torch.tensor(np.random.randint(1, 10000, (4, 12))),
+    attention_mask=torch.ones((4, 12)),
+)
+
+print(f"results: {results}")
+print('hi')
