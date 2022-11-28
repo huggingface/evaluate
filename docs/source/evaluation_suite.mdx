@@ -34,18 +34,15 @@ class Suite(evaluate.EvaluationSuite):
         ]
 ```
 
-An `EvaluationSuite` can be loaded by name from the Hugging Face Hub, or locally by providing a path, and run with `.run(model_or_pipeline)`.
-
-```python
-from evaluate import EvaluationSuite
-suite = EvaluationSuite.load('mathemakitten/glue-evaluation-suite')
-results = suite.run("gpt2")
-```
-
-The evaluation results are printed along with their task names and information about the time it took to obtain predictions through the pipeline. These can be viewed as a pandas DataFrame.
+An `EvaluationSuite` can be loaded by name from the Hugging Face Hub, or locally by providing a path, and run with `.run(model_or_pipeline)`. The evaluation results are printed along with their task names and information about the time it took to obtain predictions through the pipeline. These can be viewed as a pandas DataFrame.
 
 ```python
 import pandas as pd
-results = [{'accuracy': 0.0, 'total_time_in_seconds': 0.6330130019999842, 'samples_per_second': 15.797463825237905, 'latency_in_seconds': 0.06330130019999843, 'task_name': 'glue/cola', 'data_preprocessor': None}, {'accuracy': 0.5, 'total_time_in_seconds': 0.7627554609999834, 'samples_per_second': 13.110361723126644, 'latency_in_seconds': 0.07627554609999834, 'task_name': 'glue/sst2', 'data_preprocessor': None}, {'accuracy': 0.4, 'total_time_in_seconds': 0.8692741149999961, 'samples_per_second': 11.503851118355279, 'latency_in_seconds': 0.08692741149999961, 'task_name': 'glue/qqp', 'data_preprocessor': None}, {'accuracy': 0.6, 'total_time_in_seconds': 1.261677170999974, 'samples_per_second': 7.925957788452532, 'latency_in_seconds': 0.12616771709999738, 'task_name': 'glue/mrpc', 'data_preprocessor': None}, {'accuracy': 0.1, 'total_time_in_seconds': 1.2419020169999726, 'samples_per_second': 8.052165036462954, 'latency_in_seconds': 0.12419020169999725, 'task_name': 'glue/mnli', 'data_preprocessor': None}, {'accuracy': 0.7, 'total_time_in_seconds': 1.2787757880000186, 'samples_per_second': 7.819979150246357, 'latency_in_seconds': 0.12787757880000186, 'task_name': 'glue/qnli', 'data_preprocessor': None}, {'accuracy': 0.7, 'total_time_in_seconds': 1.6646484159999773, 'samples_per_second': 6.00727451147266, 'latency_in_seconds': 0.16646484159999772, 'task_name': 'glue/rte', 'data_preprocessor': None}, {'accuracy': 0.5, 'total_time_in_seconds': 0.9870553189999782, 'samples_per_second': 10.13114443284837, 'latency_in_seconds': 0.09870553189999781, 'task_name': 'glue/wnli', 'data_preprocessor': None}]
+from evaluate import EvaluationSuite
+
+suite = EvaluationSuite.load('mathemakitten/glue-evaluation-suite')
+results = suite.run("gpt2")
+
+results = [{'accuracy': 0.0, 'total_time_in_seconds': 0.6330130019999842, 'samples_per_second': 15.797463825237905, 'latency_in_seconds': 0.06330130019999843, 'task_name': 'glue/cola', 'data_preprocessor': None}, {'accuracy': 0.5, 'total_time_in_seconds': 0.7627554609999834, 'samples_per_second': 13.110361723126644, 'latency_in_seconds': 0.07627554609999834, 'task_name': 'glue/sst2', 'data_preprocessor': None}]
 print(pd.DataFrame(results))
 ```
