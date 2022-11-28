@@ -907,4 +907,3 @@ class TestText2TextGenerationEvaluator(TestCase):
             data=self.data,
         )
         self.assertEqual(results["bleu"], 0)
-
