@@ -81,7 +81,8 @@ y_pred = y_pred.tolist()
 
 accuracy_metric = evaluate.load("accuracy")
 accuracy = accuracy_metric.compute(references=y_test, predictions=y_pred)
-print(accuracy)
+print("Accuracy:", accuracy)
+# Accuracy: 0.xyz
 ```
 
 You can use any suitable `evaluate` metric with the estimators as long as they are compatible with the task and predictions. 
