@@ -72,7 +72,7 @@ class MetricsCallback(keras.callbacks.Callback):
 
     def on_epoch_end(self, epoch, logs=dict()):
         m = self.model 
-        # Ensure we get labels of 1 or 0
+        # Ensure we get labels of "1" or "0"
         training_preds = np.round(m.predict(self.x_data))
         training_labels = self.y_data
 
@@ -102,10 +102,10 @@ We can also use the same metric after model training! Here, we show how to check
 
 ```python
 acc = evaluate.load("accuracy")
-
+# Round the predictions to turn them into "0" or "1" labels
 test_preds = np.round(model.predict(x_test))
 test_labels = y_test
-
+```
 
 ```python
 print("Test accuracy is : ", acc.compute(predictions = test_preds, references = test_labels))
