@@ -2,9 +2,9 @@
 
 The `EvaluationSuite` provides a way to compose any number of ([evaluator](base_evaluator), dataset, metric) tuples to evaluate a model on a collection of several evaluation tasks. See the [evaluator documentation](base_evaluator) for a list of currently supported tasks.
 
-A new `EvaluationSuite` is made up of `SubTask` classes, and can be defined by subclassing the `EvaluationSuite` class. Files can be uploaded to a Space on the Hugging Face Hub or saved locally.
+A new `EvaluationSuite` is made up of a list of `SubTask` classes, each defining an evaluation task. The Python file containing the definition can be uploaded to a Space on the Hugging Face Hub so it can be shared with the community or saved/loaded locally.
 
-Datasets which require additional preprocessing before being used with an `Evaluator` can be processed with `datasets` transformations by setting the `preprocessor` attribute to a preprocessing function. Keyword arguments for the `Evaluator` can be passed down through `args_for_task`.
+Some datasets require additional preprocessing before passing them to an `Evaluator`. You can set a `data_preprocessor` for each `SubTask` which is applied via a `map` operation using the `datasets` library. Keyword arguments for the `Evaluator` can be passed down through the `args_for_task` attribute.
 
 ```python
 import evaluate
@@ -34,7 +34,7 @@ class Suite(evaluate.EvaluationSuite):
         ]
 ```
 
-An `EvaluationSuite` can be loaded by name from the Hugging Face Hub, or locally by providing a path, and run with `.run(model_or_pipeline)`. The evaluation results are printed along with their task names and information about the time it took to obtain predictions through the pipeline. These can be viewed as a pandas DataFrame.
+An `EvaluationSuite` can be loaded by name from the Hugging Face Hub, or locally by providing a path, and run with the `run(model_or_pipeline)` method. The evaluation results are returned along with their task names and information about the time it took to obtain predictions through the pipeline. These can be easily displayed with a `pandas.DataFrame`.
 
 ```python
 import pandas as pd
