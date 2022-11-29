@@ -8,6 +8,14 @@ A new `EvaluationSuite` is made up of a list of `SubTask` classes, each defining
 
 Some datasets require additional preprocessing before passing them to an `Evaluator`. You can set a `data_preprocessor` for each `SubTask` which is applied via a `map` operation using the `datasets` library. Keyword arguments for the `Evaluator` can be passed down through the `args_for_task` attribute.
 
+To create a new `EvaluationSuite`, create a new Space with a .py file which matches the name of the Space, add the below template to a Python file, and fill in the attributes for a new task.
+
+The mandatory attributes for a new `SubTask` are `task_type` and `data`.
+1. [`task_type`] maps to the tasks currently supported by the Evaluator.
+2. [`data`] can be an instantiated Hugging Face dataset object or the name of a dataset.
+3. [`subset`] and [`split`] can be used to define which name and split of the dataset should be used for evaluation.
+4. [`args_for_task`] should be a dictionary with kwargs to be passed to the Evaluator.
+
 ```python
 import evaluate
 from evaluate.evaluation_suite import SubTask
