@@ -26,6 +26,7 @@ SCRIPTS_VERSION = "main" if version.parse(__version__).is_devrelease else __vers
 
 del version
 
+from .evaluation_suite import EvaluationSuite
 from .evaluator import (
     Evaluator,
     ImageClassificationEvaluator,
@@ -33,6 +34,7 @@ from .evaluator import (
     SummarizationEvaluator,
     Text2TextGenerationEvaluator,
     TextClassificationEvaluator,
+    TextGenerationEvaluator,
     TokenClassificationEvaluator,
     TranslationEvaluator,
     evaluator,

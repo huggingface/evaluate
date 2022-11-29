@@ -14,6 +14,7 @@
 """Matthews Correlation metric."""
 
 import datasets
+import numpy as np
 from sklearn.metrics import matthews_corrcoef
 
 import evaluate
@@ -36,6 +37,9 @@ _KWARGS_DESCRIPTION = """
 Args:
     predictions (list of int): Predicted labels, as returned by a model.
     references (list of int): Ground truth labels.
+    average (`string`): This parameter is used for multilabel configs. Defaults to `None`.
+        - None (default): Returns an array of Matthews correlation coefficients, one for each feature
+        - 'macro': Calculate metrics for each feature, and find their unweighted mean.
     sample_weight (list of int, float, or bool): Sample weights. Defaults to `None`.
 Returns:
     matthews_correlation (dict containing float): Matthews correlation.
@@ -62,6 +66,21 @@ Examples:
         ...                                     sample_weight=[0.5, 1, 0, 0, 0, 1])
         >>> print(round(results['matthews_correlation'], 2))
         -0.25
+
+    Example 4, Multi-label without averaging:
+        >>> matthews_metric = evaluate.load("matthews_correlation", config_name="multilabel")
+        >>> results = matthews_metric.compute(references=[[0,1], [1,0], [1,1]],
+        ...                                     predictions=[[0,1], [1,1], [0,1]])
+        >>> print(results['matthews_correlation'])
+        [0.5, 0.0]
+
+    Example 5, Multi-label with averaging:
+        >>> matthews_metric = evaluate.load("matthews_correlation", config_name="multilabel")
+        >>> results = matthews_metric.compute(references=[[0,1], [1,0], [1,1]],
+        ...                                     predictions=[[0,1], [1,1], [0,1]],
+        ...                                     average='macro')
+        >>> print(round(results['matthews_correlation'], 2))
+        0.25
 """
 
 _CITATION = """\
@@ -88,6 +107,11 @@ class MatthewsCorrelation(evaluate.Metric):
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
                 {
+                    "predictions": datasets.Sequence(datasets.Value("int32")),
+                    "references": datasets.Sequence(datasets.Value("int32")),
+                }
+                if self.config_name == "multilabel"
+                else {
                     "predictions": datasets.Value("int32"),
                     "references": datasets.Value("int32"),
                 }
@@ -97,7 +121,20 @@ class MatthewsCorrelation(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references, sample_weight=None):
-        return {
-            "matthews_correlation": float(matthews_corrcoef(references, predictions, sample_weight=sample_weight)),
-        }
+    def _compute(self, predictions, references, sample_weight=None, average=None):
+        if self.config_name == "multilabel":
+            references = np.array(references)
+            predictions = np.array(predictions)
+            if not (references.ndim == 2 and predictions.ndim == 2):
+                raise ValueError("For multi-label inputs, both references and predictions should be 2-dimensional")
+            matthews_corr = [
+                matthews_corrcoef(predictions[:, i], references[:, i], sample_weight=sample_weight)
+                for i in range(references.shape[1])
+            ]
+            if average == "macro":
+                matthews_corr = np.mean(matthews_corr)
+            elif average is not None:
+                raise ValueError("Invalid `average`: expected `macro`, or None ")
+        else:
+            matthews_corr = float(matthews_corrcoef(references, predictions, sample_weight=sample_weight))
+        return {"matthews_correlation": matthews_corr}
