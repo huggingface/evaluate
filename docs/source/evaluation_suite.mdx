@@ -1,8 +1,10 @@
 # Creating an EvaluationSuite
 
-The `EvaluationSuite` provides a way to compose any number of ([evaluator](base_evaluator), dataset, metric) tuples to evaluate a model on a collection of several evaluation tasks. See the [evaluator documentation](base_evaluator) for a list of currently supported tasks.
+It can be useful to evaluate models on a variety of different tasks to understand their downstream performance. Assessing the model on several types of tasks can reveal gaps in performance along some axis. For example, when training a language model, it is often useful to measure perplexity on an in-domain corpus, but also to concurrently evaluate on tasks which test for general language capabilities like natural language entailment or question-answering, or tasks designed to probe the model along fairness and bias dimensions.
 
-A new `EvaluationSuite` is made up of a list of `SubTask` classes, each defining an evaluation task. The Python file containing the definition can be uploaded to a Space on the Hugging Face Hub so it can be shared with the community or saved/loaded locally.
+The `EvaluationSuite` provides a way to compose any number of ([evaluator](base_evaluator), dataset, metric) tuples as a SubTask to evaluate a model on a collection of several evaluation tasks. See the [evaluator documentation](base_evaluator) for a list of currently supported tasks.
+
+A new `EvaluationSuite` is made up of a list of `SubTask` classes, each defining an evaluation task. The Python file containing the definition can be uploaded to a Space on the Hugging Face Hub so it can be shared with the community or saved/loaded locally as a Python script.
 
 Some datasets require additional preprocessing before passing them to an `Evaluator`. You can set a `data_preprocessor` for each `SubTask` which is applied via a `map` operation using the `datasets` library. Keyword arguments for the `Evaluator` can be passed down through the `args_for_task` attribute.
 
@@ -19,8 +21,8 @@ class Suite(evaluate.EvaluationSuite):
             SubTask(
                 task_type="text-classification",
                 data="glue",
-                subset="cola",
-                split="test[:10]",
+                subset="sst2",
+                split="validation[:10]",
                 args_for_task={
                     "metric": "accuracy",
                     "input_column": "sentence",
@@ -30,19 +32,35 @@ class Suite(evaluate.EvaluationSuite):
                         "LABEL_1": 1.0
                     }
                 }
+            ),
+            SubTask(
+                task_type="text-classification",
+                data="glue",
+                subset="rte",
+                split="validation[:10]",
+                args_for_task={
+                    "metric": "accuracy",
+                    "input_column": "sentence1",
+                    "second_input_column": "sentence2",
+                    "label_column": "label",
+                    "label_mapping": {
+                        "LABEL_0": 0,
+                        "LABEL_1": 1
+                    }
+                }
             )
         ]
 ```
 
 An `EvaluationSuite` can be loaded by name from the Hugging Face Hub, or locally by providing a path, and run with the `run(model_or_pipeline)` method. The evaluation results are returned along with their task names and information about the time it took to obtain predictions through the pipeline. These can be easily displayed with a `pandas.DataFrame`.
 
-```python
-import pandas as pd
-from evaluate import EvaluationSuite
+```
+>>> from evaluate import EvaluationSuite
+>>> suite = EvaluationSuite.load('mathemakitten/glue-evaluation-suite')
+>>> results = suite.run("gpt2")
 
-suite = EvaluationSuite.load('mathemakitten/glue-evaluation-suite')
-results = suite.run("gpt2")
-
-results = [{'accuracy': 0.0, 'total_time_in_seconds': 0.6330130019999842, 'samples_per_second': 15.797463825237905, 'latency_in_seconds': 0.06330130019999843, 'task_name': 'glue/cola', 'data_preprocessor': None}, {'accuracy': 0.5, 'total_time_in_seconds': 0.7627554609999834, 'samples_per_second': 13.110361723126644, 'latency_in_seconds': 0.07627554609999834, 'task_name': 'glue/sst2', 'data_preprocessor': None}]
-print(pd.DataFrame(results))
+|   accuracy |   total_time_in_seconds |   samples_per_second |   latency_in_seconds | task_name   |
+|-----------:|------------------------:|---------------------:|---------------------:|:------------|
+|        0.5 |                0.740811 |             13.4987  |            0.0740811 | glue/sst2   |
+|        0.4 |                1.67552  |              5.9683  |            0.167552  | glue/rte    |
 ```

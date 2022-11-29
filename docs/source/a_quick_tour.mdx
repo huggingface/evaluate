@@ -199,47 +199,6 @@ The `combine` function accepts both the list of names of the metrics as well as 
 }
 ```
 
-## Running evaluation on a suite of tasks
-
-It can be useful to evaluate models on a variety of different tasks to understand their downstream performance. The [EvaluationSuite](evaluation_suite) enables evaluation of models on a collection of tasks. Tasks can be constructed as ([evaluator](base_evaluator), dataset, metric) tuples and passed to an [EvaluationSuite](evaluation_suite) stored on the Hugging Face Hub as a Space. See the [evaluator documentation](base_evaluator) for a list of currently supported tasks.
-
-`EvaluationSuite` scripts can be defined as follows, and supports Python code for data preprocessing.
-
-```python
-import evaluate
-from evaluate.evaluation_suite import SubTask
-
-class Suite(evaluate.EvaluationSuite):
-
-    def __init__(self, name):
-        super().__init__(name)
-        self.preprocessor = lambda x: {"text": x["text"].lower()}
-        self.suite = [
-            SubTask(
-                task_type="text-classification",
-                data="glue",
-                subset="cola",
-                split="test[:10]",
-                args_for_task={
-                    "metric": "accuracy",
-                    "input_column": "sentence",
-                    "label_column": "label",
-                    "label_mapping": {
-                        "LABEL_0": 0.0,
-                        "LABEL_1": 1.0
-                    }
-                }
-            )]
-```
-
-Evaluation can be run by loading the `EvaluationSuite` and calling `run()` method with a model or pipeline.
-
-```python
-from evaluate import EvaluationSuite
-suite = EvaluationSuite.load('mathemakitten/glue-evaluation-suite')
-results = suite.run("gpt2")
-```
-
 ## Save and push to the Hub
 
 Saving and sharing evaluation results is an important step. We provide the [`evaluate.save`] function to easily save metrics results. You can either pass a specific filename or a directory. In the latter case, the results are saved in a file with an automatically created file name. Besides the directory or file name, the function takes any key-value pairs as inputs and stores them in a JSON file.
@@ -332,3 +291,63 @@ Calculating the value of the metric alone is often not enough to know if a model
 ```
 
 The evaluator expects a `"text"` and `"label"` column for the data input. If your dataset differs you can provide the columns with the keywords `input_column="text"` and `label_column="label"`. Currently only `"text-classification"` is supported with more tasks being added in the future.
+
+## Running evaluation on a suite of tasks
+
+It can be useful to evaluate models on a variety of different tasks to understand their downstream performance. The [EvaluationSuite](evaluation_suite) enables evaluation of models on a collection of tasks. Tasks can be constructed as ([evaluator](base_evaluator), dataset, metric) tuples and passed to an [EvaluationSuite](evaluation_suite) stored on the Hugging Face Hub as a Space, or locally as a Python script. See the [evaluator documentation](base_evaluator) for a list of currently supported tasks.
+
+`EvaluationSuite` scripts can be defined as follows, and supports Python code for data preprocessing.
+
+```python
+import evaluate
+from evaluate.evaluation_suite import SubTask
+
+class Suite(evaluate.EvaluationSuite):
+
+    def __init__(self, name):
+        super().__init__(name)
+
+        self.suite = [
+            SubTask(
+                task_type="text-classification",
+                data="imdb",
+                split="test[:1]",
+                args_for_task={
+                    "metric": "accuracy",
+                    "input_column": "text",
+                    "label_column": "label",
+                    "label_mapping": {
+                        "LABEL_0": 0.0,
+                        "LABEL_1": 1.0
+                    }
+                }
+            ),
+            SubTask(
+                task_type="text-classification",
+                data="sst2",
+                split="test[:1]",
+                args_for_task={
+                    "metric": "accuracy",
+                    "input_column": "sentence",
+                    "label_column": "label",
+                    "label_mapping": {
+                        "LABEL_0": 0.0,
+                        "LABEL_1": 1.0
+                    }
+                }
+            )
+        ]
+```
+
+Evaluation can be run by loading the `EvaluationSuite` and calling `run()` method with a model or pipeline.
+
+```
+>>> from evaluate import EvaluationSuite
+>>> suite = EvaluationSuite.load('mathemakitten/sentiment-evaluation-suite')
+>>> results = suite.run("huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli")
+
+|   accuracy |   total_time_in_seconds |   samples_per_second |   latency_in_seconds | task_name   |
+|------------:|---------------------:|--------------------------:|:----------------|:-----------|
+|        0.3 |                4.62804  |              2.16074 |            0.462804  | imdb        |
+|        0   |                0.686388 |             14.569   |            0.0686388 | sst2        |
+```
