@@ -52,7 +52,7 @@ model = keras.Sequential(
 )
 ```
 
-# Callbacks
+## Callbacks
 
 Suppose we want to keep track of model metrics while a model is training. We can use a Callback in order to calculate this metric during training, after an epoch ends. 
 
@@ -70,7 +70,7 @@ class MetricsCallback(keras.callbacks.Callback):
         self.metric_name = metric_name
         self.metric = evaluate.load(metric_name)
 
-    def on_epoch_end(self, epoch, logs=None):
+    def on_epoch_end(self, epoch, logs=dict()):
         m = self.model 
         # Ensure we get labels of 1 or 0
         training_preds = np.round(m.predict(self.x_data))
@@ -79,10 +79,10 @@ class MetricsCallback(keras.callbacks.Callback):
         # Compute score and save
         score = self.metric.compute(predictions = training_preds, references = training_labels)
         
-        print(f"At end of epoch {epoch}, {self.metric_name} is {score[self.metric_name]}")
+        logs.update(score)
 ```
 
-After callback creation, we can pass it as such in order to activate it. 
+We can pass this class to the `callbacks` keyword-argument to use it during training:
 
 
 ```python
@@ -97,21 +97,16 @@ callbacks = [MetricsCallback(x_data = x_train, y_data = y_train, metric_name = "
 
 ## Using an Evaluate Metric for... Evaluation!
 
-We can of course use the same metric outside of model training. Here, we check accuracy of the model after training on our train and test sets. 
+We can also use the same metric after model training! Here, we show how to check accuracy of the model after training on the test set:
 
 
 ```python
 acc = evaluate.load("accuracy")
 
-train_preds = np.round(model.predict(x_train))
-train_labels = y_train
-
 test_preds = np.round(model.predict(x_test))
 test_labels = y_test
-```
 
 
 ```python
-print("Train accuracy is : ", acc.compute(predictions = train_preds, references = train_labels))
 print("Test accuracy is : ", acc.compute(predictions = test_preds, references = test_labels))
 ```
