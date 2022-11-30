@@ -6,21 +6,17 @@ import pandas as pd
 
 
 class ComplexRadar:
-    """Create a complex radar chart with different scales for each variable
-    Parameters
-    ----------
-    fig : figure object
-        A matplotlib figure object to add the axes on
-    variables : list
-        A list of variables
-    ranges : list
-        A list of tuples (min, max) for each variable
-    n_ring_levels: int, defaults to 5
-        Number of ordinate or ring levels to draw
-    show_scales: bool, defaults to True
-        Indicates if we the ranges for each variable are plotted
-    format_cfg: dict, defaults to None
-        A dictionary with formatting configurations
+    """ Create a complex radar chart with different scales for each variable
+    Args:
+    fig (`matplotlib.figure`) :  A matplotlib figure object to add the axes on.
+    variables (`list`) : a list of variables to. plot
+    ranges (`list` of `tuples`): A list of ranges (min, max) for each variable
+    n_ring_levels (`int): Number of ordinate or ring levels to draw.
+        Default: 5.
+    show_scales (`bool`): Indicates if we the ranges for each variable are plotted.
+        Default: True.
+    format_cfg (`dict`): A dictionary with formatting configurations.
+        Default: None.
     """
 
     def __init__(self, fig, variables, ranges, n_ring_levels=5, show_scales=True, format_cfg=None):
