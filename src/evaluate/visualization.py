@@ -6,7 +6,7 @@ import pandas as pd
 
 
 class ComplexRadar:
-    """ Create a complex radar chart with different scales for each variable
+    """Create a complex radar chart with different scales for each variable
     Args:
     fig (`matplotlib.figure`) :  A matplotlib figure object to add the axes on.
     variables (`list`) : a list of variables to. plot
