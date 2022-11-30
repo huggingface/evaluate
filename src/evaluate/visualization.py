@@ -17,6 +17,8 @@ class ComplexRadar:
         Default: True.
     format_cfg (`dict`): A dictionary with formatting configurations.
         Default: None.
+    Returns:
+    `matplotlib.figure.Figure`: a radar plot.
     """
 
     def __init__(self, fig, variables, ranges, n_ring_levels=5, show_scales=True, format_cfg=None):
