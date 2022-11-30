@@ -22,6 +22,8 @@
       title: Transformers
     - local: tf_keras_integrations
       title: Keras and Tensorflow
+    - local: sklearn_integrations
+      title: scikit-learn
     title: Using 🤗 Evaluate with other ML frameworks
   title: "How-to guides"
 - sections:

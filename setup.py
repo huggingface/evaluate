@@ -109,7 +109,7 @@ TESTS_REQUIRE = [
     "pytest-datadir",
     "pytest-xdist",
     # optional dependencies
-    "tensorflow>=2.3,!=2.6.0,!=2.6.1",
+    "tensorflow>=2.3,!=2.6.0,!=2.6.1, <=2.10",
     "torch",
     # metrics dependencies
     "bert_score>=0.3.6",
