@@ -15,13 +15,10 @@
 
 import datasets
 import numpy as np
-import tensorflow as tf
 import torch
 from torch.nn import CrossEntropyLoss
-from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import evaluate
-from evaluate import logging
 
 
 _CITATION = """\
@@ -36,12 +33,9 @@ For more information, see https://huggingface.co/docs/transformers/perplexity
 """
 
 _KWARGS_DESCRIPTION = """
-Perplexity can be calculated by passing in a set of logits, labels, and attention mask tensors to the `compute()` function.
-To run inference and calculate perplexities with a pretrained model, use the measurement version of this metric instead.
-Args for `compute`:
-    logits (`ndarray`): Tensor-like, of shape [batch size, sequence length, vocab size]
-    labels (`ndarray`): Tensor-like, of shape [batch, sequence length]
-    attention_mask (`ndarray`): Tensor-like, of shape [batch, sequence length]
+Args:
+    predictions (`List[ndarray]`): Tensor-like, of shape [batch size, sequence length, vocab size]
+    references (`List[ndarray]`): Tensor-like, of shape [batch, sequence length]
 Returns:
     perplexity: dictionary containing the perplexity scores for the texts
         in the input list, as well as the mean perplexity. If one of the input texts is
