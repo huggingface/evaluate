@@ -58,15 +58,12 @@ class Perplexity(evaluate.Metric):
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
-            features=[
-                datasets.Features(
-                    {
-                        "predictions": datasets.Sequence(datasets.Sequence(datasets.Value("float"))),
-                        "references": datasets.Sequence(datasets.Value("float")),
-                        "attention_mask": datasets.Sequence(datasets.Value("float")),
-                    }
-                )
-            ],
+            features=datasets.Features(
+                {
+                    "predictions": datasets.Sequence(datasets.Sequence(datasets.Value("float"))),
+                    "references": datasets.Sequence(datasets.Value("float")),
+                }
+            ),
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
