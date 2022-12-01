@@ -85,6 +85,9 @@ class Perplexity(evaluate.Metric):
             (`dict`): Dictionary containing perplexity for each example and mean perplexity.
         """
 
+        if attention_mask is None:
+            attention_mask = torch.ones_like(references)
+
         predictions = self.maybe_cast_to_tensor(predictions)
         references = self.maybe_cast_to_tensor(references)
         attention_mask = self.maybe_cast_to_tensor(attention_mask)
