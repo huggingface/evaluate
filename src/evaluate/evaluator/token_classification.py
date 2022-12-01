@@ -17,11 +17,10 @@ from typing import Any, Callable, Dict, List, Optional, Tuple, Union
 from datasets import ClassLabel, Dataset, Sequence
 from typing_extensions import Literal
 
-from evaluate.evaluator.utils import DatasetColumn
-
 from ..module import EvaluationModule
 from ..utils.file_utils import add_end_docstrings, add_start_docstrings
 from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOCSTRING, Evaluator
+from .utils import DatasetColumn
 
 
 TASK_DOCUMENTATION = r"""
@@ -215,6 +214,7 @@ class TokenClassificationEvaluator(Evaluator):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
+        subset: Optional[str] = None,
         split: str = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
@@ -238,8 +238,10 @@ class TokenClassificationEvaluator(Evaluator):
         """
         result = {}
 
+        self.check_for_mismatch_in_device_setup(device, model_or_pipeline)
+
         # Prepare inputs
-        data = self.load_data(data=data, split=split)
+        data = self.load_data(data=data, subset=subset, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(
             data=data, input_column=input_column, label_column=label_column, join_by=join_by
         )

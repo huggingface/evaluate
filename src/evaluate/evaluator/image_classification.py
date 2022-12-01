@@ -69,6 +69,8 @@ class ImageClassificationEvaluator(Evaluator):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
+        subset: Optional[str] = None,
+        split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,  # noqa: F821
@@ -95,6 +97,8 @@ class ImageClassificationEvaluator(Evaluator):
         result = super().compute(
             model_or_pipeline=model_or_pipeline,
             data=data,
+            subset=subset,
+            split=split,
             metric=metric,
             tokenizer=tokenizer,
             feature_extractor=feature_extractor,

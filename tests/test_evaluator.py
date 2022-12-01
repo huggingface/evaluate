@@ -27,17 +27,39 @@ from transformers import (
     AutoModelForSequenceClassification,
     AutoModelForTokenClassification,
     AutoTokenizer,
+    pipeline,
 )
 
 from evaluate import (
     Evaluator,
     ImageClassificationEvaluator,
     QuestionAnsweringEvaluator,
+    Text2TextGenerationEvaluator,
     TextClassificationEvaluator,
+    TextGenerationEvaluator,
     TokenClassificationEvaluator,
     evaluator,
     load,
 )
+
+
+class DummyTextGenerationPipeline:
+    def __init__(self, prefix="generated", task="text-generation", num_return_sequences=1):
+        self.task = task
+        self.prefix = prefix
+        self.num_return_sequences = num_return_sequences
+
+    def __call__(self, inputs, **kwargs):
+        return [[{f"{self.prefix}_text": "Lorem ipsum"} for _ in range(self.num_return_sequences)] for _ in inputs]
+
+
+class DummyText2TextGenerationPipeline:
+    def __init__(self, prefix="generated", task="text2text-generation"):
+        self.task = task
+        self.prefix = prefix
+
+    def __call__(self, inputs, **kwargs):
+        return [{f"{self.prefix}_text": "Lorem ipsum"} for _ in inputs]
 
 
 class DummyTextClassificationPipeline:
@@ -104,6 +126,9 @@ class TestEvaluator(TestCase):
         pt_mock = mock.Mock()
         tf_mock = mock.Mock()
 
+        # Generic pipeline object for testing pre-instantiated pipelines with the evaluator
+        self.pipe = pipeline("text-classification")
+
         # mock import of torch and tensorflow
         def import_pt_tf_mock(name, *args):
             if name == "torch":
@@ -142,6 +167,19 @@ class TestEvaluator(TestCase):
             # tf available and GPU found
             tf_mock.config.list_physical_devices.return_value = ["GPU:0", "GPU:1"]
             self.assertEqual(Evaluator._infer_device(), 0)
+
+            # pt accelerator found and pipeline instantiated on CPU
+            pt_mock.cuda.is_available.return_value = True
+            self.assertRaises(
+                ValueError, Evaluator.check_for_mismatch_in_device_setup, Evaluator._infer_device(), self.pipe
+            )
+
+            # tf accelerator found and pipeline instantiated on CPU
+            pt_available = False
+            tf_available = True
+            self.assertRaises(
+                ValueError, Evaluator.check_for_mismatch_in_device_setup, Evaluator._infer_device(), self.pipe
+            )
 
 
 class TestTextClassificationEvaluator(TestCase):
@@ -221,6 +259,14 @@ class TestTextClassificationEvaluator(TestCase):
 
         # Test that the data point returned is correct; this maps to the first example in the dataset
         self.assertEqual(data[0]["text"], "I love movies about whales!")
+
+        # Test loading subset of a dataset with the `name` field
+        data = self.evaluator.load_data("evaluate/glue-ci", subset="cola", split="test")
+        self.assertEqual(isinstance(data, Dataset), True)
+
+        # Test loading subset of a dataset with the `name` field and having it infer the split
+        data = self.evaluator.load_data("evaluate/glue-ci", subset="cola")
+        self.assertEqual(isinstance(data, Dataset), True)
 
     def test_overwrite_default_metric(self):
         accuracy = load("accuracy")
@@ -744,3 +790,120 @@ class TestTokenClassificationEvaluator(TestCase):
         ]
         predictions = task_evaluator.predictions_processor(predictions, words, join_by)
         self.assertListEqual(predictions["predictions"][0], ["B-LOC", "O", "O", "O", "B-LOC", "O"])
+
+
+class TestTextGenerationEvaluator(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict({"text": ["Lorem ipsum"]})
+        self.pipe = DummyTextGenerationPipeline(num_return_sequences=4)
+        self.evaluator = evaluator("text-generation")
+
+    def test_class_init(self):
+        evaluator = TextGenerationEvaluator()
+        self.assertEqual(evaluator.task, "text-generation")
+        self.assertIsNone(evaluator.default_metric_name)
+
+        results = evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="word_count",
+        )
+        self.assertIsInstance(results["unique_words"], int)
+
+    def test_default_pipe_init(self):
+        results = self.evaluator.compute(data=self.data)
+        self.assertIsInstance(results["unique_words"], int)
+
+    def test_overwrite_default_metric(self):
+        word_length = load("word_length")
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric=word_length,
+        )
+        self.assertIsInstance(results["average_word_length"], int)
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="word_length",
+        )
+        self.assertIsInstance(results["average_word_length"], int)
+
+    def test_process_predictions_multiple_return_sequences(self):
+        processed_predictions = self.evaluator.predictions_processor(
+            [
+                [{"generated_text": "A"}, {"generated_text": "B"}],
+                [{"generated_text": "C"}, {"generated_text": "D"}],
+            ]
+        )
+        self.assertEqual(processed_predictions, {"data": ["A", "B", "C", "D"]})
+
+
+class TestText2TextGenerationEvaluator(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict(
+            {
+                "text": ["Lorem ipsum"] * 4,
+                "label": ["Ipsum Lorem"] * 4,
+            }
+        )
+        self.pipe = DummyText2TextGenerationPipeline()
+        self.evaluator = evaluator("text2text-generation")
+
+    def test_pipe_init(self):
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+        )
+        self.assertEqual(results["bleu"], 0)
+
+    def test_class_init(self):
+        evaluator = Text2TextGenerationEvaluator()
+        self.assertEqual(evaluator.task, "text2text-generation")
+        self.assertIsNone(evaluator.default_metric_name)
+
+        results = evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="bleu",
+        )
+        self.assertEqual(results["bleu"], 0)
+
+    def test_default_pipe_init(self):
+        results = self.evaluator.compute(data=self.data)
+        self.assertEqual(results["bleu"], 0)
+
+    def test_overwrite_default_metric(self):
+        rouge = load("rouge")
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric=rouge,
+        )
+        self.assertEqual(results["rouge1"], 1.0)
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="rouge",
+        )
+        self.assertEqual(results["rouge1"], 1.0)
+
+    def test_summarization(self):
+        pipe = DummyText2TextGenerationPipeline(task="summarization", prefix="summary")
+        e = evaluator("summarization")
+
+        results = e.compute(
+            model_or_pipeline=pipe,
+            data=self.data,
+        )
+        self.assertEqual(results["rouge1"], 1.0)
+
+    def test_translation(self):
+        pipe = DummyText2TextGenerationPipeline(task="translation", prefix="translation")
+        e = evaluator("translation")
+
+        results = e.compute(
+            model_or_pipeline=pipe,
+            data=self.data,
+        )
+        self.assertEqual(results["bleu"], 0)

@@ -17,7 +17,7 @@
 # pylint: enable=line-too-long
 # pylint: disable=g-import-not-at-top,g-bad-import-order,wrong-import-position
 
-__version__ = "0.2.3.dev0"
+__version__ = "0.3.0.dev0"
 
 from packaging import version
 
@@ -26,12 +26,17 @@ SCRIPTS_VERSION = "main" if version.parse(__version__).is_devrelease else __vers
 
 del version
 
+from .evaluation_suite import EvaluationSuite
 from .evaluator import (
     Evaluator,
     ImageClassificationEvaluator,
     QuestionAnsweringEvaluator,
+    SummarizationEvaluator,
+    Text2TextGenerationEvaluator,
     TextClassificationEvaluator,
+    TextGenerationEvaluator,
     TokenClassificationEvaluator,
+    TranslationEvaluator,
     evaluator,
 )
 from .hub import push_to_hub

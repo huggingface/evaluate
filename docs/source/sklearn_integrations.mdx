@@ -1,0 +1,88 @@
+# Scikit-Learn
+
+To run the scikit-learn examples make sure you have installed the following library:
+
+```bash
+pip install -U scikit-learn
+```
+
+The metrics in `evaluate` can be easily integrated with an Scikit-Learn estimator or [pipeline](https://scikit-learn.org/stable/modules/generated/sklearn.pipeline.Pipeline.html#sklearn.pipeline.Pipeline).  
+
+However, these metrics require that we generate the predictions from the model. The predictions and labels from the estimators can be passed to `evaluate` mertics to compute the required values.
+
+```python
+import numpy as np
+np.random.seed(0)
+import evaluate
+from sklearn.compose import ColumnTransformer
+from sklearn.datasets import fetch_openml
+from sklearn.pipeline import Pipeline
+from sklearn.impute import SimpleImputer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+```
+
+Load data from https://www.openml.org/d/40945:
+
+```python
+X, y = fetch_openml("titanic", version=1, as_frame=True, return_X_y=True)
+```
+
+Alternatively X and y can be obtained directly from the frame attribute:
+
+```python
+X = titanic.frame.drop('survived', axis=1)
+y = titanic.frame['survived']
+```
+
+We create the preprocessing pipelines for both numeric and categorical data. Note that pclass could either be treated as a categorical or numeric feature.
+
+```python
+numeric_features = ["age", "fare"]
+numeric_transformer = Pipeline(
+    steps=[("imputer", SimpleImputer(strategy="median")), ("scaler", StandardScaler())]
+)
+
+categorical_features = ["embarked", "sex", "pclass"]
+categorical_transformer = OneHotEncoder(handle_unknown="ignore")
+
+preprocessor = ColumnTransformer(
+    transformers=[
+        ("num", numeric_transformer, numeric_features),
+        ("cat", categorical_transformer, categorical_features),
+    ]
+)
+```
+
+Append classifier to preprocessing pipeline. Now we have a full prediction pipeline.
+
+```python
+clf = Pipeline(
+    steps=[("preprocessor", preprocessor), ("classifier", LogisticRegression())]
+)
+
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
+
+clf.fit(X_train, y_train)
+y_pred = clf.predict(X_test)
+```
+
+As `Evaluate` metrics use lists as inputs for references and predictions, we need to convert them to Python lists.
+
+
+```python
+# Evaluate metrics accept lists as inputs for values of references and predictions
+
+y_test = y_test.tolist()
+y_pred = y_pred.tolist()
+
+# Accuracy
+
+accuracy_metric = evaluate.load("accuracy")
+accuracy = accuracy_metric.compute(references=y_test, predictions=y_pred)
+print("Accuracy:", accuracy)
+# Accuracy: 0.79
+```
+
+You can use any suitable `evaluate` metric with the estimators as long as they are compatible with the task and predictions. 

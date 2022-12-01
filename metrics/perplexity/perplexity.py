@@ -76,13 +76,6 @@ class Perplexity(evaluate.Metric):
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
-        """
-        
-                    "predictions": datasets.Sequence(datasets.Sequence(datasets.Value("uint16"))),
-                    "references": datasets.Sequence(datasets.Sequence(datasets.Value("uint16"))),
-                }
-        """
-
     @staticmethod
     def maybe_cast_to_tensor(data):
         if not torch.is_tensor(data):
