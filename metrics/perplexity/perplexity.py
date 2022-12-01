@@ -17,6 +17,7 @@ import datasets
 import numpy as np
 import torch
 from torch.nn import CrossEntropyLoss
+import tensorflow as tf
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import evaluate
@@ -66,14 +67,27 @@ class Perplexity(evaluate.Metric):
             # ),
                          datasets.Features(
                              {
-                                 "predictions": datasets.Value("float"),
-                                 "references": datasets.Value("float"),
-                                 "attention_mask": datasets.Value("float"),
+                                 "predictions": datasets.Sequence(datasets.Sequence(datasets.Value("float"))),
+                                 "references": datasets.Sequence(datasets.Value("float")),
+                                 "attention_mask": datasets.Sequence(datasets.Value("float")),
                              }
                          )
                      ],
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
+
+        """
+        
+                    "predictions": datasets.Sequence(datasets.Sequence(datasets.Value("uint16"))),
+                    "references": datasets.Sequence(datasets.Sequence(datasets.Value("uint16"))),
+                }
+        """
+
+    @staticmethod
+    def maybe_cast_to_tensor(data):
+        if not torch.is_tensor(data):
+            return torch.Tensor(data).type(torch.float32)
+        return data
 
     def _compute(self, predictions, references, attention_mask=None):
         """
@@ -86,8 +100,13 @@ class Perplexity(evaluate.Metric):
         Returns:
             (`dict`): Dictionary containing perplexity for each example and mean perplexity.
         """
+
+        predictions = self.maybe_cast_to_tensor(predictions)
+        references = self.maybe_cast_to_tensor(references)
+        attention_mask = self.maybe_cast_to_tensor(attention_mask)
+
         logits = predictions[..., :-1, :]
-        labels = references[..., 1:]
+        labels = references[..., 1:].type(torch.LongTensor)
         attention_mask = attention_mask[..., 1:]
 
         ppls = torch.exp(
@@ -97,16 +116,23 @@ class Perplexity(evaluate.Metric):
         return {"perplexities": ppls, "mean_perplexity": np.mean(ppls)}
 
 ppl = Perplexity()
-# results = ppl._compute(
-#     predictions=torch.tensor(np.random.uniform(-100, 0, (4, 12, 50257))),
-#     references=torch.tensor(np.random.randint(1, 10000, (4, 12))),
-#     attention_mask=torch.ones((4, 12)),
-# )
-results = ppl.compute(
+import time
+st = time.time()
+results = ppl._compute(
+    predictions=torch.tensor(np.random.uniform(-100, 0, (4, 12, 50257))),
+    references=torch.tensor(np.random.randint(1, 10000, (4, 12))),
+    attention_mask=torch.ones((4, 12)),
+)
+print(results)
+print(f'time taken: {time.time() - st}')
+
+st = time.time()
+results2 = ppl.compute(
     predictions=torch.tensor(np.random.uniform(-100, 0, (4, 12, 50257))),
     references=torch.tensor(np.random.randint(1, 10000, (4, 12))),
     attention_mask=torch.ones((4, 12)),
 )
 
-print(f"results: {results}")
+print(f"results2: {results2}")
+print(f'time taken: {time.time() - st}')
 print('hi')
