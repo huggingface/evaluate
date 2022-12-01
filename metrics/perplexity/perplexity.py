@@ -15,9 +15,9 @@
 
 import datasets
 import numpy as np
+import tensorflow as tf
 import torch
 from torch.nn import CrossEntropyLoss
-import tensorflow as tf
 from transformers import AutoModelForCausalLM, AutoTokenizer
 
 import evaluate
@@ -59,20 +59,14 @@ class Perplexity(evaluate.Metric):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             features=[
-            #     datasets.Features(
-            #     {
-            #         "predictions": datasets.Value("float"),
-            #         "references": datasets.Value("float"),
-            #     }
-            # ),
-                         datasets.Features(
-                             {
-                                 "predictions": datasets.Sequence(datasets.Sequence(datasets.Value("float"))),
-                                 "references": datasets.Sequence(datasets.Value("float")),
-                                 "attention_mask": datasets.Sequence(datasets.Value("float")),
-                             }
-                         )
-                     ],
+                datasets.Features(
+                    {
+                        "predictions": datasets.Sequence(datasets.Sequence(datasets.Value("float"))),
+                        "references": datasets.Sequence(datasets.Value("float")),
+                        "attention_mask": datasets.Sequence(datasets.Value("float")),
+                    }
+                )
+            ],
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
@@ -107,25 +101,3 @@ class Perplexity(evaluate.Metric):
             / attention_mask.sum(1)
         ).tolist()
         return {"perplexities": ppls, "mean_perplexity": np.mean(ppls)}
-
-ppl = Perplexity()
-import time
-st = time.time()
-results = ppl._compute(
-    predictions=torch.tensor(np.random.uniform(-100, 0, (4, 12, 50257))),
-    references=torch.tensor(np.random.randint(1, 10000, (4, 12))),
-    attention_mask=torch.ones((4, 12)),
-)
-print(results)
-print(f'time taken: {time.time() - st}')
-
-st = time.time()
-results2 = ppl.compute(
-    predictions=torch.tensor(np.random.uniform(-100, 0, (4, 12, 50257))),
-    references=torch.tensor(np.random.randint(1, 10000, (4, 12))),
-    attention_mask=torch.ones((4, 12)),
-)
-
-print(f"results2: {results2}")
-print(f'time taken: {time.time() - st}')
-print('hi')
