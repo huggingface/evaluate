@@ -201,7 +201,7 @@ def radar_plot(
         Default:'upper right'
     fig: `matplotlib.figure.Figure` used to plot the radar plot.
     Returns:
-    `matplotlib.figure.Figure`: a radar plot which can be seen at using `plot.show()` and saved using `plot.savefig()`.
+    fig: `matplotlib.figure.Figure` which can be seen at using `plot.show()` and saved using `plot.savefig()`.
     """
     data = pd.DataFrame(data)
     data.index = model_names
