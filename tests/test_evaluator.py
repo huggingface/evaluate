@@ -324,6 +324,7 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 1.0)
 
+    @slow
     def test_bootstrap(self):
         data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
 
