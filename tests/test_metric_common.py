@@ -92,7 +92,7 @@ def get_local_module_names():
 
 
 @parameterized.named_parameters(get_local_module_names())
-@for_all_test_methods(skip_if_metric_requires_fairseq, skip_on_windows_if_not_windows_compatible)
+@for_all_test_methods(skip_if_metric_requires_fairseq, skip_on_windows_if_not_windows_compatible, skip_slow_metrics)
 @local
 class LocalModuleTest(parameterized.TestCase):
     INTENSIVE_CALLS_PATCHER = {}
