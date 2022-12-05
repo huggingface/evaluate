@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from evaluate import EvaluationSuite
 from tests.test_evaluator import DummyTextClassificationPipeline
-
+from .utils import slow
 
 class TestEvaluationSuite(TestCase):
     def setUp(self):
@@ -12,6 +12,7 @@ class TestEvaluationSuite(TestCase):
         # Setup a dummy model for usage with the EvaluationSuite
         self.dummy_model = DummyTextClassificationPipeline()
 
+    @slow
     def test_running_evaluation_suite(self):
 
         # Check that the evaluation suite successfully runs
