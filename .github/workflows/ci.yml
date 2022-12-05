@@ -10,6 +10,7 @@ on:
 
 env:
   HF_ALLOW_CODE_EVAL: 1
+  TOKENIZERS_PARALLELISM: false
 
 jobs:
 
