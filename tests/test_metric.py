@@ -10,7 +10,7 @@ from datasets.features import Features, Sequence, Value
 
 from evaluate.module import EvaluationModule, EvaluationModuleInfo, combine
 
-from .utils import require_tf, require_torch
+from .utils import require_tf, require_torch, slow
 
 
 class DummyMetric(EvaluationModule):
@@ -264,6 +264,7 @@ class TestMetric(TestCase):
         self.assertDictEqual(other_expected_results, other_metric.compute())
         del metric, other_metric
 
+    @slow
     def test_separate_experiments_in_parallel(self):
         with tempfile.TemporaryDirectory() as tmp_dir:
             (preds_0, refs_0), (preds_1, refs_1) = DummyMetric.separate_predictions_and_references()
