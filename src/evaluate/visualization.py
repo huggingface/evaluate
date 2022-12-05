@@ -149,29 +149,29 @@ def radar_plot(data, model_names, invert_range=[], config=None, fig=None):
         config (`dict`, optional) : a specification of the formatting configurations, namely:
 
             - rad_ln_args (`dict`, default `{"visible": True}`): The visibility of the radial (circle) lines.
-            
+
             - outer_ring (`dict`, default `{"visible": True}`): The visibility of the outer ring.
-            
+
             - angle_ln_args (`dict`, default `{"visible": True}`): The visibility of the angle lines.
-            
+
             - rgrid_tick_lbls_args (`dict`, default `{"fontsize": 12}`): The font size of the tick labels on the scales.
-            
+
             - theta_tick_lbls (`dict`, default `{"fontsize": 12}`): The font size of the variable labels on the plot.
-            
+
             - theta_tick_lbls_pad (`int`, default `3`): The padding of the variable labels on the plot.
-            
+
             - theta_tick_lbls_brk_lng_wrds (`bool`, default `True` ): Whether long words in the label are broken up or not.
-            
+
             - theta_tick_lbls_txt_wrap (`int`, default `15`): Text wrap for tick labels
-            
+
             - incl_endpoint (`bool`, default `False`): Include value endpoints on calse
-            
+
             - marker (`str`, default `"o"`): the shape of the marker used in the radar plot.
-            
+
             - markersize (`int`, default `3`): the shape of the marker used in the radar plot.
-            
+
             - legend_loc (`str`, default `"upper right"`): the location of the legend in the radar plot. Must be one of: 'upper left', 'upper right', 'lower left', 'lower right'.
-            
+
             - bbox_to_anchor (`tuple`, default `(2, 1)`: anchor for the legend.
         fig (`matplotlib.figure.Figure`, optional): figure used to plot the radar plot.
 
