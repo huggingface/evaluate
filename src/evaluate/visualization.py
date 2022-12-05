@@ -23,36 +23,7 @@ class ComplexRadar:
 
     def __init__(self, fig, variables, ranges, n_ring_levels=5, show_scales=True, format_cfg=None):
 
-        # Default formatting
-        self.format_cfg = {
-            # Axes
-            # https://matplotlib.org/stable/api/figure_api.html
-            "axes_args": {},
-            # Tick labels on the scales
-            # https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.rgrids.html
-            "rgrid_tick_lbls_args": {"fontsize": 8},
-            # Radial (circle) lines
-            # https://matplotlib.org/stable/api/_as_gen/matplotlib.pyplot.grid.html
-            "rad_ln_args": {},
-            # Angle lines
-            # https://matplotlib.org/3.2.2/api/_as_gen/matplotlib.lines.Line2D.html#matplotlib.lines.Line2D
-            "angle_ln_args": {},
-            # Include last value (endpoint) on scale
-            "incl_endpoint": False,
-            # Variable labels (ThetaTickLabel)
-            "theta_tick_lbls": {"va": "top", "ha": "center"},
-            "theta_tick_lbls_txt_wrap": 15,
-            "theta_tick_lbls_brk_lng_wrds": False,
-            "theta_tick_lbls_pad": 25,
-            # Outer ring
-            # https://matplotlib.org/stable/api/spines_api.html
-            "outer_ring": {"visible": True, "color": "#d6d6d6"},
-        }
-
-        if format_cfg is not None:
-            self.format_cfg = {
-                k: (format_cfg[k]) if k in format_cfg.keys() else (self.format_cfg[k]) for k in self.format_cfg.keys()
-            }
+        self.format_cfg = format_cfg
 
         # Calculate angles and create for each variable an axes
         # Consider here the trick with having the first axes element twice (len+1)
@@ -164,44 +135,35 @@ class ComplexRadar:
         self.ax1.legend(*args, **kwargs)
 
 
-def radar_plot(
-    data, model_names, invert_range=[], config=None, marker="o", markersize=3, legend_loc="upper right", fig=None
-):
+def radar_plot(data, model_names, invert_range=[], config=None, fig=None):
     """Create a complex radar chart with different scales for each variable
     Source: https://towardsdatascience.com/how-to-create-and-visualize-complex-radar-charts-f7764d0f3652
 
     Args:
-    data (`list` of `dict`s): the results (list of metric + value pairs).
-        E.g. data = [{"accuracy": 0.9, "precision":0.8},{"accuracy": 0.7, "precision":0.6}]
-    names (`list` of `str`s): model names.
-        E.g. names = ["model1", "model 2", ...]
-    It also optionally takes the following parameters:
-    invert_range (`list` of `str`s): the metrics to invert (in cases when smaller is better, e.g. speed)
-        E.g. invert_range=["latency_in_seconds"]
-    config (`dict`) : a specification of the formatting configurations, namely:
-        rad_ln_args (`dict`): The visibility of the radial (circle) lines.
-            Default: {"visible": True}
-        outer_ring (`dict`): The visibility of the outer ring.
-            Default: {"visible": True}
-        angle_ln_args (`dict`): The visibility of the angle lines.
-            Default: {"visible": True}
-        rgrid_tick_lbls_args (`dict`): The font size of the tick labels on the scales.
-            Default: {"fontsize": 12}
-        theta_tick_lbls (`dict`): The font size of the variable labels on the plot.
-            Default: {"fontsize": 12}
-        theta_tick_lbls_pad (`dict`): The padding of the variable labels on the plot.
-            Default: 3
-        theta_tick_lbls_brk_lng_wrds (`dict`): Whether long words in the label are broken up or not.
-            Default: True
-    marker (`str`): the shape of the marker used in the radar plot.
-        Default: "o"
-    markersize (`int`): the shape of the marker used in the radar plot.
-        Default : 3
-    legend_loc (`str`): the location of the legend in the radar plot. Must be one of: 'upper left', 'upper right', 'lower left', 'lower right'.
-        Default:'upper right'
-    fig: `matplotlib.figure.Figure` used to plot the radar plot.
+        data (`List[dict]`): the results (list of metric + value pairs).
+            E.g. data = [{"accuracy": 0.9, "precision":0.8},{"accuracy": 0.7, "precision":0.6}]
+        names (`List[dict]`): model names.
+            E.g. names = ["model1", "model 2", ...]
+        invert_range (`List[dict]`, optional): the metrics to invert (in cases when smaller is better, e.g. speed)
+            E.g. invert_range=["latency_in_seconds"]
+        config (`dict`, optional) : a specification of the formatting configurations, namely:
+            rad_ln_args (`dict`, default `{"visible": True}`): The visibility of the radial (circle) lines.
+            outer_ring (`dict`, default `{"visible": True}`): The visibility of the outer ring.
+            angle_ln_args (`dict`, ` {"visible": True}`): The visibility of the angle lines.
+            rgrid_tick_lbls_args (`dict`, default `{"fontsize": 12}`): The font size of the tick labels on the scales.
+            theta_tick_lbls (`dict`, default `{"fontsize": 12}`): The font size of the variable labels on the plot.
+            theta_tick_lbls_pad (`int`, default `3`): The padding of the variable labels on the plot.
+            theta_tick_lbls_brk_lng_wrds (`bool`, default `True` ): Whether long words in the label are broken up or not.
+            theta_tick_lbls_txt_wrap (`int`, default `15`): Text wrap for tick labels
+            incl_endpoint (`bool`, default `False`): Include value endpoints on calse
+            marker (`str`, default `"o"`): the shape of the marker used in the radar plot.
+            markersize (`int`, default `3`): the shape of the marker used in the radar plot.
+            legend_loc (`str`, default `"upper right"`): the location of the legend in the radar plot. Must be one of: 'upper left', 'upper right', 'lower left', 'lower right'.
+            bbox_to_anchor (`tuple`, default `(2, 1)`: anchor for the legend.
+        fig (`matplotlib.figure.Figure`, optional): figure used to plot the radar plot.
+
     Returns:
-    fig: `matplotlib.figure.Figure` which can be seen at using `plot.show()` and saved using `plot.savefig()`.
+        `matplotlib.figure.Figure`
     """
     data = pd.DataFrame(data)
     data.index = model_names
@@ -222,6 +184,7 @@ def radar_plot(
         for var, (min_value, max_value) in zip(variables, ranges)
     ]
     format_cfg = {
+        "axes_args": {},
         "rad_ln_args": {"visible": True},
         "outer_ring": {"visible": True},
         "angle_ln_args": {"visible": True},
@@ -229,6 +192,12 @@ def radar_plot(
         "theta_tick_lbls": {"fontsize": 12},
         "theta_tick_lbls_pad": 3,
         "theta_tick_lbls_brk_lng_wrds": True,
+        "theta_tick_lbls_txt_wrap": 15,
+        "incl_endpoint": False,
+        "marker": "o",
+        "markersize": 3,
+        "legend_loc": "upper right",
+        "bbox_to_anchor": (2, 1),
     }
     if config is not None:
         format_cfg.update(config)
@@ -243,6 +212,6 @@ def radar_plot(
         format_cfg=format_cfg,
     )
     for g in zip(data.index):
-        radar.plot(data.loc[g].values, label=g, marker=marker, markersize=markersize)
-        radar.use_legend(**{"loc": legend_loc, "bbox_to_anchor": (2, 1)})
+        radar.plot(data.loc[g].values, label=g, marker=format_cfg["marker"], markersize=format_cfg["markersize"])
+        radar.use_legend(**{"loc": format_cfg["legend_loc"], "bbox_to_anchor": format_cfg["bbox_to_anchor"]})
     return fig
