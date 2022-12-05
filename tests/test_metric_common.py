@@ -29,7 +29,7 @@ from absl.testing import parameterized
 import evaluate
 from evaluate import load
 
-from .utils import for_all_test_methods, local, slow
+from .utils import _run_slow_tests, for_all_test_methods, local, slow
 
 
 REQUIRE_FAIRSEQ = {"comet"}
@@ -37,6 +37,8 @@ _has_fairseq = importlib.util.find_spec("fairseq") is not None
 
 UNSUPPORTED_ON_WINDOWS = {"code_eval"}
 _on_windows = os.name == "nt"
+
+SLOW_METRIC = {"perplexity", "regard", "toxicity"}
 
 
 def skip_if_metric_requires_fairseq(test_case):
@@ -55,6 +57,17 @@ def skip_on_windows_if_not_windows_compatible(test_case):
     def wrapper(self, evaluation_module_name, evaluation_module_type):
         if _on_windows and evaluation_module_name in UNSUPPORTED_ON_WINDOWS:
             self.skipTest('"test not supported on Windows"')
+        else:
+            test_case(self, evaluation_module_name, evaluation_module_type)
+
+    return wrapper
+
+
+def skip_slow_metrics(test_case):
+    @wraps(test_case)
+    def wrapper(self, evaluation_module_name, evaluation_module_type):
+        if not _run_slow_tests and evaluation_module_name in SLOW_METRIC:
+            self.skipTest('"test is slow"')
         else:
             test_case(self, evaluation_module_name, evaluation_module_type)
 
