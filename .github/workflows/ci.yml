@@ -54,8 +54,6 @@ jobs:
           pip install -r additional-tests-requirements.txt --no-deps
       - name: Test with pytest
         if: ${{ matrix.test == 'unit' }}
-        env:
-          TOKENIZERS_PARALLELISM: false
         run: |
           python -m pytest -n 2 --dist loadfile -sv ./tests/ --ignore=./tests/test_trainer_evaluator_parity.py
       - name: Integration test with transformers
