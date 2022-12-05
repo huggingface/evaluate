@@ -138,9 +138,6 @@ class TestEvaluator(TestCase):
         pt_mock = mock.Mock()
         tf_mock = mock.Mock()
 
-        # Generic pipeline object for testing pre-instantiated pipelines with the evaluator
-        self.pipe = pipeline("text-classification")
-
         # mock import of torch and tensorflow
         def import_pt_tf_mock(name, *args):
             if name == "torch":
