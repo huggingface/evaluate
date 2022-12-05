@@ -27,9 +27,9 @@ jobs:
           pip install .[quality]
       - name: Check quality
         run: |
-          black --check tests src metrics comparisons measurements
+          black --check --line-length 119 --target-version py36 tests src metrics comparisons measurements
           isort --check-only tests src metrics comparisons measurements
-          flake8 tests src metrics comparisons measurements
+          flake8 tests src metrics
 
   test:
     needs: check_code_quality
