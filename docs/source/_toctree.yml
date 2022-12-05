@@ -39,6 +39,8 @@
     title: Hub methods
   - local: package_reference/evaluator_classes
     title: Evaluator classes
+  - local: package_reference/vizualization_methods
+    title: Vizualization methods
   - local: package_reference/logging_methods
     title: Logging methods
   title: "Reference"
