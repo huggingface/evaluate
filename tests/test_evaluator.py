@@ -44,6 +44,7 @@ from evaluate import (
 
 from .utils import slow
 
+
 class DummyTextGenerationPipeline:
     def __init__(self, prefix="generated", task="text-generation", num_return_sequences=1):
         self.task = task
@@ -191,6 +192,7 @@ class TestEvaluator(TestCase):
             self.assertRaises(
                 ValueError, Evaluator.check_for_mismatch_in_device_setup, Evaluator._infer_device(), self.pipe
             )
+
     def test_pipe_init(self):
         self.evaluator.compute(
             model_or_pipeline=self.pipe,
@@ -199,6 +201,7 @@ class TestEvaluator(TestCase):
             label_column="label",
             label_mapping=self.label_mapping,
         )
+
     def test_model_init(self):
         self.evaluator.compute(
             model_or_pipeline=self.default_model,
@@ -208,6 +211,7 @@ class TestEvaluator(TestCase):
             label_column="label",
             label_mapping=self.label_mapping,
         )
+
     def test_model_str_init(self):
         self.evaluator.compute(
             model_or_pipeline=self.default_ckpt,
@@ -216,6 +220,7 @@ class TestEvaluator(TestCase):
             label_column="label",
             label_mapping=self.label_mapping,
         )
+
 
 class TestTextClassificationEvaluator(TestCase):
     def setUp(self):
@@ -706,7 +711,7 @@ class TestTokenClassificationEvaluator(TestCase):
             metric="seqeval",
         )
         self.assertEqual(results["overall_accuracy"], 1.0)
-    
+
     @slow
     def test_default_pipe_init(self):
         results = self.evaluator.compute(
