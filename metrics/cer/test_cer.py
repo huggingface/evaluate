@@ -20,7 +20,7 @@ cer = CER()
 
 
 class TestCER(unittest.TestCase):
-    def test_cer_case_senstive(self):
+    def test_cer_case_sensitive(self):
         refs = ["White House"]
         preds = ["white house"]
         # S = 2, D = 0, I = 0, N = 11, CER = 2 / 11

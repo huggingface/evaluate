@@ -91,7 +91,7 @@ REQUIRED_PKGS = [
 
 TEMPLATE_REQUIRE = [
     # to populate metric template
-    "cookiecutter"
+    "cookiecutter",
     # for the gradio widget
     "gradio>=3.0.0"
 ]
@@ -110,7 +110,7 @@ TESTS_REQUIRE = [
     "pytest-datadir",
     "pytest-xdist",
     # optional dependencies
-    "tensorflow>=2.3,!=2.6.0,!=2.6.1",
+    "tensorflow>=2.3,!=2.6.0,!=2.6.1, <=2.10",
     "torch",
     # metrics dependencies
     "bert_score>=0.3.6",
@@ -130,6 +130,7 @@ TESTS_REQUIRE = [
     "requests_file>=1.5.1",
     "tldextract>=3.1.0",
     "texttable>=1.6.3",
+    "unidecode>=1.3.4",
     "Werkzeug>=1.0.1",
     "six~=1.15.0",
 ]
@@ -154,7 +155,7 @@ EXTRAS_REQUIRE = {
 
 setup(
     name="evaluate",
-    version="0.2.3.dev0",  # expected format is one of x.y.z.dev0, or x.y.z.rc1 or x.y.z (no to dashes, yes to dots)
+    version="0.3.0.dev0",  # expected format is one of x.y.z.dev0, or x.y.z.rc1 or x.y.z (no to dashes, yes to dots)
     description="HuggingFace community-driven open-source library of evaluation",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

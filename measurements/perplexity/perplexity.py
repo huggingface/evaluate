@@ -29,7 +29,7 @@ _CITATION = """\
 
 _DESCRIPTION = """
 Perplexity (PPL) can be used for evaluating to what extent a dataset is similar to the distribution of text that a given model was trained on.
-It is defined as the exponentiated average negative log-likelihood of a sequence.
+It is defined as the exponentiated average negative log-likelihood of a sequence, calculated with exponent base `e`.
 
 For more information, see https://huggingface.co/docs/transformers/perplexity
 """
@@ -63,10 +63,10 @@ Examples:
         ...                              data=data) # doctest:+ELLIPSIS
         >>> print(list(results.keys()))
         ['perplexities', 'mean_perplexity']
-        >>> print(round(results["mean_perplexity"], 2))
-        78.22
-        >>> print(round(results["perplexities"][0], 2))
-        11.11
+        >>> print(round(results["mean_perplexity"], 0))
+        647.0
+        >>> print(round(results["perplexities"][0], 0))
+        32.0
 
     Example 2:
         >>> from datasets import load_dataset
@@ -78,9 +78,9 @@ Examples:
         >>> print(list(results.keys()))
         ['perplexities', 'mean_perplexity']
         >>> print(round(results["mean_perplexity"], 2)) # doctest: +SKIP
-        60.35
+        576.76
         >>> print(round(results["perplexities"][0], 2)) # doctest: +SKIP
-        81.12
+        889.28
 """
 
 
@@ -100,7 +100,9 @@ class Perplexity(evaluate.Measurement):
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 
-    def _compute(self, data, model_id, batch_size: int = 16, add_start_token: bool = True, device=None):
+    def _compute(
+        self, data, model_id, batch_size: int = 16, add_start_token: bool = True, device=None, max_length=None
+    ):
 
         if device is not None:
             assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
@@ -126,20 +128,20 @@ class Perplexity(evaluate.Measurement):
             # assign one of the special tokens to also be the pad token
             tokenizer.add_special_tokens({"pad_token": existing_special_tokens[0]})
 
-        if add_start_token:
+        if add_start_token and max_length:
             # leave room for <BOS> token to be added:
             assert (
                 tokenizer.bos_token is not None
             ), "Input model must already have a BOS token if using add_start_token=True. Please use a different model, or set add_start_token=False"
-            max_tokenized_len = model.config.max_length - 1
+            max_tokenized_len = max_length - 1
         else:
-            max_tokenized_len = model.config.max_length
+            max_tokenized_len = max_length
 
         encodings = tokenizer(
             data,
             add_special_tokens=False,
             padding=True,
-            truncation=True,
+            truncation=True if max_tokenized_len else False,
             max_length=max_tokenized_len,
             return_tensors="pt",
             return_attention_mask=True,
@@ -180,7 +182,7 @@ class Perplexity(evaluate.Measurement):
             shift_labels = labels[..., 1:].contiguous()
             shift_attention_mask_batch = attn_mask[..., 1:].contiguous()
 
-            perplexity_batch = torch.exp2(
+            perplexity_batch = torch.exp(
                 (loss_fct(shift_logits.transpose(1, 2), shift_labels) * shift_attention_mask_batch).sum(1)
                 / shift_attention_mask_batch.sum(1)
             )

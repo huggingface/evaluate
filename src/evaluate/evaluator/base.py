@@ -14,10 +14,12 @@
 
 from abc import ABC, abstractmethod
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Union
 
 # Lint as: python3
 from datasets import Dataset, load_dataset
+
+from evaluate.evaluator.utils import choose_split
 
 
 try:
@@ -29,7 +31,7 @@ except ImportError:
 
 try:
     import transformers
-    from transformers import pipeline
+    from transformers import Pipeline, pipeline
 
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
@@ -46,6 +48,55 @@ from .utils import DatasetColumn
 
 
 logger = get_logger(__name__)
+
+
+EVALUTOR_COMPUTE_START_DOCSTRING = r"""
+    Compute the metric for a given pipeline and dataset combination.
+    Args:
+        model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`, defaults to `None`):
+            If the argument in not specified, we initialize the default pipeline for the task (in this case
+            `text-classification` or its alias - `sentiment-analysis`). If the argument is of the type `str` or
+            is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
+            argument specifies a pre-initialized pipeline.
+        data (`str` or `Dataset`, defaults to `None`):
+            Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
+            name, and load it. Otherwise we assume it represents a pre-loaded dataset.
+        subset (`str`, defaults to `None`):
+            Defines which dataset subset to load. If `None` is passed the default subset is loaded.
+        split (`str`, defaults to `None`):
+            Defines which dataset split to load. If `None` is passed, infers based on the `choose_split` function.
+        metric (`str` or `EvaluationModule`, defaults to `None`):
+            Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
+            load it. Otherwise we assume it represents a pre-loaded metric.
+        tokenizer (`str` or `PreTrainedTokenizer`, *optional*, defaults to `None`):
+            Argument can be used to overwrite a default tokenizer if `model_or_pipeline` represents a model for
+            which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
+            this argument.
+        strategy (`Literal["simple", "bootstrap"]`, defaults to "simple"):
+            specifies the evaluation strategy. Possible values are:
+            - `"simple"` - we evaluate the metric and return the scores.
+            - `"bootstrap"` - on top of computing the metric scores, we calculate the confidence interval for each
+            of the returned metric keys, using `scipy`'s `bootstrap` method
+            https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.bootstrap.html.
+        confidence_level (`float`, defaults to `0.95`):
+            The `confidence_level` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
+        n_resamples (`int`, defaults to `9999`):
+            The `n_resamples` value passed to `bootstrap` if `"bootstrap"` strategy is chosen.
+        device (`int`, defaults to `None`):
+            Device ordinal for CPU/GPU support of the pipeline. Setting this to -1 will leverage CPU, a positive
+            integer will run the model on the associated CUDA device ID. If `None` is provided it will be inferred and
+            CUDA:0 used if available, CPU otherwise.
+        random_state (`int`, *optional*, defaults to `None`):
+            The `random_state` value passed to `bootstrap` if `"bootstrap"` strategy is chosen. Useful for
+            debugging.
+"""
+
+EVALUATOR_COMPUTE_RETURN_DOCSTRING = r"""
+    Return:
+        A `Dict`. The keys represent metric keys calculated for the `metric` spefied in function arguments. For the
+        `"simple"` strategy, the value is the metric score. For the `"bootstrap"` strategy, the value is a `Dict`
+        containing the score, the confidence interval and the standard error calculated for each metric key.
+"""
 
 
 class Evaluator(ABC):
@@ -170,6 +221,8 @@ class Evaluator(ABC):
             str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
+        subset: Optional[str] = None,
+        split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,  # noqa: F821
@@ -181,11 +234,14 @@ class Evaluator(ABC):
         input_column: str = "text",
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
-    ) -> Tuple[Dict[str, float], Any]:
+    ) -> Dict[str, float]:
 
         result = {}
 
+        self.check_for_mismatch_in_device_setup(device, model_or_pipeline)
+
         # Prepare inputs
+        data = self.load_data(data=data, subset=subset, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(data=data, input_column=input_column, label_column=label_column)
         pipe = self.prepare_pipeline(
             model_or_pipeline=model_or_pipeline,
@@ -216,14 +272,87 @@ class Evaluator(ABC):
 
         return result
 
-    def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str):
+    @staticmethod
+    def check_for_mismatch_in_device_setup(device, model_or_pipeline):
+        if device is not None and device != -1 and isinstance(model_or_pipeline, Pipeline):
+            if model_or_pipeline.device.type == "cpu":
+                raise ValueError(
+                    "The value of the `device` kwarg passed to `compute` suggests that this pipe should be run on an "
+                    "accelerator, but the pipe was instantiated on CPU. Pass `device` to the pipeline during "
+                    "initialization to use an accelerator, or pass `device=None` to `compute`. "
+                )
+            elif device != model_or_pipeline.device.index:
+                raise ValueError(
+                    f"This pipeline was instantiated on device {model_or_pipeline.device.index} but device={device} was passed to `compute`."
+                )
+
+    def check_required_columns(self, data: Union[str, Dataset], columns_names: Dict[str, str]):
+        """
+        Ensure the columns required for the evaluation are present in the dataset.
+
+        Args:
+            data (`str` or `Dataset`):
+                Specifies the dataset we will run evaluation on.
+            columns_names (`List[str]`):
+            List of column names to check in the dataset. The keys are the arguments to the compute() method,
+            while the values are the column names to check.
+        """
+        for input_name, column_name in columns_names.items():
+            if column_name not in data.column_names:
+                raise ValueError(
+                    f"Invalid `{input_name}` {column_name} specified. The dataset contains the following columns: {data.column_names}."
+                )
+
+    @staticmethod
+    def get_dataset_split(data, subset=None, split=None):
+        """
+        Infers which split to use if None is given.
+
+        Args:
+             data (`str`): Name of dataset
+             subset (`str`): Name of config for datasets with multiple configurations (e.g. 'glue/cola')
+             split (`str`, defaults to None): Split to use
+        Returns:
+            `split`: `str` containing which split to use
+        """
+        if split is None:
+            split = choose_split(data, subset)
+            logger.warning(f"Dataset split not defined! Automatically evaluating with split: {split.upper()}")
+        return split
+
+    def load_data(self, data: Union[str, Dataset], subset: str = None, split: str = None):
+        """
+        Load dataset with given subset and split.
+        Args:
+            data (`Dataset` or `str`, defaults to None): Specifies the dataset we will run evaluation on. If it is of
+            type `str`, we treat it as the dataset name, and load it. Otherwise we assume it represents a pre-loaded dataset.
+            subset (`str`, defaults to None): Specifies dataset subset to be passed to `name` in `load_dataset`. To be
+                used with datasets with several configurations (e.g. glue/sst2).
+            split (`str`, defaults to None):
+                User-defined dataset split by name (e.g. train, validation, test). Supports slice-split (test[:n]).
+                If not defined and data is a `str` type, will automatically select the best one via `choose_split()`.
+        Returns:
+            data (`Dataset`): Loaded dataset which will be used for evaluation.
+        """
+        if isinstance(data, str):
+            split = self.get_dataset_split(data, subset, split)
+            data = load_dataset(data, name=subset, split=split)
+            return data
+        elif isinstance(data, Dataset):
+            if split is not None or subset is not None:
+                logger.warning("`data` is a preloaded Dataset! Ignoring `subset` and `split`.")
+            return data
+        else:
+            raise ValueError(
+                "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
+            )
+
+    def prepare_data(self, data: Dataset, input_column: str, label_column: str, *args, **kwargs):
         """
         Prepare data.
 
         Args:
-            data (`str` or `Dataset`, defaults to `None):
-                Specifies the dataset we will run evaluation on. If it is of type `str`, we treat it as the dataset
-                name, and load it. Otherwise we assume it represents a pre-loaded dataset.
+            data (`Dataset`): Specifies the dataset we will run evaluation on.
             input_column (`str`, defaults to `"text"`):
                 the name of the column containing the text feature in the dataset specified by `data`.
             label_column (`str`, defaults to `"label"`):
@@ -232,19 +361,8 @@ class Evaluator(ABC):
             `dict`:  metric inputs.
             `list`:  pipeline inputs.
         """
-        if data is None:
-            raise ValueError(
-                "Please specify a valid `data` object - either a `str` with a name or a `Dataset` object."
-            )
-        data = load_dataset(data) if isinstance(data, str) else data
-        if input_column not in data.column_names:
-            raise ValueError(
-                f"Invalid `input_column` {input_column} specified. The dataset contains the following columns: {data.column_names}."
-            )
-        if label_column not in data.column_names:
-            raise ValueError(
-                f"Invalid `label_column` {label_column} specified. The dataset contains the following columns: {data.column_names}."
-            )
+
+        self.check_required_columns(data, {"input_column": input_column, "label_column": label_column})
 
         return {"references": data[label_column]}, DatasetColumn(data, input_column)
 
@@ -294,7 +412,7 @@ class Evaluator(ABC):
                 pipe = model_or_pipeline
             if tokenizer is not None and feature_extractor is not None:
                 logger.warning("Ignoring the value of the preprocessor argument (`tokenizer` or `feature_extractor`).")
-        if pipe.task != self.task:
+        if (pipe.task != self.task) and not (self.task == "translation" and pipe.task.startswith("translation")):
             raise ValueError(
                 f"Incompatible `model_or_pipeline`. Please specify `model_or_pipeline` compatible with the `{self.task}` task."
             )

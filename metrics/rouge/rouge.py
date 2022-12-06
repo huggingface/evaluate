@@ -60,7 +60,7 @@ Args:
         Valid names:
         `"rouge{n}"` (e.g. `"rouge1"`, `"rouge2"`) where: {n} is the n-gram based scoring,
         `"rougeL"`: Longest common subsequence based scoring.
-        `"rougeLSum"`: rougeLsum splits text using `"\n"`.
+        `"rougeLsum"`: rougeLsum splits text using `"\n"`.
         See details in https://github.com/huggingface/datasets/issues/617
     use_stemmer: Bool indicating whether Porter stemmer should be used to strip word suffixes.
     use_aggregator: Return aggregates if this is set to True
@@ -78,6 +78,16 @@ Examples:
     >>> print(results)
     {'rouge1': 1.0, 'rouge2': 1.0, 'rougeL': 1.0, 'rougeLsum': 1.0}
 """
+
+
+class Tokenizer:
+    """Helper class to wrap a callable into a class with a `tokenize` method as used by rouge-score."""
+
+    def __init__(self, tokenizer_func):
+        self.tokenizer_func = tokenizer_func
+
+    def tokenize(self, text):
+        return self.tokenizer_func(text)
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
@@ -108,13 +118,18 @@ class Rouge(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references, rouge_types=None, use_aggregator=True, use_stemmer=False):
+    def _compute(
+        self, predictions, references, rouge_types=None, use_aggregator=True, use_stemmer=False, tokenizer=None
+    ):
         if rouge_types is None:
             rouge_types = ["rouge1", "rouge2", "rougeL", "rougeLsum"]
 
         multi_ref = isinstance(references[0], list)
 
-        scorer = rouge_scorer.RougeScorer(rouge_types=rouge_types, use_stemmer=use_stemmer)
+        if tokenizer is not None:
+            tokenizer = Tokenizer(tokenizer)
+
+        scorer = rouge_scorer.RougeScorer(rouge_types=rouge_types, use_stemmer=use_stemmer, tokenizer=tokenizer)
         if use_aggregator:
             aggregator = scoring.BootstrapAggregator()
         else:

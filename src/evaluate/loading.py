@@ -33,7 +33,7 @@ from datasets.packaged_modules import _EXTENSION_TO_MODULE, _hash_python_lines
 from datasets.utils.filelock import FileLock
 from datasets.utils.version import Version
 
-from . import config
+from . import SCRIPTS_VERSION, config
 from .module import EvaluationModule
 from .utils.file_utils import (
     DownloadConfig,
@@ -73,10 +73,7 @@ def init_dynamic_modules(
 
 
 def import_main_class(module_path) -> Optional[Union[Type[DatasetBuilder], Type[EvaluationModule]]]:
-    """Import a module at module_path and return its main class:
-    - a DatasetBuilder if dataset is True
-    - a Metric if dataset is False
-    """
+    """Import a module at module_path and return its main class, a Metric by default"""
     module = importlib.import_module(module_path)
     main_cls_type = EvaluationModule
 
@@ -258,12 +255,12 @@ def _download_additional_modules(
         local_imports.append((import_name, local_import_path))
 
     # Check library imports
-    needs_to_be_installed = []
+    needs_to_be_installed = set()
     for library_import_name, library_import_path in library_imports:
         try:
             lib = importlib.import_module(library_import_name)  # noqa F841
         except ImportError:
-            needs_to_be_installed.append((library_import_name, library_import_path))
+            needs_to_be_installed.add((library_import_name, library_import_path))
     if needs_to_be_installed:
         raise ImportError(
             f"To be able to use {name}, you need to install the following dependencies"
@@ -464,20 +461,34 @@ class HubEvaluationModuleFactory(_EvaluationModuleFactory):
         assert self.name.count("/") == 1
         increase_load_count(name, resource_type="metric")
 
-    def download_loading_script(self) -> str:
-        file_path = hf_hub_url(path=self.name, name=self.name.split("/")[1] + ".py", revision=self.revision)
+    def download_loading_script(self, revision) -> str:
+        file_path = hf_hub_url(path=self.name, name=self.name.split("/")[1] + ".py", revision=revision)
         download_config = self.download_config.copy()
         if download_config.download_desc is None:
             download_config.download_desc = "Downloading builder script"
         return cached_path(file_path, download_config=download_config)
 
     def get_module(self) -> ImportableModule:
+        revision = self.revision or os.getenv("HF_SCRIPTS_VERSION", SCRIPTS_VERSION)
+
+        if re.match(r"\d*\.\d*\.\d*", revision):  # revision is version number (three digits separated by full stops)
+            revision = "v" + revision  # tagging convention on evaluate repository starts with v
+
         # get script and other files
-        local_path = self.download_loading_script()
+        try:
+            local_path = self.download_loading_script(revision)
+        except FileNotFoundError as err:
+            # if there is no file found with current revision tag try to load main
+            if self.revision is None and os.getenv("HF_SCRIPTS_VERSION", SCRIPTS_VERSION) != "main":
+                revision = "main"
+                local_path = self.download_loading_script(revision)
+            else:
+                raise err
+
         imports = get_imports(local_path)
         local_imports = _download_additional_modules(
             name=self.name,
-            base_path=hf_hub_url(path=self.name, name="", revision=self.revision),
+            base_path=hf_hub_url(path=self.name, name="", revision=revision),
             imports=imports,
             download_config=self.download_config,
         )
@@ -527,7 +538,9 @@ class CachedEvaluationModuleFactory(_EvaluationModuleFactory):
         # get most recent
 
         def _get_modification_time(module_hash):
-            return (Path(importable_directory_path) / module_hash / (self.name + ".py")).stat().st_mtime
+            return (
+                (Path(importable_directory_path) / module_hash / (self.name.split("--")[-1] + ".py")).stat().st_mtime
+            )
 
         hash = sorted(hashes, key=_get_modification_time)[-1]
         logger.warning(
@@ -536,7 +549,9 @@ class CachedEvaluationModuleFactory(_EvaluationModuleFactory):
             f"couldn't be found locally at {self.name}, or remotely on the Hugging Face Hub."
         )
         # make the new module to be noticed by the import system
-        module_path = ".".join([os.path.basename(dynamic_modules_path), self.module_type, self.name, hash, self.name])
+        module_path = ".".join(
+            [os.path.basename(dynamic_modules_path), self.module_type, self.name, hash, self.name.split("--")[-1]]
+        )
         importlib.invalidate_caches()
         return ImportableModule(module_path, hash)
 
@@ -644,15 +659,29 @@ def evaluation_module_factory(
                     dynamic_modules_path=dynamic_modules_path,
                 ).get_module()
         except Exception as e1:  # noqa: all the attempts failed, before raising the error we should check if the module is already cached.
-            try:
-                return CachedEvaluationModuleFactory(path, dynamic_modules_path=dynamic_modules_path).get_module()
-            except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
-                if not isinstance(e1, (ConnectionError, FileNotFoundError)):
-                    raise e1 from None
-                raise FileNotFoundError(
-                    f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}. "
-                    f"Module '{path}' doesn't exist on the Hugging Face Hub either."
-                ) from None
+            # if it's a canonical module we need to check if it's any of the types
+            if path.count("/") == 0:
+                for current_type in ["metric", "comparison", "measurement"]:
+                    try:
+                        return CachedEvaluationModuleFactory(
+                            f"evaluate-{current_type}--{path}", dynamic_modules_path=dynamic_modules_path
+                        ).get_module()
+                    except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
+                        pass
+            # if it's a community module we just need to check on path
+            elif path.count("/") == 1:
+                try:
+                    return CachedEvaluationModuleFactory(
+                        path.replace("/", "--"), dynamic_modules_path=dynamic_modules_path
+                    ).get_module()
+                except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
+                    pass
+            if not isinstance(e1, (ConnectionError, FileNotFoundError)):
+                raise e1 from None
+            raise FileNotFoundError(
+                f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}. "
+                f"Module '{path}' doesn't exist on the Hugging Face Hub either."
+            ) from None
     else:
         raise FileNotFoundError(f"Couldn't find a module script at {relative_to_absolute_path(combined_path)}.")
 

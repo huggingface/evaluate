@@ -27,17 +27,39 @@ from transformers import (
     AutoModelForSequenceClassification,
     AutoModelForTokenClassification,
     AutoTokenizer,
+    pipeline,
 )
 
 from evaluate import (
     Evaluator,
     ImageClassificationEvaluator,
     QuestionAnsweringEvaluator,
+    Text2TextGenerationEvaluator,
     TextClassificationEvaluator,
+    TextGenerationEvaluator,
     TokenClassificationEvaluator,
     evaluator,
     load,
 )
+
+
+class DummyTextGenerationPipeline:
+    def __init__(self, prefix="generated", task="text-generation", num_return_sequences=1):
+        self.task = task
+        self.prefix = prefix
+        self.num_return_sequences = num_return_sequences
+
+    def __call__(self, inputs, **kwargs):
+        return [[{f"{self.prefix}_text": "Lorem ipsum"} for _ in range(self.num_return_sequences)] for _ in inputs]
+
+
+class DummyText2TextGenerationPipeline:
+    def __init__(self, prefix="generated", task="text2text-generation"):
+        self.task = task
+        self.prefix = prefix
+
+    def __call__(self, inputs, **kwargs):
+        return [{f"{self.prefix}_text": "Lorem ipsum"} for _ in inputs]
 
 
 class DummyTextClassificationPipeline:
@@ -45,10 +67,10 @@ class DummyTextClassificationPipeline:
         self.task = "text-classification"
         self.sleep_time = sleep_time
 
-    def __call__(self, text, **kwargs):
+    def __call__(self, inputs, **kwargs):
         if self.sleep_time is not None:
             sleep(self.sleep_time)
-        return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(text)]
+        return [{"label": "NEGATIVE"} if i % 2 == 1 else {"label": "POSITIVE"} for i, _ in enumerate(inputs)]
 
 
 class DummyImageClassificationPipeline:
@@ -104,6 +126,9 @@ class TestEvaluator(TestCase):
         pt_mock = mock.Mock()
         tf_mock = mock.Mock()
 
+        # Generic pipeline object for testing pre-instantiated pipelines with the evaluator
+        self.pipe = pipeline("text-classification")
+
         # mock import of torch and tensorflow
         def import_pt_tf_mock(name, *args):
             if name == "torch":
@@ -142,6 +167,19 @@ class TestEvaluator(TestCase):
             # tf available and GPU found
             tf_mock.config.list_physical_devices.return_value = ["GPU:0", "GPU:1"]
             self.assertEqual(Evaluator._infer_device(), 0)
+
+            # pt accelerator found and pipeline instantiated on CPU
+            pt_mock.cuda.is_available.return_value = True
+            self.assertRaises(
+                ValueError, Evaluator.check_for_mismatch_in_device_setup, Evaluator._infer_device(), self.pipe
+            )
+
+            # tf accelerator found and pipeline instantiated on CPU
+            pt_available = False
+            tf_available = True
+            self.assertRaises(
+                ValueError, Evaluator.check_for_mismatch_in_device_setup, Evaluator._infer_device(), self.pipe
+            )
 
 
 class TestTextClassificationEvaluator(TestCase):
@@ -205,6 +243,30 @@ class TestTextClassificationEvaluator(TestCase):
             label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 1.0)
+
+    def test_data_loading(self):
+
+        # Test passing in dataset by name with split
+        data = self.evaluator.load_data("evaluate/imdb-ci", split="test[:1]")
+        self.evaluator.prepare_data(data=data, input_column="text", label_column="label", second_input_column=None)
+
+        # Test passing in dataset by name without split and inferring the optimal split
+        data = self.evaluator.load_data("evaluate/imdb-ci")
+        self.evaluator.prepare_data(data=data, input_column="text", label_column="label", second_input_column=None)
+
+        # Test that it chooses the correct one (e.g. imdb only has train and test, but no validation)
+        self.assertEqual(data.split, "test")
+
+        # Test that the data point returned is correct; this maps to the first example in the dataset
+        self.assertEqual(data[0]["text"], "I love movies about whales!")
+
+        # Test loading subset of a dataset with the `name` field
+        data = self.evaluator.load_data("evaluate/glue-ci", subset="cola", split="test")
+        self.assertEqual(isinstance(data, Dataset), True)
+
+        # Test loading subset of a dataset with the `name` field and having it infer the split
+        data = self.evaluator.load_data("evaluate/glue-ci", subset="cola")
+        self.assertEqual(isinstance(data, Dataset), True)
 
     def test_overwrite_default_metric(self):
         accuracy = load("accuracy")
@@ -280,6 +342,60 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertAlmostEqual(results["total_time_in_seconds"], 0.1, 1)
         self.assertAlmostEqual(results["samples_per_second"], len(data) / results["total_time_in_seconds"], 5)
         self.assertAlmostEqual(results["latency_in_seconds"], results["total_time_in_seconds"] / len(data), 5)
+
+
+class TestTextClassificationEvaluatorTwoColumns(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict(
+            {
+                "label": [1, 0],
+                "premise": ["great car", "great movie"],
+                "hypothesis": ["great vehicle", "horrible movie"],
+            }
+        )
+        self.default_model = "prajjwal1/bert-tiny-mnli"
+        self.input_column = "premise"
+        self.second_input_column = "hypothesis"
+        self.label_column = "label"
+        self.pipe = DummyTextClassificationPipeline()
+        self.model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
+        self.tokenizer = AutoTokenizer.from_pretrained(self.default_model)
+        self.evaluator = evaluator("text-classification")
+        self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
+        self.label_mapping2 = {"LABEL_0": 0, "LABEL_1": 1, "LABEL_2": 2}
+
+    def test_pipe_init(self):
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            input_column=self.input_column,
+            second_input_column=self.second_input_column,
+            label_column="label",
+            label_mapping=self.label_mapping,
+        )
+        self.assertEqual(results["accuracy"], 1.0)
+
+    def test_model_init(self):
+        results = self.evaluator.compute(
+            model_or_pipeline=self.default_model,
+            data=self.data,
+            metric="accuracy",
+            input_column=self.input_column,
+            second_input_column=self.second_input_column,
+            label_column=self.label_column,
+            label_mapping=self.label_mapping2,
+        )
+        self.assertEqual(results["accuracy"], 1.0)
+        results = self.evaluator.compute(
+            model_or_pipeline=self.model,
+            data=self.data,
+            metric="accuracy",
+            input_column=self.input_column,
+            second_input_column=self.second_input_column,
+            tokenizer=self.tokenizer,
+            label_mapping=self.label_mapping2,
+        )
+        self.assertEqual(results["accuracy"], 1.0)
 
 
 class TestImageClassificationEvaluator(TestCase):
@@ -401,7 +517,7 @@ class TestQuestionAnsweringEvaluator(TestCase):
             metric="squad",
         )
         self.assertEqual(results["exact_match"], 0)
-        self.assertEqual(results["f1"], 0)
+        self.assertEqual(results["f1"], 100 / 3)
 
         model = AutoModelForQuestionAnswering.from_pretrained(self.default_model)
         tokenizer = AutoTokenizer.from_pretrained(self.default_model)
@@ -412,7 +528,7 @@ class TestQuestionAnsweringEvaluator(TestCase):
             tokenizer=tokenizer,
         )
         self.assertEqual(results["exact_match"], 0)
-        self.assertEqual(results["f1"], 0)
+        self.assertEqual(results["f1"], 100 / 3)
 
     def test_class_init(self):
         # squad_v1-like dataset
@@ -458,6 +574,25 @@ class TestQuestionAnsweringEvaluator(TestCase):
         self.assertDictEqual(
             {key: results[key] for key in ["HasAns_f1", "NoAns_f1"]}, {"HasAns_f1": 100.0, "NoAns_f1": 0.0}
         )
+
+    def test_data_loading(self):
+        # Test passing in dataset by name with data_split
+        data = self.evaluator.load_data("evaluate/squad-ci", split="validation[:1]")
+        self.evaluator.prepare_data(
+            data=data, question_column="question", context_column="context", id_column="id", label_column="answers"
+        )
+
+        # Test passing in dataset by name without data_split and inferring the optimal split
+        data = self.evaluator.load_data("evaluate/squad-ci")
+        self.evaluator.prepare_data(
+            data=data, question_column="question", context_column="context", id_column="id", label_column="answers"
+        )
+
+        # Test that it chooses the correct one (e.g. squad only has train and validation, but no test)
+        self.assertEqual(data.split, "validation")
+
+        # Test that the data point returned is correct; this maps to the first example in the squad-ci dataset
+        self.assertEqual(data[0]["id"], "56be4db0acb8001400a502ec")
 
     def test_overwrite_default_metric(self):
         # squad_v1-like dataset
@@ -550,6 +685,31 @@ class TestTokenClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["overall_accuracy"], 1.0)
 
+    def test_data_loading(self):
+        # Test passing in dataset by name with data_split
+        data = self.evaluator.load_data("evaluate/conll2003-ci", split="validation[:1]")
+        self.evaluator.prepare_data(
+            data=data,
+            input_column="tokens",
+            label_column="ner_tags",
+            join_by=" ",
+        )
+
+        # Test passing in dataset by name without data_split and inferring the optimal split
+        data = self.evaluator.load_data("evaluate/conll2003-ci")
+        self.evaluator.prepare_data(
+            data=data,
+            input_column="tokens",
+            label_column="ner_tags",
+            join_by=" ",
+        )
+
+        # Test that it chooses the correct one (e.g. conll2003 has train, validation, test but should select test)
+        self.assertEqual(data.split, "test")
+
+        # Test that the data point returned is correct; this maps to the first example in the dataset
+        self.assertEqual(data[0]["id"], "0")
+
     def test_wrong_task(self):
         self.assertRaises(KeyError, evaluator, "bad_task")
 
@@ -630,3 +790,120 @@ class TestTokenClassificationEvaluator(TestCase):
         ]
         predictions = task_evaluator.predictions_processor(predictions, words, join_by)
         self.assertListEqual(predictions["predictions"][0], ["B-LOC", "O", "O", "O", "B-LOC", "O"])
+
+
+class TestTextGenerationEvaluator(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict({"text": ["Lorem ipsum"]})
+        self.pipe = DummyTextGenerationPipeline(num_return_sequences=4)
+        self.evaluator = evaluator("text-generation")
+
+    def test_class_init(self):
+        evaluator = TextGenerationEvaluator()
+        self.assertEqual(evaluator.task, "text-generation")
+        self.assertIsNone(evaluator.default_metric_name)
+
+        results = evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="word_count",
+        )
+        self.assertIsInstance(results["unique_words"], int)
+
+    def test_default_pipe_init(self):
+        results = self.evaluator.compute(data=self.data)
+        self.assertIsInstance(results["unique_words"], int)
+
+    def test_overwrite_default_metric(self):
+        word_length = load("word_length")
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric=word_length,
+        )
+        self.assertIsInstance(results["average_word_length"], int)
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="word_length",
+        )
+        self.assertIsInstance(results["average_word_length"], int)
+
+    def test_process_predictions_multiple_return_sequences(self):
+        processed_predictions = self.evaluator.predictions_processor(
+            [
+                [{"generated_text": "A"}, {"generated_text": "B"}],
+                [{"generated_text": "C"}, {"generated_text": "D"}],
+            ]
+        )
+        self.assertEqual(processed_predictions, {"data": ["A", "B", "C", "D"]})
+
+
+class TestText2TextGenerationEvaluator(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict(
+            {
+                "text": ["Lorem ipsum"] * 4,
+                "label": ["Ipsum Lorem"] * 4,
+            }
+        )
+        self.pipe = DummyText2TextGenerationPipeline()
+        self.evaluator = evaluator("text2text-generation")
+
+    def test_pipe_init(self):
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+        )
+        self.assertEqual(results["bleu"], 0)
+
+    def test_class_init(self):
+        evaluator = Text2TextGenerationEvaluator()
+        self.assertEqual(evaluator.task, "text2text-generation")
+        self.assertIsNone(evaluator.default_metric_name)
+
+        results = evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="bleu",
+        )
+        self.assertEqual(results["bleu"], 0)
+
+    def test_default_pipe_init(self):
+        results = self.evaluator.compute(data=self.data)
+        self.assertEqual(results["bleu"], 0)
+
+    def test_overwrite_default_metric(self):
+        rouge = load("rouge")
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric=rouge,
+        )
+        self.assertEqual(results["rouge1"], 1.0)
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="rouge",
+        )
+        self.assertEqual(results["rouge1"], 1.0)
+
+    def test_summarization(self):
+        pipe = DummyText2TextGenerationPipeline(task="summarization", prefix="summary")
+        e = evaluator("summarization")
+
+        results = e.compute(
+            model_or_pipeline=pipe,
+            data=self.data,
+        )
+        self.assertEqual(results["rouge1"], 1.0)
+
+    def test_translation(self):
+        pipe = DummyText2TextGenerationPipeline(task="translation", prefix="translation")
+        e = evaluator("translation")
+
+        results = e.compute(
+            model_or_pipeline=pipe,
+            data=self.data,
+        )
+        self.assertEqual(results["bleu"], 0)
