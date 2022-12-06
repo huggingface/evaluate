@@ -3,8 +3,6 @@ from unittest import TestCase
 from evaluate import EvaluationSuite
 from tests.test_evaluator import DummyTextClassificationPipeline
 
-from .utils import slow
-
 
 class TestEvaluationSuite(TestCase):
     def setUp(self):
