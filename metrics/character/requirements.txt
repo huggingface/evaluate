@@ -1,2 +1,2 @@
 git+https://github.com/huggingface/evaluate@{COMMIT_PLACEHOLDER}
-cer>=1.1.0
+cer>=1.2.0
