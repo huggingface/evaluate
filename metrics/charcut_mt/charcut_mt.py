@@ -51,7 +51,7 @@ Args:
 Returns:
     charcut_mt: the CharCut score
 Examples:
-    >>> charcut = evaluate.load("charcut")
+    >>> charcut = evaluate.load("charcut_mt")
     >>> preds = ["this week the saudis denied information published in the new york times",
                 "this is in fact an estimate"]
     >>> refs = ["saudi arabia denied this week information published in the american new york times",
