@@ -10,7 +10,7 @@ from datasets.features import Features, Sequence, Value
 
 from evaluate.module import EvaluationModule, EvaluationModuleInfo, combine
 
-from .utils import require_tf, require_torch, slow
+from .utils import require_tf, require_torch
 
 
 class DummyMetric(EvaluationModule):
