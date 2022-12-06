@@ -81,7 +81,7 @@ Examples:
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class Nist_mt(evaluate.Metric):
+class NistMt(evaluate.Metric):
     """A wrapper around NLTK's NIST implementation."""
 
     def _info(self):
@@ -97,14 +97,6 @@ class Nist_mt(evaluate.Metric):
                         "references": Sequence(Value("string", id="reference"), id="references"),
                     }
                 ),
-                datasets.Features(
-                    {
-                        "predictions": Sequence(Value("string", id="prediction"), id="predictions"),
-                        "references": Sequence(
-                            Sequence(Value("string", id="reference"), id="references"), id="reference_corpus"
-                        ),
-                    }
-                ),
             ],
             homepage="https://www.nltk.org/api/nltk.translate.nist_score.html",
             codebase_urls=["https://github.com/nltk/nltk/blob/develop/nltk/translate/nist_score.py"],
@@ -113,25 +105,16 @@ class Nist_mt(evaluate.Metric):
 
     def _compute(self, predictions, references, n: int = 5, lowercase=False, western_lang=True):
         tokenizer = NISTTokenizer()
-        if isinstance(predictions, str) and isinstance(references[0], str):  # sentence nist_mt
-            predictions = tokenizer.tokenize(
-                predictions, return_str=False, lowercase=lowercase, western_lang=western_lang
-            )
-            references = [
+
+        predictions = [
+            tokenizer.tokenize(pred, return_str=False, lowercase=lowercase, western_lang=western_lang)
+            for pred in predictions
+        ]
+        references = [
+            [
                 tokenizer.tokenize(ref, return_str=False, lowercase=lowercase, western_lang=western_lang)
-                for ref in references
+                for ref in ref_sentences
             ]
-            return {"nist_mt": sentence_nist(references=references, hypothesis=predictions, n=n)}
-        elif isinstance(predictions[0], str) and isinstance(references[0][0], str):  # corpus nist_mt
-            predictions = [
-                tokenizer.tokenize(pred, return_str=False, lowercase=lowercase, western_lang=western_lang)
-                for pred in predictions
-            ]
-            references = [
-                [
-                    tokenizer.tokenize(ref, return_str=False, lowercase=lowercase, western_lang=western_lang)
-                    for ref in ref_sentences
-                ]
-                for ref_sentences in references
-            ]
-            return {"nist_mt": corpus_nist(list_of_references=references, hypotheses=predictions, n=n)}
+            for ref_sentences in references
+        ]
+        return {"nist_mt": corpus_nist(list_of_references=references, hypotheses=predictions, n=n)}
