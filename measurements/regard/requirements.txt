@@ -1,0 +1,3 @@
+git+https://github.com/huggingface/evaluate.git@{COMMIT_PLACEHOLDER}
+transformers
+torch

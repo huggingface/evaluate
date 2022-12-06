@@ -50,7 +50,7 @@ With [`list_evaluation_modules`] you can check what modules are available on the
 ```python
 >>> evaluate.list_evaluation_modules(
 ...   module_type="comparison",
-...   include_community=False, 
+...   include_community=False,
 ...   with_details=True)
 
 [{'name': 'mcnemar', 'type': 'comparison', 'community': False, 'likes': 1},
@@ -227,7 +227,7 @@ The content of the JSON file look like the following:
 }
 ```
 
-In addition to the specified fields, it also contains useful system information for reproducing the results. 
+In addition to the specified fields, it also contains useful system information for reproducing the results.
 
 Besides storing the results locally, you should report them on the model's repository on the Hub. With the [`evaluate.push_to_hub`] function, you can easily report evaluation results to the model's repository:
 
@@ -249,7 +249,7 @@ evaluate.push_to_hub(
 
 The [`evaluate.evaluator`] provides automated evaluation and only requires a model, dataset, metric in contrast to the metrics in `EvaluationModule`s that require the model's predictions. As such it is easier to evaluate a model on a dataset with a given metric as the inference is handled internally. To make that possible it uses the [`~transformers.pipeline`] abstraction from `transformers`. However, you can use your own framework as long as it follows the `pipeline` interface.
 
-To make an evaluation with the `evaluator` let's load a `transformers` pipeline (but you can pass your own custom inference class for any framework as long as it follows the pipeline call API) with an model trained on IMDb, the IMDb test split and the accuracy metric. 
+To make an evaluation with the `evaluator` let's load a `transformers` pipeline (but you can pass your own custom inference class for any framework as long as it follows the pipeline call API) with an model trained on IMDb, the IMDb test split and the accuracy metric.
 
 ```python
 from transformers import pipeline
@@ -265,9 +265,9 @@ metric = evaluate.load("accuracy")
 Then you can create an evaluator for text classification and pass the three objects to the `compute()` method. With the label mapping `evaluate` provides a method to align the pipeline outputs with the label column in the dataset:
 
 ```python
->>> eval = evaluator("text-classification")
+>>> task_evaluator = evaluator("text-classification")
 
->>> results = eval.compute(model_or_pipeline=pipe, data=data, metric=metric,
+>>> results = task_evaluator.compute(model_or_pipeline=pipe, data=data, metric=metric,
 ...                        label_mapping={"NEGATIVE": 0, "POSITIVE": 1},)
 
 >>> print(results)
@@ -282,7 +282,7 @@ Calculating the value of the metric alone is often not enough to know if a model
 ...                        strategy="bootstrap", n_resamples=200)
 
 >>> print(results)
-{'accuracy': 
+{'accuracy':
     {
       'confidence_interval': (0.906, 0.9406749892841922),
       'standard_error': 0.00865213251082787,
@@ -292,3 +292,30 @@ Calculating the value of the metric alone is often not enough to know if a model
 ```
 
 The evaluator expects a `"text"` and `"label"` column for the data input. If your dataset differs you can provide the columns with the keywords `input_column="text"` and `label_column="label"`. Currently only `"text-classification"` is supported with more tasks being added in the future.
+
+
+## Visualization
+
+When comparing several models, sometimes it's hard to spot the differences in their performance simply by looking at their scores. Also often there is not a single best model but there are trade-offs between e.g. latency and accuracy as larger models might have better performance but are also slower. We are gradually adding different visualization approaches, such as plots, to make choosing the best model for a use-case easier.
+
+For instance, if you have a list of results from multiple models (as dictionaries), you can feed them into the `radar_plot()` function:
+
+```python
+import evaluate
+from evaluate.visualization import radar_plot
+
+>>> data = [
+   {"accuracy": 0.99, "precision": 0.8, "f1": 0.95, "latency_in_seconds": 33.6},
+   {"accuracy": 0.98, "precision": 0.87, "f1": 0.91, "latency_in_seconds": 11.2},
+   {"accuracy": 0.98, "precision": 0.78, "f1": 0.88, "latency_in_seconds": 87.6}, 
+   {"accuracy": 0.88, "precision": 0.78, "f1": 0.81, "latency_in_seconds": 101.6}
+   ]
+>>> model_names = ["Model 1", "Model 2", "Model 3", "Model 4"]
+>>> plot = radar_plot(data=data, model_names=model_names)
+>>> plot.show()
+```
+
+Which lets you visually compare the 4 models and choose the optimal one for you, based on one or several metrics:
+<div class="flex justify-center">
+    <img src="https://huggingface.co/datasets/evaluate/media/resolve/main/example_viz.png" width="400"/>
+</div>

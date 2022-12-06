@@ -48,8 +48,8 @@ We can now pass this `pipeline` to the `evaluator`:
 ```py
 from evaluate import evaluator
 
-eval = evaluator("text-classification")
-eval.compute(pipe, ds["test"], "accuracy")
+task_evaluator = evaluator("text-classification")
+task_evaluator.compute(pipe, ds["test"], "accuracy")
 
 >>> {'accuracy': 0.82956}
 ```
