@@ -50,7 +50,7 @@ DARPA commissioned NIST to develop an MT evaluation facility based on the BLEU
 score. The official script used by NIST to compute BLEU and NIST score is
 mteval-14.pl. The main differences are:
 
- - BLEU uses geometric mean of the ngram overlaps, NIST uses arithmetic mean.
+ - BLEU uses geometric mean of the ngram precisions, NIST uses arithmetic mean.
  - NIST has a different brevity penalty
  - NIST score from mteval-14.pl has a self-contained tokenizer (in the Hugging Face implementation we rely on NLTK's
 implementation of the NIST-specific tokenizer)
@@ -60,13 +60,13 @@ implementation of the NIST-specific tokenizer)
 _KWARGS_DESCRIPTION = """
 Computes NIST score of translated segments against one or more references.
 Args:
-    predictions: predictions to score. For sentence-level NIST, a string;
-     for corpus-level NIST, a list of setences (str)
-    references:  potentially multiple references for each prediction.  For sentence-level NIST, a
-     list of potential references (str); for corpus-level NIST, a list (corpus) of lists
-     of potential references (str)
+    predictions: predictions to score (list of str)
+    references: potentially multiple references for each prediction (list of str or list of list of str)
     n: highest n-gram order
-    tokenize_kwargs: arguments passed to the tokenizer (see: https://github.com/nltk/nltk/blob/90fa546ea600194f2799ee51eaf1b729c128711e/nltk/tokenize/nist.py#L139)
+    lowercase: whether to lowercase the data (only applicable if 'western_lang' is True)
+    western_lang: whether the current language is a Western language, which will enable some specific tokenization
+ rules with respect to, e.g., punctuation
+    
 Returns:
     'nist_mt': nist_mt score
 Examples:
@@ -77,6 +77,8 @@ Examples:
     >>> reference3 = "It is the practical guide for the army always to heed the directions of the party"
     >>> nist_mt.compute(predictions=[hypothesis], references=[[reference1, reference2, reference3]])
     {'nist_mt': 3.3709935957649324}
+    >>> nist_mt.compute(predictions=[hypothesis], references=[reference1])
+    {'nist_mt': 2.4477124183006533}
 """
 
 
@@ -97,6 +99,12 @@ class NistMt(evaluate.Metric):
                         "references": Sequence(Value("string", id="reference"), id="references"),
                     }
                 ),
+                datasets.Features(
+                    {
+                        "predictions": Value("string", id="prediction"),
+                        "references": Value("string", id="reference"),
+                    }
+                ),
             ],
             homepage="https://www.nltk.org/api/nltk.translate.nist_score.html",
             codebase_urls=["https://github.com/nltk/nltk/blob/develop/nltk/translate/nist_score.py"],
@@ -105,6 +113,10 @@ class NistMt(evaluate.Metric):
 
     def _compute(self, predictions, references, n: int = 5, lowercase=False, western_lang=True):
         tokenizer = NISTTokenizer()
+
+        # Account for single reference cases: references always need to have one more dimension than predictions
+        if isinstance(references[0], str):
+            references = [[ref] for ref in references]
 
         predictions = [
             tokenizer.tokenize(pred, return_str=False, lowercase=lowercase, western_lang=western_lang)
