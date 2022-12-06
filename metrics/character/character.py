@@ -58,21 +58,17 @@ Args:
 Returns:
     cer_scores: a list of all scores, one per ref/hyp pair
 Examples:
-    >>> character_mt = evaluate.load("character")
+    >>> character_mt = evaluate.load(r"F:\python\evaluate\metrics\character")
     >>> preds = ["this week the saudis denied information published in the new york times"]
     >>> refs = ["saudi arabia denied this week information published in the american new york times"]
     >>> character_mt.compute(references=refs, predictions=preds)
-    {
-        'cer_scores': [0.36619718309859156]
-    }
+    {'cer_scores': [0.36619718309859156]}
     >>> preds = ["this week the saudis denied information published in the new york times",
     ...          "this is in fact an estimate"]
     >>> refs = ["saudi arabia denied this week information published in the american new york times",
     ...         "this is actually an estimate"]
     >>> character_mt.compute(references=refs, predictions=preds)
-    {
-        'cer_scores': [0.36619718309859156, 0.25925925925925924]
-    }
+    {'cer_scores': [0.36619718309859156, 0.25925925925925924]}
 """
 
 
