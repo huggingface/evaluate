@@ -51,9 +51,9 @@ TER."""
 _KWARGS_DESCRIPTION = """
 Calculates how good are predictions given some references, using certain scores
 Args:
-    predictions: a single prediction or a list of predictions to score. Each prediction should be a string with
+    predictions: a list of predictions to score. Each prediction should be a string with
      tokens separated by spaces.
-    references: a single reference or a list of references for each prediction. Each reference should be a string with
+    references: a list of references for each prediction. Each reference should be a string with
      tokens separated by spaces.
 Returns:
     cer_scores: a list of all scores, one per ref/hyp pair
@@ -86,12 +86,6 @@ class Character(evaluate.Metric):
                 datasets.Features(
                     {"predictions": Value("string", id="prediction"), "references": Value("string", id="reference")}
                 ),
-                datasets.Features(
-                    {
-                        "predictions": Sequence(Value("string", id="prediction"), id="predictions"),
-                        "references": Sequence(Value("string", id="reference"), id="references"),
-                    }
-                ),
             ],
             homepage="https://github.com/bramvanroy/CharacTER",
             codebase_urls=["https://github.com/bramvanroy/CharacTER", "https://github.com/rwth-i6/CharacTER"],
@@ -100,12 +94,6 @@ class Character(evaluate.Metric):
     def _compute(self, predictions, references):
         """Returns the scores. When more than one prediction/reference is given, we can use
         the corpus-focused metric"""
-        if isinstance(predictions, str):
-            predictions = [predictions]
-
-        if isinstance(references, str):
-            references = [references]
-
         predictions = [p.split() for p in predictions]
         references = [r.split() for r in references]
 
