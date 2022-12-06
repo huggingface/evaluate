@@ -44,9 +44,9 @@ _KWARGS_DESCRIPTION = """
 Calculates how good predictions are given some references. Predictions/references can be one or more sentences,
 but they must be of the both type (one reference per hypothesis).
 Args:
-    predictions: a single prediction or a list of predictions to score. Each prediction should be a string with
+    predictions: a list of predictions to score. Each prediction should be a string with
      tokens separated by spaces.
-    references: a single reference or a list of reference for each prediction. Each reference should be a string with
+    references: a list of reference for each prediction. Each reference should be a string with
      tokens separated by spaces.
 Returns:
     charcut_mt: the CharCut score
@@ -76,12 +76,6 @@ class Charcut(evaluate.Metric):
             features=[
                 datasets.Features(
                     {"predictions": Value("string", id="prediction"), "references": Value("string", id="reference")}
-                ),
-                datasets.Features(
-                    {
-                        "predictions": Sequence(Value("string", id="prediction"), id="predictions"),
-                        "references": Sequence(Value("string", id="reference"), id="references"),
-                    }
                 ),
             ],
             # Homepage of the module for documentation
