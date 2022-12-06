@@ -105,7 +105,7 @@ EVALUATOR_REQUIRE = [
 TESTS_REQUIRE = [
     # test dependencies
     "absl-py",
-    "charcut",  # for charcut_mt
+    "charcut>=1.1.1",  # for charcut_mt
     "pytest",
     "pytest-datadir",
     "pytest-xdist",
