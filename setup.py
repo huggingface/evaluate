@@ -105,7 +105,7 @@ EVALUATOR_REQUIRE = [
 TESTS_REQUIRE = [
     # test dependencies
     "absl-py",
-    "cer",  # for characTER
+    "cer>=1.2.0",  # for characTER
     "pytest",
     "pytest-datadir",
     "pytest-xdist",
