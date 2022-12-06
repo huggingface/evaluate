@@ -1,4 +1,4 @@
 git+https://github.com/huggingface/evaluate@{COMMIT_PLACEHOLDER}
 faiss-cpu
-sklearn
+scikit-learn
 mauve-text

@@ -18,8 +18,8 @@ class DatasetColumn(list):
         return (self.dataset[i][self.key] for i in range(len(self)))
 
 
-def choose_split(data):
-    available_splits = get_dataset_split_names(data)
+def choose_split(data, subset=None):
+    available_splits = get_dataset_split_names(data, subset)
     preferred_split_order = [
         "test",
         "testing",
