@@ -55,36 +55,22 @@ Args:
      tokens separated by spaces.
     references: a single reference or a list of references for each prediction. Each reference should be a string with
      tokens separated by spaces.
-Returns (*=only when a list of references/hypotheses are given):
-    count (*) : how many parallel sentences were processed,
-    mean (*): the mean CharacTER score,
-    median (*): the median score,
-    std (*): standard deviation of the score,
-    min (*): smallest score,
-    max (*): largest score
-    cer_scores: all scores, one per ref/hyp pair
+Returns:
+    cer_scores: a list of all scores, one per ref/hyp pair
 Examples:
-    >>> character = evaluate.load("character")
+    >>> character_mt = evaluate.load("character")
     >>> preds = ["this week the saudis denied information published in the new york times"]
     >>> refs = ["saudi arabia denied this week information published in the american new york times"]
-    >>> results = character.compute(references=refs, predictions=preds)
-    >>> print(results)
+    >>> character_mt.compute(references=refs, predictions=preds)
     {
         'cer_scores': [0.36619718309859156]
     }
     >>> preds = ["this week the saudis denied information published in the new york times",
-                "this is in fact an estimate"]
+    ...          "this is in fact an estimate"]
     >>> refs = ["saudi arabia denied this week information published in the american new york times",
-                "this is actually an estimate"]
-    >>> results = character.compute(references=refs, predictions=preds)
-    >>> print(results)
+    ...         "this is actually an estimate"]
+    >>> character_mt.compute(references=refs, predictions=preds)
     {
-        'count': 2,
-        'mean': 0.3127282211789254,
-        'median': 0.3127282211789254,
-        'std': 0.07561653111280243,
-        'min': 0.25925925925925924,
-        'max': 0.36619718309859156,
         'cer_scores': [0.36619718309859156, 0.25925925925925924]
     }
 """
@@ -118,12 +104,13 @@ class Character(evaluate.Metric):
     def _compute(self, predictions, references):
         """Returns the scores. When more than one prediction/reference is given, we can use
         the corpus-focused metric"""
-        if isinstance(predictions, str) and isinstance(references, str):
-            predictions = predictions.split()
-            references = references.split()
-            return {"cer_scores": [cer.calculate_cer(predictions, references)]}
-        else:
-            predictions = [p.split() for p in predictions]
-            references = [r.split() for r in references]
+        if isinstance(predictions, str):
+            predictions = [predictions]
 
-            return cer.calculate_cer_corpus(predictions, references)
+        if isinstance(references, str):
+            references = [references]
+
+        predictions = [p.split() for p in predictions]
+        references = [r.split() for r in references]
+
+        return {"cer_scores": cer.calculate_cer_corpus(predictions, references)["cer_scores"]}
