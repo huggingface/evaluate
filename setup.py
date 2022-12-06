@@ -105,6 +105,7 @@ EVALUATOR_REQUIRE = [
 TESTS_REQUIRE = [
     # test dependencies
     "absl-py",
+    "nltk",  # for NIST and probably others
     "pytest",
     "pytest-datadir",
     "pytest-xdist",
