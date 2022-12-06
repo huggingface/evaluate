@@ -66,7 +66,7 @@ Args:
     lowercase: whether to lowercase the data (only applicable if 'western_lang' is True)
     western_lang: whether the current language is a Western language, which will enable some specific tokenization
  rules with respect to, e.g., punctuation
-    
+
 Returns:
     'nist_mt': nist_mt score
 Examples:
