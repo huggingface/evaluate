@@ -227,8 +227,6 @@ class TestTextClassificationEvaluator(TestCase):
         self.label_column = "label"
         self.pipe = DummyTextClassificationPipeline()
         self.perf_pipe = DummyTextClassificationPipeline(sleep_time=0.1)
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.default_model)
         self.evaluator = evaluator("text-classification")
         self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
 
@@ -252,12 +250,16 @@ class TestTextClassificationEvaluator(TestCase):
             label_column=self.label_column,
             label_mapping=self.label_mapping,
         )
+
+        model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
+        tokenizer = AutoTokenizer.from_pretrained(self.default_model)
+
         self.assertEqual(results["accuracy"], 1.0)
         results = self.evaluator.compute(
-            model_or_pipeline=self.model,
+            model_or_pipeline=model,
             data=self.data,
             metric="accuracy",
-            tokenizer=self.tokenizer,
+            tokenizer=tokenizer,
             label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 1.0)
@@ -324,12 +326,11 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertEqual(results["accuracy"], 1.0)
 
-    @slow
     def test_bootstrap(self):
         data = Dataset.from_dict({"label": [1, 0, 0], "text": ["great movie", "great movie", "horrible movie"]})
 
         results = self.evaluator.compute(
-            model_or_pipeline=self.model,
+            model_or_pipeline=self.pipe,
             data=data,
             metric="accuracy",
             tokenizer=self.tokenizer,
@@ -340,8 +341,8 @@ class TestTextClassificationEvaluator(TestCase):
         )
         self.assertAlmostEqual(results["accuracy"]["score"], 0.666666, 5)
         self.assertAlmostEqual(results["accuracy"]["confidence_interval"][0], 0.33333, 5)
-        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.68326, 5)
-        self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.24595, 5)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.666666, 5)
+        self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.22498, 5)
 
     def test_perf(self):
         results = self.evaluator.compute(
@@ -398,8 +399,6 @@ class TestTextClassificationEvaluatorTwoColumns(TestCase):
         self.second_input_column = "hypothesis"
         self.label_column = "label"
         self.pipe = DummyTextClassificationPipeline()
-        self.model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
-        self.tokenizer = AutoTokenizer.from_pretrained(self.default_model)
         self.evaluator = evaluator("text-classification")
         self.label_mapping = {"NEGATIVE": 0.0, "POSITIVE": 1.0}
         self.label_mapping2 = {"LABEL_0": 0, "LABEL_1": 1, "LABEL_2": 2}
@@ -427,13 +426,17 @@ class TestTextClassificationEvaluatorTwoColumns(TestCase):
             label_mapping=self.label_mapping2,
         )
         self.assertEqual(results["accuracy"], 1.0)
+
+        model = AutoModelForSequenceClassification.from_pretrained(self.default_model)
+        tokenizer = AutoTokenizer.from_pretrained(self.default_model)
+
         results = self.evaluator.compute(
-            model_or_pipeline=self.model,
+            model_or_pipeline=model,
             data=self.data,
             metric="accuracy",
             input_column=self.input_column,
             second_input_column=self.second_input_column,
-            tokenizer=self.tokenizer,
+            tokenizer=tokenizer,
             label_mapping=self.label_mapping2,
         )
         self.assertEqual(results["accuracy"], 1.0)
@@ -469,8 +472,10 @@ class TestImageClassificationEvaluator(TestCase):
             label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 0)
+
         model = AutoModelForImageClassification.from_pretrained(self.default_model)
         feature_extractor = AutoFeatureExtractor.from_pretrained(self.default_model)
+
         results = self.evaluator.compute(
             model_or_pipeline=model,
             data=self.data,
@@ -565,6 +570,7 @@ class TestQuestionAnsweringEvaluator(TestCase):
 
         model = AutoModelForQuestionAnswering.from_pretrained(self.default_model)
         tokenizer = AutoTokenizer.from_pretrained(self.default_model)
+
         results = self.evaluator.compute(
             model_or_pipeline=model,
             data=self.data,
