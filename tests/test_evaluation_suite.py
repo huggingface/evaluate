@@ -14,7 +14,6 @@ class TestEvaluationSuite(TestCase):
         # Setup a dummy model for usage with the EvaluationSuite
         self.dummy_model = DummyTextClassificationPipeline()
 
-    @slow
     def test_running_evaluation_suite(self):
 
         # Check that the evaluation suite successfully runs
