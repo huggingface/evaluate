@@ -12,11 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """An implementation for calculating CharacTER, a character-based TER variant, useful for machine translation tasks."""
-from typing import Iterable, Literal
+import math
+from statistics import mean, median
+from typing import Iterable, List, Literal, Union
 
 import cer
 import datasets
-from datasets import Value
+from cer import calculate_cer
+from datasets import Sequence, Value
 
 import evaluate
 
@@ -55,8 +58,10 @@ Calculates how good the predictions are in terms of the CharacTER metric given s
 Args:
     predictions: a list of predictions to score. Each prediction should be a string with
      tokens separated by spaces.
-    references: a list of references for each prediction. Each reference should be a string with
-     tokens separated by spaces.
+    references: a list of references for each prediction. You can also pass multiple references for each prediction,
+     so a list and in that list a sublist for each prediction for its related references. When multiple references are
+     given, the lowest (best) score is returned for that prediction-references pair.
+     Each reference should be a string with tokens separated by spaces.
     aggregate: one of "mean", "sum", "median" to indicate how the scores of individual sentences should be
      aggregated
     return_all_scores: a boolean, indicating whether in addition to the aggregated score, also all individual
@@ -76,6 +81,11 @@ Examples:
     ...         "this is actually an estimate"]
     >>> character_mt.compute(references=refs, predictions=preds, aggregate="sum", return_all_scores=True)
     {'cer_score': 0.6254564423578508, 'cer_scores': [0.36619718309859156, 0.25925925925925924]}
+    >>> preds = ["this week the saudis denied information published in the new york times"]
+    >>> refs = [["saudi arabia denied this week information published in the american new york times",
+    ...          "the saudis have denied new information published in the ny times"]]
+    >>> character_mt.compute(references=refs, predictions=preds, aggregate="median", return_all_scores=True)
+    {'cer_score': 0.36619718309859156, 'cer_scores': [0.36619718309859156]}
 """
 
 
@@ -93,6 +103,12 @@ class Character(evaluate.Metric):
                 datasets.Features(
                     {"predictions": Value("string", id="prediction"), "references": Value("string", id="reference")}
                 ),
+                datasets.Features(
+                    {
+                        "predictions": Value("string", id="prediction"),
+                        "references": Sequence(Value("string", id="reference"), id="references"),
+                    }
+                ),
             ],
             homepage="https://github.com/bramvanroy/CharacTER",
             codebase_urls=["https://github.com/bramvanroy/CharacTER", "https://github.com/rwth-i6/CharacTER"],
@@ -101,27 +117,51 @@ class Character(evaluate.Metric):
     def _compute(
         self,
         predictions: Iterable[str],
-        references: Iterable[str],
+        references: Union[Iterable[str], Iterable[Iterable[str]]],
         aggregate: Literal["mean", "sum", "median"] = "mean",
         return_all_scores: bool = False,
     ):
-        """Returns the scores. When more than one prediction/reference is given, we can use
-        the corpus-focused metric"""
-        predictions = [p.split() for p in predictions]
-        references = [r.split() for r in references]
-
-        scores_d = cer.calculate_cer_corpus(predictions, references)
-        cer_scores = scores_d["cer_scores"]
-
-        if aggregate == "sum":
-            score = sum(cer_scores)
-        elif aggregate == "mean":
-            score = scores_d["mean"]
-        elif aggregate == "median":
-            score = scores_d["median"]
-        else:
+        if aggregate not in ("mean", "sum", "median"):
             raise ValueError("'aggregate' must be one of 'sum', 'mean', 'median'")
 
+        predictions = [p.split() for p in predictions]
+        # Predictions and references have the same internal types, so only one reference per prediction
+        if isinstance(references[0], str):
+            references = [r.split() for r in references]
+
+            scores_d = cer.calculate_cer_corpus(predictions, references)
+            cer_scores: List[float] = scores_d["cer_scores"]
+
+            if aggregate == "sum":
+                score = sum(cer_scores)
+            elif aggregate == "mean":
+                score = scores_d["mean"]
+            else:
+                score = scores_d["median"]
+        else:
+            # In the case of multiple references, we just find the "best score",
+            # i.e., the reference that the prediction is closest to, i.e. the lowest characTER score
+            references = [[r.split() for r in refs] for refs in references]
+
+            cer_scores = []
+            for pred, refs in zip(predictions, references):
+                min_score = math.inf
+                for ref in refs:
+                    score = calculate_cer(pred, ref)
+
+                    if score < min_score:
+                        min_score = score
+
+                cer_scores.append(min_score)
+
+            if aggregate == "sum":
+                score = sum(cer_scores)
+            elif aggregate == "mean":
+                score = mean(cer_scores)
+            else:
+                score = median(cer_scores)
+
+        # Return scores
         if return_all_scores:
             return {"cer_score": score, "cer_scores": cer_scores}
         else:
