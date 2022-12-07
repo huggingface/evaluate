@@ -106,6 +106,7 @@ TESTS_REQUIRE = [
     # test dependencies
     "absl-py",
     "charcut>=1.1.1",  # for charcut_mt
+    "nltk",  # for NIST and probably others
     "pytest",
     "pytest-datadir",
     "pytest-xdist",
