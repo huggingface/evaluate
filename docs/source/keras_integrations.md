@@ -109,4 +109,5 @@ test_labels = y_test
 
 ```python
 print("Test accuracy is : ", acc.compute(predictions = test_preds, references = test_labels))
+# Test accuracy is : 0.9855
 ```

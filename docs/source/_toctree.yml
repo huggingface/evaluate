@@ -20,7 +20,7 @@
   - sections:
     - local: transformers_integrations
       title: Transformers
-    - local: tf_keras_integrations
+    - local: keras_integrations
       title: Keras and Tensorflow
     - local: sklearn_integrations
       title: scikit-learn
