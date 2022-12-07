@@ -12,9 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """An implementation for calculating CharacTER, a character-based TER variant, useful for machine translation tasks."""
+from typing import Iterable, Literal
+
 import cer
 import datasets
-from datasets import Sequence, Value
+from datasets import Value
 
 import evaluate
 
@@ -49,26 +51,31 @@ normalizing the edit distance, which effectively counters the issue that shorter
 TER."""
 
 _KWARGS_DESCRIPTION = """
-Calculates how good are predictions given some references, using certain scores
+Calculates how good the predictions are in terms of the CharacTER metric given some references
 Args:
     predictions: a list of predictions to score. Each prediction should be a string with
      tokens separated by spaces.
     references: a list of references for each prediction. Each reference should be a string with
      tokens separated by spaces.
+    aggregate: one of "mean", "sum", "median" to indicate how the scores of individual sentences should be
+     aggregated
+    return_all_scores: a boolean, indicating whether in addition to the aggregated score, also all individual
+     scores should be returned
 Returns:
-    cer_scores: a list of all scores, one per ref/hyp pair
+    cer_score: an aggregated score across all the items, based on 'aggregate'
+    cer_scores: (optionally, if 'return_all_scores' evaluates to True) a list of all scores, one per ref/hyp pair
 Examples:
     >>> character_mt = evaluate.load("character")
     >>> preds = ["this week the saudis denied information published in the new york times"]
     >>> refs = ["saudi arabia denied this week information published in the american new york times"]
     >>> character_mt.compute(references=refs, predictions=preds)
-    {'cer_scores': [0.36619718309859156]}
+    {'cer_score': 0.36619718309859156}
     >>> preds = ["this week the saudis denied information published in the new york times",
     ...          "this is in fact an estimate"]
     >>> refs = ["saudi arabia denied this week information published in the american new york times",
     ...         "this is actually an estimate"]
-    >>> character_mt.compute(references=refs, predictions=preds)
-    {'cer_scores': [0.36619718309859156, 0.25925925925925924]}
+    >>> character_mt.compute(references=refs, predictions=preds, aggregate="sum", return_all_scores=True)
+    {'cer_score': 0.6254564423578508, 'cer_scores': [0.36619718309859156, 0.25925925925925924]}
 """
 
 
@@ -91,10 +98,31 @@ class Character(evaluate.Metric):
             codebase_urls=["https://github.com/bramvanroy/CharacTER", "https://github.com/rwth-i6/CharacTER"],
         )
 
-    def _compute(self, predictions, references):
+    def _compute(
+        self,
+        predictions: Iterable[str],
+        references: Iterable[str],
+        aggregate: Literal["mean", "sum", "median"] = "mean",
+        return_all_scores: bool = False,
+    ):
         """Returns the scores. When more than one prediction/reference is given, we can use
         the corpus-focused metric"""
         predictions = [p.split() for p in predictions]
         references = [r.split() for r in references]
 
-        return {"cer_scores": cer.calculate_cer_corpus(predictions, references)["cer_scores"]}
+        scores_d = cer.calculate_cer_corpus(predictions, references)
+        cer_scores = scores_d["cer_scores"]
+
+        if aggregate == "sum":
+            score = sum(cer_scores)
+        elif aggregate == "mean":
+            score = scores_d["mean"]
+        elif aggregate == "median":
+            score = scores_d["median"]
+        else:
+            raise ValueError("'aggregate' must be one of 'sum', 'mean', 'median'")
+
+        if return_all_scores:
+            return {"cer_score": score, "cer_scores": cer_scores}
+        else:
+            return {"cer_score": score}
