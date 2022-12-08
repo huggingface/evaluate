@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 """An implementation for calculating CharCut, a character-based machine translation evaluation metric."""
+from typing import Iterable, Union
+
 import datasets
 from charcut import calculate_charcut
 from datasets import Sequence, Value
@@ -84,6 +86,5 @@ class Charcut(evaluate.Metric):
             codebase_urls=["https://github.com/BramVanroy/CharCut", "https://github.com/alardill/CharCut"],
         )
 
-    def _compute(self, predictions, references):
-        """Returns the scores"""
+    def _compute(self, predictions: Iterable[str], references: Iterable[str]):
         return {"charcut_mt": calculate_charcut(predictions, references)[0]}
