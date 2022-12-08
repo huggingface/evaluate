@@ -144,7 +144,7 @@ class CER(evaluate.Metric):
                 truth_transform=cer_transform,
                 hypothesis_transform=cer_transform,
             )["wer"]
-            
+
             if RETURN_DICT:
                 return {"cer": cer}
             else:

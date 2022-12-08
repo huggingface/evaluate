@@ -109,7 +109,7 @@ class WER(evaluate.Metric):
                 measures = compute_measures(reference, prediction)
                 incorrect += measures["substitutions"] + measures["deletions"] + measures["insertions"]
                 total += measures["substitutions"] + measures["deletions"] + measures["hits"]
-            
+
             if RETURN_DICT:
                 return {"wer": incorrect / total}
             else:
