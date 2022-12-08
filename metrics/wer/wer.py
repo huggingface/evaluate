@@ -15,9 +15,12 @@
 
 import datasets
 from jiwer import compute_measures
+from packaging import version
 
 import evaluate
 
+
+RETURN_DICT = version.parase(evaluate.__version__) > version.parase("0.3.0")
 
 _CITATION = """\
 @inproceedings{inproceedings,
@@ -95,7 +98,10 @@ class WER(evaluate.Metric):
 
     def _compute(self, predictions=None, references=None, concatenate_texts=False):
         if concatenate_texts:
-            return compute_measures(references, predictions)["wer"]
+            if RETURN_DICT:
+                return {"wer": compute_measures(references, predictions)["wer"]}
+            else:
+                return compute_measures(references, predictions)["wer"]
         else:
             incorrect = 0
             total = 0
@@ -103,4 +109,8 @@ class WER(evaluate.Metric):
                 measures = compute_measures(reference, prediction)
                 incorrect += measures["substitutions"] + measures["deletions"] + measures["insertions"]
                 total += measures["substitutions"] + measures["deletions"] + measures["hits"]
-            return incorrect / total
+            
+            if RETURN_DICT:
+                return {"wer": incorrect / total}
+            else:
+                return incorrect / total
