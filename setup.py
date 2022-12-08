@@ -106,6 +106,7 @@ TESTS_REQUIRE = [
     # test dependencies
     "absl-py",
     "cer>=1.2.0",  # for characTER
+    "nltk",  # for NIST and probably others
     "pytest",
     "pytest-datadir",
     "pytest-xdist",
