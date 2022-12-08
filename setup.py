@@ -106,6 +106,7 @@ TESTS_REQUIRE = [
     # test dependencies
     "absl-py",
     "charcut>=1.1.1",  # for charcut_mt
+    "cer>=1.2.0",  # for characTER
     "nltk",  # for NIST and probably others
     "pytest",
     "pytest-datadir",
@@ -156,7 +157,7 @@ EXTRAS_REQUIRE = {
 
 setup(
     name="evaluate",
-    version="0.3.0.dev0",  # expected format is one of x.y.z.dev0, or x.y.z.rc1 or x.y.z (no to dashes, yes to dots)
+    version="0.3.1.dev0",  # expected format is one of x.y.z.dev0, or x.y.z.rc1 or x.y.z (no to dashes, yes to dots)
     description="HuggingFace community-driven open-source library of evaluation",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",
