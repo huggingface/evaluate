@@ -18,17 +18,25 @@ from datasets import Dataset
 from typing_extensions import Literal
 
 from ..module import EvaluationModule
-from ..utils.file_utils import add_start_docstrings
+from ..utils.file_utils import add_end_docstrings, add_start_docstrings
 from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOCSTRING, Evaluator
 
 
-TASK_DOCUMENTATION_KWARGS = r"""
-        input_column (`str`, defaults to `"path"`):
-            the name of the column containing the input audio path in the dataset specified by `data`.
-        label_column (`str`, defaults to `"sentence"`):
-            the name of the column containing the labels in the dataset specified by `data`.
-        generation_kwargs (`Dict`, *optional*, defaults to `None`):
-            The generation kwargs are passed to the pipeline and set the text generation strategy.
+TASK_DOCUMENTATION = r"""
+    Examples:
+    ```python
+    >>> from evaluate import evaluator
+    >>> from datasets import load_dataset
+    >>> task_evaluator = evaluator("automatic-speech-recognition")
+    >>> data = load_dataset("mozilla-foundation/common_voice_11_0", "en", split="validation[:40]")
+    >>> results = task_evaluator.compute(
+    >>>     model_or_pipeline="https://huggingface.co/openai/whisper-tiny.en",
+    >>>     data=data,
+    >>>     input_column="path",
+    >>>     label_column="sentence",
+    >>>     metric="wer",
+    >>> )
+    ```
 """
 
 
@@ -48,9 +56,8 @@ class AutomaticSpeechRecognitionEvaluator(Evaluator):
     def predictions_processor(self, predictions, label_mapping):
         return {"predictions": [pred["text"] for pred in predictions]}
 
-    @add_start_docstrings(
-        EVALUTOR_COMPUTE_START_DOCSTRING, TASK_DOCUMENTATION_KWARGS, EVALUATOR_COMPUTE_RETURN_DOCSTRING
-    )
+    @add_start_docstrings(EVALUTOR_COMPUTE_START_DOCSTRING)
+    @add_end_docstrings(EVALUATOR_COMPUTE_RETURN_DOCSTRING, TASK_DOCUMENTATION)
     def compute(
         self,
         model_or_pipeline: Union[
@@ -71,20 +78,12 @@ class AutomaticSpeechRecognitionEvaluator(Evaluator):
         generation_kwargs: dict = None,
     ) -> Tuple[Dict[str, float], Any]:
         """
-        Examples:
-        ```python
-        >>> from evaluate import evaluator
-        >>> from datasets import load_dataset
-        >>> task_evaluator = evaluator("automatic-speech-recognition")
-        >>> data = load_dataset("mozilla-foundation/common_voice_11_0", "en", split="validation[:40]")
-        >>> results = task_evaluator.compute(
-        >>>     model_or_pipeline="https://huggingface.co/openai/whisper-tiny.en",
-        >>>     data=data,
-        >>>     input_column="path",
-        >>>     label_column="sentence",
-        >>>     metric="wer",
-        >>> )
-        ```
+        input_column (`str`, defaults to `"path"`):
+            the name of the column containing the input audio path in the dataset specified by `data`.
+        label_column (`str`, defaults to `"sentence"`):
+            the name of the column containing the labels in the dataset specified by `data`.
+        generation_kwargs (`Dict`, *optional*, defaults to `None`):
+            The generation kwargs are passed to the pipeline and set the text generation strategy.
         """
 
         if generation_kwargs is not None:
