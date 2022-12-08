@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""An implementation for calculating CharacTER, a character-based TER variant, useful for machine translation tasks."""
+"""CharacTER metric, a character-based TER variant, for machine translation."""
 import math
 from statistics import mean, median
 from typing import Iterable, List, Union
@@ -91,7 +91,7 @@ Examples:
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class Character(evaluate.Metric):
-    """CharacTer is a novel character level metric inspired by the commonly applied translation edit rate (TER)."""
+    """CharacTer is a character-level metric inspired by the commonly applied translation edit rate (TER)."""
 
     def _info(self):
         return evaluate.MetricInfo(
