@@ -66,9 +66,9 @@ An `EvaluationSuite` can be loaded by name from the Hugging Face Hub, or locally
 >>> from evaluate import EvaluationSuite
 >>> suite = EvaluationSuite.load('mathemakitten/glue-evaluation-suite')
 >>> results = suite.run("gpt2")
+```
 
 |   accuracy |   total_time_in_seconds |   samples_per_second |   latency_in_seconds | task_name   |
 |-----------:|------------------------:|---------------------:|---------------------:|:------------|
 |        0.5 |                0.740811 |             13.4987  |            0.0740811 | glue/sst2   |
 |        0.4 |                1.67552  |              5.9683  |            0.167552  | glue/rte    |
-```
