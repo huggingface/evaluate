@@ -43,7 +43,7 @@ _CITATION = """\
 """
 
 _DESCRIPTION = """\
-CharacTer is a novel character level metric inspired by the commonly applied translation edit rate (TER). It is
+CharacTer is a character-level metric inspired by the commonly applied translation edit rate (TER). It is
 defined as the minimum number of character edits required to adjust a hypothesis, until it completely matches the
 reference, normalized by the length of the hypothesis sentence. CharacTer calculates the character level edit
 distance while performing the shift edit on word level. Unlike the strict matching criterion in TER, a hypothesis
@@ -54,7 +54,7 @@ normalizing the edit distance, which effectively counters the issue that shorter
 TER."""
 
 _KWARGS_DESCRIPTION = """
-Calculates how good the predictions are in terms of the CharacTER metric given some references
+Calculates how good the predictions are in terms of the CharacTER metric given some references.
 Args:
     predictions: a list of predictions to score. Each prediction should be a string with
      tokens separated by spaces.
