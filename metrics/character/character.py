@@ -14,7 +14,7 @@
 """An implementation for calculating CharacTER, a character-based TER variant, useful for machine translation tasks."""
 import math
 from statistics import mean, median
-from typing import Iterable, List, Literal, Union
+from typing import Iterable, List, Union
 
 import cer
 import datasets
@@ -118,14 +118,15 @@ class Character(evaluate.Metric):
         self,
         predictions: Iterable[str],
         references: Union[Iterable[str], Iterable[Iterable[str]]],
-        aggregate: Literal["mean", "sum", "median"] = "mean",
+        aggregate: str = "mean",
         return_all_scores: bool = False,
     ):
         if aggregate not in ("mean", "sum", "median"):
             raise ValueError("'aggregate' must be one of 'sum', 'mean', 'median'")
 
         predictions = [p.split() for p in predictions]
-        # Predictions and references have the same internal types, so only one reference per prediction
+        # Predictions and references have the same internal types (both lists of strings),
+        # so only one reference per prediction
         if isinstance(references[0], str):
             references = [r.split() for r in references]
 
