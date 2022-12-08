@@ -105,6 +105,7 @@ EVALUATOR_REQUIRE = [
 TESTS_REQUIRE = [
     # test dependencies
     "absl-py",
+    "charcut>=1.1.1",  # for charcut_mt
     "cer>=1.2.0",  # for characTER
     "nltk",  # for NIST and probably others
     "pytest",
