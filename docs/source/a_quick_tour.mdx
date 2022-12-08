@@ -341,13 +341,3 @@ class Suite(evaluate.EvaluationSuite):
 
 Evaluation can be run by loading the `EvaluationSuite` and calling `run()` method with a model or pipeline.
 
-```
->>> from evaluate import EvaluationSuite
->>> suite = EvaluationSuite.load('mathemakitten/sentiment-evaluation-suite')
->>> results = suite.run("huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli")
-
-|   accuracy |   total_time_in_seconds |   samples_per_second |   latency_in_seconds | task_name   |
-|------------:|---------------------:|--------------------------:|:----------------|:-----------|
-|        0.3 |                4.62804  |              2.16074 |            0.462804  | imdb        |
-|        0   |                0.686388 |             14.569   |            0.0686388 | sst2        |
-```
