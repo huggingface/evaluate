@@ -29,7 +29,7 @@ if PY_VERSION < version.parse("3.8"):
 else:
     import importlib.metadata as importlib_metadata
 
-RETURN_DICT = version.parase(evaluate.__version__) > version.parase("0.3.0")
+RETURN_DICT = version.parse(evaluate.__version__) > version.parse("0.3.0")
 
 SENTENCE_DELIMITER = ""
 
