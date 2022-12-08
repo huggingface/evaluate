@@ -269,7 +269,7 @@ class TestMetric(TestCase):
             (preds_0, refs_0), (preds_1, refs_1) = DummyMetric.separate_predictions_and_references()
             expected_results = DummyMetric.separate_expected_results()
 
-            pool = Pool(processes=4)
+            pool = Pool(processes=2)
 
             results = pool.map(
                 metric_compute,
