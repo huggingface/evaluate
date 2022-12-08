@@ -43,7 +43,7 @@ matches. As a similarity metric this is not new, but to the best of our knowledg
 and scoring of MT outputs. It has the neat effect of keeping character-based differences readable by humans."""
 
 _KWARGS_DESCRIPTION = """
-Calculates how good predictions are given some references. 
+Calculates how good predictions are given some references.
 Args:
     predictions: a list of predictions to score. Each prediction should be a string with
      tokens separated by spaces.
