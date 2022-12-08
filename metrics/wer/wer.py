@@ -72,7 +72,7 @@ Examples:
     >>> references = ["this is the reference", "there is another one"]
     >>> wer = evaluate.load("wer")
     >>> wer_score = wer.compute(predictions=predictions, references=references)
-    >>> print(wer_score)
+    >>> print(wer_score["wer"])
     0.5
 """
 
