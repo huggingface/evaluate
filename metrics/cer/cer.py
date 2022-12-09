@@ -103,7 +103,7 @@ Args:
     predictions: list of transcribtions to score.
     concatenate_texts: Whether or not to concatenate sentences before evaluation, set to True for more accurate result.
 Returns:
-    (dict): the character error rate (before evaluate>0.3.0 returns just value)
+    (dict): the character error rate (before evaluate>0.3.0 returns just a float value)
 
 Examples:
 
