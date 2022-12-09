@@ -22,6 +22,10 @@
   - sections:
     - local: transformers_integrations
       title: Transformers
+    - local: keras_integrations
+      title: Keras and Tensorflow
+    - local: sklearn_integrations
+      title: scikit-learn
     title: Using 🤗 Evaluate with other ML frameworks
   title: "How-to guides"
 - sections:
@@ -41,6 +45,8 @@
     title: Hub methods
   - local: package_reference/evaluator_classes
     title: Evaluator classes
+  - local: package_reference/visualization_methods
+    title: Visualization methods
   - local: package_reference/logging_methods
     title: Logging methods
   title: "Reference"

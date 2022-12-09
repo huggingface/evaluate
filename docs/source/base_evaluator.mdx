@@ -11,6 +11,7 @@ Currently supported tasks are:
 - `"text2text-generation"`: will use the [`Text2TextGenerationEvaluator`].
 - `"summarization"`: will use the [`SummarizationEvaluator`].
 - `"translation"`: will use the [`TranslationEvaluator`].
+- `"automatic-speech-recognition"`: will use the [`AutomaticSpeechRecognitionEvaluator`].
 
 To run an `Evaluator` with several tasks in a single call, use the [EvaluationSuite](evaluation_suite), which runs evaluations on a collection of `SubTask`s.
 
@@ -56,7 +57,7 @@ eval_results = task_evaluator.compute(
     label_mapping={"NEGATIVE": 0, "POSITIVE": 1}
 )
 
-# 3. Pass an instantiated pipeline 
+# 3. Pass an instantiated pipeline
 pipe = pipeline("text-classification", model="lvwerra/distilbert-imdb")
 
 eval_results = task_evaluator.compute(
@@ -83,7 +84,7 @@ The results will look as follows:
 }
 ```
 
-Note that evaluation results include both the requested metric, and information about the time it took to obtain predictions through the pipeline. 
+Note that evaluation results include both the requested metric, and information about the time it took to obtain predictions through the pipeline.
 
 <Tip>
 
@@ -180,12 +181,35 @@ The result is a table that looks like this:
 | philschmid/distilroberta-base-ner-conll2003                        |        0.961 |              0.994 |                   2.436 |              410.579 |                0.002 |
 | xlm-roberta-large-finetuned-conll03-english                        |        0.969 |              0.882 |                  11.996 |               83.359 |                0.012 |
 
+
+### Visualizing results
+
+You can feed in the `results` list above into the `plot_radar()` function to visualize different aspects of their performance and choose the model that is the best fit, depending on the metric(s) that are relevant to your use case:
+
+```python
+import evaluate
+from evaluate.visualization import radar_plot
+
+>>> plot = radar_plot(data=results, model_names=models, invert_range=["latency_in_seconds"])
+>>> plot.show()
+```
+
+<div class="flex justify-center">
+    <img src="https://huggingface.co/datasets/evaluate/media/resolve/main/viz.png" width="400"/>
+</div>
+
+
+Don't forget to specify `invert_range` for metrics for which smaller is better (such as the case for latency in seconds).
+
+If you want to save the plot locally, you can use the `plot.savefig()` function with the option `bbox_inches='tight'`, to make sure no part of the image gets cut off.
+
+
 ## Question Answering
 
 With the question-answering evaluator one can evaluate models for QA without needing to worry about the complicated pre- and post-processing that's required for these models. It has the following specific arguments:
 
 
-- `question_column="question"`: the name of the column containing the question in the dataset 
+- `question_column="question"`: the name of the column containing the question in the dataset
 - `context_column="context"`: the name of the column containing the context
 - `id_column="id"`: the name of the column cointaing the identification field of the question and answer pair
 - `label_column="answers"`: the name of the column containing the answers
@@ -217,13 +241,13 @@ Results include confidence intervals as well as error estimates as follows:
 
 ```python
 {
-    'exact_match': 
+    'exact_match':
     {
         'confidence_interval': (79.67, 84.54),
         'score': 82.30,
         'standard_error': 1.28
     },
-    'f1': 
+    'f1':
     {
         'confidence_interval': (85.30, 88.88),
         'score': 87.23,
