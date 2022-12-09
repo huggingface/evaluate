@@ -13,6 +13,7 @@ Currently supported tasks are:
 - `"translation"`: will use the [`TranslationEvaluator`].
 - `"automatic-speech-recognition"`: will use the [`AutomaticSpeechRecognitionEvaluator`].
 
+To run an `Evaluator` with several tasks in a single call, use the [EvaluationSuite](evaluation_suite), which runs evaluations on a collection of `SubTask`s.
 
 Each task has its own set of requirements for the dataset format and pipeline output, make sure to check them out for your custom use case. Let's have a look at some of them and see how you can use the evaluator to evalute a single or multiple of models, datasets, and metrics at the same time.
 
