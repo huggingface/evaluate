@@ -31,6 +31,7 @@ from transformers import (
 )
 
 from evaluate import (
+    AutomaticSpeechRecognitionEvaluator,
     Evaluator,
     ImageClassificationEvaluator,
     QuestionAnsweringEvaluator,
@@ -116,6 +117,14 @@ class DummyTokenClassificationPipeline:
         ]
 
         return [result]
+
+
+class DummyAutomaticSpeechRecognitionPipeline:
+    def __init__(self) -> None:
+        self.task = "automatic-speech-recognition"
+
+    def __call__(self, inputs, **kwargs):
+        return [{"text": "Lorem ipsum"} for _ in inputs]
 
 
 class TestEvaluator(TestCase):
@@ -959,3 +968,64 @@ class TestText2TextGenerationEvaluator(TestCase):
             data=self.data,
         )
         self.assertEqual(results["bleu"], 0)
+
+
+class TestAutomaticSpeechRecognitionEvaluator(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict(
+            {
+                "path": [
+                    # Examples copied from default speech model of
+                    # `automic-speech-recognition` pipeline:
+                    # https://huggingface.co/facebook/wav2vec2-base-960h
+                    # https://github.com/huggingface/transformers/blob/main/src/transformers/pipelines/__init__.py#L161
+                    "https://cdn-media.huggingface.co/speech_samples/sample1.flac",
+                    "https://cdn-media.huggingface.co/speech_samples/sample2.flac",
+                ],
+                "sentence": ["Ipsum Lorem"] * 2,
+            }
+        )
+        self.pipe = DummyAutomaticSpeechRecognitionPipeline()
+        self.evaluator = evaluator("automatic-speech-recognition")
+
+    def test_pipe_init(self):
+        print(self.evaluator)
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+        )
+        print(results)
+        self.assertEqual(results["wer"], 1.0)
+
+    def test_class_init(self):
+        evaluator = AutomaticSpeechRecognitionEvaluator()
+        self.assertEqual(evaluator.task, "automatic-speech-recognition")
+        self.assertIsNone(evaluator.default_metric_name)
+
+        results = evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="wer",
+        )
+        self.assertEqual(results["wer"], 1.0)
+
+    @slow
+    def test_default_pipe_init(self):
+        results = self.evaluator.compute(data=self.data)
+        self.assertGreater(results["wer"], 1.0)
+
+    def test_overwrite_default_metric(self):
+        cer = load("cer")
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric=cer,
+        )
+        self.assertEqual(results["cer"], 0.7272727272727273)
+
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="cer",
+        )
+        self.assertEqual(results["cer"], 0.7272727272727273)
