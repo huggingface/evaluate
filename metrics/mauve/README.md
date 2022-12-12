@@ -13,14 +13,8 @@ tags:
 description: >-
   MAUVE is a measure of the statistical gap between two text distributions, e.g., how far the text written by a model is the distribution of human text, using samples from both distributions.
  
-  MAUVE takes values between 0 (completely different distributions) and 1 (identical distributions).
- 
   MAUVE is obtained by computing Kullback–Leibler (KL) divergences between the two distributions in a quantized embedding space of a large language model. It can quantify differences in the quality of generated text based on the size of the model, the decoding algorithm, and the length of the generated text. MAUVE was found to correlate the strongest with human evaluations over baseline metrics for open-ended text generation.
  
-  For details, see the MAUVE paper: https://arxiv.org/abs/2102.01454 (NeurIPS, 2021).
- 
-  This metric is a wrapper around the official implementation of MAUVE:
-  https://github.com/krishnap25/mauve
 ---
 
 # Metric Card for MAUVE
@@ -92,16 +86,6 @@ This metric outputs a dictionary with 5 key-value pairs:
 
 The [original MAUVE paper](https://arxiv.org/abs/2102.01454) reported values ranging from 0.88 to 0.94 for open-ended text generation using a text completion task in the web text domain. The authors found that bigger models resulted in higher MAUVE scores and that MAUVE is correlated with human judgments.
 
-### Best practices
-
-It is a good idea to use at least 1000 samples for each distribution to compute MAUVE (the original paper uses 5000).
-
-MAUVE is unable to identify very small differences between different settings of generation (e.g., between top-p sampling with p=0.95 versus 0.96). It is important, therefore, to account for the randomness inside the generation (e.g., due to sampling) and within the MAUVE estimation procedure (see the `seed` parameter above). Concretely, it is a good idea to obtain generations using multiple random seeds and/or to use rerun MAUVE with multiple values of the parameter `seed`.
-
-For MAUVE to be large, the model distribution must be close to the human text distribution as seen by the embeddings. It is possible to have high-quality model text that still has a small MAUVE score (i.e., large gap) if it contains text about different topics/subjects, or uses a different writing style or vocabulary, or contains texts of a different length distribution. MAUVE summarizes the statistical gap (as measured by the large language model embeddings) --- this includes all these factors in addition to the quality-related aspects such as grammaticality.
-
-See the [official implementation](https://github.com/krishnap25/mauve#best-practices-for-mauve) for more details about best practices. 
-
 
 ## Examples
 
@@ -135,6 +119,14 @@ The [original MAUVE paper](https://arxiv.org/abs/2102.01454) did not analyze the
 
 Also, calculating the MAUVE metric involves downloading the model from which features are obtained -- the default model, `gpt2-large`, takes over 3GB of storage space and downloading it can take a significant amount of time depending on the speed of your internet connection. If this is an issue, choose a smaller model; for instance, `gpt` is 523MB.
 
+It is a good idea to use at least 1000 samples for each distribution to compute MAUVE (the original paper uses 5000).
+
+MAUVE is unable to identify very small differences between different settings of generation (e.g., between top-p sampling with p=0.95 versus 0.96). It is important, therefore, to account for the randomness inside the generation (e.g., due to sampling) and within the MAUVE estimation procedure (see the `seed` parameter above). Concretely, it is a good idea to obtain generations using multiple random seeds and/or to use rerun MAUVE with multiple values of the parameter `seed`.
+
+For MAUVE to be large, the model distribution must be close to the human text distribution as seen by the embeddings. It is possible to have high-quality model text that still has a small MAUVE score (i.e., large gap) if it contains text about different topics/subjects, or uses a different writing style or vocabulary, or contains texts of a different length distribution. MAUVE summarizes the statistical gap (as measured by the large language model embeddings) --- this includes all these factors in addition to the quality-related aspects such as grammaticality.
+
+See the [official implementation](https://github.com/krishnap25/mauve#best-practices-for-mauve) for more details about best practices. 
+
 
 ## Citation
 
@@ -150,5 +142,3 @@ Also, calculating the MAUVE metric involves downloading the model from which fea
 ## Further References
 - [Official MAUVE implementation](https://github.com/krishnap25/mauve)
 - [Hugging Face Tasks - Text Generation](https://huggingface.co/tasks/text-generation)
-
-
