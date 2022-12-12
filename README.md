@@ -5,8 +5,8 @@
 </p>
 
 <p align="center">
-    <a href="https://circleci.com/gh/huggingface/evaluate">
-        <img alt="Build" src="https://img.shields.io/circleci/build/github/huggingface/evaluate/main">
+    <a href="https://github.com/huggingface/evaluate/actions/workflows/ci.yml?query=branch%3Amain">
+        <img alt="Build" src="https://github.com/huggingface/evaluate/actions/workflows/ci.yml/badge.svg?branch=main">
     </a>
     <a href="https://github.com/huggingface/evaluate/blob/master/LICENSE">
         <img alt="GitHub" src="https://img.shields.io/github/license/huggingface/evaluate.svg?color=blue">
