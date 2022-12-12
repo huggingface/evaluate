@@ -182,7 +182,6 @@ This solution allows 🤗 Evaluate to perform distributed predictions, which is 
 
 Often one wants to not only evaluate a single metric but a range of different metrics capturing different aspects of a model. E.g. for classification it is usually a good idea to compute F1-score, recall, and precision in addition to accuracy to get a better picture of model performance. Naturally, you can load a bunch of metrics and call them sequentially. However, a more convenient way is to use the [`~evaluate.combine`] function to bundle them together:
 
-
 ```python
 >>> clf_metrics = evaluate.combine(["accuracy", "f1", "precision", "recall"])
 ```
@@ -319,3 +318,63 @@ Which lets you visually compare the 4 models and choose the optimal one for you,
 <div class="flex justify-center">
     <img src="https://huggingface.co/datasets/evaluate/media/resolve/main/example_viz.png" width="400"/>
 </div>
+
+## Running evaluation on a suite of tasks
+
+It can be useful to evaluate models on a variety of different tasks to understand their downstream performance. The [EvaluationSuite](evaluation_suite) enables evaluation of models on a collection of tasks. Tasks can be constructed as ([evaluator](base_evaluator), dataset, metric) tuples and passed to an [EvaluationSuite](evaluation_suite) stored on the Hugging Face Hub as a Space, or locally as a Python script. See the [evaluator documentation](base_evaluator) for a list of currently supported tasks.
+
+`EvaluationSuite` scripts can be defined as follows, and supports Python code for data preprocessing.
+
+```python
+import evaluate
+from evaluate.evaluation_suite import SubTask
+
+class Suite(evaluate.EvaluationSuite):
+
+    def __init__(self, name):
+        super().__init__(name)
+
+        self.suite = [
+            SubTask(
+                task_type="text-classification",
+                data="imdb",
+                split="test[:1]",
+                args_for_task={
+                    "metric": "accuracy",
+                    "input_column": "text",
+                    "label_column": "label",
+                    "label_mapping": {
+                        "LABEL_0": 0.0,
+                        "LABEL_1": 1.0
+                    }
+                }
+            ),
+            SubTask(
+                task_type="text-classification",
+                data="sst2",
+                split="test[:1]",
+                args_for_task={
+                    "metric": "accuracy",
+                    "input_column": "sentence",
+                    "label_column": "label",
+                    "label_mapping": {
+                        "LABEL_0": 0.0,
+                        "LABEL_1": 1.0
+                    }
+                }
+            )
+        ]
+```
+
+Evaluation can be run by loading the `EvaluationSuite` and calling `run()` method with a model or pipeline.
+
+```
+>>> from evaluate import EvaluationSuite
+>>> suite = EvaluationSuite.load('mathemakitten/sentiment-evaluation-suite')
+>>> results = suite.run("huggingface/prunebert-base-uncased-6-finepruned-w-distil-mnli")
+```
+
+|   accuracy |   total_time_in_seconds |   samples_per_second |   latency_in_seconds | task_name   |
+|------------:|---------------------:|--------------------------:|:----------------|:-----------|
+|        0.3 |                4.62804  |              2.16074 |            0.462804  | imdb        |
+|        0   |                0.686388 |             14.569   |            0.0686388 | sst2        |

@@ -17,9 +17,13 @@
     title: Using the evaluator
   - local: custom_evaluator
     title: Using the evaluator with custom pipelines
+  - local: evaluation_suite
+    title: Creating an EvaluationSuite
   - sections:
     - local: transformers_integrations
       title: Transformers
+    - local: keras_integrations
+      title: Keras and Tensorflow
     - local: sklearn_integrations
       title: scikit-learn
     title: Using 🤗 Evaluate with other ML frameworks

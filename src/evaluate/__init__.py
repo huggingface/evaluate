@@ -17,7 +17,7 @@
 # pylint: enable=line-too-long
 # pylint: disable=g-import-not-at-top,g-bad-import-order,wrong-import-position
 
-__version__ = "0.3.0.dev0"
+__version__ = "0.3.1.dev0"
 
 from packaging import version
 
@@ -28,6 +28,7 @@ del version
 
 from .evaluation_suite import EvaluationSuite
 from .evaluator import (
+    AutomaticSpeechRecognitionEvaluator,
     Evaluator,
     ImageClassificationEvaluator,
     QuestionAnsweringEvaluator,
