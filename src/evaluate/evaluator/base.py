@@ -101,7 +101,7 @@ EVALUATOR_COMPUTE_RETURN_DOCSTRING = r"""
 
 class Evaluator(ABC):
     """
-    The Evaluator class is the class from which all evaluators inherit. Refer to this class for methods shared across
+    The [`Evaluator`] class is the class from which all evaluators inherit. Refer to this class for methods shared across
     different evaluators.
     Base class implementing evaluator operations.
     """
@@ -291,11 +291,20 @@ class Evaluator(ABC):
         Ensure the columns required for the evaluation are present in the dataset.
 
         Args:
-            data (`str` or `Dataset`):
+            data (`str` or [`Dataset`]):
                 Specifies the dataset we will run evaluation on.
             columns_names (`List[str]`):
-            List of column names to check in the dataset. The keys are the arguments to the compute() method,
-            while the values are the column names to check.
+                List of column names to check in the dataset. The keys are the arguments to the [`evaluate.EvaluationModule.compute`] method,
+                while the values are the column names to check.
+
+        Example:
+
+        ```py
+        >>> from datasets import load_dataset
+        >>> from evaluate import evaluator
+        >>> data = load_dataset("rotten_tomatoes', split="train")
+        >>> evaluator.check_required_columns(data, {"input_column": "text", "label_column": "label"})
+        ```
         """
         for input_name, column_name in columns_names.items():
             if column_name not in data.column_names:
@@ -306,14 +315,26 @@ class Evaluator(ABC):
     @staticmethod
     def get_dataset_split(data, subset=None, split=None):
         """
-        Infers which split to use if None is given.
+        Infers which split to use if `None` is given.
 
         Args:
-             data (`str`): Name of dataset
-             subset (`str`): Name of config for datasets with multiple configurations (e.g. 'glue/cola')
-             split (`str`, defaults to None): Split to use
+             data (`str`):
+                Name of dataset.
+             subset (`str`):
+                Name of config for datasets with multiple configurations (e.g. 'glue/cola').
+             split (`str`, defaults to `None`):
+                Split to use.
         Returns:
             `split`: `str` containing which split to use
+
+        Example:
+
+        ```py
+        >>> from evaluate import evaluator
+        >>> evaluator("text-classification").get_dataset_split(data="rotten_tomatoes")
+        WARNING:evaluate.evaluator.base:Dataset split not defined! Automatically evaluating with split: TEST
+        'test'
+        ```
         """
         if split is None:
             split = choose_split(data, subset)
@@ -324,15 +345,28 @@ class Evaluator(ABC):
         """
         Load dataset with given subset and split.
         Args:
-            data (`Dataset` or `str`, defaults to None): Specifies the dataset we will run evaluation on. If it is of
-            type `str`, we treat it as the dataset name, and load it. Otherwise we assume it represents a pre-loaded dataset.
-            subset (`str`, defaults to None): Specifies dataset subset to be passed to `name` in `load_dataset`. To be
+            data ([`Dataset`] or `str`, defaults to `None`):
+                Specifies the dataset we will run evaluation on. If it is of
+                type `str`, we treat it as the dataset name, and load it. Otherwise we assume it represents a pre-loaded dataset.
+            subset (`str`, defaults to `None`):
+                Specifies dataset subset to be passed to `name` in `load_dataset`. To be
                 used with datasets with several configurations (e.g. glue/sst2).
-            split (`str`, defaults to None):
-                User-defined dataset split by name (e.g. train, validation, test). Supports slice-split (test[:n]).
+            split (`str`, defaults to `None`):
+                User-defined dataset split by name (e.g. train, validation, test). Supports slice-split (`test[:n]`).
                 If not defined and data is a `str` type, will automatically select the best one via `choose_split()`.
         Returns:
-            data (`Dataset`): Loaded dataset which will be used for evaluation.
+            data ([`Dataset`]): Loaded dataset which will be used for evaluation.
+
+        Example:
+
+        ```py
+        >>> from evaluate import evaluator
+        >>> evaluator("text-classification").load_data(data="rotten_tomatoes", split="train")
+        Dataset({
+            features: ['text', 'label'],
+            num_rows: 8530
+        })
+        ```
         """
         if isinstance(data, str):
             split = self.get_dataset_split(data, subset, split)
@@ -352,14 +386,26 @@ class Evaluator(ABC):
         Prepare data.
 
         Args:
-            data (`Dataset`): Specifies the dataset we will run evaluation on.
+            data ([`Dataset`]):
+                Specifies the dataset we will run evaluation on.
             input_column (`str`, defaults to `"text"`):
-                the name of the column containing the text feature in the dataset specified by `data`.
+                The name of the column containing the text feature in the dataset specified by `data`.
+            second_input_column(`str`, *optional*):
+                The name of the column containing the second text feature if there is one. Otherwise, set to `None`.
             label_column (`str`, defaults to `"label"`):
-                the name of the column containing the labels in the dataset specified by `data`.
+                The name of the column containing the labels in the dataset specified by `data`.
         Returns:
             `dict`:  metric inputs.
             `list`:  pipeline inputs.
+
+        Example:
+
+        ```py
+        >>> from evaluate import evaluator
+        >>> from datasets import load_dataset
+
+        >>> ds = load_dataset("rotten_tomatoes", split="train")
+        >>> evaluator("text-classification").prepare_data(ds, input_column="text", second_input_column=None, label_column="label")
         """
 
         self.check_required_columns(data, {"input_column": input_column, "label_column": label_column})
@@ -377,17 +423,23 @@ class Evaluator(ABC):
         Prepare pipeline.
 
         Args:
-            model_or_pipeline (`str` or `Pipeline` or `Callable` or `PreTrainedModel` or `TFPreTrainedModel`,
-            defaults to `None`):
+            model_or_pipeline (`str` or [`~transformers.Pipeline`] or `Callable` or [`~transformers.PreTrainedModel`] or [`~transformers.TFPreTrainedModel`], defaults to `None`):
                 If the argument in not specified, we initialize the default pipeline for the task. If the argument is of the type `str` or
-                is a model instance, we use it to initialize a new `Pipeline` with the given model. Otherwise we assume the
+                is a model instance, we use it to initialize a new [`~transformers.Pipeline`] with the given model. Otherwise we assume the
                 argument specifies a pre-initialized pipeline.
-            preprocessor (`PreTrainedTokenizerBase` or `FeatureExtractionMixin`, *optional*, defaults to `None`):
+            preprocessor ([`~transformers.PreTrainedTokenizerBase`] or [`~transformers.FeatureExtractionMixin`], *optional*, defaults to `None`):
                 Argument can be used to overwrite a default preprocessor if `model_or_pipeline` represents a model for
                 which we build a pipeline. If `model_or_pipeline` is `None` or a pre-initialized pipeline, we ignore
                 this argument.
         Returns:
             The initialized pipeline.
+
+        Example:
+
+        ```py
+        >>> from evaluate import evaluator
+        >>> evaluator("text-classification").prepare_pipeline(model_or_pipeline="distilbert-base-uncased")
+        ```
         """
 
         if device is None:
@@ -423,12 +475,19 @@ class Evaluator(ABC):
         Prepare metric.
 
         Args:
-            metric (`str` or `EvaluationModule`, defaults to `None`):
+            metric (`str` or [`EvaluationModule`], defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
 
         Returns:
             The loaded metric.
+
+        Example:
+
+        ```py
+        >>> from evaluate import evaluator
+        >>> evaluator("text-classification").prepare_metric("accuracy")
+        ```
         """
         # Prepare metric.
         if metric is None:

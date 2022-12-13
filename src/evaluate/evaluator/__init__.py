@@ -103,7 +103,7 @@ def check_task(task: str) -> Dict:
 def evaluator(task: str = None) -> Evaluator:
     """
     Utility factory method to build an [`Evaluator`].
-    Evaluators encapsulate a task and a default metric name. They leverage `pipeline` functionalify from `transformers`
+    Evaluators encapsulate a task and a default metric name. They leverage `pipeline` functionality from `transformers`
     to simplify the evaluation of multiple combinations of models, datasets and metrics for a given task.
     Args:
         task (`str`):

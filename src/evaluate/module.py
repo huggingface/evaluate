@@ -143,24 +143,34 @@ class EvaluationModuleInfoMixin:
 
 
 class EvaluationModule(EvaluationModuleInfoMixin):
-    """A EvaluationModule is the base class and common API for metrics, comparisons, and measurements.
+    """A `EvaluationModule` is the base class and common API for metrics, comparisons, and measurements.
 
     Args:
-        config_name (``str``): This is used to define a hash specific to a module computation script and prevents the module's data
+        config_name (`str`):
+            This is used to define a hash specific to a module computation script and prevents the module's data
             to be overridden when the module loading script is modified.
-        keep_in_memory (:obj:`bool`): keep all predictions and references in memory. Not possible in distributed settings.
-        cache_dir (``str``): Path to a directory in which temporary prediction/references data will be stored.
+        keep_in_memory (`bool`):
+            Keep all predictions and references in memory. Not possible in distributed settings.
+        cache_dir (`str`):
+            Path to a directory in which temporary prediction/references data will be stored.
             The data directory should be located on a shared file-system in distributed setups.
-        num_process (``int``): specify the total number of nodes in a distributed settings.
+        num_process (`int`):
+            Specify the total number of nodes in a distributed settings.
             This is useful to compute module in distributed setups (in particular non-additive modules like F1).
-        process_id (``int``): specify the id of the current process in a distributed setup (between 0 and num_process-1)
+        process_id (`int`):
+            Specify the id of the current process in a distributed setup (between 0 and num_process-1)
             This is useful to compute module in distributed setups (in particular non-additive metrics like F1).
-        seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`evaluate.EvaluationModule.compute` is run.
-        experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
+        seed (`int`, optional):
+            If specified, this will temporarily set numpy's random seed when [`~evaluate.EvaluationModule.compute`] is run.
+        experiment_id (`str`):
+            A specific experiment id. This is used if several distributed evaluations share the same file system.
             This is useful to compute module in distributed setups (in particular non-additive metrics like F1).
-        hash (``str``): Used to identify the evaluation module according to the hashed file contents.
-        max_concurrent_cache_files (``int``): Max number of concurrent module cache files (default 10000).
-        timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
+        hash (`str`):
+            Used to identify the evaluation module according to the hashed file contents.
+        max_concurrent_cache_files (`int`):
+            Max number of concurrent module cache files (default `10000`).
+        timeout (`Union[int, float]`):
+            Timeout in second for distributed setting synchronization.
     """
 
     def __init__(
@@ -404,16 +414,25 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         Usage of positional arguments is not allowed to prevent mistakes.
 
         Args:
-            predictions (list/array/tensor, optional): Predictions.
-            references (list/array/tensor, optional): References.
-            **kwargs (optional): Keyword arguments that will be forwarded to the evaluation module :meth:`_compute`
+            predictions (`list/array/tensor`, *optional*):
+                Predictions.
+            references (`list/array/tensor`, *optional*):
+                References.
+            **kwargs (optional):
+                Keyword arguments that will be forwarded to the evaluation module [`~evaluate.EvaluationModule.compute`]
                 method (see details in the docstring).
 
         Return:
-            dict or None
+            `dict` or `None`
 
-            - Dictionary with the results if this evaluation module is run on the main process (``process_id == 0``).
-            - None if the evaluation module is not run on the main process (``process_id != 0``).
+            - Dictionary with the results if this evaluation module is run on the main process (`process_id == 0`).
+            - `None` if the evaluation module is not run on the main process (`process_id != 0`).
+
+        ```py
+        >>> import evaluate
+        >>> accuracy =  evaluate.load("accuracy")
+        >>> accuracy.compute(predictions=[0, 1, 1, 0], references=[0, 1, 0, 1])
+        ```
         """
         all_kwargs = {"predictions": predictions, "references": references, **kwargs}
         if predictions is None and references is None:
@@ -466,8 +485,19 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         """Add a batch of predictions and references for the evaluation module's stack.
 
         Args:
-            predictions (list/array/tensor, optional): Predictions.
-            references (list/array/tensor, optional): References.
+            predictions (`list/array/tensor`, *optional*):
+                Predictions.
+            references (`list/array/tensor`, *optional*):
+                References.
+
+        Example:
+
+        ```py
+        >>> import evaluate
+        >>> accuracy = evaluate.load("accuracy")
+        >>> for refs, preds in zip([[0,1],[0,1]], [[1,0],[0,1]]):
+        ...     accuracy.add_batch(references=refs, predictions=preds)
+        ```
         """
         bad_inputs = [input_name for input_name in kwargs if input_name not in self._feature_names()]
         if bad_inputs:
@@ -515,8 +545,18 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         """Add one prediction and reference for the evaluation module's stack.
 
         Args:
-            prediction (list/array/tensor, optional): Predictions.
-            reference (list/array/tensor, optional): References.
+            prediction (`list/array/tensor`, *optional*):
+                Predictions.
+            reference (`list/array/tensor`, *optional*):
+                References.
+
+        Example:
+
+        ```py
+        >>> import evaluate
+        >>> accuracy = evaluate.load("accuracy")
+        >>> accuracy.add(references=[0,1], predictions=[1,0])
+        ```
         """
         bad_inputs = [input_name for input_name in kwargs if input_name not in self._feature_names()]
         if bad_inputs:
@@ -635,11 +675,19 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         download_config: Optional[DownloadConfig] = None,
         dl_manager: Optional[DownloadManager] = None,
     ):
-        """Downloads and prepares dataset for reading.
+        """Downloads and prepares evaluation module for reading.
 
         Args:
-            download_config (:class:`DownloadConfig`, optional): Specific download configuration parameters.
-            dl_manager (:class:`DownloadManager`, optional): Specific download manager to use.
+            download_config ([`DownloadConfig`], *optional*):
+                Specific download configuration parameters.
+            dl_manager ([`DownloadManager`], *optional*):
+                Specific download manager to use.
+
+        Example:
+
+        ```py
+        >>> import evaluate
+
         """
         if dl_manager is None:
             if download_config is None:
@@ -731,20 +779,29 @@ class Metric(EvaluationModule):
     """A Metric is the base class and common API for all metrics.
 
     Args:
-        config_name (``str``): This is used to define a hash specific to a metric computation script and prevents the metric's data
+        config_name (`str`):
+            This is used to define a hash specific to a metric computation script and prevents the metric's data
             to be overridden when the metric loading script is modified.
-        keep_in_memory (:obj:`bool`): keep all predictions and references in memory. Not possible in distributed settings.
-        cache_dir (``str``): Path to a directory in which temporary prediction/references data will be stored.
+        keep_in_memory (`bool`):
+            Keep all predictions and references in memory. Not possible in distributed settings.
+        cache_dir (`str`):
+            Path to a directory in which temporary prediction/references data will be stored.
             The data directory should be located on a shared file-system in distributed setups.
-        num_process (``int``): specify the total number of nodes in a distributed settings.
+        num_process (`int`):
+            Specify the total number of nodes in a distributed settings.
             This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
-        process_id (``int``): specify the id of the current process in a distributed setup (between 0 and num_process-1)
+        process_id (`int`):
+            Specify the id of the current process in a distributed setup (between 0 and num_process-1)
             This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
-        seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`evaluate.Metric.compute` is run.
-        experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
+        seed (`int`, *optional*):
+            If specified, this will temporarily set numpy's random seed when [`~evaluate.Metric.compute`] is run.
+        experiment_id (`str`):
+            A specific experiment id. This is used if several distributed evaluations share the same file system.
             This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
-        max_concurrent_cache_files (``int``): Max number of concurrent metric cache files (default 10000).
-        timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
+        max_concurrent_cache_files (`int`):
+            Max number of concurrent metric cache files (default `10000`).
+        timeout (`Union[int, float]`):
+            Timeout in second for distributed setting synchronization.
     """
 
 
@@ -752,20 +809,29 @@ class Comparison(EvaluationModule):
     """A Comparison is the base class and common API for all comparisons.
 
     Args:
-        config_name (``str``): This is used to define a hash specific to a comparison computation script and prevents the comparison's data
-            to be overridden when the  comparison loading script is modified.
-        keep_in_memory (:obj:`bool`): keep all predictions and references in memory. Not possible in distributed settings.
-        cache_dir (``str``): Path to a directory in which temporary prediction/references data will be stored.
+        config_name (`str`):
+            This is used to define a hash specific to a comparison computation script and prevents the comparison's data
+            to be overridden when the comparison loading script is modified.
+        keep_in_memory (`bool`):
+            Keep all predictions and references in memory. Not possible in distributed settings.
+        cache_dir (`str`):
+            Path to a directory in which temporary prediction/references data will be stored.
             The data directory should be located on a shared file-system in distributed setups.
-        num_process (``int``): specify the total number of nodes in a distributed settings.
+        num_process (`int`):
+            Specify the total number of nodes in a distributed settings.
             This is useful to compute  comparisons in distributed setups (in particular non-additive comparisons).
-        process_id (``int``): specify the id of the current process in a distributed setup (between 0 and num_process-1)
+        process_id (`int`):
+            Specify the id of the current process in a distributed setup (between 0 and num_process-1)
             This is useful to compute  comparisons in distributed setups (in particular non-additive comparisons).
-        seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`evaluate.Comparison.compute` is run.
-        experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
+        seed (`int`, *optional*):
+            If specified, this will temporarily set numpy's random seed when [`~evaluate.Comparison.compute`] is run.
+        experiment_id (`str`):
+            A specific experiment id. This is used if several distributed evaluations share the same file system.
             This is useful to compute  comparisons in distributed setups (in particular non-additive comparisons).
-        max_concurrent_cache_files (``int``): Max number of concurrent comparison cache files (default 10000).
-        timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
+        max_concurrent_cache_files (`int`):
+            Max number of concurrent comparison cache files (default `10000`).
+        timeout (`Union[int, float]`):
+            Timeout in second for distributed setting synchronization.
     """
 
 
@@ -773,20 +839,29 @@ class Measurement(EvaluationModule):
     """A Measurement is the base class and common API for all measurements.
 
     Args:
-        config_name (``str``): This is used to define a hash specific to a measurement computation script and prevents the measurement's data
+        config_name (`str`):
+            This is used to define a hash specific to a measurement computation script and prevents the measurement's data
             to be overridden when the measurement loading script is modified.
-        keep_in_memory (:obj:`bool`): keep all predictions and references in memory. Not possible in distributed settings.
-        cache_dir (``str``): Path to a directory in which temporary prediction/references data will be stored.
+        keep_in_memory (`bool`):
+            Keep all predictions and references in memory. Not possible in distributed settings.
+        cache_dir (`str`):
+            Path to a directory in which temporary prediction/references data will be stored.
             The data directory should be located on a shared file-system in distributed setups.
-        num_process (``int``): specify the total number of nodes in a distributed settings.
+        num_process (`int`):
+            Specify the total number of nodes in a distributed settings.
             This is useful to compute measurements in distributed setups (in particular non-additive measurements).
-        process_id (``int``): specify the id of the current process in a distributed setup (between 0 and num_process-1)
+        process_id (`int`):
+            Specify the id of the current process in a distributed setup (between 0 and num_process-1)
             This is useful to compute measurements in distributed setups (in particular non-additive measurements).
-        seed (:obj:`int`, optional): If specified, this will temporarily set numpy's random seed when :func:`evaluate.Measurement.compute` is run.
-        experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
+        seed (`int`, *optional*):
+            If specified, this will temporarily set numpy's random seed when [`~evaluate.Measurement.compute`] is run.
+        experiment_id (`str`):
+            A specific experiment id. This is used if several distributed evaluations share the same file system.
             This is useful to compute measurements in distributed setups (in particular non-additive measurements).
-        max_concurrent_cache_files (``int``): Max number of concurrent measurement cache files (default 10000).
-        timeout (``Union[int, float]``): Timeout in second for distributed setting synchronization.
+        max_concurrent_cache_files (`int`):
+            Max number of concurrent measurement cache files (default `10000`).
+        timeout (`Union[int, float]`):
+            Timeout in second for distributed setting synchronization.
     """
 
 
@@ -817,8 +892,21 @@ class CombinedEvaluations:
         """Add one prediction and reference for each evaluation module's stack.
 
         Args:
-            prediction (list/array/tensor, optional): Predictions.
-            reference (list/array/tensor, optional): References.
+            predictions (`list/array/tensor`, *optional*):
+                Predictions.
+            references (`list/array/tensor`, *optional*):
+                References.
+
+        Example:
+
+        ```py
+        >>> import evaluate
+        >>> accuracy = evaluate.load("accuracy")
+        >>> f1 = evaluate.load("f1")
+        >>> clf_metrics = combine(["accuracy", "f1"])
+        >>> for ref, pred in zip([0,1,0,1], [1,0,0,1]):
+        ...     clf_metrics.add(references=ref, predictions=pred)
+        ```
         """
         for evaluation_module in self.evaluation_modules:
             batch = {"predictions": prediction, "references": reference, **kwargs}
@@ -829,8 +917,20 @@ class CombinedEvaluations:
         """Add a batch of predictions and references for each evaluation module's stack.
 
         Args:
-            predictions (list/array/tensor, optional): Predictions.
-            references (list/array/tensor, optional): References.
+            predictions (`list/array/tensor`, *optional*):
+                Predictions.
+            references (`list/array/tensor`, *optional*):
+                References.
+
+        Example:
+        ```py
+        >>> import evaluate
+        >>> accuracy = evaluate.load("accuracy")
+        >>> f1 = evaluate.load("f1")
+        >>> clf_metrics = combine(["accuracy", "f1"])
+        >>> for refs, preds in zip([[0,1],[0,1]], [[1,0],[0,1]]):
+        ...     clf_metrics.add(references=refs, predictions=preds)
+        ```
         """
         for evaluation_module in self.evaluation_modules:
             batch = {"predictions": predictions, "references": references, **kwargs}
@@ -843,16 +943,30 @@ class CombinedEvaluations:
         Usage of positional arguments is not allowed to prevent mistakes.
 
         Args:
-            predictions (list/array/tensor, optional): Predictions.
-            references (list/array/tensor, optional): References.
-            **kwargs (optional): Keyword arguments that will be forwarded to the evaluation module :meth:`_compute`
+            predictions (`list/array/tensor`, *optional*):
+                Predictions.
+            references (`list/array/tensor`, *optional*):
+                References.
+            **kwargs (*optional*):
+                Keyword arguments that will be forwarded to the evaluation module [`~evaluate.EvaluationModule.compute`]
                 method (see details in the docstring).
 
         Return:
-            dict or None
+            `dict` or `None`
 
-            - Dictionary with the results if this evaluation module is run on the main process (``process_id == 0``).
-            - None if the evaluation module is not run on the main process (``process_id != 0``).
+            - Dictionary with the results if this evaluation module is run on the main process (`process_id == 0`).
+            - `None` if the evaluation module is not run on the main process (`process_id != 0`).
+
+        Example:
+
+        ```py
+        >>> import evaluate
+        >>> accuracy = evaluate.load("accuracy")
+        >>> f1 = evaluate.load("f1")
+        >>> clf_metrics = combine(["accuracy", "f1"])
+        >>> clf_metrics.compute(predictions=[0,1], references=[1,1])
+        {'accuracy': 0.5, 'f1': 0.6666666666666666}
+        ```
         """
         results = []
 
@@ -896,16 +1010,22 @@ def combine(evaluations, force_prefix=False):
     And if two modules have the same name, please use a dictionary to give them different names, otherwise an integer id is appended to the prefix.
 
     Args:
-        evaluations (``Union[list, dict]``): A list or dictionary of evaluation modules. The modules can either be passed
+        evaluations (`Union[list, dict]`):
+            A list or dictionary of evaluation modules. The modules can either be passed
             as strings or loaded `EvaluationModule`s. If a dictionary is passed its keys are the names used and the values the modules.
             The names are used as prefix in case there are name overlaps in the returned results of each module or if `force_prefix=True`.
-        force_prefix (``bool``, optional, defaults to `False`): If `True` all scores from the modules are prefixed with their name. If
+        force_prefix (`bool`, *optional*, defaults to `False`):
+            If `True` all scores from the modules are prefixed with their name. If
             a dictionary is passed the keys are used as name otherwise the module's name.
 
     Examples:
-        >>> clf_metrics = combine(["accuracy", "f1", "precision","recall"])
-        >>> clf_metrics.compute(predictions=[0,1], references=[1,1])
-        {'accuracy': 0.5, 'f1': 0.66, 'precision': 1.0, 'recall': 0.5}
+
+    ```py
+    >>> import evaluate
+    >>> accuracy = evaluate.load("accuracy")
+    >>> f1 = evaluate.load("f1")
+    >>> clf_metrics = combine(["accuracy", "f1"])
+    ```
     """
 
     return CombinedEvaluations(evaluations, force_prefix=force_prefix)

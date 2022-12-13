@@ -33,7 +33,7 @@ class TextGenerationEvaluator(Evaluator):
     Text generation evaluator.
     This Text generation evaluator can currently be loaded from [`evaluator`] using the default task name
     `text-generation`.
-    Methods in this class assume a data format compatible with the [`TextGenerationPipeline`].
+    Methods in this class assume a data format compatible with the [`~transformers.TextGenerationPipeline`].
     """
 
     def predictions_processor(self, predictions, *args, **kwargs):
@@ -55,9 +55,10 @@ class TextGenerationEvaluator(Evaluator):
         Prepare data.
 
         Args:
-            data (`Dataset`): Specifies the dataset we will run evaluation on.
+            data ([`Dataset`]):
+                Specifies the dataset we will run evaluation on.
             input_column (`str`, defaults to `"text"`):
-                the name of the column containing the text feature in the dataset specified by `data`.
+                The name of the column containing the text feature in the dataset specified by `data`.
         Returns:
             `dict`:  metric inputs.
             `list`:  pipeline inputs.
