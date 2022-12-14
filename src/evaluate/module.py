@@ -687,7 +687,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
 
         ```py
         >>> import evaluate
-
+        ```
         """
         if dl_manager is None:
             if download_config is None:
