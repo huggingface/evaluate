@@ -412,6 +412,7 @@ class Evaluator(ABC):
 
         >>> ds = load_dataset("rotten_tomatoes", split="train")
         >>> evaluator("text-classification").prepare_data(ds, input_column="text", second_input_column=None, label_column="label")
+        ```
         """
 
         self.check_required_columns(data, {"input_column": input_column, "label_column": label_column})
