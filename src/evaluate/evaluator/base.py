@@ -267,6 +267,12 @@ class Evaluator(ABC):
             random_state=random_state,
         )
 
+        # TODO: To clarify why `wer` and `cer` return float
+        # even though metric.compute contract says that it
+        # returns Optional[dict].
+        if type(metric_results) == float:
+            metric_results = {metric.name: metric_results}
+
         result.update(metric_results)
         result.update(perf_results)
 

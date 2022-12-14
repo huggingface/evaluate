@@ -24,6 +24,7 @@ except ImportError:
 
 from typing import Dict, List
 
+from .automatic_speech_recognition import AutomaticSpeechRecognitionEvaluator
 from .base import Evaluator
 from .image_classification import ImageClassificationEvaluator
 from .question_answering import QuestionAnsweringEvaluator
@@ -65,6 +66,10 @@ SUPPORTED_EVALUATOR_TASKS = {
     "translation": {
         "implementation": TranslationEvaluator,
         "default_metric_name": "bleu",
+    },
+    "automatic-speech-recognition": {
+        "implementation": AutomaticSpeechRecognitionEvaluator,
+        "default_metric_name": "wer",
     },
 }
 

@@ -1,0 +1,74 @@
+# Creating an EvaluationSuite
+
+It can be useful to evaluate models on a variety of different tasks to understand their downstream performance. Assessing the model on several types of tasks can reveal gaps in performance along some axis. For example, when training a language model, it is often useful to measure perplexity on an in-domain corpus, but also to concurrently evaluate on tasks which test for general language capabilities like natural language entailment or question-answering, or tasks designed to probe the model along fairness and bias dimensions.
+
+The `EvaluationSuite` provides a way to compose any number of ([evaluator](base_evaluator), dataset, metric) tuples as a SubTask to evaluate a model on a collection of several evaluation tasks. See the [evaluator documentation](base_evaluator) for a list of currently supported tasks.
+
+A new `EvaluationSuite` is made up of a list of `SubTask` classes, each defining an evaluation task. The Python file containing the definition can be uploaded to a Space on the Hugging Face Hub so it can be shared with the community or saved/loaded locally as a Python script.
+
+Some datasets require additional preprocessing before passing them to an `Evaluator`. You can set a `data_preprocessor` for each `SubTask` which is applied via a `map` operation using the `datasets` library. Keyword arguments for the `Evaluator` can be passed down through the `args_for_task` attribute.
+
+To create a new `EvaluationSuite`, create a [new Space](https://huggingface.co/new-space) with a .py file which matches the name of the Space, add the below template to a Python file, and fill in the attributes for a new task.
+
+The mandatory attributes for a new `SubTask` are `task_type` and `data`.
+1. [`task_type`] maps to the tasks currently supported by the Evaluator.
+2. [`data`] can be an instantiated Hugging Face dataset object or the name of a dataset.
+3. [`subset`] and [`split`] can be used to define which name and split of the dataset should be used for evaluation.
+4. [`args_for_task`] should be a dictionary with kwargs to be passed to the Evaluator.
+
+```python
+import evaluate
+from evaluate.evaluation_suite import SubTask
+
+class Suite(evaluate.EvaluationSuite):
+
+    def __init__(self, name):
+        super().__init__(name)
+        self.preprocessor = lambda x: {"text": x["text"].lower()}
+        self.suite = [
+            SubTask(
+                task_type="text-classification",
+                data="glue",
+                subset="sst2",
+                split="validation[:10]",
+                args_for_task={
+                    "metric": "accuracy",
+                    "input_column": "sentence",
+                    "label_column": "label",
+                    "label_mapping": {
+                        "LABEL_0": 0.0,
+                        "LABEL_1": 1.0
+                    }
+                }
+            ),
+            SubTask(
+                task_type="text-classification",
+                data="glue",
+                subset="rte",
+                split="validation[:10]",
+                args_for_task={
+                    "metric": "accuracy",
+                    "input_column": "sentence1",
+                    "second_input_column": "sentence2",
+                    "label_column": "label",
+                    "label_mapping": {
+                        "LABEL_0": 0,
+                        "LABEL_1": 1
+                    }
+                }
+            )
+        ]
+```
+
+An `EvaluationSuite` can be loaded by name from the Hugging Face Hub, or locally by providing a path, and run with the `run(model_or_pipeline)` method. The evaluation results are returned along with their task names and information about the time it took to obtain predictions through the pipeline. These can be easily displayed with a `pandas.DataFrame`:
+
+```
+>>> from evaluate import EvaluationSuite
+>>> suite = EvaluationSuite.load('mathemakitten/glue-evaluation-suite')
+>>> results = suite.run("gpt2")
+```
+
+|   accuracy |   total_time_in_seconds |   samples_per_second |   latency_in_seconds | task_name   |
+|-----------:|------------------------:|---------------------:|---------------------:|:------------|
+|        0.5 |                0.740811 |             13.4987  |            0.0740811 | glue/sst2   |
+|        0.4 |                1.67552  |              5.9683  |            0.167552  | glue/rte    |
