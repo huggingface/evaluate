@@ -32,23 +32,37 @@ def push_to_hub(
     Pushes the result of a metric to the metadata of a model repository in the Hub.
 
     Args:
-        model_id (``str``): Model id from https://hf.co/models.
-        task_type (``str``): Task id, refer to
-            https://github.com/huggingface/evaluate/blob/main/src/evaluate/config.py#L154 for allowed values.
-        dataset_type (``str``): Dataset id from https://hf.co/datasets.
-        dataset_name (``str``): Pretty name for the dataset.
-        metric_type (``str``): Metric id from https://hf.co/metrics.
-        metric_name (``str``): Pretty name for the metric.
-        metric_value (``float``): Computed metric value.
-        task_name (``str``, optional): Pretty name for the task.
-        dataset_config (``str``, optional): Dataset configuration used in datasets.load_dataset().
-            See huggingface/datasets docs for more info: https://huggingface.co/docs/datasets/package_reference/loading_methods#datasets.load_dataset.name
-        dataset_split (``str``, optional): Name of split used for metric computation.
-        dataset_revision (``str``, optional): Git hash for the specific version of the dataset.
-        dataset_args (``dict[str, int]``, optional): Additional arguments passed to datasets.load_dataset().
-        metric_config (``str``, optional): Configuration for the metric (e.g. the GLUE metric has a configuration for each subset)
-        metric_args (``dict[str, int]``, optional): Arguments passed during Metric.compute().
-        overwrite (``bool``, optional, defaults to `False`): If set to `True` an existing metric field can be overwritten, otherwise
+        model_id (`str`):
+            Model id from https://hf.co/models.
+        task_type (`str`):
+            Task id, refer to the [Hub allowed tasks](https://github.com/huggingface/evaluate/blob/main/src/evaluate/config.py#L154) for allowed values.
+        dataset_type (`str`):
+            Dataset id from https://hf.co/datasets.
+        dataset_name (`str`):
+            Pretty name for the dataset.
+        metric_type (`str`):
+            Metric id from https://hf.co/metrics.
+        metric_name (`str`):
+            Pretty name for the metric.
+        metric_value (`float`):
+            Computed metric value.
+        task_name (`str`, *optional*):
+            Pretty name for the task.
+        dataset_config (`str`, *optional*):
+            Dataset configuration used in [`~datasets.load_dataset`].
+            See [`~datasets.load_dataset`] for more info.
+        dataset_split (`str`, *optional*):
+            Name of split used for metric computation.
+        dataset_revision (`str`, *optional*):
+            Git hash for the specific version of the dataset.
+        dataset_args (`dict[str, int]`, *optional*):
+            Additional arguments passed to [`~datasets.load_dataset`].
+        metric_config (`str`, *optional*):
+            Configuration for the metric (e.g. the GLUE metric has a configuration for each subset).
+        metric_args (`dict[str, int]`, *optional*):
+            Arguments passed during [`~evaluate.EvaluationModule.compute`].
+        overwrite (`bool`, *optional*, defaults to `False`):
+            If set to `True` an existing metric field can be overwritten, otherwise
              attempting to overwrite any existing fields will cause an error.
 
     Example:

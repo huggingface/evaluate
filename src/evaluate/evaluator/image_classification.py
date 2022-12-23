@@ -86,9 +86,9 @@ class ImageClassificationEvaluator(Evaluator):
 
         """
         input_column (`str`, defaults to `"image"`):
-            the name of the column containing the images as PIL ImageFile in the dataset specified by `data`.
+            The name of the column containing the images as PIL ImageFile in the dataset specified by `data`.
         label_column (`str`, defaults to `"label"`):
-            the name of the column containing the labels in the dataset specified by `data`.
+            The name of the column containing the labels in the dataset specified by `data`.
         label_mapping (`Dict[str, Number]`, *optional*, defaults to `None`):
             We want to map class labels defined by the model in the pipeline to values consistent with those
             defined in the `label_column` of the `data` dataset.
