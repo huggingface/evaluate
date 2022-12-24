@@ -380,6 +380,8 @@ class PanopticQuality(evaluate.Metric):
         # step 1: dump predicted segmentations to folder
         for seg_img, image_id in zip(predictions, image_ids):
             with io.BytesIO() as out:
+                print(type(seg_img))
+                print(seg_img)
                 seg_img = id2rgb(seg_img)
                 f.write(seg_img.save(out, format="PNG"))
             
