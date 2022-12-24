@@ -386,7 +386,7 @@ class PanopticQuality(evaluate.Metric):
             with io.BytesIO() as out:
                 seg_img.save(out, format="PNG")
             
-            file_name = f"{image_id:012d}.png"
+            file_name = f"{image_id}.png"
             with open(os.path.join(output_dir, file_name), "wb") as f:
                 f.write(out.getvalue())
 
