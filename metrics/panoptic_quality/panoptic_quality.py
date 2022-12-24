@@ -391,7 +391,7 @@ class PanopticQuality(evaluate.Metric):
                 with open(os.path.join(output_dir, file_name), "wb") as f:
                     f.write(out.getvalue())
 
-            predicted_annotations["image_id"] = image_id
+            predicted_annotations[idx]["image_id"] = image_id
 
         # step 2: create predictions JSON file
         # predicted_annotations is a list of segments_info
