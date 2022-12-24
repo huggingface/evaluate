@@ -380,16 +380,18 @@ class PanopticQuality(evaluate.Metric):
             os.mkdir(output_dir)
 
         # step 1: dump predicted segmentations to folder
-        for seg_img, image_id in zip(predictions, image_ids):
+        for idx, (seg_img, image_id) in enumerate(zip(predictions, image_ids)):
             seg_img = np.array(seg_img)
             print("Shape of seg_img:", seg_img.shape)
             seg_img = Image.fromarray(id2rgb(seg_img))
 
             with io.BytesIO() as out:
                 seg_img.save(out, format="PNG")
-                file_name = f"{image_id}.png"
+                file_name = f"{image_id:012d}.png"
                 with open(os.path.join(output_dir, file_name), "wb") as f:
                     f.write(out.getvalue())
+
+            predicted_annotations["image_id"] = image_id
 
         # step 2: create predictions JSON file
         # predicted_annotations is a list of segments_info
