@@ -313,6 +313,8 @@ def pq_compute(gt_json_file, pred_json_file, gt_folder=None, pred_folder=None):
     if not os.path.isdir(pred_folder):
         raise Exception("Folder {} with predicted segmentations doesn't exist".format(pred_folder))
 
+    for el in pred_json["annotations"]:
+        print(el)
     pred_annotations = {el["image_id"]: el for el in pred_json["annotations"]}
     matched_annotations_list = []
     for gt_ann in gt_json["annotations"]:
