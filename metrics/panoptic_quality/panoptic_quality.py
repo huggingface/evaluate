@@ -354,7 +354,7 @@ class PanopticQuality(evaluate.Metric):
             features=datasets.Features(
                 # 1st Seq - height dim, 2nd - width dim
                 {
-                    "predictions": datasets.Sequence(datasets.Image),
+                    "predictions": datasets.Sequence(datasets.Sequence(datasets.Value("uint16"))),
                 }
             ),
             reference_urls=[
@@ -379,6 +379,8 @@ class PanopticQuality(evaluate.Metric):
 
         # step 1: dump predicted segmentations to folder
         for seg_img, image_id in zip(predictions, image_ids):
+            seg_img = Image.fromarray(id2rgb(np.array(seg_img)))
+
             with io.BytesIO() as out:
                 f.write(seg_img.save(out, format="PNG"))
             
