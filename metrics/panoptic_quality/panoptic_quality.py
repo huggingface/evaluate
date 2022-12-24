@@ -366,9 +366,9 @@ class PanopticQuality(evaluate.Metric):
 
     def _compute(
         self,
-        predictions=None,
+        predictions=None, # this corresponds to the png_string key of DetrPostProcess
         references=None,
-        predicted_annotations=None,
+        predicted_annotations=None, # list of dicts, each dict containing `segments_info`. Segments info is a list of dicts, each dict containing category_id, id, iscrowd, area, bbox
         image_ids=None,
         # references,
         # reference_annotations,
@@ -390,9 +390,9 @@ class PanopticQuality(evaluate.Metric):
                 with open(os.path.join(output_dir, file_name), "wb") as f:
                     f.write(out.getvalue())
 
-            for i in range(len(predicted_annotations[idx])):
-                predicted_annotations[idx][i]["image_id"] = image_id
-                predicted_annotations[idx][i]["file_name"] = file_name
+            # add image_id and file_name keys to each of the predicted annotations
+            predicted_annotations[idx]["image_id"] = image_id
+            predicted_annotations[idx]["file_name"] = file_name
 
         # step 2: create predictions JSON file
         # predicted_annotations is a list of segments_info
