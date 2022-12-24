@@ -11,14 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Panoptic Quality (PQ) metric."""
+"""Panoptic Quality (PQ) metric.
+
+Entirely based on https://github.com/cocodataset/panopticapi/blob/master/panopticapi/evaluation.py.
+"""
 
 from collections import defaultdict
 import functools
 import json
 import multiprocessing
+import io
 import os
-import time
 import traceback
 
 import numpy as np
@@ -85,6 +88,22 @@ def rgb2id(color):
             color = color.astype(np.int32)
         return color[:, :, 0] + 256 * color[:, :, 1] + 256 * 256 * color[:, :, 2]
     return int(color[0] + 256 * color[1] + 256 * 256 * color[2])
+
+
+def id2rgb(id_map):
+    if isinstance(id_map, np.ndarray):
+        id_map_copy = id_map.copy()
+        rgb_shape = tuple(list(id_map.shape) + [3])
+        rgb_map = np.zeros(rgb_shape, dtype=np.uint8)
+        for i in range(3):
+            rgb_map[..., i] = id_map_copy % 256
+            id_map_copy //= 256
+        return rgb_map
+    color = []
+    for _ in range(3):
+        color.append(id_map % 256)
+        id_map //= 256
+    return color
 
 
 OFFSET = 256 * 256 * 256
@@ -335,8 +354,8 @@ class PanopticQuality(evaluate.Metric):
             features=datasets.Features(
                 # 1st Seq - height dim, 2nd - width dim
                 {
-                    "predictions": datasets.Sequence(datasets.Sequence(datasets.Value("uint16"))),
-                    "references": datasets.Sequence(datasets.Sequence(datasets.Value("uint16"))),
+                    "predictions": datasets.Sequence(datasets.Image()),
+                    "references": datasets.Sequence(datasets.Image()),
                 }
             ),
             reference_urls=[
@@ -346,42 +365,54 @@ class PanopticQuality(evaluate.Metric):
 
     def _compute(
         self,
-        predictions,
-        references,
-        predicted_annotations,
-        reference_annotations,
-        output_dir,
-        categories,
+        predictions=None,
+        references=None,
+        predicted_annotations=None,
+        image_ids=None,
+        # references,
+        # reference_annotations,
+        output_dir=None,
+        gt_folder=None,
+        gt_json=None,
     ):
         if not os.path.exists(output_dir):
             os.mkdir(output_dir)
-        
-        # step 1: create ground truth JSON file
-        gt_json_data = {"annotations": reference_annotations, "categories": categories}
-        gt_json = os.path.join(output_dir, "gt.json")
-        with open(gt_json, "w") as f:
-            f.write(json.dumps(gt_json_data))
+
+        # step 1: dump predicted segmentations to folder
+        for seg_img, image_id in zip(predictions, image_ids):
+            with io.BytesIO() as out:
+                seg_img = id2rgb(seg_img)
+                f.write(seg_img.save(out, format="PNG"))
+            
+            file_name = f"{image_id:012d}.png"
+            with open(os.path.join(output_dir, file_name), "wb") as f:
+                f.write(out.getvalue())
 
         # step 2: create predictions JSON file
-        predictions_json_data = {"annotations": predicted_annotations}
+        # predicted_annotations is a list of segments_info
+        json_data = {"annotations": predicted_annotations}
         predictions_json = os.path.join(output_dir, "predictions.json")
         with open(predictions_json, "w") as f:
-            f.write(json.dumps(predictions_json_data))
-
-        # step 3: dump ground truth PNG files
-        gt_folder = os.path.join(output_dir, "gt")
-        if not os.path.exists(gt_folder):
-            os.mkdir(gt_folder)
-        for image_id, gt in zip(references.keys(), references.values()):
-            gt_image = Image.fromarray(gt)
-            gt_image.save(os.path.join(gt_folder, str(image_id) + ".png"))
-
-        # step 4: dump predictions PNG files
-        for p in predictions:
-            with open(os.path.join(output_dir, p["file_name"]), "wb") as f:
-                f.write(p.pop("png_string"))
-
+            f.write(json.dumps(json_data))
+                
         # step 5: compute PQ
         result = pq_compute(gt_json, predictions_json, gt_folder=gt_folder, pred_folder=output_dir)
         
         return result
+
+
+# # step 1: create ground truth JSON file
+# gt_json_data = {"annotations": reference_annotations, "categories": categories}
+# gt_json = os.path.join(output_dir, "gt.json")
+# with open(gt_json, "w") as f:
+#     f.write(json.dumps(gt_json_data))
+
+# # step 4
+        # gt_folder = os.path.join(output_dir, "gt")
+        # if not os.path.exists(gt_folder):
+        #     os.mkdir(gt_folder)
+        # for ref in reference_annotations:
+        #     image_id = ref["image_id"]
+        #     file_name = f"{image_id:012d}.png"
+        #     with open(os.path.join(gt_folder, file_name), "wb") as f:
+        #         f.write(ref["segmentation"])
