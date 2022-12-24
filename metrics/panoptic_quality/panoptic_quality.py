@@ -379,10 +379,12 @@ class PanopticQuality(evaluate.Metric):
 
         # step 1: dump predicted segmentations to folder
         for seg_img, image_id in zip(predictions, image_ids):
-            seg_img = Image.fromarray(id2rgb(np.array(seg_img)))
+            seg_img = np.array(seg_img)
+            print("Shape of seg_img:", seg_img.shape)
+            seg_img = Image.fromarray(id2rgb(seg_img))
 
             with io.BytesIO() as out:
-                f.write(seg_img.save(out, format="PNG"))
+                seg_img.save(out, format="PNG")
             
             file_name = f"{image_id:012d}.png"
             with open(os.path.join(output_dir, file_name), "wb") as f:
