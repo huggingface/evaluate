@@ -356,9 +356,9 @@ class PanopticQuality(evaluate.Metric):
                 # 1st Seq - height dim, 2nd - width dim
                 {
                     "predictions": datasets.Sequence(datasets.Image()),
-                    "references": datasets.Sequence(datasets.Image()),
-                    "predicted_annotations": datasets.Sequence(dict),
-                    "reference_annotations": datasets.Sequence(dict),
+                    # "references": datasets.Sequence(datasets.Image()),
+                    # "predicted_annotations": datasets.Sequence(dict),
+                    # "reference_annotations": datasets.Sequence(dict),
                 }
             ),
             reference_urls=[
