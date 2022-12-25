@@ -165,19 +165,20 @@ class PQStat:
 
 
 @get_traceback
-def pq_compute_single_core(proc_id, annotation_set, gt_folder, pred_folder, categories):
+def pq_compute_single_core(proc_id, annotation_set, predictions, references, categories):
     pq_stat = PQStat()
 
     idx = 0
-    for gt_ann, pred_ann in annotation_set:
+    for pan_pred, pan_gt, (pred_ann, gt_ann) in zip(predictions, references, annotation_set):
         if idx % 100 == 0:
             print("Core: {}, {} from {} images processed".format(proc_id, idx, len(annotation_set)))
         idx += 1
 
-        pan_gt = np.array(Image.open(os.path.join(gt_folder, gt_ann["file_name"])), dtype=np.uint32)
-        pan_gt = rgb2id(pan_gt)
-        pan_pred = np.array(Image.open(os.path.join(pred_folder, pred_ann["file_name"])), dtype=np.uint32)
-        pan_pred = rgb2id(pan_pred)
+        # TODO perhaps work in the RGB space
+        # pan_gt = np.array(Image.open(os.path.join(gt_folder, gt_ann["file_name"])), dtype=np.uint32)
+        # pan_gt = rgb2id(pan_gt)
+        # pan_pred = np.array(Image.open(os.path.join(pred_folder, pred_ann["file_name"])), dtype=np.uint32)
+        # pan_pred = rgb2id(pan_pred)
 
         gt_segms = {el["id"]: el for el in gt_ann["segments_info"]}
         pred_segms = {el["id"]: el for el in pred_ann["segments_info"]}
@@ -273,14 +274,14 @@ def pq_compute_single_core(proc_id, annotation_set, gt_folder, pred_folder, cate
     return pq_stat
 
 
-def pq_compute_multi_core(matched_annotations_list, gt_folder, pred_folder, categories):
+def pq_compute_multi_core(matched_annotations_list, predictions, references, categories):
     cpu_num = multiprocessing.cpu_count()
     annotations_split = np.array_split(matched_annotations_list, cpu_num)
     print("Number of cores: {}, images per core: {}".format(cpu_num, len(annotations_split[0])))
     workers = multiprocessing.Pool(processes=cpu_num)
     processes = []
     for proc_id, annotation_set in enumerate(annotations_split):
-        p = workers.apply_async(pq_compute_single_core, (proc_id, annotation_set, gt_folder, pred_folder, categories))
+        p = workers.apply_async(pq_compute_single_core, (proc_id, annotation_set, predictions, references, categories))
         processes.append(p)
     pq_stat = PQStat()
     for p in processes:
@@ -288,42 +289,40 @@ def pq_compute_multi_core(matched_annotations_list, gt_folder, pred_folder, cate
     return pq_stat
 
 
-def pq_compute(gt_json_file, pred_json_file, gt_folder=None, pred_folder=None):
-    with open(gt_json_file, "r") as f:
-        gt_json = json.load(f)
-    with open(pred_json_file, "r") as f:
-        pred_json = json.load(f)
+def pq_compute(predictions, references, predicted_annotations, reference_annotations, categories):
+    # categories = {el["id"]: el for el in gt_json["categories"]}
+    # with open(gt_json_file, "r") as f:
+    #     gt_json = json.load(f)
+    # with open(pred_json_file, "r") as f:
+    #     pred_json = json.load(f)
 
-    if gt_folder is None:
-        gt_folder = gt_json_file.replace(".json", "")
-    if pred_folder is None:
-        pred_folder = pred_json_file.replace(".json", "")
-    categories = {el["id"]: el for el in gt_json["categories"]}
+    # if gt_folder is None:
+    #     gt_folder = gt_json_file.replace(".json", "")
+    # if pred_folder is None:
+    #     pred_folder = pred_json_file.replace(".json", "")
+    # categories = {el["id"]: el for el in gt_json["categories"]}
 
-    print("Evaluation panoptic segmentation metrics:")
-    print("Ground truth:")
-    print("\tSegmentation folder: {}".format(gt_folder))
-    print("\tJSON file: {}".format(gt_json_file))
-    print("Prediction:")
-    print("\tSegmentation folder: {}".format(pred_folder))
-    print("\tJSON file: {}".format(pred_json_file))
+    # print("Evaluation panoptic segmentation metrics:")
+    # print("Ground truth:")
+    # print("\tSegmentation folder: {}".format(gt_folder))
+    # print("\tJSON file: {}".format(gt_json_file))
+    # print("Prediction:")
+    # print("\tSegmentation folder: {}".format(pred_folder))
+    # print("\tJSON file: {}".format(pred_json_file))
 
-    if not os.path.isdir(gt_folder):
-        raise Exception("Folder {} with ground truth segmentations doesn't exist".format(gt_folder))
-    if not os.path.isdir(pred_folder):
-        raise Exception("Folder {} with predicted segmentations doesn't exist".format(pred_folder))
+    # if not os.path.isdir(gt_folder):
+    #     raise Exception("Folder {} with ground truth segmentations doesn't exist".format(gt_folder))
+    # if not os.path.isdir(pred_folder):
+    #     raise Exception("Folder {} with predicted segmentations doesn't exist".format(pred_folder))
 
-    for el in pred_json["annotations"]:
-        print(el)
-    pred_annotations = {el["image_id"]: el for el in pred_json["annotations"]}
+    # for el in pred_json["annotations"]:
+    #     print(el)
+    # pred_annotations = {el["image_id"]: el for el in pred_json["annotations"]}
     matched_annotations_list = []
-    for gt_ann in gt_json["annotations"]:
-        image_id = gt_ann["image_id"]
-        if image_id not in pred_annotations:
-            raise Exception("no prediction for the image with id: {}".format(image_id))
-        matched_annotations_list.append((gt_ann, pred_annotations[image_id]))
+    for pred_ann, gt_ann in zip(predicted_annotations, reference_annotations):
+        matched_annotations_list.append((pred_ann, gt_ann))
 
-    pq_stat = pq_compute_multi_core(matched_annotations_list, gt_folder, pred_folder, categories)
+    pq_stat = pq_compute_multi_core(matched_annotations_list, predictions, references, categories)
 
     metrics = [("All", None), ("Things", True), ("Stuff", False)]
     results = {}
@@ -357,10 +356,13 @@ class PanopticQuality(evaluate.Metric):
                 # 1st Seq - height dim, 2nd - width dim
                 {
                     "predictions": datasets.Sequence(datasets.Sequence(datasets.Value("uint16"))),
+                    "references": datasets.Sequence(datasets.Sequence(datasets.Value("uint16"))),
+                    "predicted_annotations": datasets.Sequence(dict),
+                    "reference_annotations": datasets.Sequence(dict),
                 }
             ),
             reference_urls=[
-                "https://github.com/open-mmlab/mmsegmentation/blob/71c201b1813267d78764f306a297ca717827c4bf/mmseg/core/evaluation/metrics.py"
+                "https://github.com/cocodataset/panopticapi/blob/master/panopticapi/evaluation.py"
             ],
         )
 
@@ -369,40 +371,14 @@ class PanopticQuality(evaluate.Metric):
         predictions=None, # this corresponds to the png_string key of DetrPostProcess
         references=None,
         predicted_annotations=None, # list of dicts, each dict containing `segments_info`. Segments info is a list of dicts, each dict containing category_id, id, iscrowd, area, bbox
-        image_ids=None,
-        # references,
-        # reference_annotations,
-        output_dir=None,
-        gt_folder=None,
-        gt_json=None,
-    ):
-        if not os.path.exists(output_dir):
-            os.mkdir(output_dir)
-
-        # step 1: dump predicted segmentations to folder
-        for idx, (seg_img, image_id) in enumerate(zip(predictions, image_ids)):
-            seg_img = np.array(seg_img)
-            seg_img = Image.fromarray(id2rgb(seg_img))
-
-            with io.BytesIO() as out:
-                seg_img.save(out, format="PNG")
-                file_name = f"{image_id:012d}.png"
-                with open(os.path.join(output_dir, file_name), "wb") as f:
-                    f.write(out.getvalue())
-
-            # add image_id and file_name keys to each of the predicted annotations
-            predicted_annotations[idx]["image_id"] = image_id
-            predicted_annotations[idx]["file_name"] = file_name
-
-        # step 2: create predictions JSON file
-        # predicted_annotations is a list of segments_info
-        json_data = {"annotations": predicted_annotations}
-        predictions_json = os.path.join(output_dir, "predictions.json")
-        with open(predictions_json, "w") as f:
-            f.write(json.dumps(json_data))
-                
-        # step 5: compute PQ
-        result = pq_compute(gt_json, predictions_json, gt_folder=gt_folder, pred_folder=output_dir)
+        reference_annotations=None,
+        categories=None,
+        # image_ids=None,
+        # output_dir=None,
+        # gt_folder=None,
+        #  gt_json=None,
+    ):          
+        result = pq_compute(predictions, references, predicted_annotations, reference_annotations, categories)
         
         return result
 
