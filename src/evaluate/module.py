@@ -259,9 +259,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         builder_data_dir = os.path.join(builder_data_dir, self.name, self.config_name)
         try:
             os.makedirs(builder_data_dir, exist_ok=True)
-        except OSError as e:
-            if e.errno != errno.EEXIST:
-                raise
+        except:
             pass
         return builder_data_dir
 
