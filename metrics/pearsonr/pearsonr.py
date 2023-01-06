@@ -91,10 +91,7 @@ class Pearsonr(evaluate.Metric):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
-                {
-                    "predictions": datasets.Value("float"),
-                    "references": datasets.Value("float"),
-                }
+                {"predictions": datasets.Value("float"), "references": datasets.Value("float")}
             ),
             reference_urls=["https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html"],
         )

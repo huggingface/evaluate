@@ -88,9 +88,7 @@ class WER(evaluate.Metric):
                 }
             ),
             codebase_urls=["https://github.com/jitsi/jiwer/"],
-            reference_urls=[
-                "https://en.wikipedia.org/wiki/Word_error_rate",
-            ],
+            reference_urls=["https://en.wikipedia.org/wiki/Word_error_rate"],
         )
 
     def _compute(self, predictions=None, references=None, concatenate_texts=False):

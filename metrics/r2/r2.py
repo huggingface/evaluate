@@ -15,10 +15,11 @@
 """R2 metric."""
 
 
-import evaluate
-import numpy as np
 import datasets
+import numpy as np
+
 import evaluate
+
 
 _CITATION = """
 @article{williams2006relationship,
@@ -31,7 +32,8 @@ year={2006}
 }
 """
 
-_DESCRIPTION = """R^2 (R Squared) is a statistical measure of the goodness of fit of a regression model. It represents the proportion of the variance in the dependent variable that is predictable from the independent variables.
+_DESCRIPTION = """
+R^2 (R Squared) is a statistical measure of the goodness of fit of a regression model. It represents the proportion of the variance in the dependent variable that is predictable from the independent variables.
 
 The R^2 value ranges from 0 to 1, with a higher value indicating a better fit. A value of 0 means that the model does not explain any of the variance in the dependent variable, while a value of 1 means that the model explains all of the variance.
 
@@ -39,7 +41,8 @@ R^2 can be calculated using the following formula:
 
 R^2 = 1 - (Sum of Squared Errors / Sum of Squared Total)
 
-where the Sum of Squared Errors is the sum of the squared differences between the predicted values and the true values, and the Sum of Squared Total is the sum of the squared differences between the true values and the mean of the true values."""
+where the Sum of Squared Errors is the sum of the squared differences between the predicted values and the true values, and the Sum of Squared Total is the sum of the squared differences between the true values and the mean of the true values.,
+"""
 
 _KWARGS_DESCRIPTION = """
 Computes the R^2 metric.
@@ -61,6 +64,7 @@ Examples:
     0.95
 """
 
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class R2(evaluate.Metric):
     def _info(self):
@@ -75,9 +79,7 @@ class R2(evaluate.Metric):
                 }
             ),
             codebase_urls=["https://github.com/scikit-learn/scikit-learn/"],
-            reference_urls=[
-                "https://en.wikipedia.org/wiki/Coefficient_of_determination",
-            ],
+            reference_urls=["https://en.wikipedia.org/wiki/Coefficient_of_determination"],
         )
 
     def _compute(self, predictions=None, references=None):
