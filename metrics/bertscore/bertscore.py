@@ -1,4 +1,4 @@
-# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
+# Copyright 2020 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,118 +11,205 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-"""Brier Score Metric"""
+""" BERTScore metric. """
 
+import functools
+from contextlib import contextmanager
+
+import bert_score
 import datasets
-from sklearn.metrics import brier_score_loss
+from packaging import version
 
 import evaluate
 
 
+@contextmanager
+def filter_logging_context():
+    def filter_log(record):
+        return False if "This IS expected if you are initializing" in record.msg else True
+
+    logger = datasets.utils.logging.get_logger("transformers.modeling_utils")
+    logger.addFilter(filter_log)
+    try:
+        yield
+    finally:
+        logger.removeFilter(filter_log)
+
+
 _CITATION = """\
-@article{scikit-learn,
- title={Scikit-learn: Machine Learning in {P}ython},
- author={Pedregosa, F. and Varoquaux, G. and Gramfort, A. and Michel, V.
-         and Thirion, B. and Grisel, O. and Blondel, M. and Prettenhofer, P.
-         and Weiss, R. and Dubourg, V. and Vanderplas, J. and Passos, A. and
-         Cournapeau, D. and Brucher, M. and Perrot, M. and Duchesnay, E.},
- journal={Journal of Machine Learning Research},
- volume={12},
- pages={2825--2830},
- year={2011}
+@inproceedings{bert-score,
+  title={BERTScore: Evaluating Text Generation with BERT},
+  author={Tianyi Zhang* and Varsha Kishore* and Felix Wu* and Kilian Q. Weinberger and Yoav Artzi},
+  booktitle={International Conference on Learning Representations},
+  year={2020},
+  url={https://openreview.net/forum?id=SkeHuCVFDr}
 }
 """
 
 _DESCRIPTION = """\
-Brier score is a type of evaluation metric for classification tasks, where you predict outcomes such as win/lose, spam/ham, click/no-click etc.
-`BrierScore = 1/N * sum( (p_i - o_i)^2 )`
+BERTScore leverages the pre-trained contextual embeddings from BERT and matches words in candidate and reference
+sentences by cosine similarity.
+It has been shown to correlate with human judgment on sentence-level and system-level evaluation.
+Moreover, BERTScore computes precision, recall, and F1 measure, which can be useful for evaluating different language
+generation tasks.
+
+See the project's README at https://github.com/Tiiiger/bert_score#readme for more information.
 """
 
-
 _KWARGS_DESCRIPTION = """
+BERTScore Metrics with the hashcode from a source against one or more references.
+
 Args:
-    y_true : array of shape (n_samples,)
-        True targets.
-    y_prob : array of shape (n_samples,)
-        Probabilities of the positive class.
-    sample_weight : array-like of shape (n_samples,), default=None
-        Sample weights.
-    pos_label : int or str, default=None
-        Label of the positive class. `pos_label` will be inferred in the
-        following manner:
-        * if `y_true` in {-1, 1} or {0, 1}, `pos_label` defaults to 1;
-        * else if `y_true` contains string, an error will be raised and
-          `pos_label` should be explicitly specified;
-        * otherwise, `pos_label` defaults to the greater label,
-          i.e. `np.unique(y_true)[-1]`.
-Returns
-    score : float
-        Brier score loss.
+    predictions (list of str): Prediction/candidate sentences.
+    references (list of str or list of list of str): Reference sentences.
+    lang (str): Language of the sentences; required (e.g. 'en').
+    model_type (str): Bert specification, default using the suggested
+        model for the target language; has to specify at least one of
+        `model_type` or `lang`.
+    num_layers (int): The layer of representation to use,
+        default using the number of layers tuned on WMT16 correlation data.
+    verbose (bool): Turn on intermediate status update.
+    idf (bool or dict): Use idf weighting; can also be a precomputed idf_dict.
+    device (str): On which the contextual embedding model will be allocated on.
+        If this argument is None, the model lives on cuda:0 if cuda is available.
+    nthreads (int): Number of threads.
+    batch_size (int): Bert score processing batch size,
+        at least one of `model_type` or `lang`. `lang` needs to be
+        specified when `rescale_with_baseline` is True.
+    rescale_with_baseline (bool): Rescale bertscore with pre-computed baseline.
+    baseline_path (str): Customized baseline file.
+    use_fast_tokenizer (bool): `use_fast` parameter passed to HF tokenizer. New in version 0.3.10.
+
+Returns:
+    precision: Precision.
+    recall: Recall.
+    f1: F1 score.
+    hashcode: Hashcode of the library.
+
 Examples:
-    Example-1: if y_true in {-1, 1} or {0, 1}, pos_label defaults to 1.
-        >>> import numpy as np
-        >>> brier_score = evaluate.load("brier_score")
-        >>> references = np.array([0, 0, 1, 1])
-        >>> predictions = np.array([0.1, 0.9, 0.8, 0.3])
-        >>> results = brier_score.compute(references=references, predictions=predictions)
-        >>> print(round(results["brier_score"], 4))
-        0.3375
-    Example-2: if y_true contains string, an error will be raised and pos_label should be explicitly specified.
-        >>> import numpy as np
-        >>> brier_score = evaluate.load("brier_score")
-        >>> references =  np.array(["spam", "ham", "ham", "spam"])
-        >>> predictions = np.array([0.1, 0.9, 0.8, 0.3])
-        >>> results = brier_score.compute(references=references, predictions=predictions, pos_label="ham")
-        >>> print(round(results["brier_score"], 4))
-        0.0375
+
+    >>> predictions = ["hello there", "general kenobi"]
+    >>> references = ["hello there", "general kenobi"]
+    >>> bertscore = evaluate.load("bertscore")
+    >>> results = bertscore.compute(predictions=predictions, references=references, lang="en")
+    >>> print([round(v, 2) for v in results["f1"]])
+    [1.0, 1.0]
 """
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class BrierScore(evaluate.Metric):
+class BERTScore(evaluate.Metric):
     def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
+            homepage="https://github.com/Tiiiger/bert_score",
             inputs_description=_KWARGS_DESCRIPTION,
-            features=self._get_feature_types(),
-            reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.brier_score_loss.html"],
+            features=[
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Sequence(datasets.Value("string", id="sequence"), id="references"),
+                    }
+                ),
+                datasets.Features(
+                    {
+                        "predictions": datasets.Value("string", id="sequence"),
+                        "references": datasets.Value("string", id="sequence"),
+                    }
+                ),
+            ],
+            codebase_urls=["https://github.com/Tiiiger/bert_score"],
+            reference_urls=[
+                "https://github.com/Tiiiger/bert_score",
+                "https://arxiv.org/abs/1904.09675",
+            ],
         )
 
-    def _get_feature_types(self):
-        if self.config_name == "multilist":
-            return [
-                datasets.Features(
-                    {
-                        "references": datasets.Sequence(datasets.Value("float")),
-                        "predictions": datasets.Sequence(datasets.Value("float")),
-                    }
-                ),
-                datasets.Features(
-                    {
-                        "references": datasets.Sequence(datasets.Value("string")),
-                        "predictions": datasets.Sequence(datasets.Value("float")),
-                    }
-                ),
-            ]
+    def _compute(
+        self,
+        predictions,
+        references,
+        lang=None,
+        model_type=None,
+        num_layers=None,
+        verbose=False,
+        idf=False,
+        device=None,
+        batch_size=64,
+        nthreads=4,
+        all_layers=False,
+        rescale_with_baseline=False,
+        baseline_path=None,
+        use_fast_tokenizer=False,
+    ):
+
+        if isinstance(references[0], str):
+            references = [[ref] for ref in references]
+
+        if idf:
+            idf_sents = [r for ref in references for r in ref]
         else:
-            return [
-                datasets.Features(
-                    {
-                        "references": datasets.Value("float"),
-                        "predictions": datasets.Value("float"),
-                    }
-                ),
-                datasets.Features(
-                    {
-                        "references": datasets.Value("string"),
-                        "predictions": datasets.Value("float"),
-                    }
-                ),
-            ]
+            idf_sents = None
 
-    def _compute(self, references, predictions, sample_weight=None, pos_label=1):
+        get_hash = bert_score.utils.get_hash
+        scorer = bert_score.BERTScorer
 
-        brier_score = brier_score_loss(references, predictions, sample_weight=sample_weight, pos_label=pos_label)
+        if version.parse(bert_score.__version__) >= version.parse("0.3.10"):
+            get_hash = functools.partial(get_hash, use_fast_tokenizer=use_fast_tokenizer)
+            scorer = functools.partial(scorer, use_fast_tokenizer=use_fast_tokenizer)
+        elif use_fast_tokenizer:
+            raise ImportWarning(
+                "To use a fast tokenizer, the module `bert-score>=0.3.10` is required, and the current version of "
+                "`bert-score` doesn't match this condition.\n"
+                'You can install it with `pip install "bert-score>=0.3.10"`.'
+            )
 
-        return {"brier_score": brier_score}
+        if model_type is None:
+            if lang is None:
+                raise ValueError(
+                    "Either 'lang' (e.g. 'en') or 'model_type' (e.g. 'microsoft/deberta-xlarge-mnli')"
+                    " must be specified"
+                )
+            model_type = bert_score.utils.lang2model[lang.lower()]
+
+        if num_layers is None:
+            num_layers = bert_score.utils.model2layers[model_type]
+
+        hashcode = get_hash(
+            model=model_type,
+            num_layers=num_layers,
+            idf=idf,
+            rescale_with_baseline=rescale_with_baseline,
+            use_custom_baseline=baseline_path is not None,
+        )
+
+        with filter_logging_context():
+            if not hasattr(self, "cached_bertscorer") or self.cached_bertscorer.hash != hashcode:
+                self.cached_bertscorer = scorer(
+                    model_type=model_type,
+                    num_layers=num_layers,
+                    batch_size=batch_size,
+                    nthreads=nthreads,
+                    all_layers=all_layers,
+                    idf=idf,
+                    idf_sents=idf_sents,
+                    device=device,
+                    lang=lang,
+                    rescale_with_baseline=rescale_with_baseline,
+                    baseline_path=baseline_path,
+                )
+
+        (P, R, F) = self.cached_bertscorer.score(
+            cands=predictions,
+            refs=references,
+            verbose=verbose,
+            batch_size=batch_size,
+        )
+        output_dict = {
+            "precision": P.tolist(),
+            "recall": R.tolist(),
+            "f1": F.tolist(),
+            "hashcode": hashcode,
+        }
+        return output_dict

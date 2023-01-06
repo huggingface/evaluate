@@ -100,6 +100,21 @@ class BrierScore(evaluate.Metric):
             return [
                 datasets.Features(
                     {
+                        "references": datasets.Sequence(datasets.Value("float")),
+                        "predictions": datasets.Sequence(datasets.Value("float")),
+                    }
+                ),
+                datasets.Features(
+                    {
+                        "references": datasets.Sequence(datasets.Value("string")),
+                        "predictions": datasets.Sequence(datasets.Value("float")),
+                    }
+                ),
+            ]
+        else:
+            return [
+                datasets.Features(
+                    {
                         "references": datasets.Value("float"),
                         "predictions": datasets.Value("float"),
                     }
@@ -110,11 +125,6 @@ class BrierScore(evaluate.Metric):
                         "predictions": datasets.Value("float"),
                     }
                 ),
-            ]
-        else:
-            return [
-                datasets.Features({"references": datasets.Value("float"), "predictions": datasets.Value("float")}),
-                datasets.Features({"references": datasets.Value("string"), "predictions": datasets.Value("float")}),
             ]
 
     def _compute(self, references, predictions, sample_weight=None, pos_label=1):
