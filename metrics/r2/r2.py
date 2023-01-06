@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""R-Squared metric."""
+"""R2 metric."""
 
 
 import evaluate
