@@ -106,10 +106,9 @@ class Recall(evaluate.Metric):
                 }
                 if self.config_name == "multilabel"
                 else {
-                     "predictions": datasets.Value("int32"),
-                     "references": datasets.Value("int32"),
-                 }
-
+                    "predictions": datasets.Value("int32"),
+                    "references": datasets.Value("int32"),
+                }
             ),
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.recall_score.html"],
         )

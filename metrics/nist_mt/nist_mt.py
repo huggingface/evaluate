@@ -100,10 +100,10 @@ class NistMt(evaluate.Metric):
                     }
                 ),
                 datasets.Features(
-                      {
-                         "predictions": Value("string", id="prediction"),
-                         "references": Value("string", id="reference"),
-                     }
+                    {
+                        "predictions": Value("string", id="prediction"),
+                        "references": Value("string", id="reference"),
+                    }
                 ),
             ],
             homepage="https://www.nltk.org/api/nltk.translate.nist_score.html",

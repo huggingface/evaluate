@@ -63,9 +63,9 @@ class FRUGALSCORE(evaluate.Metric):
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
                 {
-                     "predictions": datasets.Value("string"),
-                     "references": datasets.Value("string"),
-                 }
+                    "predictions": datasets.Value("string"),
+                    "references": datasets.Value("string"),
+                }
             ),
             homepage="https://github.com/moussaKam/FrugalScore",
         )
@@ -79,13 +79,13 @@ class FRUGALSCORE(evaluate.Metric):
         self.tokenizer = AutoTokenizer.from_pretrained(checkpoint)
 
     def _compute(
-         self,
-         predictions,
-         references,
-         batch_size=32,
-         max_length=128,
-         device=None,
-     ):
+        self,
+        predictions,
+        references,
+        batch_size=32,
+        max_length=128,
+        device=None,
+    ):
         """Returns the scores"""
         assert len(predictions) == len(
             references

@@ -116,9 +116,9 @@ class F1(evaluate.Metric):
                 }
                 if self.config_name == "multilabel"
                 else {
-                     "predictions": datasets.Value("int32"),
-                     "references": datasets.Value("int32"),
-                 }
+                    "predictions": datasets.Value("int32"),
+                    "references": datasets.Value("int32"),
+                }
             ),
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html"],
         )

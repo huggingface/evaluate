@@ -152,8 +152,8 @@ class ChrF(evaluate.Metric):
             ],
             codebase_urls=["https://github.com/mjpost/sacreBLEU#chrf--chrf"],
             reference_urls=[
-                 "https://github.com/m-popovic/chrF",
-             ],
+                "https://github.com/m-popovic/chrF",
+            ],
         )
 
     def _compute(

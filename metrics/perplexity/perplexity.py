@@ -93,10 +93,10 @@ class Perplexity(evaluate.Metric):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
-                 {
-                     "predictions": datasets.Value("string"),
-                 }
-             ),
+                {
+                    "predictions": datasets.Value("string"),
+                }
+            ),
             reference_urls=["https://huggingface.co/docs/transformers/perplexity"],
         )
 

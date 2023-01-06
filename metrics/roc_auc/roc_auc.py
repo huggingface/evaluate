@@ -161,9 +161,9 @@ class ROCAUC(evaluate.Metric):
                 }
                 if self.config_name == "multilabel"
                 else {
-                     "references": datasets.Value("int32"),
-                     "prediction_scores": datasets.Value("float"),
-                 }
+                    "references": datasets.Value("int32"),
+                    "prediction_scores": datasets.Value("float"),
+                }
             ),
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html"],
         )

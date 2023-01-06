@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-"""R2 metric."""
+"""R squared metric."""
 
 
 import datasets
@@ -39,13 +39,13 @@ The R^2 value ranges from 0 to 1, with a higher value indicating a better fit. A
 
 R^2 can be calculated using the following formula:
 
-R^2 = 1 - (Sum of Squared Errors / Sum of Squared Total)
+r_squared = 1 - (Sum of Squared Errors / Sum of Squared Total)
 
-where the Sum of Squared Errors is the sum of the squared differences between the predicted values and the true values, and the Sum of Squared Total is the sum of the squared differences between the true values and the mean of the true values.,
+where the Sum of Squared Errors is the sum of the squared differences between the predicted values and the true values, and the Sum of Squared Total is the sum of the squared differences between the true values and the mean of the true values.
 """
 
 _KWARGS_DESCRIPTION = """
-Computes the R^2 metric.
+Computes the R Squared metric.
 
 Args:
     predictions: List of predicted values of the dependent variable
@@ -57,9 +57,8 @@ Returns:
     R^2 value ranging from 0 to 1, with a higher value indicating a better fit.
 
 Examples:
-    >>> predictions = [1, 2, 3, 4]
-    >>> references = [0.9, 2.1, 3.2, 3.8]
-    >>> r2 = module._compute(predictions=predictions, references=references)
+    >>> r2_metric = evaluate.load("r_squared")
+    >>> r2 = r2_metric.compute(predictions=[1, 2, 3, 4], references=[0.9, 2.1, 3.2, 3.8])
     >>> print(r2)
     0.95
 """
@@ -79,7 +78,9 @@ class R2(evaluate.Metric):
                 }
             ),
             codebase_urls=["https://github.com/scikit-learn/scikit-learn/"],
-            reference_urls=["https://en.wikipedia.org/wiki/Coefficient_of_determination"],
+            reference_urls=[
+                "https://en.wikipedia.org/wiki/Coefficient_of_determination",
+            ],
         )
 
     def _compute(self, predictions=None, references=None):
@@ -92,7 +93,7 @@ class R2(evaluate.Metric):
         # Calculate sum of squared total
         sst = np.sum((references - mean_references) ** 2)
 
-        # Calculate R^2
-        r2 = 1 - (ssr / sst)
+        # Calculate R Squared
+        r_squared = 1 - (ssr / sst)
 
-        return r2
+        return r_squared

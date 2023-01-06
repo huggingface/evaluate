@@ -36,24 +36,19 @@ Args:
     references (`list` of `int`): Ground truth labels.
     normalize (`boolean`): If set to False, returns the number of correctly classified samples. Otherwise, returns the fraction of correctly classified samples. Defaults to True.
     sample_weight (`list` of `float`): Sample weights Defaults to None.
-
 Returns:
     accuracy (`float` or `int`): Accuracy score. Minimum possible value is 0. Maximum possible value is 1.0, or the number of examples input, if `normalize` is set to `True`.. A higher score means higher accuracy.
-
 Examples:
-
     Example 1-A simple example
         >>> accuracy_metric = evaluate.load("accuracy")
         >>> results = accuracy_metric.compute(references=[0, 1, 2, 0, 1, 2], predictions=[0, 1, 1, 2, 1, 0])
         >>> print(results)
         {'accuracy': 0.5}
-
     Example 2-The same as Example 1, except with `normalize` set to `False`.
         >>> accuracy_metric = evaluate.load("accuracy")
         >>> results = accuracy_metric.compute(references=[0, 1, 2, 0, 1, 2], predictions=[0, 1, 1, 2, 1, 0], normalize=False)
         >>> print(results)
         {'accuracy': 3.0}
-
     Example 3-The same as Example 1, except with `sample_weight` set.
         >>> accuracy_metric = evaluate.load("accuracy")
         >>> results = accuracy_metric.compute(references=[0, 1, 2, 0, 1, 2], predictions=[0, 1, 1, 2, 1, 0], sample_weight=[0.5, 2, 0.7, 0.5, 9, 0.4])
@@ -90,10 +85,10 @@ class Accuracy(evaluate.Metric):
                     "references": datasets.Sequence(datasets.Value("int32")),
                 }
                 if self.config_name == "multilabel"
-                 else {
-                     "predictions": datasets.Value("int32"),
-                     "references": datasets.Value("int32"),
-                 }
+                else {
+                    "predictions": datasets.Value("int32"),
+                    "references": datasets.Value("int32"),
+                }
             ),
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.accuracy_score.html"],
         )
