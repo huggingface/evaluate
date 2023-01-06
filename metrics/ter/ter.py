@@ -178,7 +178,9 @@ class Ter(evaluate.Metric):
                 ),
             ],
             codebase_urls=["https://github.com/mjpost/sacreBLEU#ter"],
-            reference_urls=["https://github.com/jhclark/tercom"],
+            reference_urls=[
+                 "https://github.com/jhclark/tercom",
+             ],
         )
 
     def _compute(

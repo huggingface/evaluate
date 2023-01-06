@@ -31,19 +31,15 @@ Args:
     predictions (`list` of `int`): Predicted class labels, as returned by a model.
     references (`list` of `int`): Ground truth labels.
     return_pvalue (`boolean`): If `True`, returns the p-value, along with the correlation coefficient. If `False`, returns only the correlation coefficient. Defaults to `False`.
-
 Returns:
     pearsonr (`float`): Pearson correlation coefficient. Minimum possible value is -1. Maximum possible value is 1. Values of 1 and -1 indicate exact linear positive and negative relationships, respectively. A value of 0 implies no correlation.
     p-value (`float`): P-value, which roughly indicates the probability of an The p-value roughly indicates the probability of an uncorrelated system producing datasets that have a Pearson correlation at least as extreme as the one computed from these datasets. Minimum possible value is 0. Maximum possible value is 1. Higher values indicate higher probabilities.
-
 Examples:
-
     Example 1-A simple example using only predictions and references.
         >>> pearsonr_metric = evaluate.load("pearsonr")
         >>> results = pearsonr_metric.compute(predictions=[10, 9, 2.5, 6, 4], references=[1, 2, 3, 4, 5])
         >>> print(round(results['pearsonr'], 2))
         -0.74
-
     Example 2-The same as Example 1, but that also returns the `p-value`.
         >>> pearsonr_metric = evaluate.load("pearsonr")
         >>> results = pearsonr_metric.compute(predictions=[10, 9, 2.5, 6, 4], references=[1, 2, 3, 4, 5], return_pvalue=True)
@@ -91,7 +87,10 @@ class Pearsonr(evaluate.Metric):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
-                {"predictions": datasets.Value("float"), "references": datasets.Value("float")}
+                {
+                    "predictions": datasets.Value("float"),
+                    "references": datasets.Value("float"),
+                }
             ),
             reference_urls=["https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.pearsonr.html"],
         )

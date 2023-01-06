@@ -99,17 +99,17 @@ class BrierScore(evaluate.Metric):
         if self.config_name == "multilist":
             return [
                 datasets.Features(
-                    {
-                        "references": datasets.Sequence(datasets.Value("float")),
-                        "predictions": datasets.Sequence(datasets.Value("float")),
-                    }
-                ),
-                datasets.Features(
-                    {
-                        "references": datasets.Sequence(datasets.Value("string")),
-                        "predictions": datasets.Sequence(datasets.Value("float")),
-                    }
-                ),
+                     {
+                         "references": datasets.Value("float"),
+                         "predictions": datasets.Value("float"),
+                     }
+                 ),
+                 datasets.Features(
+                     {
+                         "references": datasets.Value("string"),
+                         "predictions": datasets.Value("float"),
+                     }
+                 ),
             ]
         else:
             return [

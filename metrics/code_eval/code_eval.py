@@ -97,31 +97,24 @@ Users are strongly encouraged to sandbox this evaluation suite so that it
 does not perform destructive actions on their host or network. For more
 information on how OpenAI sandboxes its code, see the paper "Evaluating Large
 Language Models Trained on Code" (https://arxiv.org/abs/2107.03374).
-
 Once you have read this disclaimer and taken appropriate precautions,
 set the environment variable HF_ALLOW_CODE_EVAL="1". Within Python you can to this
 with:
-
 >>> import os
 >>> os.environ["HF_ALLOW_CODE_EVAL"] = "1"
-
 ################################################################################\
 """
 
 _LICENSE = """The MIT License
-
 Copyright (c) OpenAI (https://openai.com)
-
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
 in the Software without restriction, including without limitation the rights
 to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 copies of the Software, and to permit persons to whom the Software is
 furnished to do so, subject to the following conditions:
-
 The above copyright notice and this permission notice shall be included in
 all copies or substantial portions of the Software.
-
 THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -141,7 +134,10 @@ class CodeEval(evaluate.Metric):
             inputs_description=_KWARGS_DESCRIPTION,
             # This defines the format of each prediction and reference
             features=datasets.Features(
-                {"predictions": datasets.Sequence(datasets.Value("string")), "references": datasets.Value("string")}
+                {
+                    "predictions": datasets.Sequence(datasets.Value("string")),
+                    "references": datasets.Value("string"),
+                }
             ),
             homepage="https://github.com/openai/human-eval",
             codebase_urls=["https://github.com/openai/human-eval"],
