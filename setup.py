@@ -187,5 +187,6 @@ setup(
         "Topic :: Scientific/Engineering :: Artificial Intelligence",
     ],
     keywords="metrics machine learning evaluate evaluation",
+    include_package_data=True,
     zip_safe=False,  # Required for mypy to find the py.typed file
 )
