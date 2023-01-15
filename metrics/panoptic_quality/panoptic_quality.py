@@ -183,11 +183,11 @@ def pq_compute_single_core(proc_id, annotation_set, predictions, references, cat
         print("Ground truth annotation: ", gt_ann)
         print("Predicted annotation: ", pred_ann)
 
-        gt_segms = {el["id"]: el for el in gt_ann["segments_info"]}
-        pred_segms = {el["id"]: el for el in pred_ann["segments_info"]}
+        gt_segms = {el["id"]: el for el in gt_ann}
+        pred_segms = {el["id"]: el for el in pred_ann}
 
         # predicted segments area calculation + prediction sanity checks
-        pred_labels_set = set(el["id"] for el in pred_ann["segments_info"])
+        pred_labels_set = set(el["id"] for el in pred_ann)
         labels, labels_cnt = np.unique(pan_pred, return_counts=True)
         for label, label_cnt in zip(labels, labels_cnt):
             if label not in pred_segms:
@@ -359,18 +359,15 @@ class PanopticQuality(evaluate.Metric):
                 {
                     "predictions": datasets.Image(),
                     "references": datasets.Image(),
-                    "predicted_annotations": {
-                        "segments_info": datasets.Sequence(
+                    "predicted_annotations": datasets.Sequence(
                             {
                                 "id": datasets.Value("int32"),
                                 "category_id": datasets.Value("int32"),
                                 "was_fused": datasets.Value("bool"),
                                 "score": datasets.Value("float32"),
                             }
-                        )
-                    },
-                    "reference_annotations": {
-                        "segments_info": datasets.Sequence(
+                    ),
+                    "reference_annotations": datasets.Sequence(
                             {
                                 "id": datasets.Value("int32"),
                                 "category_id": datasets.Value("int32"),
@@ -378,8 +375,7 @@ class PanopticQuality(evaluate.Metric):
                                 "area": datasets.Value("int32"),
                                 "bbox": datasets.Sequence(datasets.Value("int32")),
                             }
-                        )
-                    },
+                    )
                 }
             ),
             reference_urls=["https://github.com/cocodataset/panopticapi/blob/master/panopticapi/evaluation.py"],
