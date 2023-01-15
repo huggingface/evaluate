@@ -185,8 +185,11 @@ def pq_compute_single_core(proc_id, annotation_set, predictions, references, cat
         print("Ground truth annotation: ", gt_ann)
         print("Predicted annotation: ", pred_ann)
 
-        gt_segms = {el["id"]: el for el in gt_ann}
-        pred_segms = {el["id"]: el for el in pred_ann}
+        # gt_segms = {el["id"]: el for el in gt_ann}
+        # pred_segms = {el["id"]: el for el in pred_ann}
+
+        gt_segms = {id: {k:v[idx] for k,v in gt_ann.items()} for idx, id in enumerate(gt_ann['id'])}
+        pred_segms = {id: {k:v[idx] for k,v in pred_ann.items()} for idx, id in enumerate(pred_ann['id'])}
 
         # predicted segments area calculation + prediction sanity checks
         pred_labels_set = set(el["id"] for el in pred_ann)
