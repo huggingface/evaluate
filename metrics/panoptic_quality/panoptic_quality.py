@@ -355,8 +355,8 @@ class PanopticQuality(evaluate.Metric):
             features=datasets.Features(
                 # 1st Seq - height dim, 2nd - width dim
                 {
-                    "predictions": datasets.Sequence(datasets.Image()),
-                    "references": datasets.Sequence(datasets.Image()),
+                    "predictions": datasets.Image(),
+                    "references": datasets.Image(),
                     # "predicted_annotations": datasets.Sequence(dict),
                     # "reference_annotations": datasets.Sequence(dict),
                 }
@@ -368,10 +368,10 @@ class PanopticQuality(evaluate.Metric):
 
     def _compute(
         self,
-        predictions=None, # this corresponds to the png_string key of DetrPostProcess
-        references=None,
-        predicted_annotations=None, # list of dicts, each dict containing `segments_info`. Segments info is a list of dicts, each dict containing category_id, id, iscrowd, area, bbox
-        reference_annotations=None,
+        predictions, # this corresponds to the png_string key of DetrPostProcess
+        references,
+        predicted_annotations, # list of dicts, each dict containing `segments_info`. Segments info is a list of dicts, each dict containing category_id, id, iscrowd, area, bbox
+        reference_annotations,
         categories=None,
         # image_ids=None,
         # output_dir=None,
