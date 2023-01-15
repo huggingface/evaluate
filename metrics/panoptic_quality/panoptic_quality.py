@@ -361,9 +361,8 @@ class PanopticQuality(evaluate.Metric):
                             {
                                 "id": datasets.Value("uint16"),
                                 "category_id": datasets.Value("uint16"),
-                                "iscrowd": datasets.Value("uint16"),
-                                "area": datasets.Value("uint16"),
-                                "bbox": datasets.Sequence(datasets.Value("uint16")),
+                                "was_fused": datasets.Value("bool"),
+                                "score": datasets.Value("float32"),
                             }
                         )
                     },
@@ -372,8 +371,9 @@ class PanopticQuality(evaluate.Metric):
                             {
                                 "id": datasets.Value("uint16"),
                                 "category_id": datasets.Value("uint16"),
-                                "was_fused": datasets.Value("bool"),
-                                "score": datasets.Value("float32"),
+                                "iscrowd": datasets.Value("uint16"),
+                                "area": datasets.Value("uint16"),
+                                "bbox": datasets.Sequence(datasets.Value("uint16")),
                             }
                         )
                     },
