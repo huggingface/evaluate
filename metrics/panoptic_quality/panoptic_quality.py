@@ -353,33 +353,44 @@ class PanopticQuality(evaluate.Metric):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
-                # 1st Seq - height dim, 2nd - width dim
                 {
                     "predictions": datasets.Image(),
                     "references": datasets.Image(),
-                    # "predicted_annotations": dict("segments_info"),
-                    # "reference_annotations": dict("segments_info"),
+                    "predicted_annotations": {
+                        "segments_info": datasets.Sequence(
+                            {
+                                "id": datasets.Value("uint16"),
+                                "category_id": datasets.Value("uint16"),
+                            }
+                        )
+                    },
+                    "reference_annotations": {
+                        "segments_info": datasets.Sequence(
+                            {
+                                "id": datasets.Value("uint16"),
+                                "category_id": datasets.Value("uint16"),
+                            }
+                        )
+                    },
                 }
             ),
-            reference_urls=[
-                "https://github.com/cocodataset/panopticapi/blob/master/panopticapi/evaluation.py"
-            ],
+            reference_urls=["https://github.com/cocodataset/panopticapi/blob/master/panopticapi/evaluation.py"],
         )
 
     def _compute(
         self,
-        predictions, # this corresponds to the png_string key of DetrPostProcess
+        predictions,  # this corresponds to the png_string key of DetrPostProcess
         references,
-        predicted_annotations, # list of dicts, each dict containing `segments_info`. Segments info is a list of dicts, each dict containing category_id, id, iscrowd, area, bbox
+        predicted_annotations,  # list of dicts, each dict containing `segments_info`. Segments info is a list of dicts, each dict containing category_id, id, iscrowd, area, bbox
         reference_annotations,
         categories=None,
         # image_ids=None,
         # output_dir=None,
         # gt_folder=None,
         #  gt_json=None,
-    ):          
+    ):
         result = pq_compute(predictions, references, predicted_annotations, reference_annotations, categories)
-        
+
         return result
 
 
@@ -390,11 +401,11 @@ class PanopticQuality(evaluate.Metric):
 #     f.write(json.dumps(gt_json_data))
 
 # # step 4
-        # gt_folder = os.path.join(output_dir, "gt")
-        # if not os.path.exists(gt_folder):
-        #     os.mkdir(gt_folder)
-        # for ref in reference_annotations:
-        #     image_id = ref["image_id"]
-        #     file_name = f"{image_id:012d}.png"
-        #     with open(os.path.join(gt_folder, file_name), "wb") as f:
-        #         f.write(ref["segmentation"])
+# gt_folder = os.path.join(output_dir, "gt")
+# if not os.path.exists(gt_folder):
+#     os.mkdir(gt_folder)
+# for ref in reference_annotations:
+#     image_id = ref["image_id"]
+#     file_name = f"{image_id:012d}.png"
+#     with open(os.path.join(gt_folder, file_name), "wb") as f:
+#         f.write(ref["segmentation"])
