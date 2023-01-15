@@ -359,8 +359,8 @@ class PanopticQuality(evaluate.Metric):
                     # "predicted_annotations": {
                     #     "segments_info": datasets.Sequence(
                     #         {
-                    #             "id": datasets.Value("uint16"),
-                    #             "category_id": datasets.Value("uint16"),
+                    #             "id": datasets.Value("int32"),
+                    #             "category_id": datasets.Value("int32"),
                     #             "was_fused": datasets.Value("bool"),
                     #             "score": datasets.Value("float32"),
                     #         }
@@ -369,11 +369,11 @@ class PanopticQuality(evaluate.Metric):
                     "reference_annotations": {
                         "segments_info": datasets.Sequence(
                             {
-                                "id": datasets.Value("uint16"),
-                                "category_id": datasets.Value("uint16"),
-                                "iscrowd": datasets.Value("uint16"),
-                                "area": datasets.Value("uint16"),
-                                "bbox": datasets.Sequence(datasets.Value("uint16")),
+                                "id": datasets.Value("int32"),
+                                "category_id": datasets.Value("int32"),
+                                "iscrowd": datasets.Value("int32"),
+                                "area": datasets.Value("int32"),
+                                "bbox": datasets.Sequence(datasets.Value("int32")),
                             }
                         )
                     },
