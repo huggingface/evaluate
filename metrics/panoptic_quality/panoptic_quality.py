@@ -166,6 +166,8 @@ class PQStat:
 
 @get_traceback
 def pq_compute_single_core(proc_id, annotation_set, predictions, references, categories):
+    print("Annotation set:", annotation_set)
+    
     pq_stat = PQStat()
 
     idx = 0
