@@ -357,8 +357,8 @@ class PanopticQuality(evaluate.Metric):
                 {
                     "predictions": datasets.Image(),
                     "references": datasets.Image(),
-                    "predicted_annotations": dict("segments_info"),
-                    "reference_annotations": dict("segments_info"),
+                    # "predicted_annotations": dict("segments_info"),
+                    # "reference_annotations": dict("segments_info"),
                 }
             ),
             reference_urls=[
