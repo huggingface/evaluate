@@ -180,6 +180,9 @@ def pq_compute_single_core(proc_id, annotation_set, predictions, references, cat
         # pan_pred = np.array(Image.open(os.path.join(pred_folder, pred_ann["file_name"])), dtype=np.uint32)
         pan_pred = rgb2id(np.array(pan_pred))
 
+        print("Ground truth annotation: ", gt_ann)
+        print("Predicted annotation: ", pred_ann)
+
         gt_segms = {el["id"]: el for el in gt_ann["segments_info"]}
         pred_segms = {el["id"]: el for el in pred_ann["segments_info"]}
 
