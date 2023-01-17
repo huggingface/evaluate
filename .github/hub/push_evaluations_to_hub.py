@@ -35,12 +35,12 @@ def get_git_tag(lib_path, commit_hash):
 def copy_recursive(source_base_path, target_base_path):
     """Copy directory recursively and overwrite existing files."""
     for item in source_base_path.iterdir():
-        traget_path = target_base_path / item.name
+        target_path = target_base_path / item.name
         if item.is_dir():
-            traget_path.mkdir(exist_ok=True)
-            copy_recursive(item, traget_path)
+            target_path.mkdir(exist_ok=True)
+            copy_recursive(item, target_path)
         else:
-            shutil.copy(item, traget_path)
+            shutil.copy(item, target_path)
 
 def update_evaluate_dependency(requirements_path, commit_hash):
     """Updates the evaluate requirement with the latest commit."""
