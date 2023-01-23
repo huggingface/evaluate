@@ -199,23 +199,38 @@ def pq_compute_single_core(proc_id, annotation_set, predictions, references, cat
             if label not in pred_segms:
                 if label == VOID:
                     continue
+                # raise KeyError(
+                #     "In the image with ID {} segment with ID {} is presented in PNG and not presented in JSON.".format(
+                #         gt_ann["image_id"], label
+                #     )
+                # )
                 raise KeyError(
-                    "In the image with ID {} segment with ID {} is presented in PNG and not presented in JSON.".format(
-                        gt_ann["image_id"], label
+                    "The segment with ID {} is presented in PNG and not presented in JSON.".format(
+                        label
                     )
                 )
             pred_segms[label]["area"] = label_cnt
             pred_labels_set.remove(label)
             if pred_segms[label]["category_id"] not in categories:
+                # raise KeyError(
+                #     "In the image with ID {} segment with ID {} has unknown category_id {}.".format(
+                #         gt_ann["image_id"], label, pred_segms[label]["category_id"]
+                #     )
+                # )
                 raise KeyError(
-                    "In the image with ID {} segment with ID {} has unknown category_id {}.".format(
-                        gt_ann["image_id"], label, pred_segms[label]["category_id"]
+                    "The segment with ID {} has unknown category_id {}.".format(
+                        label, pred_segms[label]["category_id"]
                     )
                 )
         if len(pred_labels_set) != 0:
+            # raise KeyError(
+            #     "In the image with ID {} the following segment IDs {} are presented in JSON and not presented in PNG.".format(
+            #         gt_ann["image_id"], list(pred_labels_set)
+            #     )
+            # )
             raise KeyError(
-                "In the image with ID {} the following segment IDs {} are presented in JSON and not presented in PNG.".format(
-                    gt_ann["image_id"], list(pred_labels_set)
+                "The following segment IDs {} are presented in JSON and not presented in PNG.".format(
+                    list(pred_labels_set)
                 )
             )
 
@@ -369,8 +384,8 @@ class PanopticQuality(evaluate.Metric):
                             {
                                 "id": datasets.Value("int32"),
                                 "category_id": datasets.Value("int32"),
-                                "was_fused": datasets.Value("bool"),
-                                "score": datasets.Value("float32"),
+                                # "was_fused": datasets.Value("bool"),
+                                # "score": datasets.Value("float32"),
                             }
                     ),
                     "reference_annotations": datasets.Sequence(
@@ -379,7 +394,7 @@ class PanopticQuality(evaluate.Metric):
                                 "category_id": datasets.Value("int32"),
                                 "iscrowd": datasets.Value("int32"),
                                 "area": datasets.Value("int32"),
-                                "bbox": datasets.Sequence(datasets.Value("int32")),
+                                # "bbox": datasets.Sequence(datasets.Value("int32")),
                             }
                     )
                 }
