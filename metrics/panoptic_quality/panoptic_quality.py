@@ -312,6 +312,8 @@ def pq_compute_single_core(proc_id, annotation_set, predictions, references, cat
 
 def pq_compute_multi_core(matched_annotations_list, predictions, references, categories):
     cpu_num = multiprocessing.cpu_count()
+    # fix cpu numbers for now (DEBUGGING)
+    cpu_num = 1
     annotations_split = np.array_split(matched_annotations_list, cpu_num)
     print("Number of cores: {}, images per core: {}".format(cpu_num, len(annotations_split[0])))
     workers = multiprocessing.Pool(processes=cpu_num)
