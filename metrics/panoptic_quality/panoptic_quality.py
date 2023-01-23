@@ -198,7 +198,13 @@ def pq_compute_single_core(proc_id, annotation_set, predictions, references, cat
         # pred_labels_set = set(el["id"] for el in pred_ann)
         pred_labels_set = set(pred_ann["id"])
         labels, labels_cnt = np.unique(pan_pred, return_counts=True)
+
+        print("Predicted labels set:", pred_labels_set)
+        print("Labels:", labels)
+        print("Labels count:", labels_cnt)
+
         for label, label_cnt in zip(labels, labels_cnt):
+            print("Label:", label)
             if label not in pred_segms:
                 if label == VOID:
                     continue
