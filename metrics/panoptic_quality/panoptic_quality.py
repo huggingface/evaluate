@@ -384,8 +384,8 @@ class PanopticQuality(evaluate.Metric):
                             {
                                 "id": datasets.Value("int32"),
                                 "category_id": datasets.Value("int32"),
-                                # "was_fused": datasets.Value("bool"),
-                                # "score": datasets.Value("float32"),
+                                "was_fused": datasets.Value("bool"),
+                                "score": datasets.Value("float32"),
                             }
                     ),
                     "reference_annotations": datasets.Sequence(
@@ -394,7 +394,7 @@ class PanopticQuality(evaluate.Metric):
                                 "category_id": datasets.Value("int32"),
                                 "iscrowd": datasets.Value("int32"),
                                 "area": datasets.Value("int32"),
-                                # "bbox": datasets.Sequence(datasets.Value("int32")),
+                                "bbox": datasets.Sequence(datasets.Value("int32")),
                             }
                     )
                 }
