@@ -203,9 +203,12 @@ def pq_compute_single_core(proc_id, annotation_set, predictions, references, cat
         print("Labels:", labels)
         print("Labels count:", labels_cnt)
 
+        print("Predicted segments:", pred_segms.keys())
+
         for label, label_cnt in zip(labels, labels_cnt):
             print("Label:", label)
             if label not in pred_segms:
+                print(f"Label {label} not in predicted segments {pred_segms.keys()}")
                 if label == VOID:
                     continue
                 # raise KeyError(
