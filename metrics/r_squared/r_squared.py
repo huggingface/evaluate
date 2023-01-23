@@ -82,8 +82,21 @@ class R2(evaluate.Metric):
                 "https://en.wikipedia.org/wiki/Coefficient_of_determination",
             ],
         )
-
+        
     def _compute(self, predictions=None, references=None):
+        """
+        Computes the coefficient of determination (R-squared) of predictions with respect to references.
+
+        Parameters:
+            predictions (List or np.ndarray): The predicted values.
+            references (List or np.ndarray): The true/reference values.
+
+        Returns:
+            float: The R-squared value.
+        """
+        predictions = np.array(predictions)
+        references = np.array(references)
+        
         # Calculate mean of the references
         mean_references = np.mean(references)
 
