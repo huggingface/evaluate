@@ -23,6 +23,7 @@ from transformers import (
     AutoConfig,
     AutoFeatureExtractor,
     AutoModelForImageClassification,
+    AutoModelForAudioClassification,
     AutoModelForQuestionAnswering,
     AutoModelForSequenceClassification,
     AutoModelForTokenClassification,
@@ -31,6 +32,7 @@ from transformers import (
 )
 
 from evaluate import (
+    AudioClassificationEvaluator,
     AutomaticSpeechRecognitionEvaluator,
     Evaluator,
     ImageClassificationEvaluator,
@@ -126,6 +128,12 @@ class DummyAutomaticSpeechRecognitionPipeline:
     def __call__(self, inputs, **kwargs):
         return [{"text": "Lorem ipsum"} for _ in inputs]
 
+class DummyAudioClassificationPipeline:
+    def __init__(self):
+        self.task = "audio-classification"
+
+    def __call__(self, audio, **kwargs):
+        return [[{"score": 0.9, "label": "yes"}, {"score": 0.1, "label": "no"}] for i, _ in enumerate(audio)]
 
 class TestEvaluator(TestCase):
     def setUp(self):
@@ -1029,3 +1037,86 @@ class TestAutomaticSpeechRecognitionEvaluator(TestCase):
             metric="cer",
         )
         self.assertEqual(results["cer"], 0.7272727272727273)
+
+
+class TestAudioClassificationEvaluator(TestCase):
+    def setUp(self):
+        self.data = Dataset.from_dict(
+            {
+                "file": ["https://huggingface.co/datasets/Narsil/asr_dummy/resolve/main/1.flac"],
+                "label": [11]
+
+            }
+        )
+        self.default_model = "superb/wav2vec2-base-superb-ks"
+        self.pipe = DummyAudioClassificationPipeline()
+        self.evaluator = evaluator("audio-classification")
+        self.label_mapping = AutoConfig.from_pretrained(self.default_model).label2id
+
+    def test_pipe_init(self):
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            label_mapping=self.label_mapping,
+        )
+        self.assertEqual(results["accuracy"], 0)
+
+    @slow
+    def test_model_init(self):
+        results = self.evaluator.compute(
+            model_or_pipeline=self.default_model,
+            data=self.data,
+            metric="accuracy",
+            label_mapping=self.label_mapping,
+        )
+        self.assertEqual(results["accuracy"], 0)
+
+        model = AutoModelForAudioClassification.from_pretrained(self.default_model)
+        feature_extractor = AutoFeatureExtractor.from_pretrained(self.default_model)
+
+        results = self.evaluator.compute(
+            model_or_pipeline=model,
+            data=self.data,
+            metric="accuracy",
+            feature_extractor=feature_extractor,
+            label_mapping=self.label_mapping,
+        )
+        self.assertEqual(results["accuracy"], 0)
+
+    def test_class_init(self):
+        evaluator = AudioClassificationEvaluator()
+        self.assertEqual(evaluator.task, "audio-classification")
+        self.assertIsNone(evaluator.default_metric_name)
+
+        results = evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="accuracy",
+            label_mapping=self.label_mapping,
+        )
+        self.assertEqual(results["accuracy"], 0)
+
+    @slow
+    def test_default_pipe_init(self):
+        results = self.evaluator.compute(
+            data=self.data,
+            label_mapping=self.label_mapping,
+        )
+        self.assertEqual(results["accuracy"], 0)
+
+    def test_overwrite_default_metric(self):
+        accuracy = load("accuracy")
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric=accuracy,
+            label_mapping=self.label_mapping,
+        )
+        self.assertEqual(results["accuracy"], 0)
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            metric="accuracy",
+            label_mapping=self.label_mapping,
+        )
+        self.assertEqual(results["accuracy"], 0)
