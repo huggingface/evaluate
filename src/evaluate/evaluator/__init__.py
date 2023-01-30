@@ -24,8 +24,8 @@ except ImportError:
 
 from typing import Dict, List
 
-from .automatic_speech_recognition import AutomaticSpeechRecognitionEvaluator
 from .audio_classification import AudioClassificationEvaluator
+from .automatic_speech_recognition import AutomaticSpeechRecognitionEvaluator
 from .base import Evaluator
 from .image_classification import ImageClassificationEvaluator
 from .question_answering import QuestionAnsweringEvaluator
@@ -75,7 +75,7 @@ SUPPORTED_EVALUATOR_TASKS = {
     "audio-classification": {
         "implementation": AudioClassificationEvaluator,
         "default_metric_name": "accuracy",
-    }
+    },
 }
 
 

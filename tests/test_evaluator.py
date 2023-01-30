@@ -22,8 +22,8 @@ from PIL import Image
 from transformers import (
     AutoConfig,
     AutoFeatureExtractor,
-    AutoModelForImageClassification,
     AutoModelForAudioClassification,
+    AutoModelForImageClassification,
     AutoModelForQuestionAnswering,
     AutoModelForSequenceClassification,
     AutoModelForTokenClassification,
@@ -128,12 +128,14 @@ class DummyAutomaticSpeechRecognitionPipeline:
     def __call__(self, inputs, **kwargs):
         return [{"text": "Lorem ipsum"} for _ in inputs]
 
+
 class DummyAudioClassificationPipeline:
     def __init__(self):
         self.task = "audio-classification"
 
     def __call__(self, audio, **kwargs):
         return [[{"score": 0.9, "label": "yes"}, {"score": 0.1, "label": "no"}] for i, _ in enumerate(audio)]
+
 
 class TestEvaluator(TestCase):
     def setUp(self):
@@ -1042,11 +1044,7 @@ class TestAutomaticSpeechRecognitionEvaluator(TestCase):
 class TestAudioClassificationEvaluator(TestCase):
     def setUp(self):
         self.data = Dataset.from_dict(
-            {
-                "file": ["https://huggingface.co/datasets/Narsil/asr_dummy/resolve/main/1.flac"],
-                "label": [11]
-
-            }
+            {"file": ["https://huggingface.co/datasets/Narsil/asr_dummy/resolve/main/1.flac"], "label": [11]}
         )
         self.default_model = "superb/wav2vec2-base-superb-ks"
         self.pipe = DummyAudioClassificationPipeline()
