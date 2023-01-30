@@ -312,6 +312,7 @@ def pq_compute_single_core(proc_id, annotation_set, predictions, references, cat
 
 def pq_compute_multi_core(matched_annotations_list, predictions, references, categories):
     cpu_num = multiprocessing.cpu_count()
+    # TODO support multiprocessing
     # fix cpu numbers for now (DEBUGGING)
     cpu_num = 1
     annotations_split = np.array_split(matched_annotations_list, cpu_num)
@@ -328,34 +329,6 @@ def pq_compute_multi_core(matched_annotations_list, predictions, references, cat
 
 
 def pq_compute(predictions, references, predicted_annotations, reference_annotations, categories):
-    # categories = {el["id"]: el for el in gt_json["categories"]}
-    # with open(gt_json_file, "r") as f:
-    #     gt_json = json.load(f)
-    # with open(pred_json_file, "r") as f:
-    #     pred_json = json.load(f)
-
-    # if gt_folder is None:
-    #     gt_folder = gt_json_file.replace(".json", "")
-    # if pred_folder is None:
-    #     pred_folder = pred_json_file.replace(".json", "")
-    # categories = {el["id"]: el for el in gt_json["categories"]}
-
-    # print("Evaluation panoptic segmentation metrics:")
-    # print("Ground truth:")
-    # print("\tSegmentation folder: {}".format(gt_folder))
-    # print("\tJSON file: {}".format(gt_json_file))
-    # print("Prediction:")
-    # print("\tSegmentation folder: {}".format(pred_folder))
-    # print("\tJSON file: {}".format(pred_json_file))
-
-    # if not os.path.isdir(gt_folder):
-    #     raise Exception("Folder {} with ground truth segmentations doesn't exist".format(gt_folder))
-    # if not os.path.isdir(pred_folder):
-    #     raise Exception("Folder {} with predicted segmentations doesn't exist".format(pred_folder))
-
-    # for el in pred_json["annotations"]:
-    #     print(el)
-    # pred_annotations = {el["image_id"]: el for el in pred_json["annotations"]}
     matched_annotations_list = []
     for pred_ann, gt_ann in zip(predicted_annotations, reference_annotations):
         matched_annotations_list.append((pred_ann, gt_ann))
@@ -418,33 +391,12 @@ class PanopticQuality(evaluate.Metric):
 
     def _compute(
         self,
-        predictions,  # this corresponds to the png_string key of DetrPostProcess
+        predictions,
         references,
-        predicted_annotations,  # list of dicts, each dict containing `segments_info`. Segments info is a list of dicts, each dict containing category_id, id, iscrowd, area, bbox
+        predicted_annotations,
         reference_annotations,
         categories=None,
-        # image_ids=None,
-        # output_dir=None,
-        # gt_folder=None,
-        #  gt_json=None,
     ):
         result = pq_compute(predictions, references, predicted_annotations, reference_annotations, categories)
 
         return result
-
-
-# # step 1: create ground truth JSON file
-# gt_json_data = {"annotations": reference_annotations, "categories": categories}
-# gt_json = os.path.join(output_dir, "gt.json")
-# with open(gt_json, "w") as f:
-#     f.write(json.dumps(gt_json_data))
-
-# # step 4
-# gt_folder = os.path.join(output_dir, "gt")
-# if not os.path.exists(gt_folder):
-#     os.mkdir(gt_folder)
-# for ref in reference_annotations:
-#     image_id = ref["image_id"]
-#     file_name = f"{image_id:012d}.png"
-#     with open(os.path.join(gt_folder, file_name), "wb") as f:
-#         f.write(ref["segmentation"])
