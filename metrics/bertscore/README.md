@@ -94,7 +94,7 @@ print(results)
 {'precision': [1.0, 1.0], 'recall': [1.0, 1.0], 'f1': [1.0, 1.0], 'hashcode': 'distilbert-base-uncased_L5_no-idf_version=0.3.10(hug_trans=4.10.3)'}
 ```
 
-Partial match with the `bert-base-uncased` model:
+Partial match with the `distilbert-base-uncased` model:
 
 ```python
 from evaluate import load
