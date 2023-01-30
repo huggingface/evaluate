@@ -167,7 +167,7 @@ class PQStat:
 @get_traceback
 def pq_compute_single_core(proc_id, annotation_set, predictions, references, categories):
     print("Annotation set:", annotation_set)
-    
+
     pq_stat = PQStat()
 
     idx = 0
@@ -188,8 +188,8 @@ def pq_compute_single_core(proc_id, annotation_set, predictions, references, cat
         # gt_segms = {el["id"]: el for el in gt_ann}
         # pred_segms = {el["id"]: el for el in pred_ann}
 
-        gt_segms = {id: {k:v[idx] for k,v in gt_ann.items()} for idx, id in enumerate(gt_ann['id'])}
-        pred_segms = {id: {k:v[idx] for k,v in pred_ann.items()} for idx, id in enumerate(pred_ann['id'])}
+        gt_segms = {id: {k: v[idx] for k, v in gt_ann.items()} for idx, id in enumerate(gt_ann["id"])}
+        pred_segms = {id: {k: v[idx] for k, v in pred_ann.items()} for idx, id in enumerate(pred_ann["id"])}
 
         print("Ground truth segments:", gt_segms)
         print("Predicted segments:", pred_segms)
@@ -216,11 +216,7 @@ def pq_compute_single_core(proc_id, annotation_set, predictions, references, cat
                 #         gt_ann["image_id"], label
                 #     )
                 # )
-                raise KeyError(
-                    "The segment with ID {} is presented in PNG and not presented in JSON.".format(
-                        label
-                    )
-                )
+                raise KeyError("The segment with ID {} is presented in PNG and not presented in JSON.".format(label))
             pred_segms[label]["area"] = label_cnt
             pred_labels_set.remove(label)
             if pred_segms[label]["category_id"] not in categories:
@@ -368,22 +364,22 @@ class PanopticQuality(evaluate.Metric):
                     "predictions": datasets.Image(),
                     "references": datasets.Image(),
                     "predicted_annotations": datasets.Sequence(
-                            {
-                                "id": datasets.Value("int32"),
-                                "category_id": datasets.Value("int32"),
-                                "was_fused": datasets.Value("bool"),
-                                "score": datasets.Value("float32"),
-                            }
+                        {
+                            "id": datasets.Value("int32"),
+                            "category_id": datasets.Value("int32"),
+                            "was_fused": datasets.Value("bool"),
+                            "score": datasets.Value("float32"),
+                        }
                     ),
                     "reference_annotations": datasets.Sequence(
-                            {
-                                "id": datasets.Value("int32"),
-                                "category_id": datasets.Value("int32"),
-                                "iscrowd": datasets.Value("int32"),
-                                "area": datasets.Value("int32"),
-                                "bbox": datasets.Sequence(datasets.Value("int32")),
-                            }
-                    )
+                        {
+                            "id": datasets.Value("int32"),
+                            "category_id": datasets.Value("int32"),
+                            "iscrowd": datasets.Value("int32"),
+                            "area": datasets.Value("int32"),
+                            "bbox": datasets.Sequence(datasets.Value("int32")),
+                        }
+                    ),
                 }
             ),
             reference_urls=["https://github.com/cocodataset/panopticapi/blob/master/panopticapi/evaluation.py"],
