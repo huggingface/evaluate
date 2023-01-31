@@ -10,8 +10,8 @@
  tags:
  - evaluate
  - metric
- description: 
- The R^2 (R Squared) metric is a measure of the goodness of fit of a linear regression model. It is the proportion of the variance in the dependent variable that is predictable from the independent variable.
+ description: >-
+  The R^2 (R Squared) metric is a measure of the goodness of fit of a linear regression model. It is the proportion of the variance in the dependent variable that is predictable from the independent variable.
  ---
 
  # Metric Card for R^2
