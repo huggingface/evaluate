@@ -65,7 +65,7 @@ Examples:
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class R2(evaluate.Metric):
+class r_squared(evaluate.Metric):
     def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
