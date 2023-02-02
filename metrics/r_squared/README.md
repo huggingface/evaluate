@@ -1,16 +1,16 @@
 ---
- title: r_squared
- emoji: 🤗 
- colorFrom: blue
- colorTo: red
- sdk: gradio
- sdk_version: 3.0.2
- app_file: app.py
- pinned: false
- tags:
- - evaluate
- - metric
- description: >-
+title: r_squared
+emoji: 🤗 
+colorFrom: blue
+colorTo: red
+sdk: gradio
+sdk_version: 3.0.2
+app_file: app.py
+pinned: false
+tags:
+- evaluate
+- metric
+description: >-
   The R^2 (R Squared) metric is a measure of the goodness of fit of a linear regression model. It is the proportion of the variance in the dependent variable that is predictable from the independent variable.
 ---
 
@@ -47,18 +47,18 @@ The R2 class in the evaluate module can be used to compute the R^2 value for a g
 ```python
 from evaluate import load
 >>> r2_metric = evaluate.load("r_squared")
->>> r2 = r2_metric.compute(predictions=[1, 2, 3, 4], references=[0.9, 2.1, 3.2, 3.8])
->>> print(r2_score)  
-{'r2_metric':0.9795918322662046}
+>>> r_squared = r2_metric.compute(predictions=[1, 2, 3, 4], references=[0.9, 2.1, 3.2, 3.8])
+>>> print(r_squared)  
+0.9795918322662046
 ```
 
 Alternatively, if you want to see an example where there is a perfect match between the prediction and reference:
 ```python
 >>> from evaluate import load
 >>> r2_metric = evaluate.load("r_squared")
->>> r2 = r2_metric.compute(predictions=[1, 2, 3, 4], references=[1, 2, 3, 4])
->>> print(r2_score)
-{'r2_metric':1.0}
+>>> r_squared = r2_metric.compute(predictions=[1, 2, 3, 4], references=[1, 2, 3, 4])
+>>> print(r_squared)
+1.0
 ```
 
 ## Limitations and Bias
@@ -80,6 +80,6 @@ R^2 is a statistical measure of the goodness of fit of a regression model. It re
 
 ## Further References
 
-The Open University: R-Squared (https://www.open.edu/openlearn/ocw/mod/oucontent/view.php?id=55450§ion=3.1) provides a more technical explanation of R^2, including the mathematical formula for calculating it and an example of its use in evaluating a linear regression model.
+- [The Open University: R-Squared](https://www.open.edu/openlearn/ocw/mod/oucontent/view.php?id=55450§ion=3.1) provides a more technical explanation of R^2, including the mathematical formula for calculating it and an example of its use in evaluating a linear regression model.
 
-Khan Academy: R-Squared (https://www.khanacademy.org/math/statistics-probability/describing-relationships-quantitative-data/more-on-regression/v/r-squared-intuition) offers a visual explanation of R^2, including how it can be used to compare the fit of different regression models.
+- [Khan Academy: R-Squared](https://www.khanacademy.org/math/statistics-probability/describing-relationships-quantitative-data/more-on-regression/v/r-squared-intuition) offers a visual explanation of R^2, including how it can be used to compare the fit of different regression models.
