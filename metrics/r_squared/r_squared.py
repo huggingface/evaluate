@@ -58,14 +58,14 @@ Returns:
 
 Examples:
     >>> r2_metric = evaluate.load("r_squared")
-    >>> r2 = r2_metric.compute(predictions=[1, 2, 3, 4], references=[0.9, 2.1, 3.2, 3.8])
-    >>> print(r2)
-    0.95
+    >>> r_squared = r2_metric.compute(predictions=[1, 2, 3, 4], references=[0.9, 2.1, 3.2, 3.8])
+    >>> print(r_squared)
+    0.9795918367346939
 """
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
-class R2(evaluate.Metric):
+class r_squared(evaluate.Metric):
     def _info(self):
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
