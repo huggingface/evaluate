@@ -60,6 +60,7 @@ It can also deal with lists of references for each predictions:
 ...                         references=references)
 >>> print(results)
 {'rouge1': 0.8333, 'rouge2': 0.5, 'rougeL': 0.8333, 'rougeLsum': 0.8333}```
+```
 
 ### Inputs
 - **predictions** (`list`): list of predictions to score. Each prediction
