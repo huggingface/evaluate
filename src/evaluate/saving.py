@@ -16,7 +16,8 @@ def save(path_or_file, **data):
     hash if inside a repository, and Python system information.
 
     Args:
-        path_or_file (``str``): Path or file to store the file. If only a folder is provided
+        path_or_file (`str`):
+            Path or file to store the file. If only a folder is provided
             the results file will be saved in the format `"result-%Y_%m_%d-%H_%M_%S.json"`.
 
     Example:

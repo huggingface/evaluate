@@ -33,7 +33,7 @@ logger = get_logger(__name__)
 
 @dataclass
 class EvaluationModuleInfo:
-    """Base class to store fnformation about an evaluation used for `MetricInfo`, `ComparisonInfo`,
+    """Base class to store information about an evaluation used for `MetricInfo`, `ComparisonInfo`,
     and `MeasurementInfo`.
 
     `EvaluationModuleInfo` documents an evaluation, including its name, version, and features.
@@ -71,7 +71,17 @@ class EvaluationModuleInfo:
 
     def write_to_directory(self, metric_info_dir):
         """Write `EvaluationModuleInfo` as JSON to `metric_info_dir`.
-        Also save the license separately in LICENCE.
+        Also save the license separately in LICENSE.
+
+        Args:
+            metric_info_dir (`str`):
+                The directory to save `metric_info_dir` to.
+
+        Example:
+
+        ```py
+        >>> my_metric.info.write_to_directory("/path/to/directory/")
+        ```
         """
         with open(os.path.join(metric_info_dir, config.METRIC_INFO_FILENAME), "w", encoding="utf-8") as f:
             json.dump(asdict(self), f)
@@ -81,11 +91,18 @@ class EvaluationModuleInfo:
 
     @classmethod
     def from_directory(cls, metric_info_dir) -> "EvaluationModuleInfo":
-        """Create EvaluationModuleInfo from the JSON file in `metric_info_dir`.
+        """Create `EvaluationModuleInfo` from the JSON file in `metric_info_dir`.
 
         Args:
-            metric_info_dir: `str` The directory containing the metadata file. This
-                should be the root directory of a specific dataset version.
+            metric_info_dir (`str`):
+                The directory containing the `metric_info` JSON file. This
+                should be the root directory of a specific metric version.
+
+        Example:
+
+        ```py
+        >>> my_metric = EvaluationModuleInfo.from_directory("/path/to/directory/")
+        ```
         """
         logger.info(f"Loading Metric info from {metric_info_dir}")
         if not metric_info_dir:

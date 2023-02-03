@@ -700,32 +700,49 @@ def load(
     revision: Optional[Union[str, Version]] = None,
     **init_kwargs,
 ) -> EvaluationModule:
-    """Load a `evaluate.EvaluationModule`.
+    """Load a [`~evaluate.EvaluationModule`].
 
     Args:
 
-        path (``str``):
-            path to the evaluation processing script with the evaluation builder. Can be either:
+        path (`str`):
+            Path to the evaluation processing script with the evaluation builder. Can be either:
                 - a local path to processing script or the directory containing the script (if the script has the same name as the directory),
-                    e.g. ``'./metrics/rouge'`` or ``'./metrics/rouge/rouge.py'``
-                - a evaluation module identifier on the HuggingFace evaluate repo e.g. ``'rouge'`` or ``'bleu'`` that are in either ``'metrics/'``,
-                    ``'comparisons/'``, or ``'measurements/'`` depending on the provided ``module_type``.
-        config_name (:obj:`str`, optional): selecting a configuration for the metric (e.g. the GLUE metric has a configuration for each subset)
-        module_type (:obj:`str`, default ``'metric'``): type of evaluation module, can be one of ``'metric'``, ``'comparison'``, or ``'measurement'``.
-        process_id (:obj:`int`, optional): for distributed evaluation: id of the process
-        num_process (:obj:`int`, optional): for distributed evaluation: total number of processes
-        cache_dir (Optional str): path to store the temporary predictions and references (default to `~/.cache/huggingface/evaluate/`)
-        experiment_id (``str``): A specific experiment id. This is used if several distributed evaluations share the same file system.
+                    e.g. `'./metrics/rouge'` or `'./metrics/rouge/rouge.py'`
+                - a evaluation module identifier on the HuggingFace evaluate repo e.g. `'rouge'` or `'bleu'` that are in either `'metrics/'`,
+                    `'comparisons/'`, or `'measurements/'` depending on the provided `module_type`
+        config_name (`str`, *optional*):
+            Selecting a configuration for the metric (e.g. the GLUE metric has a configuration for each subset).
+        module_type (`str`, default `'metric'`):
+            Type of evaluation module, can be one of `'metric'`, `'comparison'`, or `'measurement'`.
+        process_id (`int`, *optional*):
+            For distributed evaluation: id of the process.
+        num_process (`int`, *optional*):
+            For distributed evaluation: total number of processes.
+        cache_dir (`str`, *optional*):
+            Path to store the temporary predictions and references (default to `~/.cache/huggingface/evaluate/`).
+        experiment_id (`str`):
+            A specific experiment id. This is used if several distributed evaluations share the same file system.
             This is useful to compute metrics in distributed setups (in particular non-additive metrics like F1).
-        keep_in_memory (bool): Whether to store the temporary results in memory (defaults to False)
-        download_config (Optional ``evaluate.DownloadConfig``: specific download configuration parameters.
-        download_mode (:class:`DownloadMode`, default ``REUSE_DATASET_IF_EXISTS``): Download/generate mode.
-        revision (Optional ``Union[str, evaluate.Version]``): if specified, the module will be loaded from the datasets repository
+        keep_in_memory (`bool`):
+            Whether to store the temporary results in memory (defaults to `False`).
+        download_config ([`~evaluate.DownloadConfig`], *optional*):
+            Specific download configuration parameters.
+        download_mode ([`DownloadMode`], defaults to `REUSE_DATASET_IF_EXISTS`):
+            Download/generate mode.
+        revision (`Union[str, evaluate.Version]`, *optional*):
+            If specified, the module will be loaded from the datasets repository
             at this version. By default it is set to the local version of the lib. Specifying a version that is different from
             your local version of the lib might cause compatibility issues.
 
     Returns:
-        `evaluate.EvaluationModule`
+        [`evaluate.EvaluationModule`]
+
+    Example:
+
+        ```py
+        >>> from evaluate import load
+        >>> accuracy = evaluate.load("accuracy")
+        ```
     """
     download_mode = DownloadMode(download_mode or DownloadMode.REUSE_DATASET_IF_EXISTS)
     evaluation_module = evaluation_module_factory(

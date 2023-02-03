@@ -81,7 +81,7 @@ class QuestionAnsweringEvaluator(Evaluator):
     `question-answering`.
 
     Methods in this class assume a data format compatible with the
-    [`QuestionAnsweringPipeline`](https://huggingface.co/docs/transformers/en/main_classes/pipelines#transformers.QuestionAnsweringPipeline).
+    [`~transformers.QuestionAnsweringPipeline`].
     """
 
     PIPELINE_KWARGS = {}
@@ -165,16 +165,16 @@ class QuestionAnsweringEvaluator(Evaluator):
     ) -> Tuple[Dict[str, float], Any]:
         """
         question_column (`str`, defaults to `"question"`):
-            the name of the column containing the question in the dataset specified by `data`.
+            The name of the column containing the question in the dataset specified by `data`.
         context_column (`str`, defaults to `"context"`):
-            the name of the column containing the context in the dataset specified by `data`.
+            The name of the column containing the context in the dataset specified by `data`.
         id_column (`str`, defaults to `"id"`):
-            the name of the column containing the identification field of the question and answer pair in the
+            The name of the column containing the identification field of the question and answer pair in the
             dataset specified by `data`.
         label_column (`str`, defaults to `"answers"`):
-            the name of the column containing the answers in the dataset specified by `data`.
+            The name of the column containing the answers in the dataset specified by `data`.
         squad_v2_format (`bool`, *optional*, defaults to `None`):
-            whether the dataset follows the format of squad_v2 dataset. This is the case when the provided dataset
+            Whether the dataset follows the format of squad_v2 dataset. This is the case when the provided dataset
             has questions where the answer is not in the context, more specifically when are answers as
             `{"text": [], "answer_start": []}` in the answer column. If all questions have at least one answer, this parameter
             should be set to `False`. If this parameter is not provided, the format will be automatically inferred.

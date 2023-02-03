@@ -90,7 +90,7 @@ class TokenClassificationEvaluator(Evaluator):
     This token classification evaluator can currently be loaded from [`evaluator`] using the default task name
     `token-classification`.
 
-    Methods in this class assume a data format compatible with the [`TokenClassificationPipeline`].
+    Methods in this class assume a data format compatible with the [`~transformers.TokenClassificationPipeline`].
     """
 
     PIPELINE_KWARGS = {"ignore_labels": []}
@@ -103,12 +103,15 @@ class TokenClassificationEvaluator(Evaluator):
         Transform the pipeline predictions into a list of predicted labels of the same length as the true labels.
 
         Args:
-            predictions (List[List[Dict]]): List of pipeline predictions, where each token has been labeled.
-            words (List[List[str]]): Original input data to the pipeline, used to build predicted labels of the same length.
-            join_by (str): String to use to join two words. In English, it will typically be " ".
+            predictions (`List[List[Dict]]`):
+                List of pipeline predictions, where each token has been labeled.
+            words (`List[List[str]]`):
+                Original input data to the pipeline, used to build predicted labels of the same length.
+            join_by (`str`):
+                String to use to join two words. In English, it will typically be " ".
 
         Returns:
-            Dict: a dictionary holding the predictions
+            `dict`: a dictionary holding the predictions
         """
         preds = []
 
@@ -139,11 +142,13 @@ class TokenClassificationEvaluator(Evaluator):
         Convert a list of words to a list of offsets, where word are joined by `join_by`.
 
         Args:
-            words (List[str]): List of words to get offsets from.
-            join_by (str): String to insert between words.
+            words (`List[str]`):
+                List of words to get offsets from.
+            join_by (`str`):
+                String to insert between words.
 
         Returns:
-            List[Tuple[int, int]]: List of the characters (start index, end index) for each of the words.
+            `List[Tuple[int, int]]`: List of the characters (start index, end index) for each of the words.
         """
         offsets = []
 
@@ -229,9 +234,9 @@ class TokenClassificationEvaluator(Evaluator):
     ) -> Tuple[Dict[str, float], Any]:
         """
         input_column (`str`, defaults to `"tokens"`):
-            the name of the column containing the tokens feature in the dataset specified by `data`.
+            The name of the column containing the tokens feature in the dataset specified by `data`.
         label_column (`str`, defaults to `"label"`):
-            the name of the column containing the labels in the dataset specified by `data`.
+            The name of the column containing the labels in the dataset specified by `data`.
         join_by (`str`, *optional*, defaults to `" "`):
             This evaluator supports dataset whose input column is a list of words. This parameter specifies how to join
             words to generate a string input. This is especially useful for languages that do not separate words by a space.

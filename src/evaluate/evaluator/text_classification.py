@@ -49,7 +49,7 @@ class TextClassificationEvaluator(Evaluator):
     Text classification evaluator.
     This text classification evaluator can currently be loaded from [`evaluator`] using the default task name
     `text-classification` or with a `"sentiment-analysis"` alias.
-    Methods in this class assume a data format compatible with the [`TextClassificationPipeline`] - a single textual
+    Methods in this class assume a data format compatible with the [`~transformers.TextClassificationPipeline`] - a single textual
     feature as input and a categorical label as output.
     """
 
@@ -107,12 +107,12 @@ class TextClassificationEvaluator(Evaluator):
     ) -> Tuple[Dict[str, float], Any]:
         """
         input_column (`str`, *optional*, defaults to `"text"`):
-            the name of the column containing the text feature in the dataset specified by `data`.
+            The name of the column containing the text feature in the dataset specified by `data`.
         second_input_column (`str`, *optional*, defaults to `None`):
-            the name of the second column containing the text features. This may be useful for classification tasks
+            The name of the second column containing the text features. This may be useful for classification tasks
             as MNLI, where two columns are used.
         label_column (`str`, defaults to `"label"`):
-            the name of the column containing the labels in the dataset specified by `data`.
+            The name of the column containing the labels in the dataset specified by `data`.
         label_mapping (`Dict[str, Number]`, *optional*, defaults to `None`):
             We want to map class labels defined by the model in the pipeline to values consistent with those
             defined in the `label_column` of the `data` dataset.
