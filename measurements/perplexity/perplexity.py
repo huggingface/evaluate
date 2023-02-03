@@ -49,6 +49,7 @@ Args:
     add_start_token (bool): whether to add the start token to the texts,
         so the perplexity can include the probability of the first word. Defaults to True.
     device (str): device to run on, defaults to 'cuda' when available
+    max_length (int): the maximum length to truncate input texts to. Should be set to the maximum length the model supports. Defaults to None.
 Returns:
     perplexity: dictionary containing the perplexity scores for the texts
         in the input list, as well as the mean perplexity. If one of the input texts is
