@@ -1,5 +1,2 @@
 git+https://github.com/huggingface/evaluate@{COMMIT_PLACEHOLDER}
-datasets==2.8.0
-evaluate==0.4.0
-evaluate.egg==info
 numpy==1.23.1

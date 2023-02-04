@@ -28,8 +28,9 @@ R-squared is not always a reliable measure of the quality of a regression model,
 
 R squared can be calculated using the following formula:
 
+```python
 r_squared = 1 - (Sum of Squared Errors / Sum of Squared Total)
-
+```
 
 * Calculate the residual sum of squares (RSS), which is the sum of the squared differences between the predicted values and the actual values.
 * Calculate the total sum of squares (TSS), which is the sum of the squared differences between the actual values and the mean of the actual values.
