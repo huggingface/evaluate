@@ -25,9 +25,17 @@ from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOC
 
 TASK_DOCUMENTATION = r"""
     Examples:
+
+    <Tip>
+
+    Remember that, in order to process audio files, you need ffmpeg installed (https://ffmpeg.org/download.html)
+
+    </Tip>
+
     ```python
     >>> from evaluate import evaluator
     >>> from datasets import load_dataset
+
     >>> task_evaluator = evaluator("audio-classification")
     >>> data = load_dataset("superb", 'ks', split="test[:40]")
     >>> results = task_evaluator.compute(
@@ -35,6 +43,30 @@ TASK_DOCUMENTATION = r"""
     >>>     data=data,
     >>>     label_column="label",
     >>>     input_column="file",
+    >>>     metric="accuracy",
+    >>>     label_mapping={0: "yes", 1: "no", 2: "up", 3: "down"}
+    >>> )
+    ```
+
+    <Tip>
+
+    The evaluator supports raw audio data as well, in the form of a numpy array. However, be aware that calling
+    the audio column automatically decodes and resamples the audio files, which can be slow for large datasets.
+
+    </Tip>
+
+    ```python
+    >>> from evaluate import evaluator
+    >>> from datasets import load_dataset
+
+    >>> task_evaluator = evaluator("audio-classification")
+    >>> data = load_dataset("superb", 'ks', split="test[:40]")
+    >>> data = data.map(lambda example: {"audio": example["audio"]["array"]})
+    >>> results = task_evaluator.compute(
+    >>>     model_or_pipeline=""superb/wav2vec2-base-superb-ks"",
+    >>>     data=data,
+    >>>     label_column="label",
+    >>>     input_column="audio",
     >>>     metric="accuracy",
     >>>     label_mapping={0: "yes", 1: "no", 2: "up", 3: "down"}
     >>> )
@@ -47,7 +79,7 @@ class AudioClassificationEvaluator(Evaluator):
     Audio classification evaluator.
     This audio classification evaluator can currently be loaded from [`evaluator`] using the default task name
     `audio-classification`.
-    Methods in this class assume a data format compatible with the [`AudioClassificationPipeline`].
+    Methods in this class assume a data format compatible with the [`transformers.AudioClassificationPipeline`].
     """
 
     PIPELINE_KWARGS = {}
@@ -86,7 +118,7 @@ class AudioClassificationEvaluator(Evaluator):
 
         """
         input_column (`str`, defaults to `"file"`):
-            The name of the column containing the audio files in the dataset specified by `data`.
+            The name of the column containing either the audio files or a raw waveform, represented as a numpy array, in the dataset specified by `data`.
         label_column (`str`, defaults to `"label"`):
             The name of the column containing the labels in the dataset specified by `data`.
         label_mapping (`Dict[str, Number]`, *optional*, defaults to `None`):

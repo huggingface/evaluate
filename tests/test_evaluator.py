@@ -17,6 +17,7 @@
 from time import sleep
 from unittest import TestCase, mock
 
+import numpy as np
 from datasets import ClassLabel, Dataset, Features, Sequence, Value
 from PIL import Image
 from transformers import (
@@ -1046,6 +1047,16 @@ class TestAudioClassificationEvaluator(TestCase):
         self.data = Dataset.from_dict(
             {"file": ["https://huggingface.co/datasets/Narsil/asr_dummy/resolve/main/1.flac"], "label": [11]}
         )
+        self.raw_data = Dataset.from_dict(
+            {
+                "audio": [
+                    np.array(
+                        [-0.00048828, -0.00018311, -0.00137329, 0.00079346, 0.00091553, 0.00085449], dtype=np.float32
+                    )
+                ],
+                "label": [11],
+            }
+        )
         self.default_model = "superb/wav2vec2-base-superb-ks"
         self.pipe = DummyAudioClassificationPipeline()
         self.evaluator = evaluator("audio-classification")
@@ -1056,6 +1067,12 @@ class TestAudioClassificationEvaluator(TestCase):
             model_or_pipeline=self.pipe,
             data=self.data,
             label_mapping=self.label_mapping,
+        )
+        self.assertEqual(results["accuracy"], 0)
+
+    def test_raw_pipe_init(self):
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe, data=self.raw_data, label_mapping=self.label_mapping, input_column="audio"
         )
         self.assertEqual(results["accuracy"], 0)
 
@@ -1092,6 +1109,14 @@ class TestAudioClassificationEvaluator(TestCase):
             metric="accuracy",
             label_mapping=self.label_mapping,
         )
+        results_raw = evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.raw_data,
+            label_mapping=self.label_mapping,
+            metric="accuracy",
+            input_column="audio",
+        )
+        self.assertEqual(results_raw["accuracy"], 0)
         self.assertEqual(results["accuracy"], 0)
 
     @slow
