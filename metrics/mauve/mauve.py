@@ -27,20 +27,26 @@ import evaluate
 
 _CITATION = """\
 @inproceedings{pillutla-etal:mauve:neurips2021,
-  title={MAUVE: Measuring the Gap Between Neural Text and Human Text using Divergence Frontiers},
+  title={{MAUVE: Measuring the Gap Between Neural Text and Human Text using Divergence Frontiers}},
   author={Pillutla, Krishna and Swayamdipta, Swabha and Zellers, Rowan and Thickstun, John and Welleck, Sean and Choi, Yejin and Harchaoui, Zaid},
   booktitle = {NeurIPS},
   year      = {2021}
 }
 
+@article{pillutla-etal:mauve:arxiv2022,
+  title={{MAUVE Scores for Generative Models: Theory and Practice}},
+  author={Pillutla, Krishna and Liu, Lang and Thickstun, John and Welleck, Sean and Swayamdipta, Swabha and Zellers, Rowan and Oh, Sewoong and Choi, Yejin and Harchaoui, Zaid},
+  journal={arXiv Preprint},
+  year={2022}
+}
 """
 
 _DESCRIPTION = """\
-MAUVE is a library built on PyTorch and HuggingFace Transformers to measure the gap between neural text and human text with the eponymous MAUVE measure.
+MAUVE is a measure of the statistical gap between two text distributions, e.g., how far the text written by a model is the distribution of human text, using samples from both distributions. 
 
-MAUVE summarizes both Type I and Type II errors measured softly using Kullback–Leibler (KL) divergences.
-
-For details, see the MAUVE paper: https://arxiv.org/abs/2102.01454 (Neurips, 2021).
+MAUVE is obtained by computing Kullback–Leibler (KL) divergences between the two distributions in a quantized embedding space of a large language model. 
+It can quantify differences in the quality of generated text based on the size of the model, the decoding algorithm, and the length of the generated text. 
+MAUVE was found to correlate the strongest with human evaluations over baseline metrics for open-ended text generation.
 
 This metrics is a wrapper around the official implementation of MAUVE:
 https://github.com/krishnap25/mauve
