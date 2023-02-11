@@ -25,7 +25,7 @@ The ANLS smoothly captures the OCR mistakes applying a slight penalization in ca
 
 More formally, the ANLS between the net output and the ground truth answers is given by equation 1. Where N is the total number of questions, M total number of GT answers per question, a<sub>ij</sub> the ground truth answers where i = {0, ..., N}, and j = {0, ..., M}, and o<sub>qi</sub> be the network's answer for the i<sup>th</sup> question q<sub>i</sub>.
 
-![alt text](https://rrc.cvc.uab.es/files/ANLS.png)
+![alt text](https://rrc.cvc.uab.es/files/ANLSL_img.png)
 
 Reference: [Evaluation Metric](https://rrc.cvc.uab.es/?ch=11&com=tasks)
 
