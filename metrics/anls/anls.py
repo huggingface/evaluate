@@ -1,4 +1,4 @@
-# Copyright 2022 The HuggingFace Datasets Authors and the current dataset script contributor.
+# Copyright 2020 The HuggingFace Evaluate Authors.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -36,22 +36,23 @@ _DESCRIPTION = """\
 ANLS refer to the average normalized Levenshtein similarity.
 """
 
-
 _KWARGS_DESCRIPTION = """
 Computes Average Normalized Levenshtein Similarity (ANLS).
 Args:
     predictions: List of question-answers dictionaries with the following key-values:
-        - 'question_id': id of the question-answer pair as given in the references (see below)
-        - 'prediction_text': the text of the answer
+    - 'question_id': id of the question-answer pair as given in the references
+    (see below)
+    - 'prediction_text': the text of the answer
     references: List of question-answers dictionaries with the following key-values:
-        - 'question_id': id of the question-answer pair (see above),
-        - 'answers': list of possible texts for the answer, as a list of strings
-                
+    - 'question_id': id of the question-answer pair (see above)
+    - 'answers': list of possible texts for the answer, as a list of strings
 Returns:
     'anls': The ANLS score of predicted tokens versus the gold answer
 Examples:
-    >>> predictions = [{'prediction_text': 'Denver Broncos', 'question_id': '56e10a3be3433e1400422b22'}]
-    >>> references = [{'answers': ['Denver Broncos', 'Denver R. Broncos'], 'question_id': '56e10a3be3433e1400422b22'}]
+    >>> predictions = [{'prediction_text': 'Denver Broncos',
+                        'question_id': '56e10a3be'}]
+    >>> references = [{'answers': ['Denver Broncos', 'Denver R. Broncos'],
+                       'question_id': '56e10a3be'}]
     >>> anls_metric = evaluate.load("anls")
     >>> results = anls_metric.compute(predictions=predictions, references=references)
     >>> print(results)
