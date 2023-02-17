@@ -60,7 +60,7 @@ Examples:
     >>> r2_metric = evaluate.load("r_squared")
     >>> r_squared = r2_metric.compute(predictions=[1, 2, 3, 4], references=[0.9, 2.1, 3.2, 3.8])
     >>> print(r_squared)
-    0.9795918367346939
+    0.98
 """
 
 
@@ -92,7 +92,7 @@ class r_squared(evaluate.Metric):
             references (List or np.ndarray): The true/reference values.
 
         Returns:
-            float: The R-squared value.
+            float: The R-squared value, rounded to 3 decimal places.
         """
         predictions = np.array(predictions)
         references = np.array(references)
@@ -109,4 +109,7 @@ class r_squared(evaluate.Metric):
         # Calculate R Squared
         r_squared = 1 - (ssr / sst)
 
-        return r_squared
+        # Round off to 3 decimal places
+        rounded_r_squared = round(r_squared, 3)
+
+        return rounded_r_squared

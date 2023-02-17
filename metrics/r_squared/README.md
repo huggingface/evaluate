@@ -50,7 +50,7 @@ from evaluate import load
 >>> r2_metric = evaluate.load("r_squared")
 >>> r_squared = r2_metric.compute(predictions=[1, 2, 3, 4], references=[0.9, 2.1, 3.2, 3.8])
 >>> print(r_squared)  
-0.9795918322662046
+0.98
 ```
 
 Alternatively, if you want to see an example where there is a perfect match between the prediction and reference:
