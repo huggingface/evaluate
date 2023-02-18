@@ -972,7 +972,6 @@ class CombinedEvaluations:
 
         for evaluation_module in self.evaluation_modules:
             batch = {"predictions": predictions, "references": references, **kwargs}
-            batch = {input_name: batch[input_name] for input_name in evaluation_module._feature_names()}
             results.append(evaluation_module.compute(**batch))
 
         return self._merge_results(results)

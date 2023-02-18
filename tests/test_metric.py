@@ -746,3 +746,14 @@ class TestEvaluationcombined_evaluation(TestCase):
         self.assertDictEqual(
             expected_result, combined_evaluation.compute(predictions=predictions, references=references)
         )
+
+    def test_modules_from_string_poslabel(self):
+        expected_result = {"recall": 1.0, "precision": 0.5}
+        predictions = [0, 1, 0]
+        references = [1, 1, 0]
+
+        combined_evaluation = combine(["recall", "precision"])
+
+        self.assertDictEqual(
+            expected_result, combined_evaluation.compute(predictions=predictions, references=references, pos_label=0)
+        )
