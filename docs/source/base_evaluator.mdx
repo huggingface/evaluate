@@ -154,7 +154,7 @@ models = [
     "Jorgeutd/albert-base-v2-finetuned-ner",
 ]
 
-data = load_dataset("conll2003", split="validation").shuffle().select(1000)
+data = load_dataset("conll2003", split="validation").shuffle().select(range(1000))
 task_evaluator = evaluator("token-classification")
 
 results = []
