@@ -28,6 +28,7 @@ del version
 
 from .evaluation_suite import EvaluationSuite
 from .evaluator import (
+    AudioClassificationEvaluator,
     AutomaticSpeechRecognitionEvaluator,
     Evaluator,
     ImageClassificationEvaluator,
