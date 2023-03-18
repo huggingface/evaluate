@@ -14,10 +14,9 @@
 """ANLS - Average Normalized Levenshtein Similarity"""
 
 import datasets
+from Levenshtein import ratio
+
 import evaluate
-
-from compute_score import compute_score
-
 
 _CITATION = """\
 @article{,
@@ -79,8 +78,24 @@ class Anls(evaluate.Metric):
             )
         )
 
+    def _compute_score(self, predictions, ground_truths):
+        theta = 0.5
+        anls_score = 0
+        for qid, prediction in predictions.items():
+            max_value = 0
+            if qid in ground_truths:
+                for x in ground_truths[qid]:
+                    nl = ratio(prediction, x)
+                    if nl < theta:
+                        score = 1 - nl
+                        if score > max_value:
+                            max_value = score
+                anls_score += max_value
+
+        return anls_score
+
     def _compute(self, predictions, references):
         ground_truths = {x['question_id']: x['answers'] for x in references}
         predictions = {x['question_id']: x['prediction_text'] for x in predictions}
-        anls_score = compute_score(predictions=predictions, ground_truths=ground_truths)
+        anls_score = self._compute_score(predictions=predictions, ground_truths=ground_truths)
         return {"anls_score": anls_score}
