@@ -181,7 +181,7 @@ The same works for methods so you can either use \[\`XXXClass.method\`\] or \[~\
 #### Defining arguments in a method
 
 Arguments should be defined with the `Args:` (or `Arguments:` or `Parameters:`) prefix, followed by a line return and
-an indentation. The argument should be followed by its type, with its shape if it is a tensor, a colon and its
+an indentation. The argument should be followed by its type, with its shape if it is a tensor, a colon, and its
 description:
 
 ```
@@ -190,7 +190,7 @@ description:
 ```
 
 If the description is too long to fit in one line, another indentation is necessary before writing the description
-after th argument.
+after the argument.
 
 Here's an example showcasing everything so far:
 
