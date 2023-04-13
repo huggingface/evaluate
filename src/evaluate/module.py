@@ -29,13 +29,13 @@ from datasets.arrow_reader import ArrowReader
 from datasets.arrow_writer import ArrowWriter
 from datasets.features import Features, Sequence, Value
 from datasets.features.features import _check_non_null_non_empty_recursive
+from datasets.utils.file_utils import DownloadConfig
 from datasets.utils.filelock import BaseFileLock, FileLock, Timeout
 from datasets.utils.py_utils import copyfunc, temp_seed, zip_dict
 
 from . import config
 from .info import EvaluationModuleInfo
 from .naming import camelcase_to_snakecase
-from .utils.file_utils import DownloadConfig
 from .utils.logging import get_logger
 
 
