@@ -42,10 +42,10 @@ _CITATION = """\
 """
 
 _DESCRIPTION = """\
-MAUVE is a measure of the statistical gap between two text distributions, e.g., how far the text written by a model is the distribution of human text, using samples from both distributions. 
+MAUVE is a measure of the statistical gap between two text distributions, e.g., how far the text written by a model is the distribution of human text, using samples from both distributions.
 
-MAUVE is obtained by computing Kullback–Leibler (KL) divergences between the two distributions in a quantized embedding space of a large language model. 
-It can quantify differences in the quality of generated text based on the size of the model, the decoding algorithm, and the length of the generated text. 
+MAUVE is obtained by computing Kullback–Leibler (KL) divergences between the two distributions in a quantized embedding space of a large language model.
+It can quantify differences in the quality of generated text based on the size of the model, the decoding algorithm, and the length of the generated text.
 MAUVE was found to correlate the strongest with human evaluations over baseline metrics for open-ended text generation.
 
 This metrics is a wrapper around the official implementation of MAUVE:
