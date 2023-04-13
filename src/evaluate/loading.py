@@ -27,7 +27,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Type, Union
 from urllib.parse import urlparse
 
-from datasets import DownloadMode
+from datasets import DownloadConfig, DownloadMode
 from datasets.builder import DatasetBuilder
 from datasets.packaged_modules import _EXTENSION_TO_MODULE, _hash_python_lines
 from datasets.utils.filelock import FileLock
@@ -36,7 +36,6 @@ from datasets.utils.version import Version
 from . import SCRIPTS_VERSION, config
 from .module import EvaluationModule
 from .utils.file_utils import (
-    DownloadConfig,
     cached_path,
     head_hf_s3,
     hf_hub_url,
