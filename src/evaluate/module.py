@@ -267,10 +267,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         """
         builder_data_dir = self._data_dir_root
         builder_data_dir = os.path.join(builder_data_dir, self.name, self.config_name)
-        try:
-            os.makedirs(builder_data_dir, exist_ok=True)
-        except:
-            pass
+        os.makedirs(builder_data_dir, exist_ok=True)
         return builder_data_dir
 
     def _create_cache_file(self, timeout=1) -> Tuple[str, FileLock]:
