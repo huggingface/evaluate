@@ -23,7 +23,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 import pyarrow as pa
-from datasets import DatasetInfo, DownloadManager
+from datasets import DatasetInfo, DownloadConfig, DownloadManager
 from datasets.arrow_dataset import Dataset
 from datasets.arrow_reader import ArrowReader
 from datasets.arrow_writer import ArrowWriter
@@ -35,7 +35,6 @@ from datasets.utils.py_utils import copyfunc, temp_seed, zip_dict
 from . import config
 from .info import EvaluationModuleInfo
 from .naming import camelcase_to_snakecase
-from .utils.file_utils import DownloadConfig
 from .utils.logging import get_logger
 
 
