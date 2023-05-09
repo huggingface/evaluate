@@ -85,8 +85,7 @@ REQUIRED_PKGS = [
     # To get datasets from the Datasets Hub on huggingface.co
     "huggingface-hub>=0.7.0",
     # Utilities from PyPA to e.g., compare versions
-    "packaging",
-    "responses<0.19",
+    "packaging"
 ]
 
 TEMPLATE_REQUIRE = [
