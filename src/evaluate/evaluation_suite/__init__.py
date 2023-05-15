@@ -7,7 +7,7 @@ from typing import Callable, Dict, Optional, Union
 from datasets import Dataset, DownloadConfig, DownloadMode, load_dataset
 from datasets.utils.version import Version
 
-from ..evaluator import evaluator
+from ..evaluator import evaluator, Evaluator
 from ..loading import evaluation_module_factory
 from ..utils.logging import get_logger
 
@@ -18,6 +18,7 @@ logger = get_logger(__name__)
 @dataclass
 class SubTask:
     task_type: str
+    evaluator: Optional[Evaluator] = None
     data: [Union[str, Dataset]] = None
     subset: Optional[str] = None
     split: Optional[str] = None
@@ -114,7 +115,7 @@ class EvaluationSuite:
                 ds = load_dataset(task.data, name=task.subset, split=task.split)
                 task.data = ds.map(task.data_preprocessor)
 
-            task_evaluator = evaluator(task.task_type)
+            task_evaluator = task.evaluator or evaluator(task.task_type)
             args_for_task = task.args_for_task
             args_for_task["model_or_pipeline"] = model_or_pipeline
             args_for_task["data"] = task.data

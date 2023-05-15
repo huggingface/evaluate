@@ -224,6 +224,7 @@ class Evaluator(ABC):
         subset: Optional[str] = None,
         split: Optional[str] = None,
         metric: Union[str, EvaluationModule] = None,
+        metric_config_name: Optional[str] = None,
         tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
         feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,  # noqa: F821
         strategy: Literal["simple", "bootstrap"] = "simple",
@@ -249,7 +250,7 @@ class Evaluator(ABC):
             feature_extractor=feature_extractor,
             device=device,
         )
-        metric = self.prepare_metric(metric)
+        metric = self.prepare_metric(metric, metric_config_name)
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
@@ -477,7 +478,7 @@ class Evaluator(ABC):
             )
         return pipe
 
-    def prepare_metric(self, metric: Union[str, EvaluationModule]):
+    def prepare_metric(self, metric: Union[str, EvaluationModule], metric_config_name: Optional[str]):
         """
         Prepare metric.
 
@@ -504,7 +505,7 @@ class Evaluator(ABC):
                 )
             metric = load(self.default_metric_name)
         elif isinstance(metric, str):
-            metric = load(metric)
+            metric = load(metric, config_name=metric_config_name)
 
         return metric
 
