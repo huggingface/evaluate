@@ -18,7 +18,7 @@ logger = get_logger(__name__)
 @dataclass
 class SubTask:
     task_type: str
-    data: [Union[str, Dataset]] = None
+    data: Optional[Union[str, Dataset]] = None
     subset: Optional[str] = None
     split: Optional[str] = None
     data_preprocessor: Optional[Callable] = None
