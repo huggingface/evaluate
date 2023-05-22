@@ -25,7 +25,7 @@ from .utils import DatasetColumnPair
 
 
 if TYPE_CHECKING:
-    from transformers import Pipeline, PreTrainedModel, PreTrainedTokenizer, TFPreTrainedModel
+    from transformers import FeatureExtractionMixin, Pipeline, PreTrainedModel, PreTrainedTokenizer, TFPreTrainedModel
 
 
 TASK_DOCUMENTATION = r"""
