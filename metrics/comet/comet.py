@@ -22,7 +22,7 @@ Usage:
 from evaluate import load
 comet_metric = load('metrics/comet/comet.py')
 #comet_metric = load('comet')
-#comet_metric = load('comet', 'wmt-large-hter-estimator')
+#comet_metric = load('comet', 'Unbabel/wmt20-comet-da')
 
 
 source = ["Dem Feuer konnte Einhalt geboten werden", "Schulen und Kindergärten wurden eröffnet."]
@@ -37,6 +37,7 @@ predictions['scores']
 import comet  # From: unbabel-comet
 import datasets
 import torch
+from packaging import version
 
 import evaluate
 
@@ -44,6 +45,25 @@ import evaluate
 logger = evaluate.logging.get_logger(__name__)
 
 _CITATION = """\
+@inproceedings{rei-etal-2022-comet,
+    title = "{COMET}-22: Unbabel-{IST} 2022 Submission for the Metrics Shared Task",
+    author = "Rei, Ricardo  and
+      C. de Souza, Jos{\'e} G.  and
+      Alves, Duarte  and
+      Zerva, Chrysoula  and
+      Farinha, Ana C  and
+      Glushkova, Taisiya  and
+      Lavie, Alon  and
+      Coheur, Luisa  and
+      Martins, Andr{\'e} F. T.",
+    booktitle = "Proceedings of the Seventh Conference on Machine Translation (WMT)",
+    month = dec,
+    year = "2022",
+    address = "Abu Dhabi, United Arab Emirates (Hybrid)",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2022.wmt-1.52",
+    pages = "578--585",
+}
 @inproceedings{rei-EtAl:2020:WMT,
    author    = {Rei, Ricardo  and  Stewart, Craig  and  Farinha, Ana C  and  Lavie, Alon},
    title     = {Unbabel's Participation in the WMT20 Metrics Shared Task},
@@ -85,13 +105,11 @@ Args:
 `sources` (list of str): Source sentences
 `predictions` (list of str): candidate translations
 `references` (list of str): reference translations
-`cuda` (bool): If set to True, runs COMET using GPU
-`show_progress` (bool): Shows progress
-`model`: COMET model to be used. Will default to `wmt-large-da-estimator-1719` if None.
+`gpus` (bool): Number of GPUs to use. 0 for CPU
+`progress_bar` (bool): Flag that turns on and off the predict progress bar. Defaults to True
 
 Returns:
-    `samples`: List of dictionaries with `src`, `mt`, `ref` and `score`.
-    `scores`: List of scores.
+    Dict with all sentence-level scores (`scores` key) a system-level score (`mean_score` key).
 
 Examples:
 
@@ -101,8 +119,8 @@ Examples:
     >>> hypothesis = ["The fire could be stopped", "Schools and kindergartens were open"]
     >>> reference = ["They were able to control the fire.", "Schools and kindergartens opened"]
     >>> results = comet_metric.compute(predictions=hypothesis, references=reference, sources=source)
-    >>> print([round(v, 2) for v in results["scores"]])
-    [0.19, 0.92]
+    >>> print([round(v, 3) for v in results["scores"]])
+    [0.839, 0.972]
 """
 
 
@@ -125,6 +143,7 @@ class COMET(evaluate.Metric):
             codebase_urls=["https://github.com/Unbabel/COMET"],
             reference_urls=[
                 "https://github.com/Unbabel/COMET",
+                "https://aclanthology.org/2022.wmt-1.52/",
                 "https://www.aclweb.org/anthology/2020.emnlp-main.213/",
                 "http://www.statmt.org/wmt20/pdf/2020.wmt-1.101.pdf6",
             ],
@@ -132,7 +151,10 @@ class COMET(evaluate.Metric):
 
     def _download_and_prepare(self, dl_manager):
         if self.config_name == "default":
-            self.scorer = comet.load_from_checkpoint(comet.download_model("wmt20-comet-da"))
+            if version.parse(comet.__version__) >= version.parse("2.0.0"):
+                self.scorer = comet.load_from_checkpoint(comet.download_model("Unbabel/wmt22-comet-da"))
+            else:
+                self.scorer = comet.load_from_checkpoint(comet.download_model("wmt20-comet-da"))
         else:
             self.scorer = comet.load_from_checkpoint(comet.download_model(self.config_name))
 
@@ -141,5 +163,9 @@ class COMET(evaluate.Metric):
             gpus = 1 if torch.cuda.is_available() else 0
         data = {"src": sources, "mt": predictions, "ref": references}
         data = [dict(zip(data, t)) for t in zip(*data.values())]
-        scores, mean_score = self.scorer.predict(data, gpus=gpus, progress_bar=progress_bar)
+        if version.parse(comet.__version__) >= version.parse("2.0.0"):
+            output = self.scorer.predict(data, gpus=gpus, progress_bar=progress_bar)
+            scores, mean_score = output.scores, output.system_score
+        else:
+            scores, mean_score = self.scorer.predict(data, gpus=gpus, progress_bar=progress_bar)
         return {"mean_score": mean_score, "scores": scores}
