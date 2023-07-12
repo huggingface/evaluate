@@ -88,7 +88,8 @@ class Mahalanobis(evaluate.Metric):
             )
 
         # Get mahalanobis distance for each prediction
-        X_minus_mu = X - np.mean(reference_distribution)
+        mu = np.mean(reference_distribution, axis=0)
+        X_minus_mu = X - mu
         cov = np.cov(reference_distribution.T)
         try:
             inv_covmat = np.linalg.inv(cov)
