@@ -59,23 +59,23 @@ Args:
         - the probability that the question has no answer
     references: List of question-answers dictionaries with the following key-values:
             - 'id': id of the question-answer pair (see above),
-            - 'answers': a list of Dict {'text': text of the answer as a string}
+            - 'answers': a Dict {'text': list of string answers}
     no_answer_threshold: float
         Probability threshold to decide that a question has no answer.
 Returns:
     'exact': Exact match (the normalized answer exactly match the gold answer)
     'f1': The F-score of predicted tokens versus the gold answer
-    'total': Number of score considered
-    'HasAns_exact': Exact match (the normalized answer exactly match the gold answer)
+    'total': Number of scores considered
+    'HasAns_exact': Exact match (the normalized answer exactly matches the gold answer)
     'HasAns_f1': The F-score of predicted tokens versus the gold answer
-    'HasAns_total': Number of score considered
-    'NoAns_exact': Exact match (the normalized answer exactly match the gold answer)
+    'HasAns_total': Number of scores considered
+    'NoAns_exact': Exact match (the normalized answer exactly matches the gold answer)
     'NoAns_f1': The F-score of predicted tokens versus the gold answer
-    'NoAns_total': Number of score considered
+    'NoAns_total': Number of scores considered
     'best_exact': Best exact match (with varying threshold)
-    'best_exact_thresh': No-answer probability threshold associated to the best exact match
+    'best_exact_thresh': No-answer probability threshold associated with the best exact match
     'best_f1': Best F1 (with varying threshold)
-    'best_f1_thresh': No-answer probability threshold associated to the best F1
+    'best_f1_thresh': No-answer probability threshold associated with the best F1
 Examples:
 
     >>> predictions = [{'prediction_text': '1976', 'id': '56e10a3be3433e1400422b22', 'no_answer_probability': 0.}]
