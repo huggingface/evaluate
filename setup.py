@@ -83,7 +83,7 @@ REQUIRED_PKGS = [
     # minimum 2021.05.0 to have the AbstractArchiveFileSystem
     "fsspec[http]>=2021.05.0",
     # To get datasets from the Datasets Hub on huggingface.co
-    "huggingface-hub==0.17.0.rc0",
+    "huggingface_hub==v0.17.0.rc0",
     # Utilities from PyPA to e.g., compare versions
     "packaging",
     "responses<0.19",
