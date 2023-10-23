@@ -40,14 +40,16 @@ Continuous Ranked Probability Score (CRPS) is the generalization of mean absolut
 
 _KWARGS_DESCRIPTION = """
 Args:
-    predictions: array-like of shape (n_samples, n_data) or (n_samples, n_data, n_timesteps, n_outputs)
-        n_sampels from estimated target distribution.
-    references: array-like of shape (n_data,) or (n_data, n_timesteps, n_outputs)
+    predictions: array-like of shape (n_samples,) or (n_samples, n_timesteps, n_outputs)
+        n_samples from estimated target distribution.
+    references: array-like of shape (1,) or (n_timesteps, n_outputs)
         Empirical (correct) target values from ground truth distribution.
+    quantiles: list of floats, default=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9]
+        List of quantiles in the unit interval to compute CRPS over.
     sum: bool, default=False
         Defines whether to sum over sum_axis dimension.
     sum_axis: int, default=-1
-        Defines axis to sum over in case of multioutput input.
+        Defines axis to sum over in case of n_outputs > 1.
     multioutput: {"raw_values", "uniform_average"}
         Defines aggregating across the n_outputs dimension.
         "raw_values" returns full set of scores in case of multioutput input.
@@ -85,12 +87,38 @@ class Crps(evaluate.Metric):
                 "references": datasets.Value("float"),
             }
 
+    @staticmethod
+    def quantile_loss(target: np.ndarray, forecast: np.ndarray, q: float) -> float:
+        return 2.0 * np.sum(np.abs((target - forecast) * ((target <= forecast) - q)))
+
     def _compute(
         self,
         predictions,
         references,
+        quantiles=[0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9],
         sum=False,
         sum_axis=-1,
         multioutput="uniform_average",
     ):
-        pass
+        # if the number of dims of predictions > 2 then sum over sum_axis dimension if sum is True
+        if sum and len(predictions.shape) > 1:
+            predictions = np.sum(predictions, axis=sum_axis)
+            references = np.sum(references, axis=sum_axis)
+
+        abs_target_sum = np.sum(np.abs(references))
+        weighted_quantile_loss = []
+        for q in quantiles:
+            forecast_quantile = np.quantile(predictions, q, axis=0)
+            weighted_quantile_loss.append(
+                self.quantile_loss(references, forecast_quantile, q) / abs_target_sum
+            )
+
+        if multioutput == "raw_values":
+            return weighted_quantile_loss
+        elif multioutput == "uniform_average":
+            return np.average(weighted_quantile_loss)
+        else:
+            raise ValueError(
+                "The multioutput parameter should be one of the following: "
+                + "'raw_values', 'uniform_average'"
+            )
