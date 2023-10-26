@@ -58,7 +58,17 @@ Returns:
     crps: float
         Continuous Ranked Probability Score.
 
-Examples:    
+Examples:
+
+    >>> crps_metric = evaluate.load("crps")
+    >>> predictions = np.array([0.1, 0.2, 0.3, 0.4, 0.5])
+    >>> references = np.array([0.3])
+    >>> results = crps_metric.compute(predictions=predictions, references=references)
+    >>> print(results)
+    {'mase': 0.18333333333333335}
+
+
+
 """
 
 
@@ -78,12 +88,14 @@ class Crps(evaluate.Metric):
     def _get_feature_types(self):
         if self.config_name == "multilist":
             return {
-                "predictions": datasets.Sequence(datasets.Value("float")),
+                "predictions": datasets.Sequence(
+                    datasets.Sequence(datasets.Value("float"))
+                ),
                 "references": datasets.Sequence(datasets.Value("float")),
             }
         else:
             return {
-                "predictions": datasets.Value("float"),
+                "predictions": datasets.Sequence(datasets.Value("float")),
                 "references": datasets.Value("float"),
             }
 
