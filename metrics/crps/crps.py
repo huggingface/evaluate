@@ -84,17 +84,13 @@ class Crps(evaluate.Metric):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(self._get_feature_types()),
-            reference_urls=[
-                "https://www.lokad.com/continuous-ranked-probability-score/"
-            ],
+            reference_urls=["https://www.lokad.com/continuous-ranked-probability-score/"],
         )
 
     def _get_feature_types(self):
         if self.config_name == "multilist":
             return {
-                "predictions": datasets.Sequence(
-                    datasets.Sequence(datasets.Value("float"))
-                ),
+                "predictions": datasets.Sequence(datasets.Sequence(datasets.Value("float"))),
                 "references": datasets.Sequence(datasets.Value("float")),
             }
         else:
@@ -125,9 +121,7 @@ class Crps(evaluate.Metric):
         weighted_quantile_loss = []
         for q in quantiles:
             forecast_quantile = np.quantile(predictions, q, axis=0)
-            weighted_quantile_loss.append(
-                self.quantile_loss(references, forecast_quantile, q) / abs_target_sum
-            )
+            weighted_quantile_loss.append(self.quantile_loss(references, forecast_quantile, q) / abs_target_sum)
 
         if multioutput == "raw_values":
             return {"crps": weighted_quantile_loss}
@@ -135,6 +129,5 @@ class Crps(evaluate.Metric):
             return {"crps": np.average(weighted_quantile_loss)}
         else:
             raise ValueError(
-                "The multioutput parameter should be one of the following: "
-                + "'raw_values', 'uniform_average'"
+                "The multioutput parameter should be one of the following: " + "'raw_values', 'uniform_average'"
             )
