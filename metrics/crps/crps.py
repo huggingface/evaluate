@@ -18,6 +18,7 @@ import numpy as np
 
 import evaluate
 
+
 _CITATION = """\
 @article{doi:10.1198/016214506000001437,
     author = {Tilmann Gneiting and Adrian E Raftery},
