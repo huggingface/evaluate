@@ -15,10 +15,16 @@
 
 import datasets
 import numpy as np
-from datasets.config import importlib_metadata, version
 from nltk.translate import meteor_score
+from packaging import version
 
 import evaluate
+
+
+if evaluate.config.PY_VERSION < version.parse("3.8"):
+    import importlib_metadata
+else:
+    import importlib.metadata as importlib_metadata
 
 
 NLTK_VERSION = version.parse(importlib_metadata.version("nltk"))

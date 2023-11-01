@@ -29,34 +29,66 @@ if TYPE_CHECKING:
 
 TASK_DOCUMENTATION = r"""
     Examples:
+
+    <Tip>
+
+    Remember that, in order to process audio files, you need ffmpeg installed (https://ffmpeg.org/download.html)
+
+    </Tip>
+
     ```python
     >>> from evaluate import evaluator
     >>> from datasets import load_dataset
-    >>> task_evaluator = evaluator("image-classification")
-    >>> data = load_dataset("beans", split="test[:40]")
+
+    >>> task_evaluator = evaluator("audio-classification")
+    >>> data = load_dataset("superb", 'ks', split="test[:40]")
     >>> results = task_evaluator.compute(
-    >>>     model_or_pipeline="nateraw/vit-base-beans",
+    >>>     model_or_pipeline=""superb/wav2vec2-base-superb-ks"",
     >>>     data=data,
-    >>>     label_column="labels",
+    >>>     label_column="label",
+    >>>     input_column="file",
     >>>     metric="accuracy",
-    >>>     label_mapping={'angular_leaf_spot': 0, 'bean_rust': 1, 'healthy': 2},
-    >>>     strategy="bootstrap"
+    >>>     label_mapping={0: "yes", 1: "no", 2: "up", 3: "down"}
+    >>> )
+    ```
+
+    <Tip>
+
+    The evaluator supports raw audio data as well, in the form of a numpy array. However, be aware that calling
+    the audio column automatically decodes and resamples the audio files, which can be slow for large datasets.
+
+    </Tip>
+
+    ```python
+    >>> from evaluate import evaluator
+    >>> from datasets import load_dataset
+
+    >>> task_evaluator = evaluator("audio-classification")
+    >>> data = load_dataset("superb", 'ks', split="test[:40]")
+    >>> data = data.map(lambda example: {"audio": example["audio"]["array"]})
+    >>> results = task_evaluator.compute(
+    >>>     model_or_pipeline=""superb/wav2vec2-base-superb-ks"",
+    >>>     data=data,
+    >>>     label_column="label",
+    >>>     input_column="audio",
+    >>>     metric="accuracy",
+    >>>     label_mapping={0: "yes", 1: "no", 2: "up", 3: "down"}
     >>> )
     ```
 """
 
 
-class ImageClassificationEvaluator(Evaluator):
+class AudioClassificationEvaluator(Evaluator):
     """
-    Image classification evaluator.
-    This image classification evaluator can currently be loaded from [`evaluator`] using the default task name
-    `image-classification`.
-    Methods in this class assume a data format compatible with the [`ImageClassificationPipeline`].
+    Audio classification evaluator.
+    This audio classification evaluator can currently be loaded from [`evaluator`] using the default task name
+    `audio-classification`.
+    Methods in this class assume a data format compatible with the [`transformers.AudioClassificationPipeline`].
     """
 
     PIPELINE_KWARGS = {}
 
-    def __init__(self, task="image-classification", default_metric_name=None):
+    def __init__(self, task="audio-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
     def predictions_processor(self, predictions, label_mapping):
@@ -83,14 +115,14 @@ class ImageClassificationEvaluator(Evaluator):
         n_resamples: int = 9999,
         device: int = None,
         random_state: Optional[int] = None,
-        input_column: str = "image",
+        input_column: str = "file",
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
     ) -> Tuple[Dict[str, float], Any]:
 
         """
-        input_column (`str`, defaults to `"image"`):
-            The name of the column containing the images as PIL ImageFile in the dataset specified by `data`.
+        input_column (`str`, defaults to `"file"`):
+            The name of the column containing either the audio files or a raw waveform, represented as a numpy array, in the dataset specified by `data`.
         label_column (`str`, defaults to `"label"`):
             The name of the column containing the labels in the dataset specified by `data`.
         label_mapping (`Dict[str, Number]`, *optional*, defaults to `None`):

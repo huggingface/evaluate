@@ -4,6 +4,7 @@ import tempfile
 from unittest import TestCase
 
 import pytest
+from datasets import DownloadConfig
 
 import evaluate
 from evaluate.loading import (
@@ -12,7 +13,6 @@ from evaluate.loading import (
     LocalEvaluationModuleFactory,
     evaluation_module_factory,
 )
-from evaluate.utils.file_utils import DownloadConfig
 
 from .utils import OfflineSimulationMode, offline
 

@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from typing import Any, Callable, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union
 
 from datasets import Dataset
 from typing_extensions import Literal
@@ -22,6 +22,10 @@ from ..utils.file_utils import add_start_docstrings
 from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOCSTRING, Evaluator
 
 
+if TYPE_CHECKING:
+    from transformers import Pipeline, PreTrainedModel, PreTrainedTokenizer, TFPreTrainedModel
+
+
 TASK_DOCUMENTATION_KWARGS = r"""
         input_column (`str`, defaults to `"text"`):
             the name of the column containing the input text in the dataset specified by `data`.
@@ -29,6 +33,55 @@ TASK_DOCUMENTATION_KWARGS = r"""
             the name of the column containing the labels in the dataset specified by `data`.
         generation_kwargs (`Dict`, *optional*, defaults to `None`):
             The generation kwargs are passed to the pipeline and set the text generation strategy.
+"""
+
+TEXT2TEXT_TASK_DOCSTRING_EXAMPLE = r"""
+    Examples:
+    ```python
+    >>> from evaluate import evaluator
+    >>> from datasets import load_dataset
+    >>> task_evaluator = evaluator("text2text-generation")
+    >>> data = load_dataset("cnn_dailymail", "3.0.0", split="validation[:40]")
+    >>> results = task_evaluator.compute(
+    >>>     model_or_pipeline="facebook/bart-large-cnn",
+    >>>     data=data,
+    >>>     input_column="article",
+    >>>     label_column="highlights",
+    >>>     metric="rouge",
+    >>> )
+    ```
+"""
+
+SUMMARIZATION_TASK_DOCSTRING_EXAMPLE = r"""
+    Examples:
+    ```python
+    >>> from evaluate import evaluator
+    >>> from datasets import load_dataset
+    >>> task_evaluator = evaluator("summarization")
+    >>> data = load_dataset("cnn_dailymail", "3.0.0", split="validation[:40]")
+    >>> results = task_evaluator.compute(
+    >>>     model_or_pipeline="facebook/bart-large-cnn",
+    >>>     data=data,
+    >>>     input_column="article",
+    >>>     label_column="highlights",
+    >>> )
+    ```
+"""
+
+
+TRANSLATION_TASK_DOCSTRING_EXAMPLE = r"""
+    Examples:
+    ```python
+    >>> from evaluate import evaluator
+    >>> from datasets import load_dataset
+    >>> task_evaluator = evaluator("translation")
+    >>> data = load_dataset("wmt19", "fr-de", split="validation[:40]")
+    >>> data = data.map(lambda x: {"text": x["translation"]["de"], "label": x["translation"]["fr"]})
+    >>> results = task_evaluator.compute(
+    >>>     model_or_pipeline="Helsinki-NLP/opus-mt-de-fr",
+    >>>     data=data,
+    >>> )
+    ```
 """
 
 
@@ -50,7 +103,10 @@ class Text2TextGenerationEvaluator(Evaluator):
         return {"predictions": [pred[f"{self.PREDICTION_PREFIX}_text"] for pred in predictions]}
 
     @add_start_docstrings(
-        EVALUTOR_COMPUTE_START_DOCSTRING, TASK_DOCUMENTATION_KWARGS, EVALUATOR_COMPUTE_RETURN_DOCSTRING
+        EVALUTOR_COMPUTE_START_DOCSTRING,
+        TASK_DOCUMENTATION_KWARGS,
+        EVALUATOR_COMPUTE_RETURN_DOCSTRING,
+        TEXT2TEXT_TASK_DOCSTRING_EXAMPLE,
     )
     def compute(
         self,
@@ -71,23 +127,6 @@ class Text2TextGenerationEvaluator(Evaluator):
         label_column: str = "label",
         generation_kwargs: dict = None,
     ) -> Tuple[Dict[str, float], Any]:
-        """
-        Examples:
-        ```python
-        >>> from evaluate import evaluator
-        >>> from datasets import load_dataset
-        >>> task_evaluator = evaluator("text2text-generation")
-        >>> data = load_dataset("cnn_dailymail", "3.0.0", split="validation[:40]")
-        >>> results = task_evaluator.compute(
-        >>>     model_or_pipeline="facebook/bart-large-cnn",
-        >>>     data=data,
-        >>>     input_column="article",
-        >>>     label_column="highlights",
-        >>>     metric="rouge",
-        >>> )
-        ```
-        """
-
         if generation_kwargs is not None:
             self.PIPELINE_KWARGS.update(generation_kwargs)
 
@@ -125,7 +164,10 @@ class SummarizationEvaluator(Text2TextGenerationEvaluator):
         super().__init__(task, default_metric_name=default_metric_name)
 
     @add_start_docstrings(
-        EVALUTOR_COMPUTE_START_DOCSTRING, TASK_DOCUMENTATION_KWARGS, EVALUATOR_COMPUTE_RETURN_DOCSTRING
+        EVALUTOR_COMPUTE_START_DOCSTRING,
+        TASK_DOCUMENTATION_KWARGS,
+        EVALUATOR_COMPUTE_RETURN_DOCSTRING,
+        SUMMARIZATION_TASK_DOCSTRING_EXAMPLE,
     )
     def compute(
         self,
@@ -146,22 +188,6 @@ class SummarizationEvaluator(Text2TextGenerationEvaluator):
         label_column: str = "label",
         generation_kwargs: dict = None,
     ) -> Tuple[Dict[str, float], Any]:
-        """
-        Examples:
-        ```python
-        >>> from evaluate import evaluator
-        >>> from datasets import load_dataset
-        >>> task_evaluator = evaluator("summarization")
-        >>> data = load_dataset("cnn_dailymail", "3.0.0", split="validation[:40]")
-        >>> results = task_evaluator.compute(
-        >>>     model_or_pipeline="facebook/bart-large-cnn",
-        >>>     data=data,
-        >>>     input_column="article",
-        >>>     label_column="highlights",
-        >>> )
-        ```
-        """
-
         result = super().compute(
             model_or_pipeline=model_or_pipeline,
             data=data,
@@ -176,6 +202,7 @@ class SummarizationEvaluator(Text2TextGenerationEvaluator):
             random_state=random_state,
             input_column=input_column,
             label_column=label_column,
+            generation_kwargs=generation_kwargs,
         )
 
         return result
@@ -196,7 +223,10 @@ class TranslationEvaluator(Text2TextGenerationEvaluator):
         super().__init__(task, default_metric_name=default_metric_name)
 
     @add_start_docstrings(
-        EVALUTOR_COMPUTE_START_DOCSTRING, TASK_DOCUMENTATION_KWARGS, EVALUATOR_COMPUTE_RETURN_DOCSTRING
+        EVALUTOR_COMPUTE_START_DOCSTRING,
+        TASK_DOCUMENTATION_KWARGS,
+        EVALUATOR_COMPUTE_RETURN_DOCSTRING,
+        TRANSLATION_TASK_DOCSTRING_EXAMPLE,
     )
     def compute(
         self,
@@ -217,21 +247,6 @@ class TranslationEvaluator(Text2TextGenerationEvaluator):
         label_column: str = "label",
         generation_kwargs: dict = None,
     ) -> Tuple[Dict[str, float], Any]:
-        """
-        Examples:
-        ```python
-        >>> from evaluate import evaluator
-        >>> from datasets import load_dataset
-        >>> task_evaluator = evaluator("translation")
-        >>> data = load_dataset("wmt19", "fr-de", split="validation[:40]")
-        >>> data = data.map(lambda x: {"text": x["translation"]["de"], "label": x["translation"]["fr"]})
-        >>> results = task_evaluator.compute(
-        >>>     model_or_pipeline="Helsinki-NLP/opus-mt-de-fr",
-        >>>     data=data,
-        >>> )
-        ```
-        """
-
         result = super().compute(
             model_or_pipeline=model_or_pipeline,
             data=data,
@@ -246,6 +261,7 @@ class TranslationEvaluator(Text2TextGenerationEvaluator):
             random_state=random_state,
             input_column=input_column,
             label_column=label_column,
+            generation_kwargs=generation_kwargs,
         )
 
         return result

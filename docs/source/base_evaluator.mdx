@@ -12,6 +12,7 @@ Currently supported tasks are:
 - `"summarization"`: will use the [`SummarizationEvaluator`].
 - `"translation"`: will use the [`TranslationEvaluator`].
 - `"automatic-speech-recognition"`: will use the [`AutomaticSpeechRecognitionEvaluator`].
+- `"audio-classification"`: will use the [`AudioClassificationEvaluator`].
 
 To run an `Evaluator` with several tasks in a single call, use the [EvaluationSuite](evaluation_suite), which runs evaluations on a collection of `SubTask`s.
 
@@ -154,7 +155,7 @@ models = [
     "Jorgeutd/albert-base-v2-finetuned-ner",
 ]
 
-data = load_dataset("conll2003", split="validation").shuffle().select(1000)
+data = load_dataset("conll2003", split="validation").shuffle().select(range(1000))
 task_evaluator = evaluator("token-classification")
 
 results = []

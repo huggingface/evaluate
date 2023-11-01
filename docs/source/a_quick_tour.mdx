@@ -207,7 +207,7 @@ Saving and sharing evaluation results is an important step. We provide the [`eva
 >>> result = accuracy.compute(references=[0,1,0,1], predictions=[1,0,0,1])
 
 >>> hyperparams = {"model": "bert-base-uncased"}
->>> evaluate.save("./results/"experiment="run 42", **result, **hyperparams)
+>>> evaluate.save("./results/", experiment="run 42", **result, **hyperparams)
 PosixPath('results/result-2022_05_30-22_09_11.json')
 ```
 
@@ -239,7 +239,7 @@ evaluate.push_to_hub(
   dataset_type="wikitext",                # dataset name on the hub
   dataset_name="WikiText",                # pretty name
   dataset_split="test",                   # dataset split used
-  task_type="text-generation",            # task id, see https://github.com/huggingface/datasets/blob/master/src/datasets/utils/resources/tasks.json
+  task_type="text-generation",            # task id, see https://github.com/huggingface/evaluate/blob/main/src/evaluate/config.py#L154-L192
   task_name="Text Generation"             # pretty name for task
 )
 ```
@@ -366,7 +366,7 @@ class Suite(evaluate.EvaluationSuite):
         ]
 ```
 
-Evaluation can be run by loading the `EvaluationSuite` and calling `run()` method with a model or pipeline.
+Evaluation can be run by loading the `EvaluationSuite` and calling the `run()` method with a model or pipeline.
 
 ```
 >>> from evaluate import EvaluationSuite

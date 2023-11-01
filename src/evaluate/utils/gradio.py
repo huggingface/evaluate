@@ -118,7 +118,10 @@ def launch_gradio_widget(metric):
             datatype=json_to_string_type(gradio_input_types),
         ),
         outputs=gr.outputs.Textbox(label=metric.name),
-        description=metric.info.description,
+        description=(
+            metric.info.description + "\nIf this is a text-based metric, make sure to wrap you input in double quotes."
+            " Alternatively you can use a JSON-formatted list as input."
+        ),
         title=f"Metric: {metric.name}",
         article=parse_readme(local_path / "README.md"),
         # TODO: load test cases and use them to populate examples
