@@ -55,6 +55,7 @@ REQUIRED_PKGS = [
     # Utilities from PyPA to e.g., compare versions
     "packaging",
     "responses<0.19",
+    "pyarrow",
 ]
 
 TEMPLATE_REQUIRE = [
