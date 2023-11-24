@@ -93,8 +93,10 @@ class WER(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions=None, references=None, concatenate_texts=False):
+    def _compute(self, predictions=None, references=None, concatenate_texts=False, return_dict=False):
         if concatenate_texts:
+            if return_dict:
+                return {"wer" : (compute_measures(references, predictions)["wer")]}
             return compute_measures(references, predictions)["wer"]
         else:
             incorrect = 0
@@ -103,4 +105,6 @@ class WER(evaluate.Metric):
                 measures = compute_measures(reference, prediction)
                 incorrect += measures["substitutions"] + measures["deletions"] + measures["insertions"]
                 total += measures["substitutions"] + measures["deletions"] + measures["hits"]
+            if return_dict:
+                return {"wer" : (incorrect / total)}
             return incorrect / total
