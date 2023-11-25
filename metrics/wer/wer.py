@@ -96,7 +96,7 @@ class WER(evaluate.Metric):
     def _compute(self, predictions=None, references=None, concatenate_texts=False, return_dict=False):
         if concatenate_texts:
             if return_dict:
-                return {"wer" : (compute_measures(references, predictions)["wer")]}
+                return {"wer" : (compute_measures(references, predictions)["wer"])}
             return compute_measures(references, predictions)["wer"]
         else:
             incorrect = 0
