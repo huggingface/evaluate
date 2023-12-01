@@ -1,0 +1,35 @@
+<h1 id="adversarial-glue-evaluation-suite">Adversarial GLUE Evaluation Suite</h1>
+<h2 id="description">Description</h2>
+<p>This evaluation suite compares the GLUE results with Adversarial GLUE (AdvGLUE), a multi-task benchmark that evaluates modern large-scale language models robustness with respect to various types of adversarial attacks.</p>
+<h2 id="how-to-use">How to use</h2>
+<p>This suite requires installations of the following fork <a href="https://github.com/IntelAI/evaluate/tree/develop">IntelAI/evaluate</a>.</p>
+<p>After installation, there are two steps: (1) loading the Adversarial GLUE suite; and (2) calculating the metric.</p>
+<ol type="1">
+<li><strong>Loading the relevant GLUE metric</strong> : This suite loads an evaluation suite subtasks for the following tasks on both AdvGLUE and GLUE datasets: <code>sst2</code>, <code>mnli</code>, <code>qnli</code>, <code>rte</code>, and <code>qqp</code>.</li>
+</ol>
+<p>More information about the different subsets of the GLUE dataset can be found on the <a href="https://huggingface.co/datasets/glue">GLUE dataset page</a>.</p>
+<ol start="2" type="1">
+<li><strong>Calculating the metric</strong>: the metric takes one input: the name of the model or pipeline</li>
+</ol>
+<div class="sourceCode" id="cb1"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="im">from</span> evaluate <span class="im">import</span> EvaluationSuite</span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a>suite <span class="op">=</span> EvaluationSuite.load(<span class="st">&#39;intel/adversarial_glue&#39;</span>)</span>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>mc_results,  <span class="op">=</span> suite.run(<span class="st">&quot;gpt2&quot;</span>)</span></code></pre></div>
+<h2 id="output-results">Output results</h2>
+<p>The output of the metric depends on the GLUE subset chosen, consisting of a dictionary that contains one or several of the following metrics:</p>
+<p><code>accuracy</code>: the proportion of correct predictions among the total number of cases processed, with a range between 0 and 1 (see <a href="https://huggingface.co/metrics/accuracy">accuracy</a> for more information).</p>
+<h3 id="values-from-popular-papers">Values from popular papers</h3>
+<p>The <a href="https://huggingface.co/datasets/glue">original GLUE paper</a> reported average scores ranging from 58% to 64%, depending on the model used (with all evaluation values scaled by 100 to make computing the average possible).</p>
+<p>For more recent model performance, see the <a href="https://paperswithcode.com/dataset/glue">dataset leaderboard</a>.</p>
+<h2 id="examples">Examples</h2>
+<p>For full example see <a href="https://github.com/IntelAI/evaluate/blob/develop/notebooks/HF%20Evaluate%20Adversarial%20Attacks.ipynb">HF Evaluate Adversarial Attacks.ipynb</a></p>
+<h2 id="limitations-and-bias">Limitations and bias</h2>
+<p>This metric works only with datasets that have the same format as the <a href="https://huggingface.co/datasets/glue">GLUE dataset</a>.</p>
+<p>While the GLUE dataset is meant to represent “General Language Understanding”, the tasks represented in it are not necessarily representative of language understanding, and should not be interpreted as such.</p>
+<h2 id="citation">Citation</h2>
+<div class="sourceCode" id="cb2"><pre class="sourceCode bibtex"><code class="sourceCode bibtex"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co"> </span><span class="va">@inproceedings</span>{<span class="ot">wang2021adversarial</span>,</span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">title</span>={Adversarial GLUE: A Multi-Task Benchmark for Robustness Evaluation of Language Models},</span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">author</span>={Wang, Boxin and Xu, Chejian and Wang, Shuohang and Gan, Zhe and Cheng, Yu and Gao, Jianfeng and Awadallah, Ahmed Hassan and Li, Bo},</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">booktitle</span>={Advances in Neural Information Processing Systems},</span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">year</span>={2021}</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
