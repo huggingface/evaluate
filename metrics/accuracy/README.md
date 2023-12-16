@@ -54,7 +54,7 @@ At minimum, this metric requires predictions and references as inputs.
 
 
 ### Output Values
-- **accuracy**(`float` or `int`): Accuracy score. Minimum possible value is 0. Maximum possible value is 1.0, or the number of examples input, if `normalize` is set to `True`.. A higher score means higher accuracy.
+- **accuracy**(`float` or `int`): Accuracy score. Minimum possible value is 0. Maximum possible value is 1.0, or the number of examples input, if `normalize` is set to `True`. A higher score means higher accuracy.
 
 Output Example(s):
 ```python

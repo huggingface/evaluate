@@ -145,7 +145,7 @@ unsure, it is always a good idea to open an issue to get some feedback.
    that can't be automated in one go with:
 
    ```bash
-   $ make fixup
+   $ make quality
    ```
 
    This target is also optimized to only work with files modified by the PR you're working on.
