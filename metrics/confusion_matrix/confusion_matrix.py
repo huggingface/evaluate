@@ -40,7 +40,7 @@ Examples:
         >>> confusion_matrix_metric = evaluate.load("confusion_matrix")
         >>> results = confusion_matrix_metric.compute(references=[0, 1, 2, 0, 1, 2], predictions=[0, 1, 1, 2, 1, 0])
         >>> print(results)  # doctest: +NORMALIZE_WHITESPACE
-        {'confusion_matrix': array([[1, 0, 1], [0, 2, 0], [1, 1, 0]])}
+        {'confusion_matrix': array([[1, 0, 1],\n [0, 2, 0],\n [1, 1, 0]])}
 """
 
 
