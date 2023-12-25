@@ -42,7 +42,7 @@ Examples:
         >>> print(results)  # doctest: +NORMALIZE_WHITESPACE
         {'confusion_matrix': array([[1, 0, 1],
                             [0, 2, 0],
-                            [1, 1, 0]], dtype=int64)}
+                            [1, 1, 0]])}
 """
 
 
