@@ -35,6 +35,7 @@ jobs:
   test:
     needs: check_code_quality
     strategy:
+      fail-fast: false
       matrix:
         test: ['unit', 'parity']
         os: [ubuntu-latest, windows-latest]
