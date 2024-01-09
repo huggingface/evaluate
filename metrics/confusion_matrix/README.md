@@ -80,11 +80,11 @@ Example 1 - A simple example
 Example 2 - Multilabel scenario with binary labels
 
 ```python
->>> confusion_metric = evaluate.load("confusion_matrix")
->>> confusion_metric.config_name = "multilabel"
+>>> confusion_metric = evaluate.load("confusion_matrix", config_name="multilabel")
 >>> results = confusion_metric.compute(references=[[0, 1], [1, 0], [0, 0], [0, 1], [1, 0], [0, 0]], predictions=[[0, 1], [1, 0], [1, 0], [0, 0], [1, 0], [0, 1]])
 >>> print(results)
 {'confusion_matrix': [[[3, 1], [0, 2]], [[3, 1], [1, 1]]]}
+'''
 
 
 ## Citation(s)
