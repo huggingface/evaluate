@@ -45,7 +45,7 @@ Examples:
 
     Example 2-Multilabel scenario
         >>> you must pass (config_name="multilabel") to the load method
-        >>> confusion_matrix_metric = evaluate.load("confusion_matrix")
+        >>> confusion_matrix_metric = evaluate.load("confusion_matrix", config_name="multilabel")
         >>> results = confusion_matrix_metric.compute(references=[[0, 1], [1, 0], [0, 0], [0, 1], [1, 0], [0, 0]], predictions=[[0, 1], [1, 0], [1, 0], [0, 0], [1, 0], [0, 1]])
         >>> print(results)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
         {'confusion_matrix': [[[3, 1], [0, 2]], [[3, 1], [1, 1]]]}
