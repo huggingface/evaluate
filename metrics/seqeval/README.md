@@ -103,7 +103,7 @@ Maximal values (full match) :
 >>> references = [['O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
 >>> results = seqeval.compute(predictions=predictions, references=references)
 >>> print(results)
-{'MISC': {'precision': 1.0, 'recall': 1.0, 'f1': 1.0, 'number': 1}, 'PER': {'precision': 1.0, 'recall': 1.0, 'f1': 1.0, 'number': 1}, 'overall_precision': 1.0, 'overall_recall': 1.0, 'overall_f1': 1.0, 'overall_accuracy': 1.0}
+{'MISC': {'precision': 1.0, 'recall': 1.0, 'f1': 1.0, 'number': 1}, 'PER': {'precision': 1.0, 'recall': 1.0, 'f1': 1.0, 'number': 1}, 'overall_precision': 1.0, 'overall_recall': 1.0, 'overall_f1': 1.0, 'overall_accuracy': 1.0, 'macro_precision': 1.0, 'macro_recall': 1.0, 'macro_f1': 1.0, 'weighted_precision': 1.0, 'weighted_recall': 1.0, 'weighted_f1': 1.0}
 
 ```
 
@@ -115,7 +115,7 @@ Minimal values (no match):
 >>> references = [['B-MISC', 'O', 'O'], ['I-PER', '0', 'I-PER']]
 >>> results = seqeval.compute(predictions=predictions, references=references)
 >>> print(results)
-{'MISC': {'precision': 0.0, 'recall': 0.0, 'f1': 0.0, 'number': 1}, 'PER': {'precision': 0.0, 'recall': 0.0, 'f1': 0.0, 'number': 2}, '_': {'precision': 0.0, 'recall': 0.0, 'f1': 0.0, 'number': 1}, 'overall_precision': 0.0, 'overall_recall': 0.0, 'overall_f1': 0.0, 'overall_accuracy': 0.0}
+{'MISC': {'precision': 0.0, 'recall': 0.0, 'f1': 0.0, 'number': 1}, 'PER': {'precision': 0.0, 'recall': 0.0, 'f1': 0.0, 'number': 2}, '_': {'precision': 0.0, 'recall': 0.0, 'f1': 0.0, 'number': 1}, 'overall_precision': 0.0, 'overall_recall': 0.0, 'overall_f1': 0.0, 'overall_accuracy': 0.0, 'macro_precision': 0.0, 'macro_recall': 0.0, 'macro_f1': 0.0, 'weighted_precision': 0.0, 'weighted_recall': 0.0, 'weighted_f1': 0.0}
 ```
 
 Partial match:
@@ -126,7 +126,7 @@ Partial match:
 >>> references = [['O', 'O', 'O', 'B-MISC', 'I-MISC', 'I-MISC', 'O'], ['B-PER', 'I-PER', 'O']]
 >>> results = seqeval.compute(predictions=predictions, references=references)
 >>> print(results)
-{'MISC': {'precision': 0.0, 'recall': 0.0, 'f1': 0.0, 'number': 1}, 'PER': {'precision': 1.0, 'recall': 1.0, 'f1': 1.0, 'number': 1}, 'overall_precision': 0.5, 'overall_recall': 0.5, 'overall_f1': 0.5, 'overall_accuracy': 0.8}
+{'MISC': {'precision': 0.0, 'recall': 0.0, 'f1': 0.0, 'number': 1}, 'PER': {'precision': 1.0, 'recall': 1.0, 'f1': 1.0, 'number': 1}, 'overall_precision': 0.5, 'overall_recall': 0.5, 'overall_f1': 0.5, 'overall_accuracy': 0.8, 'macro_precision': 0.5, 'macro_recall': 0.5, 'macro_f1': 0.5, 'weighted_precision': 0.5, 'weighted_recall': 0.5, 'weighted_f1': 0.5}
 ```
 
 ## Limitations and bias
