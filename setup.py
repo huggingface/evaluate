@@ -54,6 +54,7 @@ REQUIRED_PKGS = [
     "huggingface-hub>=0.7.0",
     # Utilities from PyPA to e.g., compare versions
     "packaging",
+    "scikit-learn",
 ]
 
 TEMPLATE_REQUIRE = [
@@ -89,7 +90,6 @@ TESTS_REQUIRE = [
     "sacremoses",
     "scipy",
     "seqeval",
-    "scikit-learn",
     "jiwer",
     "sentencepiece",  # for bleurt
     "transformers", # for evaluator
