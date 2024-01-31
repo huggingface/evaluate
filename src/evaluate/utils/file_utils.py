@@ -535,7 +535,6 @@ def get_from_cache(
     # Prevent parallel downloads of the same file with a lock.
     lock_path = cache_path + ".lock"
     with FileLock(lock_path):
-
         if resume_download:
             incomplete_path = cache_path + ".incomplete"
 

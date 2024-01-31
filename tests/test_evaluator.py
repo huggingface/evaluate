@@ -306,7 +306,6 @@ class TestTextClassificationEvaluator(TestCase):
         self.assertEqual(results["accuracy"], 1.0)
 
     def test_data_loading(self):
-
         # Test passing in dataset by name with split
         data = self.evaluator.load_data("evaluate/imdb-ci", split="test[:1]")
         self.evaluator.prepare_data(data=data, input_column="text", label_column="label", second_input_column=None)
