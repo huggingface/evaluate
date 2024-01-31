@@ -107,7 +107,6 @@ class Mape(evaluate.Metric):
             }
 
     def _compute(self, predictions, references, sample_weight=None, multioutput="uniform_average"):
-
         mape_score = mean_absolute_percentage_error(
             references,
             predictions,

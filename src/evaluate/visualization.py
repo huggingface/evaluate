@@ -22,7 +22,6 @@ class ComplexRadar:
     """
 
     def __init__(self, fig, variables, ranges, n_ring_levels=5, show_scales=True, format_cfg=None):
-
         self.format_cfg = format_cfg
 
         # Calculate angles and create for each variable an axes
@@ -41,7 +40,6 @@ class ComplexRadar:
 
         # Writing the ranges on each axes
         for i, ax in enumerate(axes):
-
             # Here we do the trick by repeating the first iteration
             j = 0 if (i == 0 or i == 1) else i - 1
             ax.set_ylim(*ranges[j])

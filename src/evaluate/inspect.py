@@ -72,7 +72,6 @@ def list_evaluation_modules(module_type=None, include_community=True, with_detai
 
 
 def _list_evaluation_modules_type(module_type, include_community=True, with_details=False):
-
     r = requests.get(HF_LIST_ENDPOINT.format(type=module_type))
     r.raise_for_status()
     d = r.json()

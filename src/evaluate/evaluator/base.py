@@ -235,7 +235,6 @@ class Evaluator(ABC):
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
     ) -> Dict[str, float]:
-
         result = {}
 
         self.check_for_mismatch_in_device_setup(device, model_or_pipeline)

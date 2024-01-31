@@ -102,12 +102,10 @@ class EvaluationSuite:
     def run(
         self, model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"]  # noqa: F821
     ) -> Dict[str, float]:
-
         self.assert_suite_nonempty()
 
         results_all = []
         for task in self.suite:
-
             task_name = task.data
 
             if task.data_preprocessor:  # task requires extra preprocessing

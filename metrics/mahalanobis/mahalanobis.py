@@ -72,7 +72,6 @@ class Mahalanobis(evaluate.Metric):
         )
 
     def _compute(self, X, reference_distribution):
-
         # convert to numpy arrays
         X = np.array(X)
         reference_distribution = np.array(reference_distribution)
