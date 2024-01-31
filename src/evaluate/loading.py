@@ -658,9 +658,8 @@ def evaluation_module_factory(
                     download_mode=download_mode,
                     dynamic_modules_path=dynamic_modules_path,
                 ).get_module()
-        except (
-            Exception
-        ) as e1:  # noqa: all the attempts failed, before raising the error we should check if the module is already cached.
+        except Exception as e1:  # all the attempts have failed
+            # before raising the error we should check if the module is already cached.
             # if it's a canonical module we need to check if it's any of the types
             if path.count("/") == 0:
                 for current_type in ["metric", "comparison", "measurement"]:
