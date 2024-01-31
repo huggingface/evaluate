@@ -54,7 +54,6 @@ REQUIRED_PKGS = [
     "huggingface-hub>=0.7.0",
     # Utilities from PyPA to e.g., compare versions
     "packaging",
-    "responses<0.19",
 ]
 
 TEMPLATE_REQUIRE = [

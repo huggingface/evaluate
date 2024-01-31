@@ -270,7 +270,7 @@ class Evaluator(ABC):
         # TODO: To clarify why `wer` and `cer` return float
         # even though metric.compute contract says that it
         # returns Optional[dict].
-        if type(metric_results) == float:
+        if type(metric_results) is float:
             metric_results = {metric.name: metric_results}
 
         result.update(metric_results)
