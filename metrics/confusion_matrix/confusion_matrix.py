@@ -91,9 +91,7 @@ class ConfusionMatrix(evaluate.Metric):
             ],
         )
 
-    def _compute(
-        self, predictions, references, labels=None, sample_weight=None, normalize=None
-    ):
+    def _compute(self, predictions, references, labels=None, sample_weight=None, normalize=None):
         if self.config_name == "multilabel":
             return {
                 "confusion_matrix": multilabel_confusion_matrix(
@@ -106,10 +104,6 @@ class ConfusionMatrix(evaluate.Metric):
             }
         return {
             "confusion_matrix": confusion_matrix(
-                references,
-                predictions,
-                labels=labels,
-                sample_weight=sample_weight,
-                normalize=normalize,
+                references, predictions, labels=labels, sample_weight=sample_weight, normalize=normalize
             ),
         }
