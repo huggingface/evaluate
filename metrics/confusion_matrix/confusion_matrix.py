@@ -48,7 +48,7 @@ Examples:
         >>> confusion_matrix_metric = evaluate.load("confusion_matrix", config_name="multilabel")
         >>> results = confusion_matrix_metric.compute(references=[[0, 1], [1, 0], [0, 0], [0, 1], [1, 0], [0, 0]], predictions=[[0, 1], [1, 0], [1, 0], [0, 0], [1, 0], [0, 1]])
         >>> print(results)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
-        {'confusion_matrix': [[[3, 1], [0, 2]], [[3, 1], [1, 1]]]}
+        {'confusion_matrix': array([[[3, 1], [0, 2]], [[3, 1], [1, 1]]])}
 """
 
 
@@ -91,7 +91,9 @@ class ConfusionMatrix(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references, labels=None, sample_weight=None, normalize=None):
+    def _compute(
+        self, predictions, references, labels=None, sample_weight=None, normalize=None
+    ):
         if self.config_name == "multilabel":
             return {
                 "confusion_matrix": multilabel_confusion_matrix(
@@ -104,6 +106,10 @@ class ConfusionMatrix(evaluate.Metric):
             }
         return {
             "confusion_matrix": confusion_matrix(
-                references, predictions, labels=labels, sample_weight=sample_weight, normalize=normalize
+                references,
+                predictions,
+                labels=labels,
+                sample_weight=sample_weight,
+                normalize=normalize,
             ),
         }
