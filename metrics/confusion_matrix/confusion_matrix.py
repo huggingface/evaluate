@@ -14,7 +14,7 @@
 """Confusion Matrix."""
 
 import datasets
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, multilabel_confusion_matrix
 
 import evaluate
 
@@ -33,6 +33,7 @@ Args:
 
 Returns:
     confusion_matrix (`list` of `list` of `int`): Confusion matrix whose i-th row and j-th column entry indicates the number of samples with true label being i-th class and predicted label being j-th class.
+    In a multilabel scenario, each element in the confusion matrix represents the number of samples that have been assigned a particular combination of labels.
 
 Examples:
 
@@ -41,6 +42,13 @@ Examples:
         >>> results = confusion_matrix_metric.compute(references=[0, 1, 2, 0, 1, 2], predictions=[0, 1, 1, 2, 1, 0])
         >>> print(results)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
         {'confusion_matrix': array([[1, 0, 1], [0, 2, 0], [1, 1, 0]][...])}
+
+    Example 2-Multilabel scenario
+        >>> # you must pass (config_name="multilabel") to the load method
+        >>> confusion_matrix_metric = evaluate.load("confusion_matrix", config_name="multilabel")
+        >>> results = confusion_matrix_metric.compute(references=[[0, 1], [1, 0], [0, 0], [0, 1], [1, 0], [0, 0]], predictions=[[0, 1], [1, 0], [1, 0], [0, 0], [1, 0], [0, 1]])
+        >>> print(results)  # doctest: +ELLIPSIS +NORMALIZE_WHITESPACE
+        {'confusion_matrix': array([[[3, 1], [0, 2]], [[3, 1], [1, 1]]])}
 """
 
 
@@ -77,12 +85,25 @@ class ConfusionMatrix(evaluate.Metric):
                     "references": datasets.Value("int32"),
                 }
             ),
-            reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html"],
+            reference_urls=[
+                "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.confusion_matrix.html",
+                "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.multilabel_confusion_matrix.html",
+            ],
         )
 
     def _compute(self, predictions, references, labels=None, sample_weight=None, normalize=None):
+        if self.config_name == "multilabel":
+            return {
+                "confusion_matrix": multilabel_confusion_matrix(
+                    references,
+                    predictions,
+                    sample_weight=sample_weight,
+                    labels=labels,
+                    samplewise=normalize == "samplewise",
+                ),
+            }
         return {
             "confusion_matrix": confusion_matrix(
                 references, predictions, labels=labels, sample_weight=sample_weight, normalize=normalize
-            )
+            ),
         }
