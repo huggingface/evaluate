@@ -87,7 +87,7 @@ TESTS_REQUIRE = [
     "rouge_score>=0.1.2",
     "sacrebleu",
     "sacremoses",
-    "scipy",
+    "scipy>=1.10.0",
     "seqeval",
     "scikit-learn",
     "jiwer",
