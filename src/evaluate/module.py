@@ -47,10 +47,11 @@ class FileFreeLock(BaseFileLock):
     def __init__(self, lock_file, *args, **kwargs):
         self.filelock = FileLock(lock_file)
         super().__init__(lock_file, *args, **kwargs)
+        self._lock_file_fd = None
 
     def _acquire(self):
         try:
-            self.filelock.acquire(timeout=0.01, poll_intervall=0.02)  # Try to lock once
+            self.filelock.acquire(timeout=0.01, poll_interval=0.02)  # Try to lock once
         except Timeout:
             # We couldn't acquire the lock, the file is locked!
             self._lock_file_fd = self.filelock.lock_file
@@ -61,6 +62,10 @@ class FileFreeLock(BaseFileLock):
 
     def _release(self):
         self._lock_file_fd = None
+
+    @property
+    def is_locked(self) -> bool:
+        return self._lock_file_fd is not None
 
 
 # lists - summarize long lists similarly to NumPy
