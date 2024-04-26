@@ -65,7 +65,7 @@ pip install evaluate
 
 First install the necessary dependencies to create a new metric with the following command:
 ```bash
-pip install evaluate[template]
+pip install "evaluate[template]"
 ```
 Then you can get started with the following command which will create a new folder for your metric and display the necessary steps:
 ```bash
