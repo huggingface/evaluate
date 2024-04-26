@@ -742,7 +742,7 @@ def load(
 
         ```py
         >>> from evaluate import load
-        >>> accuracy = evaluate.load("accuracy")
+        >>> accuracy = load("accuracy")
         ```
     """
     download_mode = DownloadMode(download_mode or DownloadMode.REUSE_DATASET_IF_EXISTS)

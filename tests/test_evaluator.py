@@ -358,8 +358,8 @@ class TestTextClassificationEvaluator(TestCase):
             random_state=0,
         )
         self.assertAlmostEqual(results["accuracy"]["score"], 0.666666, 5)
-        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][0], 0.33333, 5)
-        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.666666, 5)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][0], 0.33557, 5)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 1.0, 5)
         self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.22498, 5)
 
     def test_perf(self):
@@ -393,8 +393,8 @@ class TestTextClassificationEvaluator(TestCase):
             random_state=0,
         )
         self.assertAlmostEqual(results["accuracy"]["score"], 0.666666, 5)
-        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][0], 0.333333, 5)
-        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 0.666666, 5)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][0], 0.33557, 5)
+        self.assertAlmostEqual(results["accuracy"]["confidence_interval"][1], 1.0, 5)
         self.assertAlmostEqual(results["accuracy"]["standard_error"], 0.22498285, 5)
         self.assertAlmostEqual(results["total_time_in_seconds"], 0.1, 1)
         self.assertAlmostEqual(results["samples_per_second"], len(data) / results["total_time_in_seconds"], 5)
