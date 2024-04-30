@@ -17,7 +17,7 @@
 # pylint: enable=line-too-long
 # pylint: disable=g-import-not-at-top,g-bad-import-order,wrong-import-position
 
-__version__ = "0.4.2"
+__version__ = "0.4.3.dev0"
 
 from packaging import version
 
