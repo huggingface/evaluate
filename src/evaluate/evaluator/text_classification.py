@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from numbers import Number
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union
+from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union, List
 
 from datasets import Dataset, load_dataset
 from typing_extensions import Literal
@@ -91,14 +91,18 @@ class TextClassificationEvaluator(Evaluator):
     def compute(
         self,
         model_or_pipeline: Union[
-            str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
+            str, "Pipeline", Callable, "PreTrainedModel",  # noqa: F821
+            "TFPreTrainedModel"
         ] = None,
         data: Union[str, Dataset] = None,
         subset: Optional[str] = None,
         split: Optional[str] = None,
-        metric: Union[str, EvaluationModule] = None,
-        tokenizer: Optional[Union[str, "PreTrainedTokenizer"]] = None,  # noqa: F821
-        feature_extractor: Optional[Union[str, "FeatureExtractionMixin"]] = None,  # noqa: F821
+        metric: Union[str, EvaluationModule,
+                      List[str], List[EvaluationModule]] = None,
+        tokenizer: Optional[Union[str,  # noqa: F821
+                                  "PreTrainedTokenizer"]] = None,
+        feature_extractor: Optional[Union[str,  # noqa: F821
+                                          "FeatureExtractionMixin"]] = None,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
@@ -108,28 +112,33 @@ class TextClassificationEvaluator(Evaluator):
         second_input_column: Optional[str] = None,
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
+        metrics_kwargs: Optional[Dict[str, Any]] = None,
     ) -> Tuple[Dict[str, float], Any]:
         """
         input_column (`str`, *optional*, defaults to `"text"`):
-            The name of the column containing the text feature in the dataset specified by `data`.
+            The name of the column containing the text feature
+            in the dataset specified by `data`.
         second_input_column (`str`, *optional*, defaults to `None`):
-            The name of the second column containing the text features. This may be useful for classification tasks
+            The name of the second column containing the text features.
+            This may be useful for classification tasks
             as MNLI, where two columns are used.
         label_column (`str`, defaults to `"label"`):
-            The name of the column containing the labels in the dataset specified by `data`.
+            The name of the column containing the labels in the dataset
+            specified by `data`.
         label_mapping (`Dict[str, Number]`, *optional*, defaults to `None`):
-            We want to map class labels defined by the model in the pipeline to values consistent with those
+            We want to map class labels defined by the model
+            in the pipeline to values consistent with those
             defined in the `label_column` of the `data` dataset.
+        metrics_kwargs (`Dict[str, Any]`, *optional*, defaults to `None`):
+            Additional keyword to pass to the metric(s).
         """
-
         result = {}
-
         self.check_for_mismatch_in_device_setup(device, model_or_pipeline)
-
         # Prepare inputs
         data = self.load_data(data=data, subset=subset, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(
-            data=data, input_column=input_column, second_input_column=second_input_column, label_column=label_column
+            data=data, input_column=input_column,
+            second_input_column=second_input_column, label_column=label_column
         )
         pipe = self.prepare_pipeline(
             model_or_pipeline=model_or_pipeline,
@@ -137,13 +146,11 @@ class TextClassificationEvaluator(Evaluator):
             feature_extractor=feature_extractor,
             device=device,
         )
-        metric = self.prepare_metric(metric)
-
+        metric = self.prepare_metric(metric, metrics_kwargs)
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
         predictions = self.predictions_processor(predictions, label_mapping)
         metric_inputs.update(predictions)
-
         # Compute metrics from references and predictions
         metric_results = self.compute_metric(
             metric=metric,
@@ -151,9 +158,8 @@ class TextClassificationEvaluator(Evaluator):
             strategy=strategy,
             confidence_level=confidence_level,
             n_resamples=n_resamples,
-            random_state=random_state,
+            random_state=random_state
         )
-
         result.update(metric_results)
         result.update(perf_results)
 
