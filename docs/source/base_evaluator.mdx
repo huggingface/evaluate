@@ -51,9 +51,10 @@ eval_results = task_evaluator.compute(
 
 # 2. Pass an instantiated model
 model = AutoModelForSequenceClassification.from_pretrained("lvwerra/distilbert-imdb")
-
+tokenizer = AutoTokenizer.from_pretrained("lvwerra/distilbert-imdb")
 eval_results = task_evaluator.compute(
     model_or_pipeline=model,
+    tokenizer=tokenizer,
     data=data,
     label_mapping={"NEGATIVE": 0, "POSITIVE": 1}
 )
