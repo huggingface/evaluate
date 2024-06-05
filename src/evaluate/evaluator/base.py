@@ -479,8 +479,11 @@ class Evaluator(ABC):
 
     def prepare_metric(
         self,
-        metric: Union[str, EvaluationModule,
-                      List[str], List[EvaluationModule]],
+        metric: Union[str,
+                      EvaluationModule,
+                      List[str],
+                      List[EvaluationModule]
+                      ],
         metrics_kwargs: Optional[Dict[str, Union[Dict, List]]] = None
     ) -> List[Tuple[EvaluationModule, Dict[str, Any]]]:
         """
@@ -492,13 +495,14 @@ class Evaluator(ABC):
                 If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
         Returns:
-            The loaded metric.
+            The list of loaded metrics with their respective kwargs.
         Example:
         ```py
         >>> from evaluate import evaluator
         >>> evaluator("text-classification").prepare_metric("accuracy")
         ```
         """
+
         # Prepare metric.
         if metric is None:
             if self.default_metric_name is None:
@@ -507,7 +511,7 @@ class Evaluator(ABC):
                     "Please specify a valid `metric` argument."
                 )
             metric = load(self.default_metric_name)
-        elif isinstance(metric, str) or isinstance(metric, EvaluationModule):
+        elif not isinstance(metric, list):
             em = load(metric) if isinstance(metric, str) else metric
             if metrics_kwargs and metric in metrics_kwargs:
                 if isinstance(metrics_kwargs[metric], dict):
@@ -516,18 +520,18 @@ class Evaluator(ABC):
                     return [(em, m_) for m_ in metrics_kwargs[metric]]
             return [(em, {})]
         else:
-            metric_ = []
+            metric_list = []
             for m in metric:
                 em = load(m) if isinstance(m, str) else m
                 if metrics_kwargs and m in metrics_kwargs:
                     if isinstance(metrics_kwargs[m], dict):
-                        metric_.append((em, metrics_kwargs[m]))
+                        metric_list.append((em, metrics_kwargs[m]))
                     elif isinstance(metrics_kwargs[m], list):
-                        metric_.extend([(em, m_)
-                                        for m_ in metrics_kwargs[m]])
+                        metric_list.extend([(em, m_)
+                                            for m_ in metrics_kwargs[m]])
                 else:
-                    metric_.append((m, {}))
-            return metric_
+                    metric_list.append((m, {}))
+            return metric_list
 
     def call_pipeline(self, pipe, *args, **kwargs):
         start_time = perf_counter()

@@ -13,7 +13,7 @@
 # limitations under the License.
 
 from numbers import Number
-from typing import TYPE_CHECKING, Any, Callable, Dict, Optional, Tuple, Union, List
+from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
 from datasets import Dataset, load_dataset
 from typing_extensions import Literal
@@ -97,8 +97,11 @@ class TextClassificationEvaluator(Evaluator):
         data: Union[str, Dataset] = None,
         subset: Optional[str] = None,
         split: Optional[str] = None,
-        metric: Union[str, EvaluationModule,
-                      List[str], List[EvaluationModule]] = None,
+        metric: Union[str,
+                      EvaluationModule,
+                      List[str],
+                      List[EvaluationModule]
+                      ] = None,
         tokenizer: Optional[Union[str,  # noqa: F821
                                   "PreTrainedTokenizer"]] = None,
         feature_extractor: Optional[Union[str,  # noqa: F821
