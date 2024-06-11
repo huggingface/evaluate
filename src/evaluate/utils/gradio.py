@@ -119,7 +119,7 @@ def launch_gradio_widget(metric):
         ),
         outputs=gr.outputs.Textbox(label=metric.name),
         description=(
-            metric.info.description + "\nIf this is a text-based metric, make sure to wrap you input in double quotes."
+            metric.info.description + "\nIf this is a text-based metric, make sure to wrap your input in double quotes."
             " Alternatively you can use a JSON-formatted list as input."
         ),
         title=f"Metric: {metric.name}",
