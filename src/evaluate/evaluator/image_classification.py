@@ -87,7 +87,6 @@ class ImageClassificationEvaluator(Evaluator):
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
     ) -> Tuple[Dict[str, float], Any]:
-
         """
         input_column (`str`, defaults to `"image"`):
             The name of the column containing the images as PIL ImageFile in the dataset specified by `data`.

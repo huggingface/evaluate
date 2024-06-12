@@ -13,7 +13,6 @@ class TestEvaluationSuite(TestCase):
         self.dummy_model = DummyTextClassificationPipeline()
 
     def test_running_evaluation_suite(self):
-
         # Check that the evaluation suite successfully runs
         results = self.evaluation_suite.run(self.dummy_model)
 
@@ -25,7 +24,6 @@ class TestEvaluationSuite(TestCase):
         self.assertEqual(len(results), 2)
 
     def test_empty_suite(self):
-
         self.empty_suite = self.evaluation_suite
         self.empty_suite.suite = []
         self.assertRaises(ValueError, self.empty_suite.run, self.dummy_model)
