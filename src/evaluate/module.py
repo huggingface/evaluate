@@ -519,7 +519,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                     self._enforce_nested_string_type(self.selected_feature_format[key], column[0])
             batch = self.selected_feature_format.encode_batch(batch)
             self.writer.write_batch(batch)
-        except (pa.ArrowInvalid, TypeError):
+        except (pa.ArrowInvalid, TypeError) as e:
             if any(len(batch[c]) != len(next(iter(batch.values()))) for c in batch):
                 col0 = next(iter(batch))
                 bad_col = [c for c in batch if len(batch[c]) != len(batch[col0])][0]
@@ -543,6 +543,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                     f"Input predictions: {summarize_if_long_list(predictions)},\n"
                     f"Input references: {summarize_if_long_list(references)}"
                 )
+            error_msg += f"\nThe original pyarrow error: {e}"
             raise ValueError(error_msg) from None
 
     def add(self, *, prediction=None, reference=None, **kwargs):
@@ -576,7 +577,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             self._enforce_nested_string_type(self.selected_feature_format, example)
             example = self.selected_feature_format.encode_example(example)
             self.writer.write(example)
-        except (pa.ArrowInvalid, TypeError):
+        except (pa.ArrowInvalid, TypeError) as e:
             error_msg = (
                 f"Evaluation module inputs don't match the expected format.\n"
                 f"Expected format: {self.selected_feature_format},\n"
@@ -586,6 +587,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
                 for input_name in self.selected_feature_format
             )
             error_msg += error_msg_inputs
+            error_msg += f"\nThe original pyarrow error: {e}"
             raise ValueError(error_msg) from None
 
     def _infer_feature_from_batch(self, batch):
