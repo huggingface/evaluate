@@ -121,7 +121,6 @@ class Regard(evaluate.Measurement):
         if self.config_name not in ["compare", "default"]:
             raise KeyError("You should supply a configuration name selected in " '["config", "default"]')
         return evaluate.MeasurementInfo(
-            module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
