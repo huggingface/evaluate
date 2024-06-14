@@ -29,6 +29,7 @@ if PY_VERSION < version.parse("3.8"):
 else:
     import importlib.metadata as importlib_metadata
 
+RETURN_DICT = version.parse(evaluate.__version__) > version.parse("0.3.0")
 
 SENTENCE_DELIMITER = ""
 
@@ -102,7 +103,7 @@ Args:
     predictions: list of transcribtions to score.
     concatenate_texts: Whether or not to concatenate sentences before evaluation, set to True for more accurate result.
 Returns:
-    (float): the character error rate
+    (dict): the character error rate (before evaluate>0.3.0 returns just a float value)
 
 Examples:
 
@@ -110,7 +111,7 @@ Examples:
     >>> references = ["this is the reference", "there is another one"]
     >>> cer = evaluate.load("cer")
     >>> cer_score = cer.compute(predictions=predictions, references=references)
-    >>> print(cer_score)
+    >>> print(cer_score["cer"])
     0.34146341463414637
 """
 
@@ -137,12 +138,17 @@ class CER(evaluate.Metric):
 
     def _compute(self, predictions, references, concatenate_texts=False):
         if concatenate_texts:
-            return jiwer.compute_measures(
+            cer = jiwer.compute_measures(
                 references,
                 predictions,
                 truth_transform=cer_transform,
                 hypothesis_transform=cer_transform,
             )["wer"]
+
+            if RETURN_DICT:
+                return {"cer": cer}
+            else:
+                return cer
 
         incorrect = 0
         total = 0
@@ -155,5 +161,7 @@ class CER(evaluate.Metric):
             )
             incorrect += measures["substitutions"] + measures["deletions"] + measures["insertions"]
             total += measures["substitutions"] + measures["deletions"] + measures["hits"]
-
-        return incorrect / total
+        if RETURN_DICT:
+            return {"cer": incorrect / total}
+        else:
+            return incorrect / total
