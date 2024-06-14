@@ -80,6 +80,14 @@ Returns:
             'precision': precision,
             'recall': recall,
             'f1': F1 score, also known as balanced F-score or F-measure,
+        Macro average:
+            'macro_precision': macro precision,
+            'macro_recall': macro recall,
+            'macro_f1': macro F1 score
+        Weighted average:
+            'weighted_precision': weighted precision,
+            'weighted_recall': weighted recall,
+            'weighted_f1': weighted F1 score
         Per type:
             'precision': precision,
             'recall': recall,
@@ -143,8 +151,8 @@ class Seqeval(evaluate.Metric):
             sample_weight=sample_weight,
             zero_division=zero_division,
         )
-        report.pop("macro avg")
-        report.pop("weighted avg")
+        macro_score = report.pop("macro avg")
+        weighted_score = report.pop("weighted avg")
         overall_score = report.pop("micro avg")
 
         scores = {
@@ -160,5 +168,13 @@ class Seqeval(evaluate.Metric):
         scores["overall_recall"] = overall_score["recall"]
         scores["overall_f1"] = overall_score["f1-score"]
         scores["overall_accuracy"] = accuracy_score(y_true=references, y_pred=predictions)
+
+        scores["macro_precision"] = macro_score["precision"]
+        scores["macro_recall"] = macro_score["recall"]
+        scores["macro_f1"] = macro_score["f1-score"]
+
+        scores["weighted_precision"] = weighted_score["precision"]
+        scores["weighted_recall"] = weighted_score["recall"]
+        scores["weighted_f1"] = weighted_score["f1-score"]
 
         return scores
