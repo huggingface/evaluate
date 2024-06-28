@@ -770,4 +770,3 @@ class TestEvaluationcombined_evaluation(TestCase):
 def test_combine_evaluations_in_different_forms(evaluations):
     combined_evaluation = combine(evaluations)
     assert isinstance(combined_evaluation, CombinedEvaluations)
-
