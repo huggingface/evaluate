@@ -8,7 +8,7 @@ from unittest import TestCase, mock
 import pytest
 from datasets.features import Features, Sequence, Value
 
-from evaluate.module import EvaluationModule, EvaluationModuleInfo, combine
+from evaluate.module import CombinedEvaluations, EvaluationModule, EvaluationModuleInfo, combine
 
 from .utils import require_tf, require_torch
 
@@ -757,3 +757,17 @@ class TestEvaluationcombined_evaluation(TestCase):
         self.assertDictEqual(
             expected_result, combined_evaluation.compute(predictions=predictions, references=references, pos_label=0)
         )
+
+
+@pytest.mark.parametrize(
+    "evaluations,",
+    (
+        [DummyMetric(), DummyMetric()],
+        (DummyMetric(), DummyMetric()),
+        {"metric1": DummyMetric(), "metric2": DummyMetric()},
+    ),
+)
+def test_combine_evaluations_in_different_forms(evaluations):
+    combined_evaluation = combine(evaluations)
+    assert isinstance(combined_evaluation, CombinedEvaluations)
+
