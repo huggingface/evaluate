@@ -279,7 +279,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             cwd=os.path.join(self.dir_path, "transformers"),
         )
 
-        os.makedirs(os.path.join(self.dir_path, 'tokenclassification_conll2003_transformers'), exist_ok=True)
+        os.makedirs(os.path.join(self.dir_path, "tokenclassification_conll2003_transformers"), exist_ok=True)
         subprocess.run(
             f"python examples/pytorch/token-classification/run_ner.py"
             f" --model_name_or_path {model_name}"
