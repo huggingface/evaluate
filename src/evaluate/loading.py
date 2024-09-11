@@ -259,7 +259,9 @@ def _download_additional_modules(
         try:
             lib = importlib.import_module(library_import_name)  # noqa F841
         except ImportError:
-            library_import_name = "scikit-learn" if library_import_name == "sklearn" else library_import_name
+            if library_import_name == "sklearn":
+                library_import_name = "scikit-learn" 
+                library_import_path = "scikit-learn"
             needs_to_be_installed.add((library_import_name, library_import_path))
     if needs_to_be_installed:
         raise ImportError(
