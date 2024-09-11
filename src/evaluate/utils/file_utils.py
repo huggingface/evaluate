@@ -183,7 +183,6 @@ def cached_path(
             use_etag=download_config.use_etag,
             max_retries=download_config.max_retries,
             token=download_config.token,
-            ignore_url_params=download_config.ignore_url_params,
             download_desc=download_config.download_desc,
         )
     elif os.path.exists(url_or_filename):
@@ -409,7 +408,6 @@ def get_from_cache(
     use_etag=True,
     max_retries=0,
     token=None,
-    ignore_url_params=False,
     download_desc=None,
 ) -> str:
     """
@@ -432,12 +430,6 @@ def get_from_cache(
 
     os.makedirs(cache_dir, exist_ok=True)
 
-    if ignore_url_params:
-        # strip all query parameters and #fragments from the URL
-        cached_url = urljoin(url, urlparse(url).path)
-    else:
-        cached_url = url  # additional parameters may be added to the given URL
-
     connected = False
     response = None
     cookies = None
@@ -446,7 +438,7 @@ def get_from_cache(
 
     # Try a first time to file the file on the local file system without eTag (None)
     # if we don't ask for 'force_download' then we spare a request
-    filename = hash_url_to_filename(cached_url, etag=None)
+    filename = hash_url_to_filename(url, etag=None)
     cache_path = os.path.join(cache_dir, filename)
 
     if os.path.exists(cache_path) and not force_download and not use_etag:
@@ -526,7 +518,7 @@ def get_from_cache(
             raise ConnectionError(f"Couldn't reach {url}")
 
     # Try a second time
-    filename = hash_url_to_filename(cached_url, etag)
+    filename = hash_url_to_filename(url, etag)
     cache_path = os.path.join(cache_dir, filename)
 
     if os.path.exists(cache_path) and not force_download:
