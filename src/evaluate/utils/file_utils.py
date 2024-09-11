@@ -20,7 +20,7 @@ from functools import partial
 from hashlib import sha256
 from pathlib import Path
 from typing import List, Optional, Type, TypeVar, Union
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
 import requests
 from datasets import DownloadConfig
