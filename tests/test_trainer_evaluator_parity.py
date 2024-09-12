@@ -283,6 +283,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
             f"python examples/pytorch/token-classification/run_ner.py"
             f" --model_name_or_path {model_name}"
             f" --dataset_name conll2003"
+            f" --trust_remote_code"
             f" --do_eval"
             f" --output_dir {os.path.join(self.dir_path, 'tokenclassification_conll2003_transformers')}"
             f" --max_eval_samples {n_samples}",
