@@ -74,7 +74,7 @@ TESTS_REQUIRE = [
     "absl-py",
     "charcut>=1.1.1",  # for charcut_mt
     "cer>=1.2.0",  # for characTER
-    "nltk<3.9",  # for NIST and probably others; temporarily pin < 3.9 to avoid "Resource punkt_tab not found" (GH-622)
+    "nltk",  # for NIST and probably others
     "pytest",
     "pytest-datadir",
     "pytest-xdist",
