@@ -20,6 +20,8 @@ from nltk import word_tokenize
 import evaluate
 
 
+NLTK_VERSION = version.parse(importlib_metadata.version("nltk"))
+
 _DESCRIPTION = """
 Returns the average length (in terms of the number of words) of the input data.
 """
@@ -75,7 +77,10 @@ class WordLength(evaluate.Measurement):
     def _download_and_prepare(self, dl_manager):
         import nltk
 
-        nltk.download("punkt")
+        if NLTK_VERSION >= version.Version("3.9.0"):
+            nltk.download("punkt_tab")
+        else:
+            nltk.download("punkt")
 
     def _compute(self, data, tokenizer=word_tokenize):
         """Returns the average word length of the input data"""
