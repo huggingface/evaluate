@@ -79,6 +79,7 @@ TESTS_REQUIRE = [
     "pytest-datadir",
     "pytest-xdist",
     # optional dependencies
+    "numpy<2.0.0",  # tensorflow requires numpy < 2
     "tensorflow>=2.3,!=2.6.0,!=2.6.1, <=2.10",
     "torch",
     # metrics dependencies
