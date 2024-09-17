@@ -22,6 +22,12 @@
     </a>
 </p>
 
+
+
+> **Tip:** For more recent evaluation approaches, for example for evaluating LLMs, we recommend our newer and more actively maintained library [LightEval](https://github.com/huggingface/lighteval).
+
+
+
 🤗 Evaluate is a library that makes evaluating and comparing models and reporting their performance easier and more standardized. 
 
 It currently contains:
