@@ -28,8 +28,8 @@ _CITATION = """\
 """
 
 _DESCRIPTION = """
-Perplexity (PPL) can be used for evaluating to what extent a dataset is similar to the distribution of text that a given model was trained on.
-It is defined as the exponentiated average negative log-likelihood of a sequence, calculated with exponent base `e`.
+Perplexity (PPL) can be used to evaluate the extent to which a dataset is similar to the distribution of text that a model was trained on.
+It is defined as the exponentiated average negative log-likelihood of a sequence.
 
 For more information, see https://huggingface.co/docs/transformers/perplexity
 """
