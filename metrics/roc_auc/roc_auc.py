@@ -155,15 +155,17 @@ class ROCAUC(evaluate.Metric):
                     "references": datasets.Value("int32"),
                 }
                 if self.config_name == "multiclass"
-                else {
-                    "references": datasets.Sequence(datasets.Value("int32")),
-                    "prediction_scores": datasets.Sequence(datasets.Value("float")),
-                }
-                if self.config_name == "multilabel"
-                else {
-                    "references": datasets.Value("int32"),
-                    "prediction_scores": datasets.Value("float"),
-                }
+                else (
+                    {
+                        "references": datasets.Sequence(datasets.Value("int32")),
+                        "prediction_scores": datasets.Sequence(datasets.Value("float")),
+                    }
+                    if self.config_name == "multilabel"
+                    else {
+                        "references": datasets.Value("int32"),
+                        "prediction_scores": datasets.Value("float"),
+                    }
+                )
             ),
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html"],
         )
