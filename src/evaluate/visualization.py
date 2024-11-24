@@ -142,8 +142,8 @@ def radar_plot(data, model_names, invert_range=[], config=None, fig=None):
     Args:
         data (`List[dict]`): the results (list of metric + value pairs).
             E.g. data = [{"accuracy": 0.9, "precision":0.8},{"accuracy": 0.7, "precision":0.6}]
-        names (`List[dict]`): model names.
-            E.g. names = ["model1", "model 2", ...]
+        model_names (`List[str]`): model names.
+            E.g. model_names = ["model1", "model 2", ...]
         invert_range (`List[dict]`, optional): the metrics to invert (in cases when smaller is better, e.g. speed)
             E.g. invert_range=["latency_in_seconds"]
         config (`dict`, optional) : a specification of the formatting configurations, namely:
