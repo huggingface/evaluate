@@ -54,11 +54,11 @@ At minimum, this metric requires predictions and references as inputs.
 - **references** (`list` of `int`): Ground truth labels.
 - **labels** (`list` of `int`): List of labels to index the matrix. This may be used to reorder or select a subset of labels.
 - **sample_weight** (`list` of `float`): Sample weights.
-- **normalize** (`str`): Normalizes confusion matrix over the true (rows), predicted (columns) conditions or all the population. 
+- **normalize** (`str`): Normalizes confusion matrix over the true (rows), predicted (columns) conditions or all the population. (Valid values are `'pred', 'all', 'true'` or `None`).
 
 
 ### Output Values
-- **confusion_matrix**(`list` of `list` of `str`): Confusion matrix. Minimum possible value is 0. Maximum possible value is 1.0, or the number of examples input, if `normalize` is set to `True`.
+- **confusion_matrix** (`list` of `list` of `str`): Confusion matrix. Minimum possible value is 0. Maximum possible value is 1.0, or the number of examples in the input, if `normalize` is set to `None` (default value).
 
 Output Example(s):
 ```python
