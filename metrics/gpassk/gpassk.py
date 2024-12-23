@@ -93,8 +93,10 @@ class GPassK(evaluate.Metric):
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features({
-                'predictions': datasets.Value('int64'),
-                'references': datasets.Value('int64'),
+                'predictions': datasets.Sequence(datasets.Value('string')),
+                'references': datasets.Value('string'),
+                'k': datasets.Sequence(datasets.Value('int32')),
+                'thresholds': datasets.Sequence(datasets.Value('float'))
             }),
             homepage="https://open-compass.github.io/GPassK/",
             codebase_urls=["https://github.com/open-compass/GPassK"],
