@@ -123,7 +123,6 @@ class Mase(evaluate.Metric):
         sample_weight=None,
         multioutput="uniform_average",
     ):
-
         y_pred_naive = training[:-periodicity]
         mae_naive = mean_absolute_error(training[periodicity:], y_pred_naive, multioutput=multioutput)
 
