@@ -95,9 +95,11 @@ class DummyQuestionAnsweringPipeline:
     def __call__(self, question, context, **kwargs):
         if self.v2:
             return [
-                {"score": 0.95, "start": 31, "end": 39, "answer": "Felix"}
-                if i % 2 == 0
-                else {"score": 0.95, "start": 0, "end": 0, "answer": ""}
+                (
+                    {"score": 0.95, "start": 31, "end": 39, "answer": "Felix"}
+                    if i % 2 == 0
+                    else {"score": 0.95, "start": 0, "end": 0, "answer": ""}
+                )
                 for i in range(len(question))
             ]
         else:

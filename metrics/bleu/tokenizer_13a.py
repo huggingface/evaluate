@@ -61,7 +61,7 @@ class TokenizerRegexp(BaseTokenizer):
         :param line: a segment to tokenize
         :return: the tokenized line
         """
-        for (_re, repl) in self._re:
+        for _re, repl in self._re:
             line = _re.sub(repl, line)
 
         # no leading or trailing spaces, single space within words
