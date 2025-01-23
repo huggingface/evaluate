@@ -229,7 +229,7 @@ def SARIsent(ssent, csent, rsents):
 
 def normalize(sentence, lowercase: bool = True, tokenizer: str = "13a", return_str: bool = True):
 
-    # Normalization is requried for the ASSET dataset (one of the primary
+    # Normalization is required for the ASSET dataset (one of the primary
     # datasets in sentence simplification) to allow using space
     # to split the sentence. Even though Wiki-Auto and TURK datasets,
     # do not require normalization, we do it for consistency.
