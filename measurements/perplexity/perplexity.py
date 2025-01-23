@@ -102,7 +102,7 @@ class Perplexity(evaluate.Measurement):
         )
 
     def _compute(
-        self, data, model_id, batch_size: int = 16, add_start_token: bool = True, device=None, max_length=None
+        self, data, model_id, batch_size: int = 16, add_start_token: bool = True, device=None, max_length=None, trust_remote_code=None
     ):
 
         if device is not None:
@@ -112,10 +112,10 @@ class Perplexity(evaluate.Measurement):
         else:
             device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        model = AutoModelForCausalLM.from_pretrained(model_id)
+        model = AutoModelForCausalLM.from_pretrained(model_id, trust_remote_code=trust_remote_code)
         model = model.to(device)
 
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=trust_remote_code)
 
         # if batch_size > 1 (which generally leads to padding being required), and
         # if there is not an already assigned pad_token, assign an existing
