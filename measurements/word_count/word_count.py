@@ -48,8 +48,6 @@ class WordCount(evaluate.Measurement):
 
     def _info(self):
         return evaluate.MeasurementInfo(
-            # This is the description that will appear on the modules page.
-            module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
