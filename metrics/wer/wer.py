@@ -14,7 +14,7 @@
 """ Word Error Ratio (WER) metric. """
 
 import datasets
-from jiwer import compute_measures
+from jiwer import process_words
 
 import evaluate
 
@@ -95,12 +95,12 @@ class WER(evaluate.Metric):
 
     def _compute(self, predictions=None, references=None, concatenate_texts=False):
         if concatenate_texts:
-            return compute_measures(references, predictions)["wer"]
+            return process_words(references, predictions).wer
         else:
             incorrect = 0
             total = 0
             for prediction, reference in zip(predictions, references):
-                measures = compute_measures(reference, prediction)
-                incorrect += measures["substitutions"] + measures["deletions"] + measures["insertions"]
-                total += measures["substitutions"] + measures["deletions"] + measures["hits"]
+                out = process_words(reference, prediction)
+                incorrect += out.substitutions + out.deletions + out.insertions
+                total += out.substitutions + out.deletions + out.hits
             return incorrect / total
