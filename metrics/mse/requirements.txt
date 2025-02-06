@@ -1,2 +1,2 @@
 git+https://github.com/huggingface/evaluate@{COMMIT_PLACEHOLDER}
-scikit-learn
+scikit-learn>=1.5.2
