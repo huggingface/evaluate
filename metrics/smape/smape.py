@@ -147,7 +147,6 @@ class Smape(evaluate.Metric):
             }
 
     def _compute(self, predictions, references, sample_weight=None, multioutput="uniform_average"):
-
         smape_score = symmetric_mean_absolute_percentage_error(
             references,
             predictions,

@@ -516,7 +516,6 @@ class TestMetric(TestCase):
             metric.compute(predictions=["a"], references=["a"])
 
     def test_string_casting_tested_once(self):
-
         self.counter = 0
 
         def checked_fct(fct):  # wrapper function that increases a counter on each call
