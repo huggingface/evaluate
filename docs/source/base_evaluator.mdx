@@ -275,7 +275,7 @@ Let's have a look at how can evaluate image classification models on large datas
 The evaluator can be used on large datasets! Below, an example shows how to use it on ImageNet-1k for image classification. Beware that this example will require to download ~150 GB.
 
 ```python
-data = load_dataset("imagenet-1k", split="validation", use_auth_token=True)
+data = load_dataset("imagenet-1k", split="validation", token=True)
 
 pipe = pipeline(
     task="image-classification",

@@ -120,7 +120,9 @@ class Meteor(evaluate.Metric):
         import nltk
 
         nltk.download("wordnet")
-        if NLTK_VERSION >= version.Version("3.6.5"):
+        if NLTK_VERSION >= version.Version("3.9.0"):
+            nltk.download("punkt_tab")
+        elif NLTK_VERSION >= version.Version("3.6.5"):
             nltk.download("punkt")
         if NLTK_VERSION >= version.Version("3.6.6"):
             nltk.download("omw-1.4")

@@ -13,3 +13,5 @@ jobs:
     with:
       commit_sha: ${{ github.sha }}
       package: evaluate
+    secrets:
+      hf_token: ${{ secrets.HF_DOC_BUILD_PUSH }}

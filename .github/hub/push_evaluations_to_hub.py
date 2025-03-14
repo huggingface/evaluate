@@ -75,7 +75,7 @@ def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
         # make sure we don't accidentally expose token
         raise OSError(f"Could not clone from '{clean_repo_url}'")
 
-    repo = Repository(local_dir=repo_path / module_name, use_auth_token=token)
+    repo = Repository(local_dir=repo_path / module_name, token=token)
     
     copy_recursive(module_path, repo_path / module_name)
     update_evaluate_dependency(repo_path / module_name / "requirements.txt", commit_hash)

@@ -20,7 +20,7 @@ from functools import partial
 from hashlib import sha256
 from pathlib import Path
 from typing import List, Optional, Type, TypeVar, Union
-from urllib.parse import urljoin, urlparse
+from urllib.parse import urlparse
 
 import requests
 from datasets import DownloadConfig
@@ -182,8 +182,7 @@ def cached_path(
             local_files_only=download_config.local_files_only,
             use_etag=download_config.use_etag,
             max_retries=download_config.max_retries,
-            use_auth_token=download_config.use_auth_token,
-            ignore_url_params=download_config.ignore_url_params,
+            token=download_config.token,
             download_desc=download_config.download_desc,
         )
     elif os.path.exists(url_or_filename):
@@ -223,14 +222,15 @@ def get_datasets_user_agent(user_agent: Optional[Union[str, dict]] = None) -> st
     return ua
 
 
-def get_authentication_headers_for_url(url: str, use_auth_token: Optional[Union[str, bool]] = None) -> dict:
+def get_authentication_headers_for_url(url: str, token: Optional[Union[str, bool]] = None) -> dict:
     """Handle the HF authentication"""
     headers = {}
     if url.startswith(config.HF_ENDPOINT):
-        token = None
-        if isinstance(use_auth_token, str):
-            token = use_auth_token
-        elif bool(use_auth_token):
+        if token is False:
+            token = None
+        elif isinstance(token, str):
+            token = token
+        else:
             from huggingface_hub import hf_api
 
             token = hf_api.HfFolder.get_token()
@@ -388,8 +388,8 @@ def http_head(
     return response
 
 
-def request_etag(url: str, use_auth_token: Optional[Union[str, bool]] = None) -> Optional[str]:
-    headers = get_authentication_headers_for_url(url, use_auth_token=use_auth_token)
+def request_etag(url: str, token: Optional[Union[str, bool]] = None) -> Optional[str]:
+    headers = get_authentication_headers_for_url(url, token=token)
     response = http_head(url, headers=headers, max_retries=3)
     response.raise_for_status()
     etag = response.headers.get("ETag") if response.ok else None
@@ -407,8 +407,7 @@ def get_from_cache(
     local_files_only=False,
     use_etag=True,
     max_retries=0,
-    use_auth_token=None,
-    ignore_url_params=False,
+    token=None,
     download_desc=None,
 ) -> str:
     """
@@ -431,12 +430,6 @@ def get_from_cache(
 
     os.makedirs(cache_dir, exist_ok=True)
 
-    if ignore_url_params:
-        # strip all query parameters and #fragments from the URL
-        cached_url = urljoin(url, urlparse(url).path)
-    else:
-        cached_url = url  # additional parameters may be added to the given URL
-
     connected = False
     response = None
     cookies = None
@@ -445,14 +438,14 @@ def get_from_cache(
 
     # Try a first time to file the file on the local file system without eTag (None)
     # if we don't ask for 'force_download' then we spare a request
-    filename = hash_url_to_filename(cached_url, etag=None)
+    filename = hash_url_to_filename(url, etag=None)
     cache_path = os.path.join(cache_dir, filename)
 
     if os.path.exists(cache_path) and not force_download and not use_etag:
         return cache_path
 
     # Prepare headers for authentication
-    headers = get_authentication_headers_for_url(url, use_auth_token=use_auth_token)
+    headers = get_authentication_headers_for_url(url, token=token)
     if user_agent is not None:
         headers["user-agent"] = user_agent
 
@@ -495,9 +488,9 @@ def get_from_cache(
             ):
                 connected = True
                 logger.info(f"Couldn't get ETag version for url {url}")
-            elif response.status_code == 401 and config.HF_ENDPOINT in url and use_auth_token is None:
+            elif response.status_code == 401 and config.HF_ENDPOINT in url and token is None:
                 raise ConnectionError(
-                    f"Unauthorized for URL {url}. Please use the parameter ``use_auth_token=True`` after logging in with ``huggingface-cli login``"
+                    f"Unauthorized for URL {url}. Please use the parameter ``token=True`` after logging in with ``huggingface-cli login``"
                 )
         except (OSError, requests.exceptions.Timeout) as e:
             # not connected
@@ -525,7 +518,7 @@ def get_from_cache(
             raise ConnectionError(f"Couldn't reach {url}")
 
     # Try a second time
-    filename = hash_url_to_filename(cached_url, etag)
+    filename = hash_url_to_filename(url, etag)
     cache_path = os.path.join(cache_dir, filename)
 
     if os.path.exists(cache_path) and not force_download:

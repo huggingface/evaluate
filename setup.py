@@ -79,6 +79,7 @@ TESTS_REQUIRE = [
     "pytest-datadir",
     "pytest-xdist",
     # optional dependencies
+    "numpy<2.0.0",  # tensorflow requires numpy < 2
     "tensorflow>=2.3,!=2.6.0,!=2.6.1, <=2.10",
     "torch",
     # metrics dependencies
@@ -125,7 +126,7 @@ EXTRAS_REQUIRE = {
 
 setup(
     name="evaluate",
-    version="0.4.2.dev0",  # expected format is one of x.y.z.dev0, or x.y.z.rc1 or x.y.z (no to dashes, yes to dots)
+    version="0.4.4.dev0",  # expected format is one of x.y.z.dev0, or x.y.z.rc1 or x.y.z (no to dashes, yes to dots)
     description="HuggingFace community-driven open-source library of evaluation",
     long_description=open("README.md", encoding="utf-8").read(),
     long_description_content_type="text/markdown",

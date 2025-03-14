@@ -142,4 +142,4 @@ class Precision(evaluate.Metric):
             sample_weight=sample_weight,
             zero_division=zero_division,
         )
-        return {"precision": float(score) if score.size == 1 else score}
+        return {"precision": score if getattr(score, "size", 1) > 1 else float(score)}

@@ -127,4 +127,4 @@ class F1(evaluate.Metric):
         score = f1_score(
             references, predictions, labels=labels, pos_label=pos_label, average=average, sample_weight=sample_weight
         )
-        return {"f1": float(score) if score.size == 1 else score}
+        return {"f1": score if getattr(score, "size", 1) > 1 else float(score)}
