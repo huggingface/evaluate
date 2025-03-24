@@ -101,6 +101,7 @@ Args:
     references: list of references for each speech input.
     predictions: list of transcribtions to score.
     concatenate_texts: Whether or not to concatenate sentences before evaluation, set to True for more accurate result.
+    normalize: Whether to normalize the CER score. If set to True, the number of mistakes is divided by the sum of the number of edit operations (insertions + substitutions + deletions) and correct characters, which results in CER values that fall within the range of 0-100%. 
 Returns:
     (float): the character error rate
 
@@ -135,7 +136,7 @@ class CER(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references, concatenate_texts=False):
+    def _compute(self, predictions, references, concatenate_texts=False, normalize=False):
         if concatenate_texts:
             return jiwer.compute_measures(
                 references,
@@ -154,6 +155,9 @@ class CER(evaluate.Metric):
                 hypothesis_transform=cer_transform,
             )
             incorrect += measures["substitutions"] + measures["deletions"] + measures["insertions"]
-            total += measures["substitutions"] + measures["deletions"] + measures["hits"]
+            if normalize:
+                total += measures["substitutions"] + measures["deletions"] + measures["insertions"] + measures["hits"]
+            else:
+                total += measures["substitutions"] + measures["deletions"] + measures["hits"]
 
         return incorrect / total
