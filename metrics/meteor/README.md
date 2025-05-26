@@ -116,6 +116,9 @@ While the correlation between METEOR and human judgments was measured for Chines
 
 Furthermore, while the alignment and matching done in METEOR is based on unigrams, using multiple word entities (e.g. bigrams) could contribute to improving its accuracy -- this has been proposed in [more recent publications](https://www.cs.cmu.edu/~alavie/METEOR/pdf/meteor-naacl-2010.pdf) on the subject.
 
+Scores differ by up to **±10 points** across v1.0↔v1.5 and flag combinations (`-l`, `-norm`, `-vOut`). 
+Pin the Java package and document your flags. This uses the NLTK implementation (METEOR v1.0).
+[Lübbers, 2024](https://github.com/cluebbers/Reproducibility-METEOR-NLP)
 
 ## Citation
 
