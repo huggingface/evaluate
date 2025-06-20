@@ -91,13 +91,14 @@ _CONFIG_NAMES = ["fleurs-asr", "mls", "voxpopuli", "babel", "covost2", "fleurs-l
 SENTENCE_DELIMITER = ""
 
 try:
-    from jiwer import transforms as tr
+    import jiwer
 
     _jiwer_available = True
 except ImportError:
     _jiwer_available = False
 
 if _jiwer_available and version.parse(importlib_metadata.version("jiwer")) < version.parse("2.3.0"):
+    from jiwer import transforms as tr
 
     class SentencesToListOfCharacters(tr.AbstractTransform):
         def __init__(self, sentence_delimiter: str = " "):
@@ -117,7 +118,9 @@ if _jiwer_available and version.parse(importlib_metadata.version("jiwer")) < ver
     cer_transform = tr.Compose(
         [tr.RemoveMultipleSpaces(), tr.Strip(), SentencesToListOfCharacters(SENTENCE_DELIMITER)]
     )
-elif _jiwer_available:
+elif _jiwer_available and hasattr(jiwer, "compute_measures"):
+    from jiwer import transforms as tr
+
     cer_transform = tr.Compose(
         [
             tr.RemoveMultipleSpaces(),
@@ -187,35 +190,59 @@ def bleu(
 
 def wer_and_cer(preds, labels, concatenate_texts, config_name):
     try:
-        from jiwer import compute_measures
+        import jiwer
     except ImportError:
         raise ValueError(
             f"jiwer has to be installed in order to apply the wer metric for {config_name}."
             "You can install it via `pip install jiwer`."
         )
 
-    if concatenate_texts:
-        wer = compute_measures(labels, preds)["wer"]
+    if hasattr(jiwer, "compute_measures"):
+        if concatenate_texts:
+            wer = jiwer.compute_measures(labels, preds)["wer"]
 
-        cer = compute_measures(labels, preds, truth_transform=cer_transform, hypothesis_transform=cer_transform)["wer"]
-        return {"wer": wer, "cer": cer}
+            cer = jiwer.compute_measures(
+                labels, preds, truth_transform=cer_transform, hypothesis_transform=cer_transform
+            )["wer"]
+            return {"wer": wer, "cer": cer}
+        else:
+
+            def compute_score(preds, labels, score_type="wer"):
+                incorrect = 0
+                total = 0
+                for prediction, reference in zip(preds, labels):
+                    if score_type == "wer":
+                        measures = jiwer.compute_measures(reference, prediction)
+                    elif score_type == "cer":
+                        measures = jiwer.compute_measures(
+                            reference, prediction, truth_transform=cer_transform, hypothesis_transform=cer_transform
+                        )
+                    incorrect += measures["substitutions"] + measures["deletions"] + measures["insertions"]
+                    total += measures["substitutions"] + measures["deletions"] + measures["hits"]
+                return incorrect / total
+
+            return {"wer": compute_score(preds, labels, "wer"), "cer": compute_score(preds, labels, "cer")}
     else:
+        if concatenate_texts:
+            wer = jiwer.process_words(labels, preds).wer
 
-        def compute_score(preds, labels, score_type="wer"):
-            incorrect = 0
-            total = 0
-            for prediction, reference in zip(preds, labels):
-                if score_type == "wer":
-                    measures = compute_measures(reference, prediction)
-                elif score_type == "cer":
-                    measures = compute_measures(
-                        reference, prediction, truth_transform=cer_transform, hypothesis_transform=cer_transform
-                    )
-                incorrect += measures["substitutions"] + measures["deletions"] + measures["insertions"]
-                total += measures["substitutions"] + measures["deletions"] + measures["hits"]
-            return incorrect / total
+            cer = jiwer.process_characters(labels, preds).cer
+            return {"wer": wer, "cer": cer}
+        else:
 
-        return {"wer": compute_score(preds, labels, "wer"), "cer": compute_score(preds, labels, "cer")}
+            def compute_score(preds, labels, score_type="wer"):
+                incorrect = 0
+                total = 0
+                for prediction, reference in zip(preds, labels):
+                    if score_type == "wer":
+                        measures = jiwer.process_words(reference, prediction)
+                    elif score_type == "cer":
+                        measures = jiwer.process_characters(reference, prediction)
+                    incorrect += measures.substitutions + measures.deletions + measures.insertions
+                    total += measures.substitutions + measures.deletions + measures.hits
+                return incorrect / total
+
+            return {"wer": compute_score(preds, labels, "wer"), "cer": compute_score(preds, labels, "cer")}
 
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
