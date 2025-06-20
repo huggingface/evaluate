@@ -32,22 +32,26 @@ else:
 if hasattr(jiwer, "compute_measures"):
     SENTENCE_DELIMITER = ""
     if version.parse(importlib_metadata.version("jiwer")) < version.parse("2.3.0"):
-    
+
         class SentencesToListOfCharacters(tr.AbstractTransform):
             def __init__(self, sentence_delimiter: str = " "):
                 self.sentence_delimiter = sentence_delimiter
-    
+
             def process_string(self, s: str):
                 return list(s)
-    
+
             def process_list(self, inp: List[str]):
                 chars = []
                 for sent_idx, sentence in enumerate(inp):
                     chars.extend(self.process_string(sentence))
-                    if self.sentence_delimiter is not None and self.sentence_delimiter != "" and sent_idx < len(inp) - 1:
+                    if (
+                        self.sentence_delimiter is not None
+                        and self.sentence_delimiter != ""
+                        and sent_idx < len(inp) - 1
+                    ):
                         chars.append(self.sentence_delimiter)
                 return chars
-    
+
         cer_transform = tr.Compose(
             [tr.RemoveMultipleSpaces(), tr.Strip(), SentencesToListOfCharacters(SENTENCE_DELIMITER)]
         )
@@ -142,7 +146,7 @@ class CER(evaluate.Metric):
                     truth_transform=cer_transform,
                     hypothesis_transform=cer_transform,
                 )["wer"]
-    
+
             incorrect = 0
             total = 0
             for prediction, reference in zip(predictions, references):
@@ -154,7 +158,7 @@ class CER(evaluate.Metric):
                 )
                 incorrect += measures["substitutions"] + measures["deletions"] + measures["insertions"]
                 total += measures["substitutions"] + measures["deletions"] + measures["hits"]
-    
+
             return incorrect / total
         else:
             if concatenate_texts:
@@ -162,7 +166,7 @@ class CER(evaluate.Metric):
                     references,
                     predictions,
                 ).cer
-    
+
             incorrect = 0
             total = 0
             for prediction, reference in zip(predictions, references):
@@ -172,5 +176,5 @@ class CER(evaluate.Metric):
                 )
                 incorrect += measures.substitutions + measures.deletions + measures.insertions
                 total += measures.substitutions + measures.deletions + measures.hits
-    
+
             return incorrect / total
