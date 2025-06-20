@@ -65,11 +65,10 @@ def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
     org = f"evaluate-{type}"
     
     if not repo_exists(org + "/" + module_name, repo_type="space", token=token):
-        repo_url = create_repo(org + "/" + module_name, repo_type="space", space_sdk="gradio", exist_ok=True, token=token)    
+        create_repo(org + "/" + module_name, repo_type="space", space_sdk="gradio", exist_ok=True, token=token)    
     repo_path = Path(tempfile.mkdtemp())
-    
-    scheme = urlparse(repo_url).scheme
-    repo_url = repo_url.replace(f"{scheme}://", f"{scheme}://user:{token}@")
+
+    repo_url = f"https://user:{token}@huggingface.co/spaces/" + org + "/" + module_name
     clean_repo_url = re.sub(r"(https?)://.*@", r"\1://", repo_url)
     
     try:
