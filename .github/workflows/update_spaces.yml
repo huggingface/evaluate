@@ -5,6 +5,9 @@ on:
     branches:
       - main
 
+env:
+  CI_HEADERS: ${{ secrets.CI_HEADERS }}
+
 jobs:
   update-hub-repositories:
     runs-on: ubuntu-latest

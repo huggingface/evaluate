@@ -8,12 +8,22 @@ import logging
 import re
 from urllib.parse import urlparse
 
+import huggingface_hub
+from huggingface_hub.utils._headers import _http_user_agent
+
 logger = logging.getLogger(__name__)
 
 GIT_UP_TO_DATE = "On branch main\nYour branch is up to date with 'origin/main'.\
 \n\nnothing to commit, working tree clean\n"
 
 COMMIT_PLACEHOLDER = "{COMMIT_PLACEHOLDER}"
+
+def _http_ci_user_agent(*args, **kwargs):
+    ua = _http_user_agent(*args, **kwargs)
+    return ua + os.environ.get("CI_HEADERS", "")
+
+huggingface_hub.utils._headers._http_user_agent = _http_ci_user_agent
+
 
 def get_git_tag(lib_path, commit_hash):
     # check if commit has a tag, see: https://stackoverflow.com/questions/1474115/how-to-find-the-tag-associated-with-a-given-git-commit
