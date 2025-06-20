@@ -15,14 +15,14 @@ logger = logging.getLogger(__name__)
 
 GIT_UP_TO_DATE = "On branch main\nYour branch is up to date with 'origin/main'.\
 \n\nnothing to commit, working tree clean\n"
+GIT_USER = os.getenv("GIT_USER", None)
+GIT_EMAIL = os.getenv("GIT_EMAIL", None)
 
 COMMIT_PLACEHOLDER = "{COMMIT_PLACEHOLDER}"
 
 def _http_ci_user_agent(*args, **kwargs):
     ua = _http_user_agent(*args, **kwargs)
     return ua + os.environ.get("CI_HEADERS", "")
-
-huggingface_hub.utils._headers._http_user_agent = _http_ci_user_agent
 
 
 def get_git_tag(lib_path, commit_hash):
@@ -85,7 +85,7 @@ def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
         # make sure we don't accidentally expose token
         raise OSError(f"Could not clone from '{clean_repo_url}'")
 
-    repo = Repository(local_dir=repo_path / module_name, token=token)
+    repo = Repository(local_dir=repo_path / module_name, token=token, git_user=GIT_USER, git_email=GIT_EMAIL)
     
     copy_recursive(module_path, repo_path / module_name)
     update_evaluate_dependency(repo_path / module_name / "requirements.txt", commit_hash)
@@ -108,6 +108,7 @@ def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
 
 
 if __name__ == "__main__":
+    huggingface_hub.utils._headers._http_user_agent = _http_ci_user_agent
     evaluation_paths = ["metrics", "comparisons", "measurements"]
     evaluation_types = ["metric", "comparison", "measurement"]
 
