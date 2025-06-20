@@ -1,5 +1,5 @@
 from pathlib import Path
-from huggingface_hub import create_repo, Repository
+from huggingface_hub import create_repo, repo_exists, Repository
 import tempfile
 import subprocess
 import os
@@ -64,7 +64,8 @@ def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
     module_name = module_path.stem
     org = f"evaluate-{type}"
     
-    repo_url = create_repo(org + "/" + module_name, repo_type="space", space_sdk="gradio", exist_ok=True, token=token)    
+    if not repo_exists(org + "/" + module_name, repo_type="space", token=token):
+        repo_url = create_repo(org + "/" + module_name, repo_type="space", space_sdk="gradio", exist_ok=True, token=token)    
     repo_path = Path(tempfile.mkdtemp())
     
     scheme = urlparse(repo_url).scheme
