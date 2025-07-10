@@ -462,7 +462,7 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         if self.process_id == 0:
             self.data.set_format(type=self.info.format)
 
-            inputs = {input_name: self.data[input_name] for input_name in self._feature_names()}
+            inputs = {input_name: self.data[input_name][:] for input_name in self._feature_names()}
             with temp_seed(self.seed):
                 output = self._compute(**inputs, **compute_kwargs)
 
