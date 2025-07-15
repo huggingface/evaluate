@@ -79,7 +79,6 @@ CHECKPOINT_URLS = {
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class BLEURT(evaluate.Metric):
     def _info(self):
-
         return evaluate.MetricInfo(
             description=_DESCRIPTION,
             citation=_CITATION,
@@ -96,7 +95,6 @@ class BLEURT(evaluate.Metric):
         )
 
     def _download_and_prepare(self, dl_manager):
-
         # check that config name specifies a valid BLEURT model
         if self.config_name == "default":
             logger.warning(

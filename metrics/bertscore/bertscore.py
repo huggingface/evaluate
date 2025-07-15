@@ -143,7 +143,6 @@ class BERTScore(evaluate.Metric):
         baseline_path=None,
         use_fast_tokenizer=False,
     ):
-
         if isinstance(references[0], str):
             references = [[ref] for ref in references]
 
