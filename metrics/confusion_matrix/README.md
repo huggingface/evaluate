@@ -58,14 +58,12 @@ At minimum, this metric requires predictions and references as inputs.
 
 
 ### Output Values
-- **confusion_matrix**(`list` of `list` of `str`): Confusion matrix. Minimum possible value is 0. Maximum possible value is 1.0, or the number of examples input, if `normalize` is set to `True`.
+- **confusion_matrix**(`list` of `list` of `str`): Confusion matrix. In a single-label scenario, the i-th row and j-th column entry indicates the number of samples with true label being i-th class and predicted label being j-th class. In a multilabel scenario, each element in the confusion matrix represents the number of samples that have been assigned a particular combination of labels. For example, the element at the i-th row and j-th column would represent the number of samples that have been correctly assigned the i-th label and incorrectly assigned the j-th label. Minimum possible value is 0. Maximum possible value is 1.0, or the number of examples input, if `normalize` is set to `True`.
 
 Output Example(s):
 ```python
-{'confusion_matrix': [[2, 0, 0], [0, 1, 1], [1, 1, 1]]}
-```
-
-This metric outputs a dictionary, containing the confusion matrix.
+{'confusion_matrix': [[2, 0, 0], [0, 1, 1], [1, 1, 1]]}  # Single-label scenario
+{'confusion_matrix': [[[1, 0], [0, 1]], [[0, 1], [1, 0]], [[1, 0], [0, 1]]]}  # Multilabel scenario
 
 
 ### Examples
@@ -78,6 +76,16 @@ Example 1 - A simple example
 >>> print(results)
 {'confusion_matrix': [[2, 0, 0], [0, 1, 1], [1, 1, 1]]}
 ```
+
+Example 2 - Multilabel scenario with binary labels
+
+```python
+>>> confusion_metric = evaluate.load("confusion_matrix", config_name="multilabel")
+>>> results = confusion_metric.compute(references=[[0, 1], [1, 0], [0, 0], [0, 1], [1, 0], [0, 0]], predictions=[[0, 1], [1, 0], [1, 0], [0, 0], [1, 0], [0, 1]])
+>>> print(results)
+{'confusion_matrix': [[[3, 1], [0, 2]], [[3, 1], [1, 1]]]}
+'''
+
 
 ## Citation(s)
 ```bibtex
