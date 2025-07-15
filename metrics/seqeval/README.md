@@ -72,11 +72,11 @@ Overall:
 
 `accuracy`: the average [accuracy](https://huggingface.co/metrics/accuracy), on a scale between 0.0 and 1.0.
     
-`precision`: the average [precision](https://huggingface.co/metrics/precision), on a scale between 0.0 and 1.0.
+`precision`: the micro average [precision](https://huggingface.co/metrics/precision), on a scale between 0.0 and 1.0.
     
-`recall`: the average [recall](https://huggingface.co/metrics/recall), on a scale between 0.0 and 1.0.
+`recall`: the micro average [recall](https://huggingface.co/metrics/recall), on a scale between 0.0 and 1.0.
 
-`f1`: the average [F1 score](https://huggingface.co/metrics/f1), which is the harmonic mean of the precision and recall. It also has a scale of 0.0 to 1.0.
+`f1`: the micro average [F1 score](https://huggingface.co/metrics/f1), which is the harmonic mean of the precision and recall. It also has a scale of 0.0 to 1.0.
 
 Per type (e.g. `MISC`, `PER`, `LOC`,...):
 
