@@ -12,6 +12,7 @@ import pytest
 from datasets import config
 from datasets.arrow_dataset import Dataset
 from datasets.features import ClassLabel, Features, Sequence, Value
+from huggingface_hub.utils._headers import _http_user_agent
 
 
 @pytest.fixture(autouse=True)
@@ -28,6 +29,21 @@ def set_test_cache_config(tmp_path_factory, monkeypatch):
     monkeypatch.setattr("evaluate.config.DOWNLOADED_EVALUATE_PATH", str(test_DOWNLOADED_EVALUATE_PATH))
     test_EXTRACTED_EVALUATE_PATH = test_hf_evaluate_cache / "downloads" / "extracted"
     monkeypatch.setattr("evaluate.config.EXTRACTED_EVALUATE_PATH", str(test_EXTRACTED_EVALUATE_PATH))
+
+
+def _http_ci_user_agent(*args, **kwargs):
+    ua = _http_user_agent(*args, **kwargs)
+    return ua + os.environ.get("CI_HEADERS", "")
+
+
+@pytest.fixture(autouse=True)
+def set_hf_ci_headers(monkeypatch):
+    old_environ = dict(os.environ)
+    os.environ["TRANSFORMERS_IS_CI"] = "1"
+    monkeypatch.setattr("huggingface_hub.utils._headers._http_user_agent", _http_ci_user_agent)
+    yield
+    os.environ.clear()
+    os.environ.update(old_environ)
 
 
 @pytest.fixture(autouse=True, scope="session")

@@ -11,6 +11,7 @@ on:
 
 env:
   HF_ALLOW_CODE_EVAL: 1
+  CI_HEADERS: ${{ secrets.CI_HEADERS }}
 
 jobs:
 
