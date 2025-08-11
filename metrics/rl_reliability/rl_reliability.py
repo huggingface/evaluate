@@ -73,7 +73,7 @@ Examples:
     >>> import numpy as np
     >>> rl_reliability = evaluate.load("rl_reliability", "online")
     >>> results = rl_reliability.compute(
-    ...     timesteps=[np.linspace(0, 2000000, 1000)],
+    ...     timesteps=[np.linspace(0, 2000000, 1000, dtype=np.int64())],
     ...     rewards=[np.linspace(0, 100, 1000)]
     ...     )
     >>> print(results["LowerCVaROnRaw"].round(4))

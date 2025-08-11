@@ -59,7 +59,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         ) as f:
             transformers_results = json.load(f)
 
-        eval_dataset = load_dataset("glue", "sst2", split="validation[:80]")
+        eval_dataset = load_dataset("nyu-mll/glue", "sst2", split="validation[:80]")
 
         pipe = pipeline(task="text-classification", model=model_name, tokenizer=model_name)
 
@@ -104,7 +104,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         ) as f:
             transformers_results = json.load(f)
 
-        eval_dataset = load_dataset("glue", "mnli", split=f"validation_matched[:{max_eval_samples}]")
+        eval_dataset = load_dataset("nyu-mll/glue", "mnli", split=f"validation_matched[:{max_eval_samples}]")
 
         pipe = pipeline(task="text-classification", model=model_name, tokenizer=model_name, max_length=256)
 
@@ -124,7 +124,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
     def test_image_classification_parity(self):
         # we can not compare to the Pytorch transformers example, that uses custom preprocessing on the images
         model_name = "douwekiela/resnet-18-finetuned-dogfood"
-        dataset_name = "beans"
+        dataset_name = "AI-Lab-Makerere/beans"
         max_eval_samples = 120
 
         raw_dataset = load_dataset(dataset_name, split="validation")
@@ -193,7 +193,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         subprocess.run(
             f"python examples/pytorch/question-answering/run_qa.py"
             f" --model_name_or_path {model_name_v1}"
-            f" --dataset_name squad"
+            f" --dataset_name rajpurkar/squad"
             f" --do_eval"
             f" --output_dir {os.path.join(self.dir_path, 'questionanswering_squad_transformers')}"
             f" --max_eval_samples 100"
@@ -207,7 +207,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         ) as f:
             transformers_results = json.load(f)
 
-        eval_dataset = load_dataset("squad", split="validation[:100]")
+        eval_dataset = load_dataset("rajpurkar/squad", split="validation[:100]")
 
         pipe = pipeline(
             task="question-answering",
@@ -232,7 +232,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         subprocess.run(
             f"python examples/pytorch/question-answering/run_qa.py"
             f" --model_name_or_path {model_name_v2}"
-            f" --dataset_name squad_v2"
+            f" --dataset_name rajpurkar/squad_v2"
             f" --version_2_with_negative"
             f" --do_eval"
             f" --output_dir {os.path.join(self.dir_path, 'questionanswering_squadv2_transformers')}"
@@ -247,7 +247,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         ) as f:
             transformers_results = json.load(f)
 
-        eval_dataset = load_dataset("squad_v2", split="validation[:100]")
+        eval_dataset = load_dataset("rajpurkar/squad_v2", split="validation[:100]")
 
         pipe = pipeline(
             task="question-answering",
@@ -282,7 +282,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         subprocess.run(
             f"python examples/pytorch/token-classification/run_ner.py"
             f" --model_name_or_path {model_name}"
-            f" --dataset_name conll2003"
+            f" --dataset_name areias/conll2003-generative"
             f" --do_eval"
             f" --output_dir {os.path.join(self.dir_path, 'tokenclassification_conll2003_transformers')}"
             f" --max_eval_samples {n_samples}",
@@ -295,7 +295,7 @@ class TestEvaluatorTrainerParity(unittest.TestCase):
         ) as f:
             transformers_results = json.load(f)
 
-        eval_dataset = load_dataset("conll2003", split=f"validation[:{n_samples}]")
+        eval_dataset = load_dataset("areias/conll2003-generative", split=f"validation[:{n_samples}]")
 
         pipe = pipeline(task="token-classification", model=model_name)
 
