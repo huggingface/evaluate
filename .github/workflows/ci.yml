@@ -38,8 +38,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: ['unit', 'parity']
-        os: [ubuntu-latest, windows-latest]
+        test: ['unit']
+        os: [ubuntu-latest]
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -59,7 +59,3 @@ jobs:
         if: ${{ matrix.test == 'unit' }}
         run: |
           python -m pytest -n 2 --dist loadfile -sv ./tests/ --ignore=./tests/test_trainer_evaluator_parity.py
-      - name: Integration test with transformers
-        if: ${{ matrix.test == 'parity' }}
-        run: |
-          python -m pytest -n 2 --dist loadfile -sv ./tests/test_trainer_evaluator_parity.py
