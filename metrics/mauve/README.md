@@ -25,7 +25,7 @@ MAUVE is a measure of the gap between neural text and human text. It is computed
 
 This metric is a wrapper around the [official implementation](https://github.com/krishnap25/mauve) of MAUVE.
 
-For more details, consult the [MAUVE paper](https://arxiv.org/abs/2102.01454).
+For more details, consult the MAUVE papers [[NeurIPS '21](https://arxiv.org/abs/2102.01454), [JMLR '23](https://arxiv.org/pdf/2212.14578)].
 
 ## How to use
 
@@ -69,11 +69,15 @@ It also has several optional arguments:
 
 ## Output values
 
-This metric outputs a dictionary with 5 key-value pairs:
+This metric outputs a dictionary with the following key-value pairs:
 
 `mauve`: MAUVE score, which ranges between 0 and 1. **Larger** values indicate that P and Q are closer.
 
 `frontier_integral`: Frontier Integral, which ranges between 0 and 1. **Smaller** values indicate that P and Q are closer.
+
+'mauve_star`: MAUVE score computed with Krichevsky-Trofimov smoothing, as advocated in [this paper](https://arxiv.org/pdf/2212.14578).
+
+'frontier_integral_star`: Frontier Interal score computed with Krichevsky-Trofimov smoothing, as advocated in [this paper](https://arxiv.org/pdf/2212.14578).
 
 `divergence_curve`: a numpy.ndarray of shape (m, 2); plot it with `matplotlib` to view the divergence curve.
 
@@ -131,11 +135,25 @@ See the [official implementation](https://github.com/krishnap25/mauve#best-pract
 ## Citation
 
 ```bibtex
+@article{pillutla-etal:mauve:jmlr2023,
+  title={{MAUVE Scores for Generative Models: Theory and Practice}},
+  author={Pillutla, Krishna and Liu, Lang and Thickstun, John and Welleck, Sean and Swayamdipta, Swabha and Zellers, Rowan and Oh, Sewoong and Choi, Yejin and Harchaoui, Zaid},
+  journal={JMLR},
+  year={2023}
+}
+
 @inproceedings{pillutla-etal:mauve:neurips2021,
-  title={MAUVE: Measuring the Gap Between Neural Text and Human Text using Divergence Frontiers},
+  title={{MAUVE: Measuring the Gap Between Neural Text and Human Text using Divergence Frontiers}},
   author={Pillutla, Krishna and Swayamdipta, Swabha and Zellers, Rowan and Thickstun, John and Welleck, Sean and Choi, Yejin and Harchaoui, Zaid},
   booktitle = {NeurIPS},
-  year  	= {2021}
+  year      = {2021}
+}
+
+@inproceedings{liu-etal:mauve-theory:neurips2021,
+  title={{Divergence Frontiers for Generative Models: Sample Complexity, Quantization Effects, and Frontier Integrals}},
+  author={Liu, Lang and Pillutla, Krishna and Welleck, Sean and Oh, Sewoong and Choi, Yejin and Harchaoui, Zaid},
+  booktitle={NeurIPS},
+  year={2021}
 }
 ```
 
