@@ -50,9 +50,12 @@ This metric takes as input a list of predicted sentences and a list of lists of 
 ### Inputs
 - **predictions** (`list` of `str`s): Translations to score.
 - **references** (`list` of `list`s of `str`s): references for each translation.
-- ** tokenizer** : approach used for standardizing `predictions` and `references`.
+ - ** tokenizer** : approach used for standardizing `predictions` and `references`.
     The default tokenizer is `tokenizer_13a`, a relatively minimal tokenization approach that is however equivalent to `mteval-v13a`, used by WMT.
     This can be replaced by another tokenizer from a source such as [SacreBLEU](https://github.com/mjpost/sacrebleu/tree/master/sacrebleu/tokenizers).
+     You can alternatively pass `tokenizer_name` to select built-ins:
+     - `"whitespace"`: simple whitespace split
+     - `"coco"`/`"ptb"`: COCO caption PTBTokenizer (requires `pycocoevalcap`)
 
 The default tokenizer is based on whitespace and regexes. It can be replaced by any function that takes a string as input and returns a list of tokens as output. E.g. `word_tokenize()` from [NLTK](https://www.nltk.org/api/nltk.tokenize.html) or pretrained tokenizers from the [Tokenizers library](https://huggingface.co/docs/tokenizers/index).
 - **max_order** (`int`): Maximum n-gram order to use when computing BLEU score. Defaults to `4`.
@@ -122,6 +125,16 @@ Example with the word tokenizer from NLTK:
 ...     [["foo bar foobar"]]
 ... ]
 >>> results = bleu.compute(predictions=predictions, references=references, tokenizer=word_tokenize)
+
+Example matching COCO/PTB tokenization (requires `pycocoevalcap`):
+```python
+>>> bleu = evaluate.load("bleu")
+>>> predictions = ["opacity, consolidation, pleural effusion, and atelectasis are present."]
+>>> references = [["opacity, consolidation, pleural effusion, and pneumonia are present."]]
+>>> results = bleu.compute(predictions=predictions, references=references, tokenizer_name="coco")
+>>> print(round(results["bleu"], 6))
+0.594604
+```
 >>> print(results)
 {'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.1666666666666667, 'translation_length': 7, 'reference_length': 6}
 ```

@@ -18,7 +18,7 @@ import datasets
 import evaluate
 
 from .nmt_bleu import compute_bleu  # From: https://github.com/tensorflow/nmt/blob/master/nmt/scripts/bleu.py
-from .tokenizer_13a import Tokenizer13a
+from .tokenizer_13a import Tokenizer13a, WhitespaceTokenizer, CocoPTBTokenizer
 
 
 _CITATION = """\
@@ -112,7 +112,15 @@ class Bleu(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions, references, tokenizer=Tokenizer13a(), max_order=4, smooth=False):
+    def _compute(self, predictions, references, tokenizer=Tokenizer13a(), max_order=4, smooth=False, tokenizer_name=None):
+        # Backward-compatible alias: allow passing tokenizer_name="whitespace" to mimic COCO/PTB tokenization splitting behavior
+        if tokenizer_name is not None:
+            if tokenizer_name == "whitespace":
+                tokenizer = WhitespaceTokenizer()
+            elif tokenizer_name in {"coco", "ptb", "coco-ptb"}:
+                tokenizer = CocoPTBTokenizer()
+            else:
+                raise ValueError("Unsupported tokenizer_name: {}".format(tokenizer_name))
         # if only one reference is provided make sure we still use list of lists
         if isinstance(references[0], str):
             references = [[ref] for ref in references]

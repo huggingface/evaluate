@@ -98,3 +98,41 @@ class Tokenizer13a(BaseTokenizer):
             line = line.replace("&gt;", ">")
 
         return self._post_tokenizer(f" {line} ")
+
+
+class WhitespaceTokenizer(BaseTokenizer):
+    def signature(self):
+        return "whitespace"
+
+    @lru_cache(maxsize=2**16)
+    def __call__(self, line):
+        return line.split()
+
+
+class CocoPTBTokenizer(BaseTokenizer):
+    """Adapter around pycocoevalcap's PTBTokenizer to reproduce COCO caption tokenization.
+
+    This requires `pycocoevalcap` to be installed. We call into its tokenizer and
+    then split the returned detokenized string to obtain tokens, matching how COCO BLEU
+    builds n-grams (space-split over PTBTokenized text).
+    """
+
+    def signature(self):
+        return "coco-ptb"
+
+    @lru_cache(maxsize=2**16)
+    def __call__(self, line):
+        try:
+            from pycocoevalcap.tokenizer.ptbtokenizer import PTBTokenizer  # type: ignore
+        except Exception as exc:  # pragma: no cover - import error path
+            raise ImportError(
+                "To use tokenizer_name='coco' (PTBTokenizer), install pycocoevalcap."
+            ) from exc
+
+        tokenizer = PTBTokenizer()
+        # The PTBTokenizer expects a dict of id -> list of dicts with 'caption'
+        input_dict = {0: [{"caption": line}]}
+        tokenized = tokenizer.tokenize(input_dict)
+        # Retrieve tokenized string and split on whitespace to get tokens
+        tokenized_str = tokenized[0][0]["caption"]
+        return tokenized_str.split()
