@@ -259,13 +259,14 @@ def _download_additional_modules(
         try:
             lib = importlib.import_module(library_import_name)  # noqa F841
         except ImportError:
-            library_import_name = "scikit-learn" if library_import_name == "sklearn" else library_import_name
+            if library_import_name == "sklearn":
+                library_import_name = library_import_path = "scikit-learn"
             needs_to_be_installed.add((library_import_name, library_import_path))
     if needs_to_be_installed:
         raise ImportError(
-            f"To be able to use {name}, you need to install the following dependencies"
+            f"To be able to use {name!r}, you need to install the following dependencies"
             f"{[lib_name for lib_name, lib_path in needs_to_be_installed]} using 'pip install "
-            f"{' '.join([lib_path for lib_name, lib_path in needs_to_be_installed])}' for instance'"
+            f"{' '.join([lib_path for lib_name, lib_path in needs_to_be_installed])}' for instance"
         )
     return local_imports
 
