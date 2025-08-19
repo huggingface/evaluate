@@ -132,12 +132,16 @@ class IndicGlue(evaluate.Metric):
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
                 {
-                    "predictions": datasets.Value("int64")
-                    if self.config_name != "cvit-mkb-clsr"
-                    else datasets.Sequence(datasets.Value("float32")),
-                    "references": datasets.Value("int64")
-                    if self.config_name != "cvit-mkb-clsr"
-                    else datasets.Sequence(datasets.Value("float32")),
+                    "predictions": (
+                        datasets.Value("int64")
+                        if self.config_name != "cvit-mkb-clsr"
+                        else datasets.Sequence(datasets.Value("float32"))
+                    ),
+                    "references": (
+                        datasets.Value("int64")
+                        if self.config_name != "cvit-mkb-clsr"
+                        else datasets.Sequence(datasets.Value("float32"))
+                    ),
                 }
             ),
             codebase_urls=[],

@@ -54,7 +54,8 @@ ALL_ALLOWED_EXTENSIONS = list(_EXTENSION_TO_MODULE.keys()) + ["zip"]
 
 
 def init_dynamic_modules(
-    name: str = config.MODULE_NAME_FOR_DYNAMIC_MODULES, hf_modules_cache: Optional[Union[Path, str]] = None
+    name: str = config.MODULE_NAME_FOR_DYNAMIC_MODULES,
+    hf_modules_cache: Optional[Union[Path, str]] = None,
 ):
     """
     Create a module with name `name` in which you can add dynamic modules
@@ -71,7 +72,9 @@ def init_dynamic_modules(
     return dynamic_modules_path
 
 
-def import_main_class(module_path) -> Optional[Union[Type[DatasetBuilder], Type[EvaluationModule]]]:
+def import_main_class(
+    module_path,
+) -> Optional[Union[Type[DatasetBuilder], Type[EvaluationModule]]]:
     """Import a module at module_path and return its main class, a Metric by default"""
     module = importlib.import_module(module_path)
     main_cls_type = EvaluationModule
@@ -176,7 +179,11 @@ def get_imports(file_path: str) -> Tuple[str, str, str, str]:
             # not be added as required dependencies
             continue
 
-        match = re.match(r"^import\s+(\.?)([^\s\.]+)[^#\r\n]*(?:#\s+From:\s+)?([^\r\n]*)", line, flags=re.MULTILINE)
+        match = re.match(
+            r"^import\s+(\.?)([^\s\.]+)[^#\r\n]*(?:#\s+From:\s+)?([^\r\n]*)",
+            line,
+            flags=re.MULTILINE,
+        )
         if match is None:
             match = re.match(
                 r"^from\s+(\.?)([^\s\.]+)(?:[^\s]*)\s+import\s+[^#\r\n]*(?:#\s+From:\s+)?([^\r\n]*)",
@@ -210,7 +217,10 @@ def get_imports(file_path: str) -> Tuple[str, str, str, str]:
 
 
 def _download_additional_modules(
-    name: str, base_path: str, imports: Tuple[str, str, str, str], download_config: Optional[DownloadConfig]
+    name: str,
+    base_path: str,
+    imports: Tuple[str, str, str, str],
+    download_config: Optional[DownloadConfig],
 ) -> List[Tuple[str, str]]:
     """
     Download additional module for a module <name>.py at URL (or local path) <base_path>/<name>.py
@@ -260,6 +270,7 @@ def _download_additional_modules(
             lib = importlib.import_module(library_import_name)  # noqa F841
         except ImportError:
             library_import_name = "scikit-learn" if library_import_name == "sklearn" else library_import_name
+            library_import_name = "absl-py" if library_import_name == "absl" else library_import_name
             needs_to_be_installed.add((library_import_name, library_import_path))
     if needs_to_be_installed:
         raise ImportError(
@@ -329,7 +340,10 @@ def _copy_script_and_other_resources_in_importable_dir(
         # Record metadata associating original dataset path with local unique folder
         meta_path = importable_local_file.split(".py")[0] + ".json"
         if not os.path.exists(meta_path):
-            meta = {"original file path": original_local_path, "local file path": importable_local_file}
+            meta = {
+                "original file path": original_local_path,
+                "local file path": importable_local_file,
+            }
             # the filename is *.py in our case, so better rename to filenam.json instead of filename.py.json
             with open(meta_path, "w", encoding="utf-8") as meta_file:
                 json.dump(meta, meta_file)
@@ -381,7 +395,13 @@ def _create_importable_file(
     )
     logger.debug(f"Created importable dataset file at {importable_local_file}")
     module_path = ".".join(
-        [os.path.basename(dynamic_modules_path), module_namespace, name.replace("/", "--"), hash, name.split("/")[-1]]
+        [
+            os.path.basename(dynamic_modules_path),
+            module_namespace,
+            name.replace("/", "--"),
+            hash,
+            name.split("/")[-1],
+        ]
     )
     return module_path, hash
 
@@ -550,7 +570,13 @@ class CachedEvaluationModuleFactory(_EvaluationModuleFactory):
         )
         # make the new module to be noticed by the import system
         module_path = ".".join(
-            [os.path.basename(dynamic_modules_path), self.module_type, self.name, hash, self.name.split("--")[-1]]
+            [
+                os.path.basename(dynamic_modules_path),
+                self.module_type,
+                self.name,
+                hash,
+                self.name.split("--")[-1],
+            ]
         )
         importlib.invalidate_caches()
         return ImportableModule(module_path, hash)
@@ -614,13 +640,17 @@ def evaluation_module_factory(
     if path.endswith(filename):
         if os.path.isfile(path):
             return LocalEvaluationModuleFactory(
-                path, download_mode=download_mode, dynamic_modules_path=dynamic_modules_path
+                path,
+                download_mode=download_mode,
+                dynamic_modules_path=dynamic_modules_path,
             ).get_module()
         else:
             raise FileNotFoundError(f"Couldn't find a metric script at {relative_to_absolute_path(path)}")
     elif os.path.isfile(combined_path):
         return LocalEvaluationModuleFactory(
-            combined_path, download_mode=download_mode, dynamic_modules_path=dynamic_modules_path
+            combined_path,
+            download_mode=download_mode,
+            dynamic_modules_path=dynamic_modules_path,
         ).get_module()
     elif is_relative_path(path) and path.count("/") <= 1 and not force_local_path:
         try:
@@ -658,13 +688,16 @@ def evaluation_module_factory(
                     download_mode=download_mode,
                     dynamic_modules_path=dynamic_modules_path,
                 ).get_module()
-        except Exception as e1:  # noqa: all the attempts failed, before raising the error we should check if the module is already cached.
+        except (
+            Exception
+        ) as e1:  # noqa: all the attempts failed, before raising the error we should check if the module is already cached.
             # if it's a canonical module we need to check if it's any of the types
             if path.count("/") == 0:
                 for current_type in ["metric", "comparison", "measurement"]:
                     try:
                         return CachedEvaluationModuleFactory(
-                            f"evaluate-{current_type}--{path}", dynamic_modules_path=dynamic_modules_path
+                            f"evaluate-{current_type}--{path}",
+                            dynamic_modules_path=dynamic_modules_path,
                         ).get_module()
                     except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
                         pass
@@ -672,7 +705,8 @@ def evaluation_module_factory(
             elif path.count("/") == 1:
                 try:
                     return CachedEvaluationModuleFactory(
-                        path.replace("/", "--"), dynamic_modules_path=dynamic_modules_path
+                        path.replace("/", "--"),
+                        dynamic_modules_path=dynamic_modules_path,
                     ).get_module()
                 except Exception as e2:  # noqa: if it's not in the cache, then it doesn't exist.
                     pass
@@ -746,7 +780,11 @@ def load(
     """
     download_mode = DownloadMode(download_mode or DownloadMode.REUSE_DATASET_IF_EXISTS)
     evaluation_module = evaluation_module_factory(
-        path, module_type=module_type, revision=revision, download_config=download_config, download_mode=download_mode
+        path,
+        module_type=module_type,
+        revision=revision,
+        download_config=download_config,
+        download_mode=download_mode,
     )
     evaluation_cls = import_main_class(evaluation_module.module_path)
     evaluation_instance = evaluation_cls(
