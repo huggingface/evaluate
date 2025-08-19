@@ -477,7 +477,7 @@ class Evaluator(ABC):
             )
         return pipe
 
-    def prepare_metric(self, metric: Union[str, EvaluationModule]):
+    def prepare_metric(self, metric: Union[str, EvaluationModule], config_name: Optional[str] = None):
         """
         Prepare metric.
 
@@ -485,6 +485,8 @@ class Evaluator(ABC):
             metric (`str` or [`EvaluationModule`], defaults to `None`):
                 Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
+            config_name (`str`, *optional*, defaults to `None`):
+                Selecting a configuration for the metric (e.g. the GLUE metric has a configuration for each subset).
 
         Returns:
             The loaded metric.
@@ -504,7 +506,7 @@ class Evaluator(ABC):
                 )
             metric = load(self.default_metric_name)
         elif isinstance(metric, str):
-            metric = load(metric)
+            metric = load(metric, config_name)
 
         return metric
 
