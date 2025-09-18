@@ -226,16 +226,10 @@ def get_authentication_headers_for_url(url: str, token: Optional[Union[str, bool
     """Handle the HF authentication"""
     headers = {}
     if url.startswith(config.HF_ENDPOINT):
-        if token is False:
-            token = None
-        elif isinstance(token, str):
-            token = token
-        else:
-            from huggingface_hub import hf_api
+        from huggingface_hub.utils import build_hf_headers
 
-            token = hf_api.HfFolder.get_token()
-        if token:
-            headers["authorization"] = f"Bearer {token}"
+        headers = build_hf_headers(token=token, library_name="evaluate", library_version=__version__)
+
     return headers
 
 
