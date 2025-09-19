@@ -64,8 +64,6 @@ class TextDuplicates(evaluate.Measurement):
     def _info(self):
         # TODO: Specifies the evaluate.MeasurementInfo object
         return evaluate.MeasurementInfo(
-            # This is the description that will appear on the modules page.
-            module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
