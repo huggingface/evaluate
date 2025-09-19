@@ -1,0 +1,14 @@
+{
+    "module_name": "sklearn_metric",
+    "module_type": "metric",
+    "module_class_name": "SklearnMetric",
+    "namespace": "sklearn",
+    "label_name": "Name of the metric labels",
+    "preds_name": "Name of the metric predictions",
+    "features": "Input feature types.",
+    "kwargs": "String of the metric kwargs",
+    "kwargs_input": "String of the metric kwargs when passed to function.",
+    "docs_url": "URL to Scikit-learns docs",
+    "docstring": "Docstring of scikit-learn metric function.",
+    "docstring_first_line": "First line of docstring of scikit-learn metric function."
+}
