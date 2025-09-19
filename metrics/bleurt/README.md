@@ -44,7 +44,7 @@ This metric takes as input lists of predicted sentences and reference sentences:
 ### Inputs
 - **predictions** (`list` of `str`s): List of generated sentences to score.
 - **references** (`list` of `str`s): List of references to compare to.
-- **checkpoint** (`str`): BLEURT checkpoint. Will default to `BLEURT-tiny` if not specified. Other models that can be chosen are: `"bleurt-tiny-128"`, `"bleurt-tiny-512"`, `"bleurt-base-128"`, `"bleurt-base-512"`, `"bleurt-large-128"`, `"bleurt-large-512"`, `"BLEURT-20-D3"`, `"BLEURT-20-D6"`, `"BLEURT-20-D12"` and `"BLEURT-20"`. 
+- **config_name** (`str`): BLEURT checkpoint. Will default to `BLEURT-tiny` if not specified. Other models that can be chosen are: `"bleurt-tiny-128"`, `"bleurt-tiny-512"`, `"bleurt-base-128"`, `"bleurt-base-512"`, `"bleurt-large-128"`, `"bleurt-large-512"`, `"BLEURT-20-D3"`, `"BLEURT-20-D6"`, `"BLEURT-20-D12"` and `"BLEURT-20"`. 
 
 ### Output Values
 - **scores** : a `list` of scores, one per prediction. 
@@ -79,7 +79,7 @@ Example with the `"bleurt-base-128"` model checkpoint:
 ```python
 >>> predictions = ["hello there", "general kenobi"]
 >>> references = ["hello there", "general kenobi"]
->>> bleurt = load("bleurt", module_type="metric", checkpoint="bleurt-base-128")
+>>> bleurt = load("bleurt", module_type="metric", config_name="bleurt-base-128")
 >>> results = bleurt.compute(predictions=predictions, references=references)
 >>> print(results)
 {'scores': [1.0295498371124268, 1.0445425510406494]}
