@@ -43,10 +43,9 @@ You can find the right metric for your task by:
 
 Some datasets have specific metrics associated with them -- this is especially in the case of popular benchmarks like [GLUE](https://huggingface.co/metrics/glue) and [SQuAD](https://huggingface.co/metrics/squad).
 
-<Tip warning={true}>
-💡
-GLUE is actually a collection of different subsets on different tasks, so first you need to choose the one that corresponds to the NLI task, such as mnli, which is described as “crowdsourced collection of sentence pairs with textual entailment annotations”
-</Tip>
+> [!WARNING]
+> 💡
+> GLUE is actually a collection of different subsets on different tasks, so first you need to choose the one that corresponds to the NLI task, such as mnli, which is described as “crowdsourced collection of sentence pairs with textual entailment annotations”
 
 
 If you are evaluating your model on a benchmark dataset like the ones mentioned above, you can use its dedicated evaluation metric. Make sure you respect the format that they require. For example, to evaluate your model on the [SQuAD](https://huggingface.co/datasets/squad) dataset, you need to feed the `question` and `context` into your model and return the `prediction_text`, which should be compared with the `references` (based on matching the `id` of the question) :

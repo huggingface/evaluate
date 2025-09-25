@@ -68,11 +68,8 @@ eval_results = task_evaluator.compute(
 )
 print(eval_results)
 ```
-<Tip>
-
-Without specifying a device, the default for model inference will be the first GPU on the machine if one is available, and else CPU. If you want to use a specific device you can pass `device` to `compute` where -1 will use the GPU and a positive integer (starting with 0) will use the associated CUDA device.
-
-</Tip>
+> [!TIP]
+> Without specifying a device, the default for model inference will be the first GPU on the machine if one is available, and else CPU. If you want to use a specific device you can pass `device` to `compute` where -1 will use the GPU and a positive integer (starting with 0) will use the associated CUDA device.
 
 
 The results will look as follows:
@@ -87,11 +84,8 @@ The results will look as follows:
 
 Note that evaluation results include both the requested metric, and information about the time it took to obtain predictions through the pipeline.
 
-<Tip>
-
-The time performances can give useful indication on model speed for inference but should be taken with a grain of salt: they include all the processing that goes on in the pipeline. This may include tokenizing, post-processing, that may be different depending on the model. Furthermore, it depends a lot on the hardware you are running the evaluation on and you may be able to improve the performance by optimizing things like the batch size.
-
-</Tip>
+> [!TIP]
+> The time performances can give useful indication on model speed for inference but should be taken with a grain of salt: they include all the processing that goes on in the pipeline. This may include tokenizing, post-processing, that may be different depending on the model. Furthermore, it depends a lot on the hardware you are running the evaluation on and you may be able to improve the performance by optimizing things like the batch size.
 
 ### Evaluate multiple metrics
 

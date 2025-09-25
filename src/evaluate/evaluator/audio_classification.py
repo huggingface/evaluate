@@ -30,11 +30,8 @@ if TYPE_CHECKING:
 TASK_DOCUMENTATION = r"""
     Examples:
 
-    <Tip>
-
-    Remember that, in order to process audio files, you need ffmpeg installed (https://ffmpeg.org/download.html)
-
-    </Tip>
+    > [!TIP]
+    > Remember that, in order to process audio files, you need ffmpeg installed (https://ffmpeg.org/download.html)
 
     ```python
     >>> from evaluate import evaluator
@@ -52,12 +49,9 @@ TASK_DOCUMENTATION = r"""
     >>> )
     ```
 
-    <Tip>
-
-    The evaluator supports raw audio data as well, in the form of a numpy array. However, be aware that calling
-    the audio column automatically decodes and resamples the audio files, which can be slow for large datasets.
-
-    </Tip>
+    > [!TIP]
+    > The evaluator supports raw audio data as well, in the form of a numpy array. However, be aware that calling
+    > the audio column automatically decodes and resamples the audio files, which can be slow for large datasets.
 
     ```python
     >>> from evaluate import evaluator
