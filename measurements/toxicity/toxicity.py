@@ -14,6 +14,8 @@
 
 """ Toxicity detection measurement. """
 
+import torch
+
 import datasets
 from transformers import pipeline
 
@@ -129,7 +131,9 @@ class Toxicity(evaluate.Measurement):
             model_name = "facebook/roberta-hate-speech-dynabench-r4-target"
         else:
             model_name = self.config_name
-        self.toxic_classifier = pipeline("text-classification", model=model_name, top_k=99999, truncation=True)
+
+        device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
+        self.toxic_classifier = pipeline("text-classification", model=model_name, top_k=99999, truncation=True, device=device)
 
     def _compute(self, predictions, aggregation="all", toxic_label="hate", threshold=0.5):
         scores = toxicity(predictions, self.toxic_classifier, toxic_label)
