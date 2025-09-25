@@ -7,6 +7,7 @@ import shutil
 import logging
 import re
 from urllib.parse import urlparse
+from .sklearn_parser import run_parser
 
 import huggingface_hub
 from huggingface_hub.utils._headers import _http_user_agent
@@ -60,9 +61,9 @@ def update_evaluate_dependency(requirements_path, commit_hash):
     with open(requirements_path, "w") as f:
         f.write(file_content)
 
-def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
+def push_module_to_hub(module_path, token, commit_hash, org, tag=None,):
     module_name = module_path.stem
-    org = f"evaluate-{type}"
+    
     
     if not repo_exists(org + "/" + module_name, repo_type="space", token=token):
         create_repo(org + "/" + module_name, repo_type="space", space_sdk="gradio", exist_ok=True, token=token)    
@@ -124,6 +125,15 @@ if __name__ == "__main__":
             for module_path in (evaluate_lib_path/dir).iterdir():
                 if module_path.is_dir():
                     logger.info(f"Updating: module {module_path.name}.")
-                    push_module_to_hub(module_path, type, token, commit_hash, tag=git_tag)
+                    push_module_to_hub(module_path, token, commit_hash, f"evaluate-{type}", tag=git_tag)
         else:
             logger.warning(f"No folder {str(evaluate_lib_path/dir)} for {type} found.")
+
+
+    sklearn_path = Path("sklearn_modules/")
+    run_parser(output_dir=sklearn_path)
+
+    for module_path in sklearn_path.iterdir():
+        if module_path.is_dir():
+            logger.info(f"Updating: module {module_path.name}.")
+            push_module_to_hub(module_path, token, commit_hash, "scikit-learn", tag=git_tag)
