@@ -43,47 +43,41 @@ TASK_DOCUMENTATION = r"""
     >>> )
     ```
 
-    <Tip>
+    > [!TIP]
+    > For example, the following dataset format is accepted by the evaluator:
+    >
+    > ```python
+    > dataset = Dataset.from_dict(
+    >     mapping={
+    >         "tokens": [["New", "York", "is", "a", "city", "and", "Felix", "a", "person", "."]],
+    >         "ner_tags": [[1, 2, 0, 0, 0, 0, 3, 0, 0, 0]],
+    >     },
+    >     features=Features({
+    >         "tokens": Sequence(feature=Value(dtype="string")),
+    >         "ner_tags": Sequence(feature=ClassLabel(names=["O", "B-LOC", "I-LOC", "B-PER", "I-PER"])),
+    >         }),
+    > )
+    > ```
 
-    For example, the following dataset format is accepted by the evaluator:
-
-    ```python
-    dataset = Dataset.from_dict(
-        mapping={
-            "tokens": [["New", "York", "is", "a", "city", "and", "Felix", "a", "person", "."]],
-            "ner_tags": [[1, 2, 0, 0, 0, 0, 3, 0, 0, 0]],
-        },
-        features=Features({
-            "tokens": Sequence(feature=Value(dtype="string")),
-            "ner_tags": Sequence(feature=ClassLabel(names=["O", "B-LOC", "I-LOC", "B-PER", "I-PER"])),
-            }),
-    )
-    ```
-
-    </Tip>
-
-    <Tip warning={true}>
-
-    For example, the following dataset format is **not** accepted by the evaluator:
-
-    ```python
-    dataset = Dataset.from_dict(
-        mapping={
-            "tokens": [["New York is a city and Felix a person."]],
-            "starts": [[0, 23]],
-            "ends": [[7, 27]],
-            "ner_tags": [["LOC", "PER"]],
-        },
-        features=Features({
-            "tokens": Value(dtype="string"),
-            "starts": Sequence(feature=Value(dtype="int32")),
-            "ends": Sequence(feature=Value(dtype="int32")),
-            "ner_tags": Sequence(feature=Value(dtype="string")),
-        }),
-    )
-    ```
-
-    </Tip>
+    > [!WARNING]
+    > For example, the following dataset format is **not** accepted by the evaluator:
+    >
+    > ```python
+    > dataset = Dataset.from_dict(
+    >     mapping={
+    >         "tokens": [["New York is a city and Felix a person."]],
+    >         "starts": [[0, 23]],
+    >         "ends": [[7, 27]],
+    >         "ner_tags": [["LOC", "PER"]],
+    >     },
+    >     features=Features({
+    >         "tokens": Value(dtype="string"),
+    >         "starts": Sequence(feature=Value(dtype="int32")),
+    >         "ends": Sequence(feature=Value(dtype="int32")),
+    >         "ner_tags": Sequence(feature=Value(dtype="string")),
+    >     }),
+    > )
+    > ```
 """
 
 

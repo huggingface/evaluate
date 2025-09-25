@@ -53,12 +53,9 @@ TASK_DOCUMENTATION = r"""
     >>> )
     ```
 
-    <Tip>
-
-    Datasets where the answer may be missing in the context are supported, for example SQuAD v2 dataset. In this case, it is safer to pass `squad_v2_format=True` to
-    the compute() call.
-
-    </Tip>
+    > [!TIP]
+    > Datasets where the answer may be missing in the context are supported, for example SQuAD v2 dataset. In this case, it is safer to pass `squad_v2_format=True` to
+    > the compute() call.
 
     ```python
     >>> from evaluate import evaluator

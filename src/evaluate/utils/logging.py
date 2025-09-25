@@ -87,16 +87,13 @@ def get_verbosity() -> int:
     Returns:
         Logging level, e.g., `evaluate.logging.DEBUG` and `evaluate.logging.INFO`.
 
-    <Tip>
-
-        Hugging Face Evaluate library has following logging levels:
-        - `evaluate.logging.CRITICAL`, `evaluate.logging.FATAL`
-        - `evaluate.logging.ERROR`
-        - `evaluate.logging.WARNING`, `evaluate.logging.WARN`
-        - `evaluate.logging.INFO`
-        - `evaluate.logging.DEBUG`
-
-    </Tip>
+    > [!TIP]
+    > Hugging Face Evaluate library has following logging levels:
+    >     - `evaluate.logging.CRITICAL`, `evaluate.logging.FATAL`
+    >     - `evaluate.logging.ERROR`
+    >     - `evaluate.logging.WARNING`, `evaluate.logging.WARN`
+    >     - `evaluate.logging.INFO`
+    >     - `evaluate.logging.DEBUG`
     """
     return _get_library_root_logger().getEffectiveLevel()
 
