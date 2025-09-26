@@ -61,13 +61,17 @@ where
 
 ## How to use 
 
-The metric takes two inputs: references (a list of references for each speech input) and predictions (a list of transcriptions to score).
+The metric takes two inputs: references (a list of references for each speech input) and predictions (a list of transcriptions to score). You can also set `normalize=True` to obtain a normalized WER value.
 
 
 ```python
 from evaluate import load
+# Standard WER calculation
 wer = load("wer")
 wer_score = wer.compute(predictions=predictions, references=references)
+# Normalized WER calculation
+normalized_wer_score = wer.compute(predictions=predictions, references=references, normalize=True)
+
 ```
 ## Output values
 
@@ -81,6 +85,10 @@ print(wer_score)
 This value indicates the average number of errors per reference word. 
 
 The **lower** the value, the **better** the performance of the ASR system, with a WER of 0 being a perfect score.
+
+When using the default settings, WER's output is not always a number between 0 and 1, in particular when there is a high number of insertions (see [Examples](#Examples) below).
+
+When using `normalize=True`, the WER is calculated as `(S + D + I) / (S + D + I + C)`, which ensures the output always falls within the range of 0-1 (or 0-100%).
 
 ### Values from popular papers
 
@@ -127,9 +135,27 @@ print(wer_score)
 1.0
 ```
 
+WER above 1 due to insertion errors:
+
+```python
+from evaluate import load
+wer = load("wer")
+predictions = ["hello wonderful world and all the people in it"]
+references = ["hello world"]
+wer_score = wer.compute(predictions=predictions, references=references)
+print(wer_score)
+3.5
+# With normalization
+normalized_wer_score = wer.compute(predictions=predictions, references=references, normalize=True)
+print(normalized_wer_score)
+0.7777777777777778
+```
+
 ## Limitations and bias
 
 WER is a valuable tool for comparing different systems as well as for evaluating improvements within one system. This kind of measurement, however, provides no details on the nature of translation errors and further work is therefore required to identify the main source(s) of error and to focus any research effort. 
+
+The raw WER can exceed 1.0 when there are many insertion errors. To address this, you can use the `normalize=True` parameter to calculate a normalized WER where the number of errors is divided by the sum of the number of edit operations (`I` + `S` + `D`) and `C` (the number of correct words), which results in WER values that fall within the range of 0–1 (or 0–100%).
 
 ## Citation
 

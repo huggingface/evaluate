@@ -59,6 +59,7 @@ Args:
     references: List of references for each speech input.
     predictions: List of transcriptions to score.
     concatenate_texts (bool, default=False): Whether to concatenate all input texts or compute WER iteratively.
+    normalize: Whether to normalize the WER score. If set to True, the number of mistakes is divided by the sum of the number of edit operations (insertions + substitutions + deletions) and correct characters, which results in CER values that fall within the range of 0-100%. 
 
 Returns:
     (float): the word error rate
@@ -93,7 +94,8 @@ class WER(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions=None, references=None, concatenate_texts=False):
+      
+    def _compute(self, predictions=None, references=None, concatenate_texts=False, normalize=False):
         if hasattr(jiwer, "compute_measures"):
             if concatenate_texts:
                 return jiwer.compute_measures(references, predictions)["wer"]
@@ -114,5 +116,8 @@ class WER(evaluate.Metric):
                 for prediction, reference in zip(predictions, references):
                     measures = jiwer.process_words(reference, prediction)
                     incorrect += measures.substitutions + measures.deletions + measures.insertions
-                    total += measures.substitutions + measures.deletions + measures.hits
+                    if normalize:
+                        total += measures["substitutions"] + measures["deletions"] + measures["insertions"] + measures["hits"]
+                    else:
+                        total += measures["substitutions"] + measures["deletions"] + measures["hits"]
                 return incorrect / total
