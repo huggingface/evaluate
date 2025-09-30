@@ -874,11 +874,14 @@ class CombinedEvaluations:
         from .loading import load  # avoid circular imports
 
         self.evaluation_module_names = None
-        if isinstance(evaluation_modules, list):
+        if isinstance(evaluation_modules, (list, tuple)):
             self.evaluation_modules = evaluation_modules
         elif isinstance(evaluation_modules, dict):
             self.evaluation_modules = list(evaluation_modules.values())
             self.evaluation_module_names = list(evaluation_modules.keys())
+        else:
+            raise ValueError("`evaluation_modules` should be a list, tuple or dict")
+
         loaded_modules = []
 
         for module in self.evaluation_modules:
