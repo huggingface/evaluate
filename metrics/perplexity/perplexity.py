@@ -101,20 +101,32 @@ class Perplexity(evaluate.Metric):
         )
 
     def _compute(
-        self, predictions, model_id, batch_size: int = 16, add_start_token: bool = True, device=None, max_length=None
+        self, predictions, model_id=None, batch_size: int = 16, add_start_token: bool = True, device=None, max_length=None, model_instance=None, 
+        tokenizer_instance=None,
     ):
+        
+        if not model_id and not model_instance:
+            raise ValueError("There needs to be at least one value for model_id or model_instance.")
+        
+        # Maybe load the model
+        if model_instance is None:
+            if device is not None:
+                assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
+                if device == "gpu":
+                    device = "cuda"
+            else:
+                device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        if device is not None:
-            assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
-            if device == "gpu":
-                device = "cuda"
+            model = AutoModelForCausalLM.from_pretrained(model_id)
+            model = model.to(device)
         else:
-            device = "cuda" if torch.cuda.is_available() else "cpu"
-
-        model = AutoModelForCausalLM.from_pretrained(model_id)
-        model = model.to(device)
-
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
+            model = model_instance
+        
+        # Maybe load the tokenizer
+        if tokenizer_instance is None:
+            tokenizer = AutoTokenizer.from_pretrained(model_id)
+        else:
+            tokenizer = tokenizer_instance
 
         # if batch_size > 1 (which generally leads to padding being required), and
         # if there is not an already assigned pad_token, assign an existing
