@@ -8,7 +8,7 @@ pip install datasets transformers torch evaluate nltk rouge_score
 
 ## Trainer
 
-The metrics in `evaluate` can be easily integrated with the [`~transformers.Trainer`]. The `Trainer` accepts a `compute_metrics` keyword argument that passes a function to compute metrics. One can specify the evaluation interval with `evaluation_strategy` in the [`~transformers.TrainerArguments`], and based on that, the model is evaluated accordingly, and the predictions and labels passed to `compute_metrics`.
+The metrics in `evaluate` can be easily integrated with the [`~transformers.Trainer`]. The `Trainer` accepts a `compute_metrics` keyword argument that passes a function to compute metrics. One can specify the evaluation interval with `eval_strategy` in the [`~transformers.TrainerArguments`], and based on that, the model is evaluated accordingly, and the predictions and labels passed to `compute_metrics`.
 
 ```python
 from datasets import load_dataset
@@ -38,7 +38,7 @@ def compute_metrics(eval_pred):
 
 # Load pretrained model and evaluate model after each epoch
 model = AutoModelForSequenceClassification.from_pretrained("bert-base-cased", num_labels=5)
-training_args = TrainingArguments(output_dir="test_trainer", evaluation_strategy="epoch")
+training_args = TrainingArguments(output_dir="test_trainer", eval_strategy="epoch")
 
 trainer = Trainer(
     model=model,
@@ -105,7 +105,7 @@ data_collator = DataCollatorForSeq2Seq(tokenizer=tokenizer, model=model)
 
 training_args = Seq2SeqTrainingArguments(
     output_dir="./results",
-    evaluation_strategy="epoch",
+    eval_strategy="epoch",
     learning_rate=2e-5,
     per_device_train_batch_size=16,
     per_device_eval_batch_size=4,
