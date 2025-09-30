@@ -113,7 +113,6 @@ class AudioClassificationEvaluator(Evaluator):
         label_column: str = "label",
         label_mapping: Optional[Dict[str, Number]] = None,
     ) -> Tuple[Dict[str, float], Any]:
-
         """
         input_column (`str`, defaults to `"file"`):
             The name of the column containing either the audio files or a raw waveform, represented as a numpy array, in the dataset specified by `data`.
