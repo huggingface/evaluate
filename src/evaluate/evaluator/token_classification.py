@@ -228,6 +228,7 @@ class TokenClassificationEvaluator(Evaluator):
         random_state: Optional[int] = None,
         input_column: str = "tokens",
         label_column: str = "ner_tags",
+        config_name: Optional[str] = None,
         join_by: Optional[str] = " ",
     ) -> Tuple[Dict[str, float], Any]:
         """
@@ -235,6 +236,8 @@ class TokenClassificationEvaluator(Evaluator):
             The name of the column containing the tokens feature in the dataset specified by `data`.
         label_column (`str`, defaults to `"label"`):
             The name of the column containing the labels in the dataset specified by `data`.
+        config_name (`str`, *optional*, defaults to `None`):
+            Selecting a configuration for the metric (e.g. the GLUE metric has a configuration for each subset).
         join_by (`str`, *optional*, defaults to `" "`):
             This evaluator supports dataset whose input column is a list of words. This parameter specifies how to join
             words to generate a string input. This is especially useful for languages that do not separate words by a space.
@@ -249,7 +252,7 @@ class TokenClassificationEvaluator(Evaluator):
             data=data, input_column=input_column, label_column=label_column, join_by=join_by
         )
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
-        metric = self.prepare_metric(metric)
+        metric = self.prepare_metric(metric, config_name)
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
