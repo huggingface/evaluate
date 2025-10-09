@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" FEVER (Fact Extraction and VERification) metric. """
+"""FEVER (Fact Extraction and VERification) metric."""
 
 import datasets
+
 import evaluate
+
 
 _CITATION = """\
 @inproceedings{thorne2018fever,
@@ -64,23 +66,26 @@ Example:
     {'label_accuracy': 1.0, 'fever_score': 1.0, 'evidence_precision': 1.0, 'evidence_recall': 1.0, 'evidence_f1': 1.0}
 """
 
+
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class FEVER(evaluate.Metric):
-  def _info(self):
-    return evaluate.MetricInfo(
-      description=_DESCRIPTION,
-      citation=_CITATION,
-      inputs_description=_KWARGS_DESCRIPTION,
-      features=datasets.Features(
+    def _info(self):
+        return evaluate.MetricInfo(
+            description=_DESCRIPTION,
+            citation=_CITATION,
+            inputs_description=_KWARGS_DESCRIPTION,
+            features=datasets.Features(
                 {
-                    "predictions": 
-                      {"label": datasets.Value("string"),
-                       "evidence": datasets.Sequence(datasets.Value("string"))}
-                    ,
-                    "references": 
-                      {"label" : datasets.Value("string"),
-                       "evidence_sets": datasets.Sequence(datasets.Sequence(datasets.Value("string")))
-                },
+                    "predictions": {
+                        "label": datasets.Value("string"),
+                        "evidence": datasets.Sequence(datasets.Value("string")),
+                    },
+                    "references": {
+                        "label": datasets.Value("string"),
+                        "evidence_sets": datasets.Sequence(
+                            datasets.Sequence(datasets.Value("string"))
+                        ),
+                    },
                 }
             ),
             reference_urls=[
@@ -88,53 +93,54 @@ class FEVER(evaluate.Metric):
                 "https://arxiv.org/abs/1803.05355",
             ],
         )
-  
-  def _compute(self, predictions, references):
-    """
-    Computes FEVER metrics:
-    - Label accuracy
-    - FEVER score (label + complete evidence set)
-    - Evidence precision, recall, and F1 (micro-averaged)
-    """
-    total = len(predictions)
-    label_correct, fever_correct = 0, 0
-    total_overlap, total_pred, total_gold = 0, 0, 0
 
-    for pred, ref in zip(predictions, references):
-      pred_label = pred["label"]
-      pred_evidence = set(e.strip().lower() for e in pred["evidence"])
-      gold_label = ref["label"]
-      gold_sets = []
-      for s in ref["evidence_sets"]:
-        gold_sets.append([e.strip().lower() for e in s])
+    def _compute(self, predictions, references):
+        """
+        Computes FEVER metrics:
+        - Label accuracy
+        - FEVER score (label + complete evidence set)
+        - Evidence precision, recall, and F1 (micro-averaged)
+        """
+        total = len(predictions)
+        label_correct, fever_correct = 0, 0
+        total_overlap, total_pred, total_gold = 0, 0, 0
 
-      if pred_label == gold_label:
-        label_correct += 1
-        for g_set in gold_sets:
-          if set(g_set).issubset(pred_evidence):
-            fever_correct += 1
-            break
-      
-      gold_evidence = set().union(*gold_sets) if gold_sets else set()
-      overlap = len(gold_evidence.intersection(pred_evidence))
-      total_overlap += overlap
-      total_pred += len(pred_evidence)
-      total_gold += len(gold_evidence)
+        for pred, ref in zip(predictions, references):
+            pred_label = pred["label"]
+            pred_evidence = set(e.strip().lower() for e in pred["evidence"])
+            gold_label = ref["label"]
+            gold_sets = []
+            for s in ref["evidence_sets"]:
+                gold_sets.append([e.strip().lower() for e in s])
 
-    precision = (total_overlap / total_pred) if total_pred else 0
-    recall = (total_overlap / total_gold) if total_gold else 0
-    evidence_f1 = (
-    2 * precision * recall / (precision + recall)
-    if (precision + recall) > 0 else 0)
+            if pred_label == gold_label:
+                label_correct += 1
+                for g_set in gold_sets:
+                    if set(g_set).issubset(pred_evidence):
+                        fever_correct += 1
+                        break
 
-    fever_score = fever_correct / total if total else 0
-    label_accuracy = label_correct / total if total else 0
+            gold_evidence = set().union(*gold_sets) if gold_sets else set()
+            overlap = len(gold_evidence.intersection(pred_evidence))
+            total_overlap += overlap
+            total_pred += len(pred_evidence)
+            total_gold += len(gold_evidence)
 
+        precision = (total_overlap / total_pred) if total_pred else 0
+        recall = (total_overlap / total_gold) if total_gold else 0
+        evidence_f1 = (
+            2 * precision * recall / (precision + recall)
+            if (precision + recall) > 0
+            else 0
+        )
 
-    return {
-        "label_accuracy": label_accuracy,
-        "fever_score": fever_score,
-        "evidence_precision": precision,
-        "evidence_recall": recall,
-        "evidence_f1": evidence_f1,
-    }
+        fever_score = fever_correct / total if total else 0
+        label_accuracy = label_correct / total if total else 0
+
+        return {
+            "label_accuracy": label_accuracy,
+            "fever_score": fever_score,
+            "evidence_precision": precision,
+            "evidence_recall": recall,
+            "evidence_f1": evidence_f1,
+        }

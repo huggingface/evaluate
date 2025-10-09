@@ -12,10 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-""" Tests for the FEVER (Fact Extraction and VERification) metric. """
+"""Tests for the FEVER (Fact Extraction and VERification) metric."""
 
 import unittest
+
 from fever import FEVER  # assuming your metric file is named fever.py
+
 
 fever = FEVER()
 
@@ -53,7 +55,7 @@ class TestFEVER(unittest.TestCase):
         result = fever.compute(predictions=preds, references=refs)
         self.assertAlmostEqual(result["label_accuracy"], 1.0)
         self.assertAlmostEqual(result["fever_score"], 0.0)
-        self.assertAlmostEqual(result["evidence_precision"], 1.0) 
+        self.assertAlmostEqual(result["evidence_precision"], 1.0)
         self.assertAlmostEqual(result["evidence_recall"], 0.5)
         self.assertTrue(0 < result["evidence_f1"] < 1.0)
 
@@ -74,9 +76,9 @@ class TestFEVER(unittest.TestCase):
 
     def test_mixed_examples(self):
         preds = [
-            {"label": "SUPPORTED", "evidence": ["A1", "A2"]},  
-            {"label": "SUPPORTED", "evidence": ["B1"]},        
-            {"label": "REFUTED", "evidence": ["C1", "C2"]},    
+            {"label": "SUPPORTED", "evidence": ["A1", "A2"]},
+            {"label": "SUPPORTED", "evidence": ["B1"]},
+            {"label": "REFUTED", "evidence": ["C1", "C2"]},
         ]
         refs = [
             {"label": "SUPPORTED", "evidence_sets": [["A1", "A2"]]},
