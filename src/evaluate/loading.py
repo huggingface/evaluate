@@ -243,7 +243,7 @@ def _download_additional_modules(
         elif import_type == "external":
             url_or_filename = import_path
         else:
-            raise ValueError("Wrong import_type")
+            raise ValueError(f"Wrong import_type: {import_type!r}. Expected 'library', 'internal', or 'external'.")
 
         local_import_path = cached_path(
             url_or_filename,
@@ -255,17 +255,17 @@ def _download_additional_modules(
 
     # Check library imports
     needs_to_be_installed = set()
-    for library_import_name, library_import_path in library_imports:
+    for library_import_name, _ in library_imports:
         try:
-            lib = importlib.import_module(library_import_name)  # noqa F841
+            importlib.import_module(library_import_name)  # noqa F841
         except ImportError:
             library_import_name = "scikit-learn" if library_import_name == "sklearn" else library_import_name
-            needs_to_be_installed.add((library_import_name, library_import_path))
+            needs_to_be_installed.add(library_import_name)
     if needs_to_be_installed:
+        missing = sorted(needs_to_be_installed)
         raise ImportError(
-            f"To be able to use {name}, you need to install the following dependencies"
-            f"{[lib_name for lib_name, lib_path in needs_to_be_installed]} using 'pip install "
-            f"{' '.join([lib_name for lib_name, lib_path in needs_to_be_installed])}' for instance'"
+            f"To be able to use {name}, you need to install these dependencies: "
+            f"{', '.join(missing)} using the command 'pip install {' '.join(missing)}'."
         )
     return local_imports
 
