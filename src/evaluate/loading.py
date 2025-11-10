@@ -265,7 +265,7 @@ def _download_additional_modules(
         raise ImportError(
             f"To be able to use {name}, you need to install the following dependencies"
             f"{[lib_name for lib_name, lib_path in needs_to_be_installed]} using 'pip install "
-            f"{' '.join([lib_path for lib_name, lib_path in needs_to_be_installed])}' for instance'"
+            f"{' '.join([lib_name for lib_name, lib_path in needs_to_be_installed])}' for instance'"
         )
     return local_imports
 
