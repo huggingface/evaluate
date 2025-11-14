@@ -69,7 +69,7 @@ Example:
     >>> print(results["evidence_precision"])
     1.0
     >>> print(results["evidence_recall"])
-    1.0
+    0.5
     >>> print(round(results["evidence_f1"], 3))
     0.667
 """

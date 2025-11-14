@@ -147,7 +147,7 @@ print(results)
 {
     'label_accuracy': 1.0,
     'fever_score': 1.0,
-    'evidence_precision': 0.5,
+    'evidence_precision': 1.0,
     'evidence_recall': 0.5,
     'evidence_f1': 0.5
 }
