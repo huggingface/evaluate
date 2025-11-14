@@ -82,9 +82,7 @@ class FEVER(evaluate.Metric):
                     },
                     "references": {
                         "label": datasets.Value("string"),
-                        "evidence_sets": datasets.Sequence(
-                            datasets.Sequence(datasets.Value("string"))
-                        ),
+                        "evidence_sets": datasets.Sequence(datasets.Sequence(datasets.Value("string"))),
                     },
                 }
             ),
@@ -128,11 +126,7 @@ class FEVER(evaluate.Metric):
 
         precision = (total_overlap / total_pred) if total_pred else 0
         recall = (total_overlap / total_gold) if total_gold else 0
-        evidence_f1 = (
-            2 * precision * recall / (precision + recall)
-            if (precision + recall) > 0
-            else 0
-        )
+        evidence_f1 = 2 * precision * recall / (precision + recall) if (precision + recall) > 0 else 0
 
         fever_score = fever_correct / total if total else 0
         label_accuracy = label_correct / total if total else 0

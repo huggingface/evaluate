@@ -23,7 +23,6 @@ fever = FEVER()
 
 
 class TestFEVER(unittest.TestCase):
-
     def test_perfect_prediction(self):
         preds = [{"label": "SUPPORTED", "evidence": ["E1", "E2"]}]
         refs = [{"label": "SUPPORTED", "evidence_sets": [["E1", "E2"]]}]
