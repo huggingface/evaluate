@@ -1,7 +1,7 @@
 ---
 title: FEVER
 emoji: 🔥
-colorFrom: orange
+colorFrom: blue
 colorTo: red
 sdk: gradio
 sdk_version: 3.19.1
