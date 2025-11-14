@@ -48,9 +48,9 @@ This metric takes as input a list of predicted sentences and a list of lists of 
 ```
 
 ### Inputs
-- **predictions** (`list` of `str`s): Translations to score.
-- **references** (`list` of `list`s of `str`s): references for each translation.
-- ** tokenizer** : approach used for standardizing `predictions` and `references`.
+- **predictions** (`list[str]`): Translations to score.
+- **references** (`Union[list[str], list[list[str]]]`): references for each translation.
+- **tokenizer** : approach used for standardizing `predictions` and `references`.
     The default tokenizer is `tokenizer_13a`, a relatively minimal tokenization approach that is however equivalent to `mteval-v13a`, used by WMT.
     This can be replaced by another tokenizer from a source such as [SacreBLEU](https://github.com/mjpost/sacrebleu/tree/master/sacrebleu/tokenizers).
 
@@ -93,15 +93,15 @@ Example where each prediction has 1 reference:
 {'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.0, 'translation_length': 7, 'reference_length': 7}
 ```
 
-Example where the second prediction has 2 references:
+Example where the first prediction has 2 references:
 ```python
 >>> predictions = [
-...     ["hello there general kenobi",
-...     ["foo bar foobar"]
+...     "hello there general kenobi",
+...     "foo bar foobar"
 ... ]
 >>> references = [
-...     [["hello there general kenobi"], ["hello there!"]],
-...     [["foo bar foobar"]]
+...     ["hello there general kenobi", "hello there!"],
+...     ["foo bar foobar"]
 ... ]
 >>> bleu = evaluate.load("bleu")
 >>> results = bleu.compute(predictions=predictions, references=references)
@@ -114,12 +114,12 @@ Example with the word tokenizer from NLTK:
 >>> bleu = evaluate.load("bleu")
 >>> from nltk.tokenize import word_tokenize
 >>> predictions = [
-...     ["hello there general kenobi",
-...     ["foo bar foobar"]
+...     "hello there general kenobi",
+...     "foo bar foobar"
 ... ]
 >>> references = [
-...     [["hello there general kenobi"], ["hello there!"]],
-...     [["foo bar foobar"]]
+...     ["hello there general kenobi", "hello there!"],
+...     ["foo bar foobar"]
 ... ]
 >>> results = bleu.compute(predictions=predictions, references=references, tokenizer=word_tokenize)
 >>> print(results)
