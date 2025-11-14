@@ -261,6 +261,8 @@ def _download_additional_modules(
         except ImportError:
             library_import_name = "scikit-learn" if library_import_name == "sklearn" else library_import_name
             library_import_path = "scikit-learn" if library_import_path == "sklearn" else library_import_path
+            library_import_name = "absl-py" if library_import_name == "absl" else library_import_name
+            library_import_path = "absl-py" if library_import_path == "absl" else library_import_path
             needs_to_be_installed.add((library_import_name, library_import_path))
     if needs_to_be_installed:
         raise ImportError(
