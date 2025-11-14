@@ -111,13 +111,13 @@ def launch_gradio_widget(metric):
 
     iface = gr.Interface(
         fn=compute,
-        inputs=gr.inputs.Dataframe(
+        inputs=gr.Dataframe(
             headers=feature_names,
             col_count=len(feature_names),
             row_count=1,
             datatype=json_to_string_type(gradio_input_types),
         ),
-        outputs=gr.outputs.Textbox(label=metric.name),
+        outputs=gr.Textbox(label=metric.name),
         description=(
             metric.info.description + "\nIf this is a text-based metric, make sure to wrap you input in double quotes."
             " Alternatively you can use a JSON-formatted list as input."
