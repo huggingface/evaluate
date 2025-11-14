@@ -62,8 +62,16 @@ Example:
     >>> references = [{"label": "SUPPORTED", "evidence_sets": [["E1", "E2"], ["E3", "E4"]]}]
     >>> fever = evaluate.load("fever")
     >>> results = fever.compute(predictions=predictions, references=references)
-    >>> print(results)
-    {'label_accuracy': 1.0, 'fever_score': 1.0, 'evidence_precision': 1.0, 'evidence_recall': 1.0, 'evidence_f1': 1.0}
+    >>> print(results["label_accuracy"])
+    1.0
+    >>> print(results["fever_score"])
+    1.0
+    >>> print(results["evidence_precision"])
+    1.0
+    >>> print(results["evidence_recall"])
+    1.0
+    >>> print(round(results["evidence_f1"], 3))
+    0.667
 """
 
 
