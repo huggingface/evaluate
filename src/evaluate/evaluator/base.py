@@ -14,7 +14,7 @@
 
 from abc import ABC, abstractmethod
 from numbers import Number
-from typing import Any, Callable, Dict, List, Optional, Union
+from typing import Any, Callable, Dict, List, Optional, Union, Tuple
 
 # Lint as: python3
 from datasets import Dataset, load_dataset
@@ -477,36 +477,61 @@ class Evaluator(ABC):
             )
         return pipe
 
-    def prepare_metric(self, metric: Union[str, EvaluationModule]):
+    def prepare_metric(
+        self,
+        metric: Union[str,
+                      EvaluationModule,
+                      List[str],
+                      List[EvaluationModule]
+                      ],
+        metrics_kwargs: Optional[Dict[str, Union[Dict, List]]] = None
+    ) -> List[Tuple[EvaluationModule, Dict[str, Any]]]:
         """
         Prepare metric.
-
         Args:
-            metric (`str` or [`EvaluationModule`], defaults to `None`):
-                Specifies the metric we use in evaluator. If it is of type `str`, we treat it as the metric name, and
+            metric (`str` or `EvaluationModule` or `List[str]`
+                    or `List[EvaluationModule]`):
+                Specifies the metric(s) we use in evaluator.
+                If it is of type `str`, we treat it as the metric name, and
                 load it. Otherwise we assume it represents a pre-loaded metric.
-
         Returns:
-            The loaded metric.
-
+            The list of loaded metrics with their respective kwargs.
         Example:
-
         ```py
         >>> from evaluate import evaluator
         >>> evaluator("text-classification").prepare_metric("accuracy")
         ```
         """
+
         # Prepare metric.
         if metric is None:
             if self.default_metric_name is None:
                 raise ValueError(
-                    "`Evaluator` doesn't specify a default metric. Please specify a valid `metric` argument."
+                    "`Evaluator` doesn't specify a default metric. "
+                    "Please specify a valid `metric` argument."
                 )
             metric = load(self.default_metric_name)
-        elif isinstance(metric, str):
-            metric = load(metric)
-
-        return metric
+        elif not isinstance(metric, list):
+            em = load(metric) if isinstance(metric, str) else metric
+            if metrics_kwargs and metric in metrics_kwargs:
+                if isinstance(metrics_kwargs[metric], dict):
+                    return [(em, metrics_kwargs[metric])]
+                elif isinstance(metrics_kwargs[metric], list):
+                    return [(em, m_) for m_ in metrics_kwargs[metric]]
+            return [(em, {})]
+        else:
+            metric_list = []
+            for m in metric:
+                em = load(m) if isinstance(m, str) else m
+                if metrics_kwargs and m in metrics_kwargs:
+                    if isinstance(metrics_kwargs[m], dict):
+                        metric_list.append((em, metrics_kwargs[m]))
+                    elif isinstance(metrics_kwargs[m], list):
+                        metric_list.extend([(em, m_)
+                                            for m_ in metrics_kwargs[m]])
+                else:
+                    metric_list.append((m, {}))
+            return metric_list
 
     def call_pipeline(self, pipe, *args, **kwargs):
         start_time = perf_counter()
@@ -516,16 +541,38 @@ class Evaluator(ABC):
 
     def compute_metric(
         self,
-        metric: EvaluationModule,
+        metric: Union[List[Tuple[EvaluationModule, Dict[str, Any]]],
+                      EvaluationModule],
         metric_inputs: Dict,
         strategy: Literal["simple", "bootstrap"] = "simple",
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
         random_state: Optional[int] = None,
-    ):
+        metrics_kwargs: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
         """Compute and return metrics."""
-        result = metric.compute(**metric_inputs, **self.METRIC_KWARGS)
+        if isinstance(metric, list):
+            if strategy == "bootstrap":
+                raise ValueError("Bootstrap strategy is not supported "
+                                 "with multiple metrics.")
+            result = {}
+            for m, kwarg in metric:
+                result_m = self.compute_metric(m,
+                                               metric_inputs,
+                                               strategy,
+                                               confidence_level,
+                                               n_resamples,
+                                               random_state,
+                                               kwarg)
+                _values_str = "_".join([str(v) for v in kwarg.values()])
+                result.update({f"{m.name}_{_values_str}":
+                               list(result_m.values())})
+            return result
 
+        result = metric.compute(
+            **metric_inputs,
+            **metrics_kwargs
+        )
         if strategy == "bootstrap":
             metric_keys = result.keys()
             bootstrap_dict = self._compute_confidence_interval(
@@ -538,7 +585,5 @@ class Evaluator(ABC):
             )
             for key in metric_keys:
                 bootstrap_dict[key]["score"] = result[key]
-
             return bootstrap_dict
-
         return result
