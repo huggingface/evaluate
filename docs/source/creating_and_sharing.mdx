@@ -59,7 +59,7 @@ Or if you need to download the NLTK `"punkt_tab"` resources:
 ```py
 def _download_and_prepare(self, dl_manager):
     import nltk
-    nltk.download("punkt_tab")
+    nltk.download("punkt_tab", quiet=True)
 ```
 
 Next, we need to define how the computation of the evaluation module works.
