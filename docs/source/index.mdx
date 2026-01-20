@@ -12,7 +12,17 @@ You can evaluate AI models on the Hub in multiple ways and this page will guide 
 - **Model Cards** provide a comprehensive overview of a model's capabilities from the author's perspective.
 - **Libraries and Packages** give you the tools to evaluate your models on the Hub.
 
-## Community Leaderboards
+## Eval Results on the Hub
+
+The Hub provides a decentralized system for tracking model evaluation results. Benchmark datasets can host leaderboards, and model repos store evaluation scores that automatically appear on both the model page and the benchmark's leaderboard.
+
+![Eval Results on the Hub](https://huggingface.co/huggingface/documentation-images/resolve/main/evaluation-results/benchmark-preview.png)
+
+You can add evaluation results to any model by submitting a YAML file to the `.eval_results/` folder in the model repo. These results display with badges indicating whether they are verified, community-provided, or linked to a benchmark leaderboard.
+
+For full details on adding evaluation results to models and registering benchmark datasets, see the [Evaluation Results documentation](https://huggingface.co/docs/hub/eval-results).
+
+## Community Managed Leaderboards
 
 Community leaderboards show how a model performs on a given task or domain. For example, there are leaderboards for question answering, reasoning, classification, vision, and audio. If you're tackling a new task, you can use a leaderboard to see how a model performs on it.
 
