@@ -87,9 +87,9 @@ class LabelDistribution(evaluate.Measurement):
         """Returns the fraction of each label present in the data and the entropy of the distribution."""
         c = Counter(data)
         label_distribution = {"labels": list(c.keys()), "fractions": [f / len(data) for f in c.values()]}
-        label_entropy = entropy(label_distribution["fractions"])
+        label_entropy = float(entropy(label_distribution["fractions"]))
         if len(c) > 1:
-            label_entropy_normalized = label_entropy / np.log(len(c))
+            label_entropy_normalized = float(label_entropy / np.log(len(c)))
         else:
             label_entropy_normalized = 0.0
         return {
