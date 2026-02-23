@@ -56,6 +56,9 @@ Args:
 
     squared : bool, default=True
         If True returns MSE value, if False returns RMSE (Root Mean Squared Error) value.
+        Note: When squared=False, uses sklearn's root_mean_squared_error function, which is
+        required for compatibility with sklearn >= 1.6 (the squared parameter was removed
+        from mean_squared_error in sklearn 1.6).
 
 Returns:
     mse : mean squared error.
@@ -94,7 +97,8 @@ class Mse(evaluate.Metric):
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(self._get_feature_types()),
             reference_urls=[
-                "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_squared_error.html"
+                "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.mean_squared_error.html",
+                "https://scikit-learn.org/stable/modules/generated/sklearn.metrics.root_mean_squared_error.html",
             ],
         )
 
