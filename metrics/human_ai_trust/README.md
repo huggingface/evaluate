@@ -117,7 +117,7 @@ They operationalize core human-centered constructs into computational form.
 
 A small reference dataset is available at:
 
-**dyra-12/human_ai_trust_demo**
+**huggingface.co/datasets/Dyra1204/human_ai_trust_demo**
 
 It demonstrates:
 
