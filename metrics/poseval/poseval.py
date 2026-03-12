@@ -38,7 +38,7 @@ _CITATION = """\
 _DESCRIPTION = """\
 The poseval metric can be used to evaluate POS taggers. Since seqeval does not work well with POS data \
 (see e.g. [here](https://stackoverflow.com/questions/71327693/how-to-disable-seqeval-label-formatting-for-pos-tagging))\
-that is not in IOB format the poseval metric is an alternative. It treats each token in the dataset as independant \
+that is not in IOB format the poseval metric is an alternative. It treats each token in the dataset as independent \
 observation and computes the precision, recall and F1-score irrespective of sentences. It uses scikit-learns's \
 [classification report](https://scikit-learn.org/stable/modules/generated/sklearn.metrics.classification_report.html) \
 to compute the scores.
