@@ -162,6 +162,7 @@ class QuestionAnsweringEvaluator(Evaluator):
         context_column: str = "context",
         id_column: str = "id",
         label_column: str = "answers",
+        config_name: Optional[str] = None,
         squad_v2_format: Optional[bool] = None,
     ) -> Tuple[Dict[str, float], Any]:
         """
@@ -174,6 +175,8 @@ class QuestionAnsweringEvaluator(Evaluator):
             dataset specified by `data`.
         label_column (`str`, defaults to `"answers"`):
             The name of the column containing the answers in the dataset specified by `data`.
+        config_name (`str`, *optional*, defaults to `None`):
+            Selecting a configuration for the metric (e.g. the GLUE metric has a configuration for each subset).
         squad_v2_format (`bool`, *optional*, defaults to `None`):
             Whether the dataset follows the format of squad_v2 dataset. This is the case when the provided dataset
             has questions where the answer is not in the context, more specifically when are answers as
@@ -199,7 +202,7 @@ class QuestionAnsweringEvaluator(Evaluator):
             )
         pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
 
-        metric = self.prepare_metric(metric)
+        metric = self.prepare_metric(metric, config_name)
 
         if squad_v2_format and metric.name == "squad":
             logger.warning(
