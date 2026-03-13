@@ -47,7 +47,7 @@ Optional arguments:
   - `raw_values` returns a full set of errors in case of multioutput input.
   - `uniform_average` means that the errors of all outputs are averaged with uniform weight. 
   - the array-like value defines weights used to average errors.
-- `squared` (`bool`): If `True` returns MSE value, if `False` returns RMSE (Root Mean Squared Error). The default value is `True`.
+- `squared` (`bool`): If `True` returns MSE value, if `False` returns RMSE (Root Mean Squared Error). The default value is `True`. Note: internally uses `root_mean_squared_error` from sklearn when `squared=False`, ensuring compatibility with sklearn >= 1.6.
         
 
 ### Output Values
@@ -82,7 +82,7 @@ Example with the `uniform_average` config:
 {'mse': 0.375}
 ```
 
-Example with `squared = True`, which returns the RMSE:
+Example with `squared = False`, which returns the RMSE:
 ```python
 >>> mse_metric = evaluate.load("mse")
 >>> predictions = [2.5, 0.0, 2, 8]
