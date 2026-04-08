@@ -38,7 +38,7 @@ This metric takes as input lists of predicted sentences and reference sentences:
 >>> predictions = ["hello there", "general kenobi"]
 >>> references = ["hello there", "general kenobi"]
 >>> bleurt = load("bleurt", module_type="metric")
->>> results = bleurt.compute(predictions=predictions, references=references)
+>>> results = bleurt.compute(predictions=predictions, references=references, batch_size=32)
 ```
 
 ### Inputs
@@ -76,7 +76,7 @@ Example with the default model (`"bleurt-base-128"`):
 >>> predictions = ["hello there", "general kenobi"]
 >>> references = ["hello there", "general kenobi"]
 >>> bleurt = load("bleurt", module_type="metric")
->>> results = bleurt.compute(predictions=predictions, references=references)
+>>> results = bleurt.compute(predictions=predictions, references=references, batch_size=32)
 >>> print(results)
 {'scores': [1.0295498371124268, 1.0445425510406494]}
 ```
@@ -86,7 +86,7 @@ Example with the full `"BLEURT-20"` model checkpoint:
 >>> predictions = ["hello there", "general kenobi"]
 >>> references = ["hello there", "general kenobi"]
 >>> bleurt = load("bleurt", module_type="metric", config_name="BLEURT-20")
->>> results = bleurt.compute(predictions=predictions, references=references)
+>>> results = bleurt.compute(predictions=predictions, references=references, batch_size=32)
 >>> print(results)
 {'scores': [1.015415906906128, 0.9985226988792419]}
 ```

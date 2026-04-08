@@ -120,6 +120,6 @@ class BLEURT(evaluate.Metric):
         model_path = dl_manager.download_and_extract(CHECKPOINT_URLS[checkpoint_name])
         self.scorer = score.BleurtScorer(os.path.join(model_path, checkpoint_name))
 
-    def _compute(self, predictions, references):
-        scores = self.scorer.score(references=references, candidates=predictions)
+    def _compute(self, predictions, references, batch_size=None):
+        scores = self.scorer.score(references=references,candidates=predictions, batch_size=batch_size)
         return {"scores": scores}
