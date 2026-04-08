@@ -13,13 +13,13 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
       - name: Set up Python
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v6
         with:
-          python-version: "3.8"
+          python-version: "3.14"
       - name: Set up default Git config
         run: |
           git config --global user.name evaluate-bot
@@ -28,7 +28,7 @@ jobs:
         working-directory: ./.github/hub
         run: |
           python -m pip install --upgrade pip
-          pip install huggingface_hub==0.35.0
+          pip install 'huggingface_hub<1'
       - name: Update Hub repositories
         working-directory: ./.github/hub
         run: |

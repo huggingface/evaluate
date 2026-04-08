@@ -11,6 +11,7 @@ from urllib.parse import urlparse
 import huggingface_hub
 from huggingface_hub.utils._headers import _http_user_agent
 
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 GIT_UP_TO_DATE = "On branch main\nYour branch is up to date with 'origin/main'.\
@@ -42,6 +43,23 @@ def get_git_tag(lib_path, commit_hash):
         return None
 
 
+def get_latest_pypi_version(pkg_name: str):
+    # finds the latest pypi version of a package (used for gradio)
+    command = f"python -m pip index versions {pkg_name}"
+    output = subprocess.run(command.split(),
+        stdout=subprocess.PIPE,
+        stderr=None,
+        encoding="utf-8",
+        check=True
+    )
+    firstline = output.stdout.split('\n')[0].strip()
+    matches = re.match(fr"{pkg_name} \((.+)\)$", firstline)
+    if matches is not None:
+        return matches[1]
+    else:
+        raise ValueError(f"Could not parse latest version for {pkg_name} from:\n{firstline}")
+
+
 def copy_recursive(source_base_path, target_base_path):
     """Copy directory recursively and overwrite existing files."""
     for item in source_base_path.iterdir():
@@ -60,7 +78,21 @@ def update_evaluate_dependency(requirements_path, commit_hash):
     with open(requirements_path, "w") as f:
         f.write(file_content)
 
-def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
+def update_gradio_sdk_version(readme_path, gradio_sdk_version):
+    # read the yaml metadata in the readme and update the `sdk_version` field
+    with open(readme_path, "r") as f:
+        content = f.read()
+    is_gradio = re.search(r'sdk: gradio(?:[\s\S]+?^---)', content, flags=re.MULTILINE)
+    if is_gradio is None:
+        logger.warning(f"No gradio sdk found in {readme_path}, skipping sdk_version update.")
+        return
+    # replace only the sdk_version within the header
+    content = re.sub(r"(sdk_version: \d*\.\d*\.\d*)([\s\S]+?^---)", fr"sdk_version: {gradio_sdk_version}\2", content, flags=re.MULTILINE)
+    with open(readme_path, "w") as f:
+        f.write(content)
+
+
+def push_module_to_hub(module_path, type, token, commit_hash, gradio_sdk_version, tag=None):
     module_name = module_path.stem
     org = f"evaluate-{type}"
     
@@ -89,6 +121,7 @@ def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
     
     copy_recursive(module_path, repo_path / module_name)
     update_evaluate_dependency(repo_path / module_name / "requirements.txt", commit_hash)
+    update_gradio_sdk_version(repo_path / module_name / "README.md", gradio_sdk_version)
     
     repo.git_add()
     try:
@@ -119,11 +152,14 @@ if __name__ == "__main__":
     if git_tag is not None:
         logger.info(f"Found tag: {git_tag}.")
 
+    gradio_sdk_version = get_latest_pypi_version('gradio')
+    logger.info(f"Latest gradio version is {gradio_sdk_version}.")
+
     for type, dir in zip(evaluation_types, evaluation_paths):
         if (evaluate_lib_path/dir).exists():
             for module_path in (evaluate_lib_path/dir).iterdir():
                 if module_path.is_dir():
                     logger.info(f"Updating: module {module_path.name}.")
-                    push_module_to_hub(module_path, type, token, commit_hash, tag=git_tag)
+                    push_module_to_hub(module_path, type, token, commit_hash, gradio_sdk_version, tag=git_tag)
         else:
             logger.warning(f"No folder {str(evaluate_lib_path/dir)} for {type} found.")
