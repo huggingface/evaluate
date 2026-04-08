@@ -11,7 +11,6 @@ on:
 
 env:
   HF_ALLOW_CODE_EVAL: 1
-  CI_HEADERS: ${{ secrets.CI_HEADERS }}
 
 jobs:
 
@@ -55,11 +54,17 @@ jobs:
         run: |
           pip install .[tests]
           pip install -r additional-tests-requirements.txt --no-deps
+        env:
+          CI_HEADERS: ${{ secrets.CI_HEADERS }}
       - name: Test with pytest
         if: ${{ matrix.test == 'unit' }}
         run: |
           python -m pytest -n 2 --dist loadfile -sv ./tests/ --ignore=./tests/test_trainer_evaluator_parity.py
+        env:
+          CI_HEADERS: ${{ secrets.CI_HEADERS }}
       - name: Integration test with transformers
         if: ${{ matrix.test == 'parity' }}
         run: |
           python -m pytest -n 2 --dist loadfile -sv ./tests/test_trainer_evaluator_parity.py
+        env:
+          CI_HEADERS: ${{ secrets.CI_HEADERS }}
