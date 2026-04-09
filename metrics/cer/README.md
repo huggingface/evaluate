@@ -56,12 +56,15 @@ where
 
 ## How to use 
 
-The metric takes two inputs: references (a list of references for each speech input) and predictions (a list of transcriptions to score).
+The metric takes two inputs: references (a list of references for each speech input) and predictions (a list of transcriptions to score). You can also set `normalize=True` to obtain a normalized CER value.
 
 ```python
 from evaluate import load
 cer = load("cer")
+# Standard CER calculation
 cer_score = cer.compute(predictions=predictions, references=references)
+# Normalized CER calculation
+normalized_cer_score = cer.compute(predictions=predictions, references=references, normalize=True)
 ```
 ## Output values
 
@@ -74,7 +77,9 @@ print(cer_score)
 
 The **lower** the CER value, the **better** the performance of the ASR system, with a CER of 0 being a perfect score. 
 
-However, CER's output is not always a number between 0 and 1, in particular when there is a high number of insertions (see [Examples](#Examples) below).
+When using the default settings, CER's output is not always a number between 0 and 1, in particular when there is a high number of insertions (see [Examples](#Examples) below).
+
+When using `normalize=True`, the CER is calculated as `(S + D + I) / (S + D + I + C)`, which ensures the output always falls within the range of 0-1 (or 0-100%).
 
 ### Values from popular papers
 
@@ -130,13 +135,17 @@ references = ["hello"]
 cer_score = cer.compute(predictions=predictions, references=references)
 print(cer_score)
 1.2
+# With normalization
+normalized_cer_score = cer.compute(predictions=predictions, references=references, normalize=True)
+print(normalized_cer_score)
+0.54545454545454545  # Will always be between 0 and 1
 ```
 
 ## Limitations and bias
 
 CER is useful for comparing different models for tasks such as automatic speech recognition (ASR) and optic character recognition (OCR), especially for multilingual datasets where WER is not suitable given the diversity of languages. However, CER provides no details on the nature of translation errors and further work is therefore required to identify the main source(s) of error and to focus any research effort.
 
-Also, in some cases, instead of reporting the raw CER, a normalized CER is reported where the number of mistakes is divided by the sum of the number of edit operations (`I` + `S` + `D`) and `C` (the number of correct characters), which results in CER values that fall within the range of 0–100%.
+The raw CER can exceed 1.0 when there are many insertion errors. To address this, you can use the `normalize=True` parameter to calculate a normalized CER where the number of errors is divided by the sum of the number of edit operations (`I` + `S` + `D`) and `C` (the number of correct characters), which results in CER values that fall within the range of 0–1 (or 0–100%).
 
 
 ## Citation
