@@ -16,14 +16,14 @@
 from collections import Counter
 
 import datasets
-import pandas as pd
-from scipy import stats
+import numpy as np
+from scipy.stats import entropy
 
 import evaluate
 
 
 _DESCRIPTION = """
-Returns the label ratios of the dataset labels, as well as a scalar for skewness.
+Returns the label ratios of the dataset labels, as well as the Shannon entropy of the label distribution.
 """
 
 _KWARGS_DESCRIPTION = """
@@ -32,13 +32,14 @@ Args:
 
 Returns:
     `label_distribution` (`dict`) :  a dictionary containing two sets of keys and values: `labels`, which includes the list of labels contained in the dataset, and `fractions`, which includes the fraction of each label.
-    `label_skew` (`scalar`) : the asymmetry of the label distribution.
+    `label_entropy` (`float`) : the Shannon entropy of the label distribution (in nats). Maximized at log(k) for k classes when labels are uniformly distributed, and 0 when all labels are the same.
+    `label_entropy_normalized` (`float`) : the Shannon entropy normalized by log(k), giving a value between 0 and 1. A value of 1.0 means perfectly balanced; a value close to 0 means highly imbalanced.
 Examples:
     >>> data = [1, 0, 1, 1, 0, 1, 0]
     >>> distribution = evaluate.load("label_distribution")
     >>> results = distribution.compute(data=data)
     >>> print(results)
-    {'label_distribution': {'labels': [1, 0], 'fractions': [0.5714285714285714, 0.42857142857142855]}, 'label_skew': -0.2886751345948127}
+    {'label_distribution': {'labels': [1, 0], 'fractions': [0.5714285714285714, 0.42857142857142855]}, 'label_entropy': 0.6829081047004717, 'label_entropy_normalized': 0.9852281360342515}
 """
 
 _CITATION = """\
@@ -83,11 +84,16 @@ class LabelDistribution(evaluate.Measurement):
         )
 
     def _compute(self, data):
-        """Returns the fraction of each label present in the data"""
+        """Returns the fraction of each label present in the data and the entropy of the distribution."""
         c = Counter(data)
-        label_distribution = {"labels": [k for k in c.keys()], "fractions": [f / len(data) for f in c.values()]}
-        if isinstance(data[0], str):
-            label2id = {label: id for id, label in enumerate(label_distribution["labels"])}
-            data = [label2id[d] for d in data]
-        skew = stats.skew(data)
-        return {"label_distribution": label_distribution, "label_skew": skew}
+        label_distribution = {"labels": list(c.keys()), "fractions": [f / len(data) for f in c.values()]}
+        label_entropy = float(entropy(label_distribution["fractions"]))
+        if len(c) > 1:
+            label_entropy_normalized = float(label_entropy / np.log(len(c)))
+        else:
+            label_entropy_normalized = 0.0
+        return {
+            "label_distribution": label_distribution,
+            "label_entropy": label_entropy,
+            "label_entropy_normalized": label_entropy_normalized,
+        }
