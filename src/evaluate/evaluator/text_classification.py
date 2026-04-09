@@ -107,6 +107,7 @@ class TextClassificationEvaluator(Evaluator):
         input_column: str = "text",
         second_input_column: Optional[str] = None,
         label_column: str = "label",
+        config_name: Optional[str] = None,
         label_mapping: Optional[Dict[str, Number]] = None,
     ) -> Tuple[Dict[str, float], Any]:
         """
@@ -117,6 +118,8 @@ class TextClassificationEvaluator(Evaluator):
             as MNLI, where two columns are used.
         label_column (`str`, defaults to `"label"`):
             The name of the column containing the labels in the dataset specified by `data`.
+        config_name (`str`, *optional*, defaults to `None`):
+            Selecting a configuration for the metric (e.g. the GLUE metric has a configuration for each subset).
         label_mapping (`Dict[str, Number]`, *optional*, defaults to `None`):
             We want to map class labels defined by the model in the pipeline to values consistent with those
             defined in the `label_column` of the `data` dataset.
@@ -137,7 +140,7 @@ class TextClassificationEvaluator(Evaluator):
             feature_extractor=feature_extractor,
             device=device,
         )
-        metric = self.prepare_metric(metric)
+        metric = self.prepare_metric(metric, config_name)
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
