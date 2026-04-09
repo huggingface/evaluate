@@ -32,7 +32,7 @@
 
 It currently contains:
 
-- **implementations of dozens of popular metrics**: the existing metrics cover a variety of tasks spanning from NLP to Computer Vision, and include dataset-specific metrics for datasets. With a simple command like `accuracy = load("accuracy")`, get any of these metrics ready to use for evaluating a ML model in any framework (Numpy/Pandas/PyTorch/TensorFlow/JAX).
+- **implementations of dozens of popular metrics**: the existing metrics cover a variety of tasks spanning from NLP to Computer Vision, and include dataset-specific metrics. With a simple command like `accuracy = load("accuracy")`, get any of these metrics ready to use for evaluating a ML model in any framework (Numpy/Pandas/PyTorch/TensorFlow/JAX).
 - **comparisons and measurements**: comparisons are used to measure the difference between models and measurements are tools to evaluate datasets.
 - **an easy way of adding new evaluation modules to the 🤗 Hub**: you can create new evaluation modules and push them to a dedicated Space in the 🤗 Hub with `evaluate-cli create [metric name]`, which allows you to see easily compare different metrics and their outputs for the same sets of references and predictions.
 
@@ -45,7 +45,7 @@ It currently contains:
 🤗 Evaluate also has lots of useful features like:
 
 - **Type checking**: the input types are checked to make sure that you are using the right input formats for each metric
-- **Metric cards**: each metrics comes with a card that describes the values, limitations and their ranges, as well as providing examples of their usage and usefulness.
+- **Metric cards**: each metric comes with a card that describes the values, limitations and their ranges, as well as providing examples of their usage and usefulness.
 - **Community metrics:** Metrics live on the Hugging Face Hub and you can easily add your own metrics for your project or to collaborate with others.
 
 
@@ -53,7 +53,7 @@ It currently contains:
 
 ## With pip
 
-🤗 Evaluate can be installed from PyPi and has to be installed in a virtual environment (venv or conda for instance)
+🤗 Evaluate can be installed from PyPI and has to be installed in a virtual environment (venv or conda for instance)
 
 ```bash
 pip install evaluate
