@@ -38,7 +38,6 @@ from evaluate import (
     Evaluator,
     ImageClassificationEvaluator,
     QuestionAnsweringEvaluator,
-    Text2TextGenerationEvaluator,
     TextClassificationEvaluator,
     TextGenerationEvaluator,
     TokenClassificationEvaluator,
@@ -57,15 +56,6 @@ class DummyTextGenerationPipeline:
 
     def __call__(self, inputs, **kwargs):
         return [[{f"{self.prefix}_text": "Lorem ipsum"} for _ in range(self.num_return_sequences)] for _ in inputs]
-
-
-class DummyText2TextGenerationPipeline:
-    def __init__(self, prefix="generated", task="text2text-generation"):
-        self.task = task
-        self.prefix = prefix
-
-    def __call__(self, inputs, **kwargs):
-        return [{f"{self.prefix}_text": "Lorem ipsum"} for _ in inputs]
 
 
 class DummyTextClassificationPipeline:
@@ -908,77 +898,6 @@ class TestTextGenerationEvaluator(TestCase):
             ]
         )
         self.assertEqual(processed_predictions, {"data": ["A", "B", "C", "D"]})
-
-
-class TestText2TextGenerationEvaluator(TestCase):
-    def setUp(self):
-        self.data = Dataset.from_dict(
-            {
-                "text": ["Lorem ipsum"] * 4,
-                "label": ["Ipsum Lorem"] * 4,
-            }
-        )
-        self.pipe = DummyText2TextGenerationPipeline()
-        self.evaluator = evaluator("text2text-generation")
-
-    def test_pipe_init(self):
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-        )
-        self.assertEqual(results["bleu"], 0)
-
-    def test_class_init(self):
-        evaluator = Text2TextGenerationEvaluator()
-        self.assertEqual(evaluator.task, "text2text-generation")
-        self.assertIsNone(evaluator.default_metric_name)
-
-        results = evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="bleu",
-        )
-        self.assertEqual(results["bleu"], 0)
-
-    @slow
-    def test_default_pipe_init(self):
-        results = self.evaluator.compute(data=self.data)
-        self.assertEqual(results["bleu"], 0)
-
-    def test_overwrite_default_metric(self):
-        rouge = load("rouge")
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric=rouge,
-        )
-        self.assertEqual(results["rouge1"], 1.0)
-        results = self.evaluator.compute(
-            model_or_pipeline=self.pipe,
-            data=self.data,
-            metric="rouge",
-        )
-        self.assertEqual(results["rouge1"], 1.0)
-
-    def test_summarization(self):
-        pipe = DummyText2TextGenerationPipeline(task="summarization", prefix="summary")
-        e = evaluator("summarization")
-
-        results = e.compute(
-            model_or_pipeline=pipe,
-            data=self.data,
-        )
-        self.assertEqual(results["rouge1"], 1.0)
-
-    def test_translation(self):
-        pipe = DummyText2TextGenerationPipeline(task="translation", prefix="translation")
-        e = evaluator("translation")
-
-        results = e.compute(
-            model_or_pipeline=pipe,
-            data=self.data,
-        )
-        self.assertEqual(results["bleu"], 0)
 
 
 class TestAutomaticSpeechRecognitionEvaluator(TestCase):
