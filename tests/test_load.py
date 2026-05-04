@@ -2,6 +2,7 @@ import importlib
 import os
 import tempfile
 from unittest import TestCase
+from unittest.mock import patch
 
 import pytest
 from datasets import DownloadConfig
@@ -99,6 +100,35 @@ class ModuleFactoryTest(TestCase):
         )
         module_factory_result = factory.get_module()
         assert importlib.import_module(module_factory_result.module_path) is not None
+
+    def test_evaluation_module_factory_local_py_path_passes_download_config(self):
+        # Regression test for https://github.com/huggingface/evaluate/issues/709:
+        # evaluation_module_factory must forward download_config to LocalEvaluationModuleFactory
+        # when a direct .py path is given (path.endswith(filename) branch).
+        py_path = os.path.join(self._metric_loading_script_dir, f"{METRIC_LOADING_SCRIPT_NAME}.py")
+        with patch("evaluate.loading.LocalEvaluationModuleFactory", wraps=LocalEvaluationModuleFactory) as spy:
+            evaluation_module_factory(
+                py_path,
+                download_config=self.download_config,
+                dynamic_modules_path=self.dynamic_modules_path,
+            )
+            spy.assert_called_once()
+            _, kwargs = spy.call_args
+            assert kwargs.get("download_config") is self.download_config
+
+    def test_evaluation_module_factory_local_dir_path_passes_download_config(self):
+        # Regression test for https://github.com/huggingface/evaluate/issues/709:
+        # evaluation_module_factory must forward download_config to LocalEvaluationModuleFactory
+        # when a directory path is given (combined_path branch).
+        with patch("evaluate.loading.LocalEvaluationModuleFactory", wraps=LocalEvaluationModuleFactory) as spy:
+            evaluation_module_factory(
+                self._metric_loading_script_dir,
+                download_config=self.download_config,
+                dynamic_modules_path=self.dynamic_modules_path,
+            )
+            spy.assert_called_once()
+            _, kwargs = spy.call_args
+            assert kwargs.get("download_config") is self.download_config
 
     def test_CachedMetricModuleFactory(self):
         path = os.path.join(self._metric_loading_script_dir, f"{METRIC_LOADING_SCRIPT_NAME}.py")

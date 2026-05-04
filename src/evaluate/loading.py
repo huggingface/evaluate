@@ -617,13 +617,13 @@ def evaluation_module_factory(
     if path.endswith(filename):
         if os.path.isfile(path):
             return LocalEvaluationModuleFactory(
-                path, download_mode=download_mode, dynamic_modules_path=dynamic_modules_path
+                path, download_mode=download_mode, download_config=download_config, dynamic_modules_path=dynamic_modules_path
             ).get_module()
         else:
             raise FileNotFoundError(f"Couldn't find a metric script at {relative_to_absolute_path(path)}")
     elif os.path.isfile(combined_path):
         return LocalEvaluationModuleFactory(
-            combined_path, download_mode=download_mode, dynamic_modules_path=dynamic_modules_path
+            combined_path, download_mode=download_mode, download_config=download_config, dynamic_modules_path=dynamic_modules_path
         ).get_module()
     elif is_relative_path(path) and path.count("/") <= 1 and not force_local_path:
         try:
