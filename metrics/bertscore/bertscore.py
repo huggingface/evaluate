@@ -14,6 +14,7 @@
 """ BERTScore metric. """
 
 import functools
+import sys
 from contextlib import contextmanager
 
 import bert_score
@@ -79,6 +80,11 @@ Args:
     rescale_with_baseline (bool): Rescale bertscore with pre-computed baseline.
     baseline_path (str): Customized baseline file.
     use_fast_tokenizer (bool): `use_fast` parameter passed to HF tokenizer. New in version 0.3.10.
+    max_length (int): Maximum sequence length for tokenization. Useful when the model does not
+        define ``model_max_length`` in its tokenizer config (e.g. DeBERTa variants), which causes
+        transformers to fall back to a huge sentinel value that overflows the Rust tokenizers backend.
+        When not set, the metric automatically caps any sentinel value larger than ``sys.maxsize``
+        to 512 to prevent the ``OverflowError``.
 
 Returns:
     precision: Precision.
@@ -142,6 +148,7 @@ class BERTScore(evaluate.Metric):
         rescale_with_baseline=False,
         baseline_path=None,
         use_fast_tokenizer=False,
+        max_length=None,
     ):
 
         if isinstance(references[0], str):
@@ -199,6 +206,16 @@ class BERTScore(evaluate.Metric):
                     rescale_with_baseline=rescale_with_baseline,
                     baseline_path=baseline_path,
                 )
+
+            # Some models (e.g. DeBERTa) omit model_max_length from their tokenizer config.
+            # Transformers then sets it to a huge sentinel (~1e30) that overflows the Rust
+            # tokenizers backend when passed to enable_truncation().  Cap it here so that
+            # bert_score's internal encode calls stay within a safe integer range.
+            _tokenizer = self.cached_bertscorer._tokenizer
+            if max_length is not None:
+                _tokenizer.model_max_length = max_length
+            elif _tokenizer.model_max_length > sys.maxsize:
+                _tokenizer.model_max_length = 512
 
         (P, R, F) = self.cached_bertscorer.score(
             cands=predictions,

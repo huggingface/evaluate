@@ -219,6 +219,82 @@ def patch_comet(module_name):
             yield
 
 
+def test_bertscore_large_model_max_length_does_not_overflow():
+    """Regression test for https://github.com/huggingface/evaluate/issues/739.
+
+    Models that omit model_max_length from their tokenizer config cause transformers to
+    set it to a huge sentinel (~1e30).  That sentinel overflows the Rust tokenizers backend
+    when bert_score passes it to enable_truncation().  BERTScore._compute() should clamp
+    the value to a safe integer before scoring.
+    """
+    import sys
+    import torch
+
+    VERY_LARGE_INTEGER = int(1e30)
+
+    def bert_cos_score_idf(model, refs, *args, **kwargs):
+        return torch.tensor([[1.0, 1.0, 1.0]] * len(refs))
+
+    class FakeTokenizer:
+        model_max_length = VERY_LARGE_INTEGER
+
+    class FakeScorer:
+        hash = "fakehash"
+        _tokenizer = FakeTokenizer()
+
+        def score(self, cands, refs, **kwargs):
+            return (torch.tensor([1.0]), torch.tensor([1.0]), torch.tensor([1.0]))
+
+    with patch("bert_score.scorer.get_model"), patch(
+        "bert_score.scorer.bert_cos_score_idf"
+    ) as mock_score, patch("bert_score.utils.get_hash", return_value="fakehash"), patch(
+        "bert_score.BERTScorer", return_value=FakeScorer()
+    ):
+        mock_score.side_effect = bert_cos_score_idf
+        metric = load(os.path.join("metrics", "bertscore"))
+        result = metric.compute(
+            predictions=["hello there"],
+            references=["hello there"],
+            lang="en",
+        )
+    # model_max_length must have been capped to a safe value
+    assert FakeScorer._tokenizer.model_max_length <= sys.maxsize
+    assert result["f1"] == [1.0]
+
+
+def test_bertscore_explicit_max_length_is_honoured():
+    """max_length parameter is applied to the tokenizer when provided."""
+    import torch
+
+    def bert_cos_score_idf(model, refs, *args, **kwargs):
+        return torch.tensor([[1.0, 1.0, 1.0]] * len(refs))
+
+    class FakeTokenizer:
+        model_max_length = 512
+
+    class FakeScorer:
+        hash = "fakehash"
+        _tokenizer = FakeTokenizer()
+
+        def score(self, cands, refs, **kwargs):
+            return (torch.tensor([1.0]), torch.tensor([1.0]), torch.tensor([1.0]))
+
+    with patch("bert_score.scorer.get_model"), patch(
+        "bert_score.scorer.bert_cos_score_idf"
+    ) as mock_score, patch("bert_score.utils.get_hash", return_value="fakehash"), patch(
+        "bert_score.BERTScorer", return_value=FakeScorer()
+    ):
+        mock_score.side_effect = bert_cos_score_idf
+        metric = load(os.path.join("metrics", "bertscore"))
+        metric.compute(
+            predictions=["hello there"],
+            references=["hello there"],
+            lang="en",
+            max_length=256,
+        )
+    assert FakeScorer._tokenizer.model_max_length == 256
+
+
 def test_seqeval_raises_when_incorrect_scheme():
     metric = load(os.path.join("metrics", "seqeval"))
     wrong_scheme = "ERROR"
