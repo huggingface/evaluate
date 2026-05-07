@@ -39,7 +39,7 @@ Args:
         - 'weighted': Calculate metrics for each label, and find their average weighted by support (the number of true instances for each label). This alters `'macro'` to account for label imbalance. This option can result in an F-score that is not between precision and recall.
         - 'samples': Calculate metrics for each instance, and find their average (only meaningful for multilabel classification).
     sample_weight (`list` of `float`): Sample weights Defaults to None.
-    zero_division (`int` or `string`): Sets the value to return when there is a zero division. Defaults to `'warn'`.
+    zero_division (`int` or `"warn"`, optional): Passed directly to sklearn's `f1_score`. Controls behavior when a label has no predicted or true samples. Use `0`, `1`, or `"warn"` (default sklearn behavior).
 
         - 0: Returns 0 when there is a zero division.
         - 1: Returns 1 when there is a zero division.
@@ -140,18 +140,12 @@ class F1(evaluate.Metric):
         predictions,
         references,
         labels=None,
-        pos_label=1,
-        average="binary",
-        sample_weight=None,
-        zero_division="warn",
+        **kwargs,
     ):
         score = f1_score(
             references,
             predictions,
             labels=labels,
-            pos_label=pos_label,
-            average=average,
-            sample_weight=sample_weight,
-            zero_division=zero_division,
+            **kwargs,
         )
         return {"f1": score if getattr(score, "size", 1) > 1 else float(score)}
