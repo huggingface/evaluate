@@ -510,6 +510,13 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             )
         batch = {"predictions": predictions, "references": references, **kwargs}
         batch = {input_name: batch[input_name] for input_name in self._feature_names()}
+        none_inputs = [name for name, val in batch.items() if val is None]
+        if none_inputs:
+            raise ValueError(
+                f"Batch inputs contain None for the following fields: {none_inputs}. "
+                "All inputs must be non-None sequences (lists, arrays, or tensors). "
+                "Check that your compute_metrics function passes non-None predictions and references."
+            )
         if self.writer is None:
             self.selected_feature_format = self._infer_feature_from_batch(batch)
             self._init_writer()
