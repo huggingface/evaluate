@@ -41,6 +41,15 @@ from .utils.logging import get_logger
 logger = get_logger(__name__)
 
 
+class EvaluationModuleError(Exception):
+    """Raised when an evaluation module's ``_compute`` method fails.
+
+    Catching this exception lets callers distinguish evaluate-specific
+    failures from unrelated ``Exception`` subclasses without importing
+    internal sklearn or numpy error types.
+    """
+
+
 class FileFreeLock(BaseFileLock):
     """Thread lock until a file **cannot** be locked"""
 
@@ -464,7 +473,12 @@ class EvaluationModule(EvaluationModuleInfoMixin):
 
             inputs = {input_name: self.data[input_name][:] for input_name in self._feature_names()}
             with temp_seed(self.seed):
-                output = self._compute(**inputs, **compute_kwargs)
+                try:
+                    output = self._compute(**inputs, **compute_kwargs)
+                except EvaluationModuleError:
+                    raise
+                except Exception as e:
+                    raise EvaluationModuleError(f"Metric '{self.name}' raised {type(e).__name__}: {e}") from e
 
             if self.buf_writer is not None:
                 self.buf_writer = None
