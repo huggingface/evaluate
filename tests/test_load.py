@@ -1,7 +1,7 @@
 import importlib
 import os
 import tempfile
-from unittest import TestCase
+from unittest import TestCase, mock
 
 import pytest
 from datasets import DownloadConfig
@@ -138,3 +138,39 @@ class ModuleFactoryTest(TestCase):
                 evaluation_module_factory(
                     metric, download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
                 )
+
+    def test_evaluation_module_factory_passes_download_config_local_script(self):
+        """Regression test for #709: download_config must be forwarded to LocalEvaluationModuleFactory
+        when loading a local .py file directly."""
+        path = os.path.join(self._metric_loading_script_dir, f"{METRIC_LOADING_SCRIPT_NAME}.py")
+        custom_config = DownloadConfig(cache_dir=self.cache_dir, local_files_only=True)
+        with mock.patch("evaluate.loading.LocalEvaluationModuleFactory") as mock_factory:
+            mock_factory.return_value.get_module.return_value = mock.MagicMock()
+            evaluation_module_factory(
+                path,
+                download_config=custom_config,
+                dynamic_modules_path=self.dynamic_modules_path,
+            )
+            mock_factory.assert_called_once()
+            _, call_kwargs = mock_factory.call_args
+            assert (
+                call_kwargs.get("download_config") is custom_config
+            ), "download_config was not forwarded to LocalEvaluationModuleFactory for .py path"
+
+    def test_evaluation_module_factory_passes_download_config_local_dir(self):
+        """Regression test for #709: download_config must be forwarded to LocalEvaluationModuleFactory
+        when loading a local directory (combined_path case)."""
+        path = self._metric_loading_script_dir
+        custom_config = DownloadConfig(cache_dir=self.cache_dir, local_files_only=True)
+        with mock.patch("evaluate.loading.LocalEvaluationModuleFactory") as mock_factory:
+            mock_factory.return_value.get_module.return_value = mock.MagicMock()
+            evaluation_module_factory(
+                path,
+                download_config=custom_config,
+                dynamic_modules_path=self.dynamic_modules_path,
+            )
+            mock_factory.assert_called_once()
+            _, call_kwargs = mock_factory.call_args
+            assert (
+                call_kwargs.get("download_config") is custom_config
+            ), "download_config was not forwarded to LocalEvaluationModuleFactory for directory path"
