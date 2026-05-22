@@ -13,7 +13,8 @@
 # limitations under the License.
 
 # Lint as: python3
-""" EvaluationModule base class."""
+"""EvaluationModule base class."""
+
 import collections
 import itertools
 import os
@@ -39,6 +40,10 @@ from .utils.logging import get_logger
 
 
 logger = get_logger(__name__)
+
+
+class EvaluationModuleError(Exception):
+    """Raised when an EvaluationModule's compute step fails."""
 
 
 class FileFreeLock(BaseFileLock):
@@ -464,7 +469,12 @@ class EvaluationModule(EvaluationModuleInfoMixin):
 
             inputs = {input_name: self.data[input_name][:] for input_name in self._feature_names()}
             with temp_seed(self.seed):
-                output = self._compute(**inputs, **compute_kwargs)
+                try:
+                    output = self._compute(**inputs, **compute_kwargs)
+                except EvaluationModuleError:
+                    raise
+                except Exception as e:
+                    raise EvaluationModuleError(f"Metric '{self.name}' computation failed: {e}") from e
 
             if self.buf_writer is not None:
                 self.buf_writer = None
