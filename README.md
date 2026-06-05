@@ -82,3 +82,8 @@ See this [step-by-step guide](https://huggingface.co/docs/evaluate/creating_and_
 ## Credits
 
 Thanks to [@marella](https://github.com/marella) for letting us use the `evaluate` namespace on PyPi previously used by his [library](https://github.com/marella/evaluate).
+
+
+## Benchmarks
+
+- [REFUTE](https://huggingface.co/datasets/BGPT-OFFICIAL/refute) — Scientific critique & epistemic calibration (Apache-2.0). [Leaderboard](https://huggingface.co/spaces/BGPT-OFFICIAL/refute-leaderboard) · [Report](https://huggingface.co/datasets/BGPT-OFFICIAL/refute/blob/main/TECHNICAL_REPORT.md) · [Integrations](https://huggingface.co/datasets/BGPT-OFFICIAL/refute/tree/main/integrations)
