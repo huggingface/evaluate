@@ -17,7 +17,7 @@ import datasets
 
 import evaluate
 
-from .nmt_bleu import compute_bleu  # From: https://github.com/tensorflow/nmt/blob/master/nmt/scripts/bleu.py
+from .nmt_bleu import compute_bleu
 from .tokenizer_13a import Tokenizer13a
 
 
