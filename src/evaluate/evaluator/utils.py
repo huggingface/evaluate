@@ -8,6 +8,9 @@ class DatasetColumn(list):
         self.dataset = dataset
         self.key = key
 
+    def __repr__(self):
+        return f"DatasetColumn(key={self.key!r}, len={len(self)})"
+
     def __len__(self):
         return len(self.dataset)
 
@@ -64,6 +67,16 @@ class DatasetColumnPair(list):
 
         self.first_key = first_key
         self.second_key = second_key
+
+    def __repr__(self):
+        return (
+            f"DatasetColumnPair("
+            f"first_col={self.first_col!r}, "
+            f"second_col={self.second_col!r}, "
+            f"first_key={self.first_key!r}, "
+            f"second_key={self.second_key!r}, "
+            f"len={len(self)})"
+        )
 
     def __len__(self):
         return len(self.dataset)
