@@ -96,7 +96,13 @@ class TokenClassificationEvaluator(Evaluator):
     def __init__(self, task="token-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
 
-    def predictions_processor(self, predictions: List[List[Dict]], words: List[List[str]], join_by: str):
+    def predictions_processor(
+        self,
+        predictions: List[List[Dict]],
+        words: List[List[str]],
+        join_by: str,
+        label_mapping: Optional[Dict[str, str]] = None,
+    ):
         """
         Transform the pipeline predictions into a list of predicted labels of the same length as the true labels.
 
@@ -107,6 +113,9 @@ class TokenClassificationEvaluator(Evaluator):
                 Original input data to the pipeline, used to build predicted labels of the same length.
             join_by (`str`):
                 String to use to join two words. In English, it will typically be " ".
+            label_mapping (`Dict[str, str]`, *optional*, defaults to `None`):
+                Mapping from pipeline output labels to labels in the dataset. For example,
+                `{"LABEL_0": "O", "LABEL_1": "B-PER"}`.
 
         Returns:
             `dict`: a dictionary holding the predictions
@@ -127,9 +136,15 @@ class TokenClassificationEvaluator(Evaluator):
                     token_index += 1
 
                 if prediction[token_index]["start"] > word_offset[0]:  # bad indexing
-                    pred_processed.append("O")
+                    entity = "O"
                 elif prediction[token_index]["start"] == word_offset[0]:
-                    pred_processed.append(prediction[token_index]["entity"])
+                    entity = prediction[token_index]["entity"]
+                else:
+                    continue
+
+                if label_mapping is not None:
+                    entity = label_mapping.get(entity, entity)
+                pred_processed.append(entity)
 
             preds.append(pred_processed)
 
@@ -158,7 +173,13 @@ class TokenClassificationEvaluator(Evaluator):
 
         return offsets
 
-    def prepare_data(self, data: Union[str, Dataset], input_column: str, label_column: str, join_by: str):
+    def prepare_data(
+        self,
+        data: Union[str, Dataset],
+        input_column: str,
+        label_column: str,
+        join_by: str,
+    ):
         super().prepare_data(data, input_column, label_column)
 
         if not isinstance(data.features[input_column], Sequence) or not isinstance(
@@ -172,9 +193,14 @@ class TokenClassificationEvaluator(Evaluator):
         # Otherwise, we have to get the list of labels manually.
         labels_are_int = isinstance(data.features[label_column].feature, ClassLabel)
         if labels_are_int:
-            label_list = data.features[label_column].feature.names  # list of string labels
+            label_list = data.features[
+                label_column
+            ].feature.names  # list of string labels
             id_to_label = {i: label for i, label in enumerate(label_list)}
-            references = [[id_to_label[label_id] for label_id in label_ids] for label_ids in data[label_column]]
+            references = [
+                [id_to_label[label_id] for label_id in label_ids]
+                for label_ids in data[label_column]
+            ]
         elif data.features[label_column].feature.dtype.startswith("int"):
             raise NotImplementedError(
                 "References provided as integers, but the reference column is not a Sequence of ClassLabels."
@@ -192,12 +218,20 @@ class TokenClassificationEvaluator(Evaluator):
 
     def prepare_pipeline(
         self,
-        model_or_pipeline: Union[str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"],  # noqa: F821
-        tokenizer: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,  # noqa: F821
-        feature_extractor: Union["PreTrainedTokenizerBase", "FeatureExtractionMixin"] = None,  # noqa: F821
+        model_or_pipeline: Union[
+            str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"
+        ],  # noqa: F821
+        tokenizer: Union[
+            "PreTrainedTokenizerBase", "FeatureExtractionMixin"
+        ] = None,  # noqa: F821
+        feature_extractor: Union[
+            "PreTrainedTokenizerBase", "FeatureExtractionMixin"
+        ] = None,  # noqa: F821
         device: int = None,
     ):
-        pipe = super().prepare_pipeline(model_or_pipeline, tokenizer, feature_extractor, device)
+        pipe = super().prepare_pipeline(
+            model_or_pipeline, tokenizer, feature_extractor, device
+        )
 
         # check the pipeline outputs start characters in its predictions
         dummy_output = pipe(["2003 New York Gregory"], **self.PIPELINE_KWARGS)
@@ -214,7 +248,11 @@ class TokenClassificationEvaluator(Evaluator):
     def compute(
         self,
         model_or_pipeline: Union[
-            str, "Pipeline", Callable, "PreTrainedModel", "TFPreTrainedModel"  # noqa: F821
+            str,
+            "Pipeline",
+            Callable,
+            "PreTrainedModel",
+            "TFPreTrainedModel",  # noqa: F821
         ] = None,
         data: Union[str, Dataset] = None,
         subset: Optional[str] = None,
@@ -229,6 +267,7 @@ class TokenClassificationEvaluator(Evaluator):
         input_column: str = "tokens",
         label_column: str = "ner_tags",
         join_by: Optional[str] = " ",
+        label_mapping: Optional[Dict[str, str]] = None,
     ) -> Tuple[Dict[str, float], Any]:
         """
         input_column (`str`, defaults to `"tokens"`):
@@ -238,6 +277,9 @@ class TokenClassificationEvaluator(Evaluator):
         join_by (`str`, *optional*, defaults to `" "`):
             This evaluator supports dataset whose input column is a list of words. This parameter specifies how to join
             words to generate a string input. This is especially useful for languages that do not separate words by a space.
+        label_mapping (`Dict[str, str]`, *optional*, defaults to `None`):
+            Mapping from pipeline output labels to labels in the dataset. For example,
+            `{"LABEL_0": "O", "LABEL_1": "B-PER"}`.
         """
         result = {}
 
@@ -246,14 +288,21 @@ class TokenClassificationEvaluator(Evaluator):
         # Prepare inputs
         data = self.load_data(data=data, subset=subset, split=split)
         metric_inputs, pipe_inputs = self.prepare_data(
-            data=data, input_column=input_column, label_column=label_column, join_by=join_by
+            data=data,
+            input_column=input_column,
+            label_column=label_column,
+            join_by=join_by,
         )
-        pipe = self.prepare_pipeline(model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device)
+        pipe = self.prepare_pipeline(
+            model_or_pipeline=model_or_pipeline, tokenizer=tokenizer, device=device
+        )
         metric = self.prepare_metric(metric)
 
         # Compute predictions
         predictions, perf_results = self.call_pipeline(pipe, pipe_inputs)
-        predictions = self.predictions_processor(predictions, data[input_column], join_by)
+        predictions = self.predictions_processor(
+            predictions, data[input_column], join_by, label_mapping
+        )
         metric_inputs.update(predictions)
 
         # Compute metrics from references and predictions
