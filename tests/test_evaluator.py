@@ -921,6 +921,16 @@ class TestText2TextGenerationEvaluator(TestCase):
         self.pipe = DummyText2TextGenerationPipeline()
         self.evaluator = evaluator("text2text-generation")
 
+    def test_text2text_evaluator_tasks_can_be_created(self):
+        for task, expected_class_name in [
+            ("text2text-generation", "Text2TextGenerationEvaluator"),
+            ("summarization", "SummarizationEvaluator"),
+            ("translation", "TranslationEvaluator"),
+        ]:
+            e = evaluator(task)
+            self.assertEqual(type(e).__name__, expected_class_name)
+            self.assertEqual(e.task, task)
+
     def test_pipe_init(self):
         results = self.evaluator.compute(
             model_or_pipeline=self.pipe,
