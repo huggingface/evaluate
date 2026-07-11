@@ -82,3 +82,7 @@ See this [step-by-step guide](https://huggingface.co/docs/evaluate/creating_and_
 ## Credits
 
 Thanks to [@marella](https://github.com/marella) for letting us use the `evaluate` namespace on PyPi previously used by his [library](https://github.com/marella/evaluate).
+
+---
+
+*[Mukller](https://github.com/Mukller)*
