@@ -54,6 +54,10 @@ Examples:
     >>> results = mahalanobis_metric.compute(reference_distribution=[[0, 1], [1, 0]], X=[[0, 1]])
     >>> print(results)
     {'mahalanobis': array([0.5])}
+    >>> # a point on the reference distribution's centroid has distance 0
+    >>> results = mahalanobis_metric.compute(reference_distribution=[[0, 10], [4, 10], [0, 14], [4, 14]], X=[[2, 12]])
+    >>> print(results)
+    {'mahalanobis': array([0.])}
 """
 
 
@@ -88,7 +92,7 @@ class Mahalanobis(evaluate.Metric):
             )
 
         # Get mahalanobis distance for each prediction
-        X_minus_mu = X - np.mean(reference_distribution)
+        X_minus_mu = X - np.mean(reference_distribution, axis=0)
         cov = np.cov(reference_distribution.T)
         try:
             inv_covmat = np.linalg.inv(cov)
