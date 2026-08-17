@@ -82,7 +82,7 @@ class TextDuplicates(evaluate.Measurement):
         if list_duplicates == True:
             logger.warning("This functionality can be memory-intensive for large datasets!")
             n_dedup = len(set([get_hash(d) for d in data]))
-            c = Counter(data)
+            c = Counter(d.strip() for d in data)
             duplicates = {k: v for k, v in c.items() if v > 1}
             return {"duplicate_fraction": 1 - (n_dedup / len(data)), "duplicates_dict": duplicates}
         else:

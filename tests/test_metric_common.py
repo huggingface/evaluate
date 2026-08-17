@@ -225,3 +225,11 @@ def test_seqeval_raises_when_incorrect_scheme():
     error_message = f"Scheme should be one of [IOB1, IOB2, IOE1, IOE2, IOBES, BILOU], got {wrong_scheme}"
     with pytest.raises(ValueError, match=re.escape(error_message)):
         metric.compute(predictions=[], references=[], scheme=wrong_scheme)
+
+
+def test_text_duplicates_lists_the_duplicates_it_counts():
+    measurement = load(os.path.join("measurements", "text_duplicates"))
+    # the fraction ignores surrounding whitespace, so the listed duplicates have to as well
+    results = measurement.compute(data=["hello sun", "hello sun ", "hello moon"], list_duplicates=True)
+    assert results["duplicate_fraction"] == pytest.approx(1 / 3)
+    assert results["duplicates_dict"] == {"hello sun": 2}
