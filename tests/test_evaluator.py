@@ -69,8 +69,8 @@ class DummyText2TextGenerationPipeline:
 
 
 class DummyTextClassificationPipeline:
-    def __init__(self, sleep_time=None):
-        self.task = "text-classification"
+    def __init__(self, sleep_time=None, task="text-classification"):
+        self.task = task
         self.sleep_time = sleep_time
 
     def __call__(self, inputs, **kwargs):
@@ -259,6 +259,22 @@ class TestTextClassificationEvaluator(TestCase):
             label_mapping=self.label_mapping,
         )
         self.assertEqual(results["accuracy"], 1.0)
+
+    def test_task_alias_pipe_init(self):
+        # `sentiment-analysis` is an alias of `text-classification`, so both names have to be accepted
+        # on the evaluator side as well as on the pipeline side
+        for evaluator_task, pipe_task in [
+            ("sentiment-analysis", "text-classification"),
+            ("text-classification", "sentiment-analysis"),
+        ]:
+            results = evaluator(evaluator_task).compute(
+                model_or_pipeline=DummyTextClassificationPipeline(task=pipe_task),
+                data=self.data,
+                input_column="text",
+                label_column="label",
+                label_mapping=self.label_mapping,
+            )
+            self.assertEqual(results["accuracy"], 1.0)
 
     @slow
     def test_model_init(self):

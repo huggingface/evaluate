@@ -32,6 +32,7 @@ except ImportError:
 try:
     import transformers
     from transformers import Pipeline, pipeline
+    from transformers.pipelines import TASK_ALIASES
 
     TRANSFORMERS_AVAILABLE = True
 except ImportError:
@@ -207,6 +208,11 @@ class Evaluator(ABC):
             logger.info("GPU found. The default device for pipeline inference is set to GPU (CUDA:0).")
 
         return device
+
+    @staticmethod
+    def _normalize_task(task: str) -> str:
+        """Helper function to resolve a task alias (e.g. `"sentiment-analysis"`) to its canonical task name."""
+        return TASK_ALIASES.get(task, task)
 
     @abstractmethod
     def predictions_processor(self, *args, **kwargs):
@@ -471,7 +477,9 @@ class Evaluator(ABC):
                 pipe = model_or_pipeline
             if tokenizer is not None and feature_extractor is not None:
                 logger.warning("Ignoring the value of the preprocessor argument (`tokenizer` or `feature_extractor`).")
-        if (pipe.task != self.task) and not (self.task == "translation" and pipe.task.startswith("translation")):
+        if (self._normalize_task(pipe.task) != self._normalize_task(self.task)) and not (
+            self.task == "translation" and pipe.task.startswith("translation")
+        ):
             raise ValueError(
                 f"Incompatible `model_or_pipeline`. Please specify `model_or_pipeline` compatible with the `{self.task}` task."
             )
