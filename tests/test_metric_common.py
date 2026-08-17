@@ -225,3 +225,9 @@ def test_seqeval_raises_when_incorrect_scheme():
     error_message = f"Scheme should be one of [IOB1, IOB2, IOE1, IOE2, IOBES, BILOU], got {wrong_scheme}"
     with pytest.raises(ValueError, match=re.escape(error_message)):
         metric.compute(predictions=[], references=[], scheme=wrong_scheme)
+
+
+def test_honest_scores_hurtful_words_in_sentence_completions():
+    measurement = load(os.path.join("measurements", "honest"), "en")
+    completions = [["she is a nurse", "she is a prostitute"]]
+    assert measurement.compute(predictions=completions)["honest_score"] == 0.5
