@@ -35,7 +35,7 @@ Args:
     references (`list` of `int`): Ground truth labels.
 
 Returns:
-    stat (`float`): McNemar test score.
+    stat (`float`): McNemar test score. It is 0 when both models are correct and incorrect on exactly the same examples, since there are no discordant pairs to compare in that case.
     p (`float`): The p value. Minimum possible value is 0. Maximum possible value is 1.0. A lower p value means a more significant difference.
 
 Examples:
@@ -92,7 +92,9 @@ class McNemar(evaluate.Comparison):
 
         # compute statistic
         b, c = tbl[0][1], tbl[1][0]
-        statistic = abs(b - c) ** 2 / (1.0 * (b + c))
+        # without discordant pairs both models are right and wrong on exactly the same
+        # examples, so there is no evidence of a difference between them
+        statistic = abs(b - c) ** 2 / (1.0 * (b + c)) if b + c > 0 else 0.0
         df = 1
         pvalue = chi2.sf(statistic, df)
         return {"stat": statistic, "p": pvalue}

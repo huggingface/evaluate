@@ -225,3 +225,9 @@ def test_seqeval_raises_when_incorrect_scheme():
     error_message = f"Scheme should be one of [IOB1, IOB2, IOE1, IOE2, IOBES, BILOU], got {wrong_scheme}"
     with pytest.raises(ValueError, match=re.escape(error_message)):
         metric.compute(predictions=[], references=[], scheme=wrong_scheme)
+
+
+def test_mcnemar_without_discordant_pairs():
+    comparison = load(os.path.join("comparisons", "mcnemar"))
+    results = comparison.compute(references=[1, 0, 1], predictions1=[1, 0, 1], predictions2=[1, 0, 1])
+    assert results == {"stat": 0.0, "p": 1.0}

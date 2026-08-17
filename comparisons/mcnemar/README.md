@@ -51,7 +51,7 @@ Its arguments are:
 
 The McNemar comparison outputs two things:
 
-`stat`: The McNemar statistic.
+`stat`: The McNemar statistic. It is 0 when both models are correct and incorrect on exactly the same examples, since there are no discordant pairs to compare in that case.
 
 `p`: The p value.
 
