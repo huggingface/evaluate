@@ -63,8 +63,10 @@ class DummyText2TextGenerationPipeline:
     def __init__(self, prefix="generated", task="text2text-generation"):
         self.task = task
         self.prefix = prefix
+        self.call_kwargs = None
 
     def __call__(self, inputs, **kwargs):
+        self.call_kwargs = kwargs
         return [{f"{self.prefix}_text": "Lorem ipsum"} for _ in inputs]
 
 
@@ -959,6 +961,28 @@ class TestText2TextGenerationEvaluator(TestCase):
             metric="rouge",
         )
         self.assertEqual(results["rouge1"], 1.0)
+
+    def test_generation_kwargs(self):
+        self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            generation_kwargs={"max_length": 5},
+        )
+        self.assertEqual(self.pipe.call_kwargs, {"truncation": True, "max_length": 5})
+
+    def test_generation_kwargs_are_not_persisted(self):
+        self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            generation_kwargs={"max_length": 5},
+        )
+        self.assertEqual(Text2TextGenerationEvaluator.PIPELINE_KWARGS, {"truncation": True})
+
+        evaluator("text2text-generation").compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+        )
+        self.assertEqual(self.pipe.call_kwargs, {"truncation": True})
 
     def test_summarization(self):
         pipe = DummyText2TextGenerationPipeline(task="summarization", prefix="summary")
