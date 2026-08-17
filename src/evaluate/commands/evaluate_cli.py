@@ -4,7 +4,7 @@ import subprocess
 from pathlib import Path
 
 from cookiecutter.main import cookiecutter
-from huggingface_hub import HfApi, Repository, create_repo
+from huggingface_hub import HfApi, create_repo
 
 from evaluate.utils.logging import get_logger
 
@@ -43,6 +43,18 @@ from evaluate import load
 module = load("{namespace}/{module_slug}")
 ```
 """
+
+
+def run_git(args, cwd):
+    subprocess.run(
+        ["git"] + args,
+        stderr=subprocess.PIPE,
+        stdout=subprocess.PIPE,
+        check=True,
+        encoding="utf-8",
+        cwd=cwd,
+        env=os.environ.copy(),
+    )
 
 
 def main():
@@ -94,19 +106,7 @@ def main():
             f"Could not create Space for module at hf.co/spaces/{namespace}/{module_slug}. Make sure this space does not exist already."
         )
         raise exception
-    subprocess.run(
-        f"git clone {repo_url}".split(),
-        stderr=subprocess.PIPE,
-        stdout=subprocess.PIPE,
-        check=True,
-        encoding="utf-8",
-        cwd=output_dir,
-        env=os.environ.copy(),
-    )
-
-    repo = Repository(
-        local_dir=output_dir / module_slug,
-    )
+    run_git(["clone", repo_url], cwd=output_dir)
 
     cookiecutter(
         "https://github.com/huggingface/evaluate/",
@@ -117,9 +117,10 @@ def main():
         overwrite_if_exists=True,
     )
 
-    repo.git_add()
-    repo.git_commit("add module default template")
-    repo.git_push()
+    module_dir = output_dir / module_slug
+    run_git(["add", "."], cwd=module_dir)
+    run_git(["commit", "-m", "add module default template"], cwd=module_dir)
+    run_git(["push"], cwd=module_dir)
 
     print(
         INSTRUCTIONS.format(

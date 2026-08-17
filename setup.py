@@ -51,7 +51,8 @@ REQUIRED_PKGS = [
     # minimum 2021.05.0 to have the AbstractArchiveFileSystem
     "fsspec[http]>=2021.05.0",
     # To get datasets from the Datasets Hub on huggingface.co
-    "huggingface-hub>=0.7.0",
+    # minimum 0.10.0 to have huggingface_hub.utils.build_hf_headers
+    "huggingface-hub>=0.10.0",
     # Utilities from PyPA to e.g., compare versions
     "packaging",
 ]
@@ -72,6 +73,7 @@ EVALUATOR_REQUIRE = [
 TESTS_REQUIRE = [
     # test dependencies
     "absl-py",
+    "cookiecutter",  # for evaluate-cli
     "charcut>=1.1.1",  # for charcut_mt
     "cer>=1.2.0",  # for characTER
     "nltk",  # for NIST and probably others
