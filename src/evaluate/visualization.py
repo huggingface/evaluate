@@ -184,12 +184,11 @@ def radar_plot(data, model_names, invert_range=[], config=None, fig=None):
     if all(x in variables for x in invert_range) is False:
         raise ValueError("All of the metrics in `invert_range` should be in the data provided.")
     min_max_per_variable = data.describe().T[["min", "max"]]
-    min_max_per_variable["min"] = min_max_per_variable["min"] - 0.1 * (
-        min_max_per_variable["max"] - min_max_per_variable["min"]
-    )
-    min_max_per_variable["max"] = min_max_per_variable["max"] + 0.1 * (
-        min_max_per_variable["max"] - min_max_per_variable["min"]
-    )
+    padding = 0.1 * (min_max_per_variable["max"] - min_max_per_variable["min"])
+    # variables that take a single value across all models would otherwise get a zero-width range
+    padding = padding.where(padding > 0, 0.1)
+    min_max_per_variable["min"] = min_max_per_variable["min"] - padding
+    min_max_per_variable["max"] = min_max_per_variable["max"] + padding
 
     ranges = list(min_max_per_variable.itertuples(index=False, name=None))
     ranges = [
