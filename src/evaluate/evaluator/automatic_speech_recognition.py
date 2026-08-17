@@ -90,8 +90,9 @@ class AutomaticSpeechRecognitionEvaluator(Evaluator):
             The generation kwargs are passed to the pipeline and set the text generation strategy.
         """
 
-        if generation_kwargs is not None:
-            self.PIPELINE_KWARGS.update(generation_kwargs)
+        # `PIPELINE_KWARGS` is a class attribute, so it is shadowed with a per-call copy to keep
+        # `generation_kwargs` from leaking into later calls and into other evaluator instances.
+        self.PIPELINE_KWARGS = {**type(self).PIPELINE_KWARGS, **(generation_kwargs or {})}
 
         result = super().compute(
             model_or_pipeline=model_or_pipeline,

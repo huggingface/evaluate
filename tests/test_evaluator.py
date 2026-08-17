@@ -125,8 +125,10 @@ class DummyTokenClassificationPipeline:
 class DummyAutomaticSpeechRecognitionPipeline:
     def __init__(self) -> None:
         self.task = "automatic-speech-recognition"
+        self.call_kwargs = None
 
     def __call__(self, inputs, **kwargs):
+        self.call_kwargs = kwargs
         return [{"text": "Lorem ipsum"} for _ in inputs]
 
 
@@ -1040,6 +1042,28 @@ class TestAutomaticSpeechRecognitionEvaluator(TestCase):
             metric="cer",
         )
         self.assertEqual(results["cer"], 0.7272727272727273)
+
+    def test_generation_kwargs(self):
+        self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            generation_kwargs={"max_new_tokens": 5},
+        )
+        self.assertEqual(self.pipe.call_kwargs, {"truncation": True, "max_new_tokens": 5})
+
+    def test_generation_kwargs_are_not_persisted(self):
+        self.evaluator.compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+            generation_kwargs={"max_new_tokens": 5},
+        )
+        self.assertEqual(AutomaticSpeechRecognitionEvaluator.PIPELINE_KWARGS, {"truncation": True})
+
+        evaluator("automatic-speech-recognition").compute(
+            model_or_pipeline=self.pipe,
+            data=self.data,
+        )
+        self.assertEqual(self.pipe.call_kwargs, {"truncation": True})
 
 
 class TestAudioClassificationEvaluator(TestCase):
