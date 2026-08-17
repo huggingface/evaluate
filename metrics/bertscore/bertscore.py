@@ -14,6 +14,7 @@
 """ BERTScore metric. """
 
 import functools
+import sys
 from contextlib import contextmanager
 
 import bert_score
@@ -21,6 +22,31 @@ import datasets
 from packaging import version
 
 import evaluate
+
+
+logger = evaluate.logging.get_logger(__name__)
+
+# Fallback truncation length for tokenizers that don't declare `model_max_length`. 512 is the
+# sequence length of the BERT-family models `bert_score` recommends for each language.
+_DEFAULT_MODEL_MAX_LENGTH = 512
+
+
+def _set_tokenizer_max_length(tokenizer, max_length=None):
+    """Make sure the tokenizer reports a truncation length the tokenizers backend can represent.
+
+    Tokenizers whose config omits `model_max_length` report transformers' `VERY_LARGE_INTEGER`
+    sentinel (~1e30) instead. `bert_score` forwards that value to `tokenizer.encode(max_length=...)`,
+    which raises `OverflowError` in the Rust tokenizers backend used by transformers>=5.
+    """
+    if max_length is None:
+        if tokenizer.model_max_length <= sys.maxsize:
+            return
+        max_length = _DEFAULT_MODEL_MAX_LENGTH
+        logger.warning(
+            f"The tokenizer does not define `model_max_length`, truncating inputs to {max_length} tokens. "
+            "Pass `max_length` to `compute()` to use a different length."
+        )
+    tokenizer.model_max_length = max_length
 
 
 @contextmanager
@@ -79,6 +105,9 @@ Args:
     rescale_with_baseline (bool): Rescale bertscore with pre-computed baseline.
     baseline_path (str): Customized baseline file.
     use_fast_tokenizer (bool): `use_fast` parameter passed to HF tokenizer. New in version 0.3.10.
+    max_length (int): Number of tokens the inputs are truncated to. Defaults to the
+        `model_max_length` of the model's tokenizer, or to 512 when the tokenizer does not
+        define one.
 
 Returns:
     precision: Precision.
@@ -142,6 +171,7 @@ class BERTScore(evaluate.Metric):
         rescale_with_baseline=False,
         baseline_path=None,
         use_fast_tokenizer=False,
+        max_length=None,
     ):
 
         if isinstance(references[0], str):
@@ -185,7 +215,10 @@ class BERTScore(evaluate.Metric):
         )
 
         with filter_logging_context():
-            if not hasattr(self, "cached_bertscorer") or self.cached_bertscorer.hash != hashcode:
+            is_new_scorer = not hasattr(self, "cached_bertscorer") or self.cached_bertscorer.hash != hashcode
+            if is_new_scorer:
+                # `idf_sents` are tokenized below instead of by the scorer itself, so that the
+                # truncation length is fixed up first.
                 self.cached_bertscorer = scorer(
                     model_type=model_type,
                     num_layers=num_layers,
@@ -193,12 +226,17 @@ class BERTScore(evaluate.Metric):
                     nthreads=nthreads,
                     all_layers=all_layers,
                     idf=idf,
-                    idf_sents=idf_sents,
+                    idf_sents=None,
                     device=device,
                     lang=lang,
                     rescale_with_baseline=rescale_with_baseline,
                     baseline_path=baseline_path,
                 )
+
+            _set_tokenizer_max_length(self.cached_bertscorer._tokenizer, max_length)
+
+            if is_new_scorer and idf_sents is not None:
+                self.cached_bertscorer.compute_idf(idf_sents)
 
         (P, R, F) = self.cached_bertscorer.score(
             cands=predictions,

@@ -219,6 +219,37 @@ def patch_comet(module_name):
             yield
 
 
+def _load_bertscore_with_tokenizer(model_max_length):
+    from transformers import AutoTokenizer
+
+    tokenizer = AutoTokenizer.from_pretrained("hf-internal-testing/tiny-random-bert")
+    tokenizer.model_max_length = model_max_length
+    return load(os.path.join("metrics", "bertscore")), tokenizer
+
+
+def test_bertscore_caps_undefined_model_max_length():
+    # regression test for https://github.com/huggingface/evaluate/issues/739: tokenizers without a
+    # `model_max_length` report a sentinel value that overflows the Rust tokenizers backend
+    from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
+
+    metric, tokenizer = _load_bertscore_with_tokenizer(VERY_LARGE_INTEGER)
+    with patch_bertscore("bertscore"), patch("bert_score.scorer.get_tokenizer", return_value=tokenizer):
+        results = metric.compute(
+            predictions=["hello there"], references=["hello there"], lang="en", idf=True, nthreads=0
+        )
+
+    assert tokenizer.model_max_length == 512
+    assert results["f1"] == [1.0]
+
+
+def test_bertscore_max_length_overrides_model_max_length():
+    metric, tokenizer = _load_bertscore_with_tokenizer(512)
+    with patch_bertscore("bertscore"), patch("bert_score.scorer.get_tokenizer", return_value=tokenizer):
+        metric.compute(predictions=["hello there"], references=["hello there"], lang="en", max_length=128)
+
+    assert tokenizer.model_max_length == 128
+
+
 def test_seqeval_raises_when_incorrect_scheme():
     metric = load(os.path.join("metrics", "seqeval"))
     wrong_scheme = "ERROR"
