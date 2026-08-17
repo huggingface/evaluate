@@ -45,10 +45,12 @@ See the project's README at https://github.com/google-research/bleurt#readme for
 _KWARGS_DESCRIPTION = """
 BLEURT score.
 
+The BLEURT checkpoint is not an argument of `compute`: it is selected when the metric is loaded, with the
+`config_name` argument of `evaluate.load`, and defaults to `bleurt-base-128`.
+
 Args:
     `predictions` (list of str): prediction/candidate sentences
     `references` (list of str): reference sentences
-    `checkpoint` BLEURT checkpoint. Will default to BLEURT-tiny if None.
 
 Returns:
     'scores': List of scores.
@@ -57,6 +59,7 @@ Examples:
     >>> predictions = ["hello there", "general kenobi"]
     >>> references = ["hello there", "general kenobi"]
     >>> bleurt = evaluate.load("bleurt")
+    >>> # bleurt = evaluate.load("bleurt", config_name="BLEURT-20")  # you can also choose which checkpoint to use
     >>> results = bleurt.compute(predictions=predictions, references=references)
     >>> print([round(v, 2) for v in results["scores"]])
     [1.03, 1.04]

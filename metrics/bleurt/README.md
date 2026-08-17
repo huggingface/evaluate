@@ -41,6 +41,8 @@ This metric takes as input lists of predicted sentences and reference sentences:
 >>> results = bleurt.compute(predictions=predictions, references=references)
 ```
 
+The BLEURT checkpoint is chosen when the metric is loaded, with the `config_name` argument of `load`, and cannot be changed in `compute`.
+
 ### Inputs
 
 For the `load` function:
@@ -96,7 +98,7 @@ The [original BLEURT paper](https://arxiv.org/pdf/2004.04696.pdf) showed that BL
 
 Furthermore, currently BLEURT only supports English-language scoring, given that it leverages models trained on English corpora. It may also reflect, to a certain extent, biases and correlations that were present in the model training data. 
 
-Finally, calculating the BLEURT metric involves downloading the BLEURT model that is used to compute the score, which can take a significant amount of time depending on the model chosen. Starting with the default model, `bleurt-tiny`, and testing out larger models if necessary can be a useful approach if memory or internet speed is an issue.
+Finally, calculating the BLEURT metric involves downloading the BLEURT model that is used to compute the score, which can take a significant amount of time depending on the model chosen. Starting with a small checkpoint, such as the default `"bleurt-base-128"` or the even smaller `"bleurt-tiny-128"`, and testing out larger models if necessary can be a useful approach if memory or internet speed is an issue.
 
 
 ## Citation
