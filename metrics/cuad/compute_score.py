@@ -11,6 +11,10 @@ import numpy as np
 
 IOU_THRESH = 0.5
 
+# np.trapz was removed in NumPy 2.0; np.trapezoid is its replacement and
+# doesn't exist before 2.0, so pick whichever the installed numpy provides.
+_trapezoid = getattr(np, "trapezoid", None) or np.trapz
+
 
 def get_jaccard(prediction, ground_truth):
     remove_tokens = [".", ",", ";", ":"]
@@ -107,17 +111,24 @@ def process_precisions(precisions):
     """
     precision_best = precisions[::-1]
     for i in range(1, len(precision_best)):
-        precision_best[i] = max(precision_best[i - 1], precision_best[i])
+        # Plain max() is order-dependent with NaN (max(0.5, nan) == 0.5, but
+        # max(nan, 0.5) == nan), so an undefined precision from a 0/0 sample
+        # could be silently overwritten by a neighboring real value depending
+        # on which side of the pair it landed on. Make NaN propagate either way.
+        prev, curr = precision_best[i - 1], precision_best[i]
+        precision_best[i] = float("nan") if (np.isnan(prev) or np.isnan(curr)) else max(prev, curr)
     precisions = precision_best[::-1]
     return precisions
 
 
 def get_aupr(precisions, recalls):
+    # The integral is NaN when it is undefined (e.g. a precision/recall pair
+    # that is itself NaN, from a sample with zero ground truths and zero
+    # predictions). That is "could not be computed", not "worst possible
+    # score" - collapsing it to 0 would make the two indistinguishable in any
+    # aggregate, so it is propagated as-is instead.
     processed_precisions = process_precisions(precisions)
-    aupr = np.trapz(processed_precisions, recalls)
-    if np.isnan(aupr):
-        return 0
-    return aupr
+    return _trapezoid(processed_precisions, recalls)
 
 
 def get_prec_at_recall(precisions, recalls, recall_thresh):
