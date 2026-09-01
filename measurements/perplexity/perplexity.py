@@ -50,6 +50,8 @@ Args:
         so the perplexity can include the probability of the first word. Defaults to True.
     device (str): device to run on, defaults to 'cuda' when available
     max_length (int): the maximum length to truncate input texts to. Should be set to the maximum length the model supports. Defaults to None.
+    model_kwargs (dict, optional): Extra keyword arguments forwarded to `AutoModelForCausalLM.from_pretrained`, for example `token` when loading a gated model.
+    tokenizer_kwargs (dict, optional): Extra keyword arguments forwarded to `AutoTokenizer.from_pretrained`.
 Returns:
     perplexity: dictionary containing the perplexity scores for the texts
         in the input list, as well as the mean perplexity. If one of the input texts is
@@ -102,8 +104,21 @@ class Perplexity(evaluate.Measurement):
         )
 
     def _compute(
-        self, data, model_id, batch_size: int = 16, add_start_token: bool = True, device=None, max_length=None
+        self,
+        data,
+        model_id,
+        batch_size: int = 16,
+        add_start_token: bool = True,
+        device=None,
+        max_length=None,
+        model_kwargs=None,
+        tokenizer_kwargs=None,
     ):
+
+        if model_kwargs is None:
+            model_kwargs = {}
+        if tokenizer_kwargs is None:
+            tokenizer_kwargs = {}
 
         if device is not None:
             assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
@@ -112,10 +127,10 @@ class Perplexity(evaluate.Measurement):
         else:
             device = "cuda" if torch.cuda.is_available() else "cpu"
 
-        model = AutoModelForCausalLM.from_pretrained(model_id)
+        model = AutoModelForCausalLM.from_pretrained(model_id, **model_kwargs)
         model = model.to(device)
 
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        tokenizer = AutoTokenizer.from_pretrained(model_id, **tokenizer_kwargs)
 
         # if batch_size > 1 (which generally leads to padding being required), and
         # if there is not an already assigned pad_token, assign an existing
