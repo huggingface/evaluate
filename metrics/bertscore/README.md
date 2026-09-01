@@ -61,6 +61,8 @@ BERTScore also accepts multiple optional arguments:
 
 `use_fast_tokenizer` (bool): `use_fast` parameter passed to HF tokenizer. The default value is `False`. 
 
+`max_length` (int, optional): Maximum sequence length for tokenization. Pass this when the tokenizer config leaves `model_max_length` unset (seen with some models under transformers>=5), which can otherwise raise an `OverflowError` during scoring.
+
 
 ## Output values
 
