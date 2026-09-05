@@ -53,7 +53,7 @@ def save(path_or_file, **data):
 
 def _setup_path(path_or_file, current_time):
     path_or_file = Path(path_or_file)
-    is_file = len(path_or_file.suffix) > 0
+    is_file = not path_or_file.is_dir() and len(path_or_file.suffix) > 0
     if is_file:
         folder = path_or_file.parent
         file_name = path_or_file.name
