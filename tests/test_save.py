@@ -42,3 +42,16 @@ class TestSave(TestCase):
         for key in SAVE_EXTRA_KEYS:
             _ = loaded_result_dict.pop(key)
         self.assertDictEqual(result_dict, loaded_result_dict)
+
+
+def test_save_without_git(tmp_path, monkeypatch):
+    import evaluate.saving
+
+    def missing_git(*args, **kwargs):
+        raise FileNotFoundError("git")
+
+    monkeypatch.setattr(evaluate.saving.subprocess, "run", missing_git)
+    path = evaluate.save(tmp_path / "result.json", accuracy=0.75)
+    data = json.loads(path.read_text())
+    assert data["accuracy"] == 0.75
+    assert data["_git_commit_hash"] is None
