@@ -40,7 +40,7 @@ Args:
     nan_to_num (`int`, *optional*):
         If specified, NaN values will be replaced by the number defined by the user.
     label_map (`dict`, *optional*):
-        If specified, dictionary mapping old label indices to new label indices.
+        If specified, dictionary mapping old label indices to new label indices. All mappings use the original labels.
     reduce_labels (`bool`, *optional*, defaults to `False`):
         Whether or not to reduce all label values of segmentation maps by 1. Usually used for datasets where 0 is used for background,
         and background itself is not included in all classes of a dataset (e.g. ADE20k). The background label will be replaced by 255.
@@ -113,7 +113,7 @@ def intersect_and_union(
         ignore_index (`int`):
             Index that will be ignored during evaluation.
         label_map (`dict`, *optional*):
-            Mapping old labels to new labels. The parameter will work only when label is str.
+            Mapping old labels to new labels. All mappings use the original labels.
         reduce_labels (`bool`, *optional*, defaults to `False`):
             Whether or not to reduce all label values of segmentation maps by 1. Usually used for datasets where 0 is used for background,
             and background itself is not included in all classes of a dataset (e.g. ADE20k). The background label will be replaced by 255.
@@ -128,13 +128,14 @@ def intersect_and_union(
          area_label (`ndarray`):
             The ground truth histogram on all classes.
     """
-    if label_map is not None:
-        for old_id, new_id in label_map.items():
-            label[label == old_id] = new_id
-
     # turn into Numpy arrays
     pred_label = np.array(pred_label)
     label = np.array(label)
+
+    if label_map is not None:
+        original_label = label.copy()
+        for old_id, new_id in label_map.items():
+            label[original_label == old_id] = new_id
 
     if reduce_labels:
         label[label == 0] = 255
@@ -177,7 +178,7 @@ def total_intersect_and_union(
         ignore_index (`int`):
             Index that will be ignored during evaluation.
         label_map (`dict`, *optional*):
-            Mapping old labels to new labels. The parameter will work only when label is str.
+            Mapping old labels to new labels. All mappings use the original labels.
         reduce_labels (`bool`, *optional*, defaults to `False`):
             Whether or not to reduce all label values of segmentation maps by 1. Usually used for datasets where 0 is used for background,
             and background itself is not included in all classes of a dataset (e.g. ADE20k). The background label will be replaced by 255.
@@ -230,7 +231,7 @@ def mean_iou(
         nan_to_num (`int`, *optional*):
             If specified, NaN values will be replaced by the number defined by the user.
         label_map (`dict`, *optional*):
-            Mapping old labels to new labels. The parameter will work only when label is str.
+            Mapping old labels to new labels. All mappings use the original labels.
         reduce_labels (`bool`, *optional*, defaults to `False`):
             Whether or not to reduce all label values of segmentation maps by 1. Usually used for datasets where 0 is used for background,
             and background itself is not included in all classes of a dataset (e.g. ADE20k). The background label will be replaced by 255.
