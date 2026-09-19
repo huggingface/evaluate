@@ -11,7 +11,7 @@ tags:
 - evaluate
 - measurement
 description: >-
-  Returns the label distribution and skew of the input data.
+  Returns the label distribution and entropy of the input data.
 ---
 
 # Measurement Card for Label Distribution
@@ -41,13 +41,14 @@ The measurement takes a list of labels as input:
 ### Output Values
 By default, this metric outputs a dictionary that contains :
 -**label_distribution** (`dict`) : a dictionary containing two sets of keys and values: `labels`, which includes the list of labels contained in the dataset, and `fractions`, which includes the fraction of each label.
--**label_skew** (`scalar`) : the asymmetry of the label distribution.
+-**label_entropy** (`float`) : the Shannon entropy of the label distribution (in nats). Maximized at log(k) for k classes when labels are uniformly distributed, and 0 when all labels are the same.
+-**label_entropy_normalized** (`float`) : the Shannon entropy normalized by log(k), giving a value between 0 and 1. A value of 1.0 means perfectly balanced; a value close to 0 means highly imbalanced.
 
 ```python
-{'label_distribution': {'labels': [1, 0, 2], 'fractions': [0.1, 0.6, 0.3]}, 'label_skew': 0.7417688338666573}
+{'label_distribution': {'labels': [1, 0, 2], 'fractions': [0.1, 0.6, 0.3]}, 'label_entropy': 0.8979457248567798, 'label_entropy_normalized': 0.8173454221465101}
 ```
 
-If skewness is 0, the dataset is perfectly balanced; if it is less than -1 or greater than 1, the distribution is highly skewed; anything in between can be considered moderately skewed.
+If normalized entropy is 1.0, the dataset is perfectly balanced; values closer to 0 indicate increasing imbalance. Unlike skewness, entropy is permutation-invariant and correctly measures uniformity for categorical variables.
 
 #### Values from Popular Papers
 
@@ -60,7 +61,7 @@ Calculating the label distribution of a dataset with binary labels:
 >>> distribution = evaluate.load("label_distribution")
 >>> results = distribution.compute(data=data)
 >>> print(results)
-{'label_distribution': {'labels': [1, 0], 'fractions': [0.5714285714285714, 0.42857142857142855]}}
+{'label_distribution': {'labels': [1, 0], 'fractions': [0.5714285714285714, 0.42857142857142855]}, 'label_entropy': 0.6829081047004717, 'label_entropy_normalized': 0.9852281360342515}
 ```
 
 Calculating the label distribution of the test subset of the [IMDb dataset](https://huggingface.co/datasets/imdb):
@@ -70,9 +71,9 @@ Calculating the label distribution of the test subset of the [IMDb dataset](http
 >>> distribution = evaluate.load("label_distribution")
 >>> results = distribution.compute(data=imdb['label'])
 >>> print(results)
-{'label_distribution': {'labels': [0, 1], 'fractions': [0.5, 0.5]}, 'label_skew': 0.0}
+{'label_distribution': {'labels': [0, 1], 'fractions': [0.5, 0.5]}, 'label_entropy': 0.6931471805599453, 'label_entropy_normalized': 1.0}
 ```
-N.B. The IMDb dataset is perfectly balanced.
+N.B. The IMDb dataset is perfectly balanced (normalized entropy = 1.0).
 
 The output of the measurement can easily be passed to matplotlib to plot a histogram of each label:
 
@@ -91,4 +92,4 @@ While label distribution can be a useful signal for analyzing datasets and choos
 
 ## Further References
 - [Facing Imbalanced Data Recommendations for the Use of Performance Metrics](https://sites.pitt.edu/~jeffcohn/skew/PID2829477.pdf)
-- [Scipy Stats Skew Documentation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.skew.html#scipy-stats-skew)
+- [Scipy Stats Entropy Documentation](https://docs.scipy.org/doc/scipy/reference/generated/scipy.stats.entropy.html)
