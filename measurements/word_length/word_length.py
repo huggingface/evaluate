@@ -82,12 +82,19 @@ class WordLength(evaluate.Measurement):
         )
 
     def _download_and_prepare(self, dl_manager):
+        import io
+        from contextlib import redirect_stdout
+
         import nltk
 
+        def _silent_download(pkg: str) -> None:
+            with redirect_stdout(io.StringIO()):
+                nltk.download(pkg, quiet=True)
+
         if NLTK_VERSION >= version.Version("3.9.0"):
-            nltk.download("punkt_tab")
+            _silent_download("punkt_tab")
         else:
-            nltk.download("punkt")
+            _silent_download("punkt")
 
     def _compute(self, data, tokenizer=word_tokenize):
         """Returns the average word length of the input data"""
