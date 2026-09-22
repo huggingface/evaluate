@@ -82,7 +82,7 @@ Example with the `uniform_average` config:
 {'mse': 0.375}
 ```
 
-Example with `squared = True`, which returns the RMSE:
+Example with `squared = False`, which returns the RMSE:
 ```python
 >>> mse_metric = evaluate.load("mse")
 >>> predictions = [2.5, 0.0, 2, 8]
