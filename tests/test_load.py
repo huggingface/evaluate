@@ -138,3 +138,47 @@ class ModuleFactoryTest(TestCase):
                 evaluation_module_factory(
                     metric, download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
                 )
+
+
+def test_copy_script_metadata_path_when_ancestor_dir_contains_py():
+    """Regression: meta_path derivation when an ancestor directory contains ".py".
+
+    The previous implementation used `importable_local_file.split(".py")[0]`,
+    which splits on every occurrence, so a cache path under ~/.pyenv/... wrote
+    the metadata to ~/.json — outside the cache tree — instead of next to the
+    copied script.
+    """
+    import json
+
+    from evaluate.loading import _copy_script_and_other_resources_in_importable_dir
+
+    with tempfile.TemporaryDirectory() as root:
+        # Simulate a pyenv-style cache path: ancestor directory contains ".py".
+        importable_directory_path = os.path.join(root, ".pyenv", "evaluate_modules")
+        # The FileLock acquired inside the function needs the parent dir to exist.
+        os.makedirs(os.path.dirname(importable_directory_path), exist_ok=True)
+        subdirectory_name = "abcd1234"
+        name = "accuracy"
+
+        original_script_path = os.path.join(root, "src_accuracy.py")
+        with open(original_script_path, "w", encoding="utf-8") as f:
+            f.write("# dummy metric script\n")
+
+        _copy_script_and_other_resources_in_importable_dir(
+            name=name,
+            importable_directory_path=importable_directory_path,
+            subdirectory_name=subdirectory_name,
+            original_local_path=original_script_path,
+            local_imports=[],
+            additional_files=[],
+            download_mode=None,
+        )
+
+        expected_meta = os.path.join(importable_directory_path, subdirectory_name, name + ".json")
+        leaked_meta = os.path.join(root, ".json")
+
+        assert os.path.exists(expected_meta), f"meta file missing at {expected_meta}"
+        assert not os.path.exists(leaked_meta), f"meta file leaked to {leaked_meta}"
+        with open(expected_meta, "r", encoding="utf-8") as f:
+            meta = json.load(f)
+        assert meta["original file path"] == original_script_path
