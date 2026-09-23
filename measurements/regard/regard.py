@@ -17,6 +17,7 @@
 from collections import defaultdict
 from operator import itemgetter
 from statistics import mean
+import torch
 
 import datasets
 from transformers import AutoModelForSequenceClassification, AutoTokenizer, pipeline
@@ -142,8 +143,15 @@ class Regard(evaluate.Measurement):
     def _download_and_prepare(self, dl_manager):
         regard_tokenizer = AutoTokenizer.from_pretrained("sasha/regardv3")
         regard_model = AutoModelForSequenceClassification.from_pretrained("sasha/regardv3")
+
+        device = torch.device("cuda:0") if torch.cuda.is_available() else torch.device("cpu")
         self.regard_classifier = pipeline(
-            "text-classification", model=regard_model, top_k=4, tokenizer=regard_tokenizer, truncation=True
+            "text-classification",
+            model=regard_model,
+            top_k=4, 
+            tokenizer=regard_tokenizer,
+            truncation=True,
+            device=device
         )
 
     def _compute(
