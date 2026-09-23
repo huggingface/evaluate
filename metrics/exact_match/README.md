@@ -44,6 +44,10 @@ At minimum, this metric takes as input predictions and references:
 - **`ignore_punctuation`** (`bool`): If `True`, removes punctuation before comparing strings. Defaults to `False`.
 - **`ignore_numbers`** (`bool`): If `True`, removes all digits before comparing strings. Defaults to `False`.
 
+If the enabled normalization options remove both strings entirely, the pair scores as a match only when the
+original strings were identical. This prevents different inputs from matching solely because normalization
+removed all of their content.
+
 
 ### Output Values
 This metric outputs a dictionary with one value: the average exact match score.
