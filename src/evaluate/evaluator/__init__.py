@@ -29,7 +29,6 @@ from .automatic_speech_recognition import AutomaticSpeechRecognitionEvaluator
 from .base import Evaluator
 from .image_classification import ImageClassificationEvaluator
 from .question_answering import QuestionAnsweringEvaluator
-from .text2text_generation import SummarizationEvaluator, Text2TextGenerationEvaluator, TranslationEvaluator
 from .text_classification import TextClassificationEvaluator
 from .text_generation import TextGenerationEvaluator
 from .token_classification import TokenClassificationEvaluator
@@ -55,18 +54,6 @@ SUPPORTED_EVALUATOR_TASKS = {
     "text-generation": {
         "implementation": TextGenerationEvaluator,
         "default_metric_name": "word_count",
-    },
-    "text2text-generation": {
-        "implementation": Text2TextGenerationEvaluator,
-        "default_metric_name": "bleu",
-    },
-    "summarization": {
-        "implementation": SummarizationEvaluator,
-        "default_metric_name": "rouge",
-    },
-    "translation": {
-        "implementation": TranslationEvaluator,
-        "default_metric_name": "bleu",
     },
     "automatic-speech-recognition": {
         "implementation": AutomaticSpeechRecognitionEvaluator,
@@ -101,6 +88,8 @@ def check_task(task: str) -> Dict:
     Returns:
         task_defaults: `dict`, contains the implementasion class of a give Evaluator and the default metric name.
     """
+    if task in ["text2text-generation", "summarization", "translation"]:
+        raise KeyError(f"Task {task} is no longer supported, instead use \"text_generation\".")
     if task in TASK_ALIASES:
         task = TASK_ALIASES[task]
     if not check_pipeline_task(task):

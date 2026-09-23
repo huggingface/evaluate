@@ -153,7 +153,6 @@ MODULE_NAME_FOR_DYNAMIC_MODULES = "evaluate_modules"
 
 HF_HUB_ALLOWED_TASKS = [
     "image-classification",
-    "translation",
     "image-segmentation",
     "fill-mask",
     "automatic-speech-recognition",
@@ -161,7 +160,6 @@ HF_HUB_ALLOWED_TASKS = [
     "sentence-similarity",
     "audio-classification",
     "question-answering",
-    "summarization",
     "zero-shot-classification",
     "table-to-text",
     "feature-extraction",
@@ -169,7 +167,6 @@ HF_HUB_ALLOWED_TASKS = [
     "multiple-choice",
     "text-classification",
     "text-to-image",
-    "text2text-generation",
     "zero-shot-image-classification",
     "tabular-classification",
     "tabular-regression",
