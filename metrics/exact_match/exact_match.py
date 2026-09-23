@@ -37,8 +37,10 @@ Args:
         to lowercase so that capitalization differences are ignored.
     ignore_punctuation: Boolean, defaults to False. If true, removes all punctuation before
         comparing predictions and references.
-    ignore_numbers: Boolean, defaults to False. If true, removes all punctuation before
+    ignore_numbers: Boolean, defaults to False. If true, removes all digits before
         comparing predictions and references.
+        If the enabled normalization options remove both strings entirely, they are
+        considered a match only when the original strings were identical.
 Returns:
     exact_match: Dictionary containing exact_match rate. Possible values are between 0.0 and 1.0, inclusive.
 Examples:
@@ -109,13 +111,15 @@ class ExactMatch(evaluate.Metric):
         ignore_numbers=False,
     ):
 
+        original_predictions = np.asarray(predictions)
+        original_references = np.asarray(references)
+        predictions = original_predictions.copy()
+        references = original_references.copy()
+
         if regexes_to_ignore is not None:
             for s in regexes_to_ignore:
                 predictions = np.array([re.sub(s, "", x) for x in predictions])
                 references = np.array([re.sub(s, "", x) for x in references])
-        else:
-            predictions = np.asarray(predictions)
-            references = np.asarray(references)
 
         if ignore_case:
             predictions = np.char.lower(predictions)
@@ -131,6 +135,8 @@ class ExactMatch(evaluate.Metric):
             predictions = np.char.translate(predictions, table=repl_table)
             references = np.char.translate(references, table=repl_table)
 
-        score_list = predictions == references
+        score_list = (predictions == references) & (
+            (predictions != "") | (original_predictions == original_references)
+        )
 
         return {"exact_match": np.mean(score_list)}
