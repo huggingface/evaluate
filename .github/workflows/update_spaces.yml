@@ -8,8 +8,12 @@ on:
 env:
   CI_HEADERS: ${{ secrets.CI_HEADERS }}
 
+permissions: {}
+
 jobs:
   update-hub-repositories:
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
