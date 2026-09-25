@@ -21,7 +21,7 @@ The label distribution measurements returns the fraction of each label represent
 
 ## Intended Uses
 
-Calculating the distribution of labels in a dataset allows to see how balanced the labels in your dataset are, which
+Calculating the distribution of labels in a dataset allows you to see how balanced the labels in your dataset are, which
 can help choosing a relevant metric (e.g. accuracy when the dataset is balanced, versus F1 score when there is an
 imbalance).
 
