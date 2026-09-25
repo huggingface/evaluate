@@ -48,6 +48,7 @@ At minimum, this metric requires predictions and references as input
     - 'weighted': Calculate metrics for each label, and find their average weighted by support (the number of true instances for each label). This alters `'macro'` to account for label imbalance. This option can result in an F-score that is not between precision and recall.
     - 'samples': Calculate metrics for each instance, and find their average (only meaningful for multilabel classification).
 - **sample_weight** (`list` of `float`): Sample weights Defaults to None.
+- **zero_division** ('warn' or 0.0 or 1.0 or np.nan): Sets the value to return when there is a zero division, i.e. when all predictions and labels are negative. Defaults to 'warn'.
 
 
 ### Output Values
