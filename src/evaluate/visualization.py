@@ -135,7 +135,7 @@ class ComplexRadar:
         self.ax1.legend(*args, **kwargs)
 
 
-def radar_plot(data, model_names, invert_range=[], config=None, fig=None):
+def radar_plot(data, model_names, invert_range=None, config=None, fig=None):
     """Create a complex radar chart with different scales for each variable
     Source: https://towardsdatascience.com/how-to-create-and-visualize-complex-radar-charts-f7764d0f3652
 
@@ -178,6 +178,8 @@ def radar_plot(data, model_names, invert_range=[], config=None, fig=None):
     Returns:
         `matplotlib.figure.Figure`
     """
+    if invert_range is None:
+        invert_range = []
     data = pd.DataFrame(data)
     data.index = model_names
     variables = data.keys()
