@@ -80,6 +80,23 @@ def summarize_if_long_list(obj):
     return f"[{format_chunk(obj[:3])}, ..., {format_chunk(obj[-3:])}]"
 
 
+class EvaluationModuleError(Exception):
+    """Raised when an evaluation module's compute step fails.
+
+    Wraps internal errors (e.g. from sklearn or numpy) so callers can catch
+    evaluate-specific failures without catching broad ``Exception``.
+
+    Example::
+
+        import evaluate
+        acc = evaluate.load("accuracy")
+        try:
+            acc.compute(predictions=[], references=[])
+        except evaluate.EvaluationModuleError as e:
+            print(f"Metric failed: {e}")
+    """
+
+
 class EvaluationModuleInfoMixin:
     """This base class exposes some attributes of EvaluationModuleInfo
     at the base level of the EvaluationModule for easy access.
@@ -464,7 +481,14 @@ class EvaluationModule(EvaluationModuleInfoMixin):
 
             inputs = {input_name: self.data[input_name][:] for input_name in self._feature_names()}
             with temp_seed(self.seed):
-                output = self._compute(**inputs, **compute_kwargs)
+                try:
+                    output = self._compute(**inputs, **compute_kwargs)
+                except EvaluationModuleError:
+                    raise
+                except Exception as e:
+                    raise EvaluationModuleError(
+                        f"Metric '{self.name}' failed during compute: {e}"
+                    ) from e
 
             if self.buf_writer is not None:
                 self.buf_writer = None
