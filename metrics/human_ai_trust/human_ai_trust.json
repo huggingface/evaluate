@@ -1,0 +1,16 @@
+{
+  "description": "Human-centered evaluation metrics for trust calibration, belief updating, and uncertainty alignment in AI systems.",
+  "citation": "@misc{human_ai_trust2026,\n  title={Human Trust & Uncertainty Metrics for AI Evaluation},\n  author={Dyra},\n  year={2026},\n  note={Hugging Face Evaluate metric}\n}",
+  "homepage": "https://huggingface.co/datasets/Dyra1204/human_ai_trust_demo",
+  "license": "Apache-2.0",
+  "inputs_description": "predictions: List[Any], references: List[Any], confidences: List[float], human_trust_scores: List[float], belief_priors: Optional[List[float]], belief_posteriors: Optional[List[float]], explanation_complexity: Optional[List[float]]",
+  "keywords": [
+    "trust",
+    "uncertainty",
+    "human-ai-interaction",
+    "calibration",
+    "interpretability",
+    "belief-updating",
+    "hcai"
+  ]
+}
