@@ -116,15 +116,18 @@ class Perplexity(evaluate.Metric):
 
         tokenizer = AutoTokenizer.from_pretrained(model_id)
 
-        # if batch_size > 1 (which generally leads to padding being required), and
-        # if there is not an already assigned pad_token, assign an existing
-        # special token to also be the padding token
-        if tokenizer.pad_token is None and batch_size > 1:
-            existing_special_tokens = list(tokenizer.special_tokens_map_extended.values())
+        # Padding is always required when tokenizing multiple predictions together
+        # (tokenizer is called with padding=True regardless of batch_size).
+        # Use all_special_tokens instead of special_tokens_map_extended.values() for
+        # compatibility with both slow and fast tokenizers (e.g. GPT-2's slow tokenizer
+        # does not expose special_tokens_map_extended). See:
+        # https://github.com/huggingface/evaluate/issues/766
+        if tokenizer.pad_token is None:
+            existing_special_tokens = tokenizer.all_special_tokens
             # check that the model already has at least one special token defined
             assert (
                 len(existing_special_tokens) > 0
-            ), "If batch_size > 1, model must have at least one special token to use for padding. Please use a different model or set batch_size=1."
+            ), "Model must have at least one special token to use for padding. Please use a different model or set batch_size=1."
             # assign one of the special tokens to also be the pad token
             tokenizer.add_special_tokens({"pad_token": existing_special_tokens[0]})
 
