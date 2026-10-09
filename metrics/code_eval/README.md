@@ -39,6 +39,14 @@ The Code Eval metric calculates how good are predictions given a set of referenc
 
 `timeout`: The maximum time taken to produce a prediction before it is considered a "timeout". The default value is `3.0` (i.e. 3 seconds).
 
+### Language support
+
+`code_eval` executes candidate programs and reference tests with the Python HumanEval-style runner.
+
+* `pass@k` itself is language-agnostic.
+* The current `code_eval` implementation only supports Python out of the box.
+* Evaluating other programming languages would require a language-specific execution runner, test harness, and appropriate sandboxing or isolation.
+
 ```python
 from evaluate import load
 code_eval = load("code_eval")
@@ -51,7 +59,7 @@ N.B.
 This metric exists to run untrusted model-generated code. Users are strongly encouraged not to do so outside of a robust security sandbox. Before running this metric and once you've taken the necessary precautions, you will need to set the `HF_ALLOW_CODE_EVAL` environment variable. Use it at your own risk:
 ```python
 import os
-os.environ["HF_ALLOW_CODE_EVAL"] = "1"` 
+os.environ["HF_ALLOW_CODE_EVAL"] = "1"
 ```
 
 ## Output values
