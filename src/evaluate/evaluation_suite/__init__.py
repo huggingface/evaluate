@@ -115,7 +115,7 @@ class EvaluationSuite:
                 task.data = ds.map(task.data_preprocessor)
 
             task_evaluator = evaluator(task.task_type)
-            args_for_task = task.args_for_task
+            args_for_task = dict(task.args_for_task or {})
             args_for_task["model_or_pipeline"] = model_or_pipeline
             args_for_task["data"] = task.data
             args_for_task["subset"] = task.subset
