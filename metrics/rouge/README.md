@@ -62,6 +62,8 @@ It can also deal with lists of references for each predictions:
 {'rouge1': 0.8333, 'rouge2': 0.5, 'rougeL': 0.8333, 'rougeLsum': 0.8333}```
 ```
 
+Scoring large sets of predictions is faster with [`rouge-score-rs`](https://pypi.org/project/rouge-score-rs/), a Rust implementation of `rouge-score` that returns identical scores. If it is installed (`pip install rouge-score-rs`), the metric uses it automatically; nothing else changes.
+
 ### Inputs
 - **predictions** (`list`): list of predictions to score. Each prediction
         should be a string with tokens separated by spaces.

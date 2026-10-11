@@ -24,6 +24,14 @@ from rouge_score import rouge_scorer, scoring
 import evaluate
 
 
+# Optional: rouge-score-rs gives identical scores and is much faster. It is
+# imported inside `try` so that it does not become a required dependency.
+try:
+    from rouge_score_rs import rouge_scorer as fast_rouge_scorer
+except ImportError:
+    fast_rouge_scorer = None
+
+
 _CITATION = """\
 @inproceedings{lin-2004-rouge,
     title = "{ROUGE}: A Package for Automatic Evaluation of Summaries",
@@ -129,7 +137,8 @@ class Rouge(evaluate.Metric):
         if tokenizer is not None:
             tokenizer = Tokenizer(tokenizer)
 
-        scorer = rouge_scorer.RougeScorer(rouge_types=rouge_types, use_stemmer=use_stemmer, tokenizer=tokenizer)
+        scorer_module = fast_rouge_scorer if fast_rouge_scorer is not None else rouge_scorer
+        scorer = scorer_module.RougeScorer(rouge_types=rouge_types, use_stemmer=use_stemmer, tokenizer=tokenizer)
         if use_aggregator:
             aggregator = scoring.BootstrapAggregator()
         else:
