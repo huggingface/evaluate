@@ -144,14 +144,11 @@ class Rouge(evaluate.Metric):
         else:
             scores = []
 
-        if multi_ref:
-            all_scores = (scorer.score_multi(ref, pred) for ref, pred in zip(references, predictions))
-        elif hasattr(scorer, "score_batch"):
-            all_scores = scorer.score_batch(references, predictions)
-        else:
-            all_scores = (scorer.score(ref, pred) for ref, pred in zip(references, predictions))
-
-        for score in all_scores:
+        for ref, pred in zip(references, predictions):
+            if multi_ref:
+                score = scorer.score_multi(ref, pred)
+            else:
+                score = scorer.score(ref, pred)
             if use_aggregator:
                 aggregator.add_scores(score)
             else:
