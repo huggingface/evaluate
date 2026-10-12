@@ -47,6 +47,9 @@ results = perplexity.compute(data=input_texts, model_id='gpt2')
 - **batch_size** (int): the batch size to run texts through the model. Defaults to 16.
 - **add_start_token** (bool): whether to add the start token to the texts, so the perplexity can include the probability of the first word. Defaults to True.
 - **device** (str): device to run on, defaults to `cuda` when available
+- **max_length** (int, optional): truncate inputs longer than this many tokens
+- **model_kwargs** (dict, optional): forwarded to `AutoModelForCausalLM.from_pretrained` (e.g. `token` for gated models)
+- **tokenizer_kwargs** (dict, optional): forwarded to `AutoTokenizer.from_pretrained`
 
 ### Output Values
 This metric outputs a dictionary with the perplexity scores for the text input in the list, and the average perplexity.
@@ -91,6 +94,20 @@ print(round(results["mean_perplexity"], 2))
 >>>576.76
 print(round(results["perplexities"][0], 2))
 >>>889.28
+```
+
+### Gated models
+
+For models that require authentication, pass your Hugging Face token through `model_kwargs` and `tokenizer_kwargs` instead of relying on a global login:
+
+```python
+perplexity = evaluate.load("perplexity", module_type="measurement")
+results = perplexity.compute(
+    model_id="meta-llama/Meta-Llama-3.1-8B-Instruct",
+    data=["The quick brown fox jumps over the lazy dog."],
+    model_kwargs={"token": os.environ["HF_TOKEN"]},
+    tokenizer_kwargs={"token": os.environ["HF_TOKEN"]},
+)
 ```
 
 ## Limitations and Bias
