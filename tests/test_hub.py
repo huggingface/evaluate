@@ -1,10 +1,10 @@
 import glob
 from unittest import TestCase
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 import pytest
-import requests
 import yaml
+from huggingface_hub.utils import HfHubHTTPError
 
 from evaluate.hub import push_to_hub
 from tests.test_metric import DummyMetric
@@ -142,7 +142,7 @@ class TestHub(TestCase):
 
     def test_push_metric_invalid_dataset_type(self, metadata_update):
         with patch("evaluate.hub.dataset_info") as mock_dataset_info:
-            mock_dataset_info.side_effect = requests.HTTPError()
+            mock_dataset_info.side_effect = HfHubHTTPError("Not found", response=MagicMock())
             push_to_hub(
                 model_id="username/repo",
                 metric_value=self.result["accuracy"],
@@ -160,7 +160,7 @@ class TestHub(TestCase):
 
     def test_push_metric_invalid_model_id(self, metadata_update):
         with patch("evaluate.hub.model_info") as mock_model_info:
-            mock_model_info.side_effect = requests.HTTPError()
+            mock_model_info.side_effect = HfHubHTTPError("Not found", response=MagicMock())
             with pytest.raises(ValueError):
                 push_to_hub(
                     model_id="username/bad-repo",

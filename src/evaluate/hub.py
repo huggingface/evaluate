@@ -1,8 +1,8 @@
 from typing import Dict
 
-import requests
 from huggingface_hub import dataset_info, model_info
 from huggingface_hub.repocard import metadata_update
+from huggingface_hub.utils import HfHubHTTPError
 
 from .config import HF_HUB_ALLOWED_TASKS
 from .utils.logging import get_logger
@@ -85,12 +85,12 @@ def push_to_hub(
 
     try:
         dataset_info(dataset_type)
-    except requests.exceptions.HTTPError:
+    except HfHubHTTPError:
         logger.warning(f"Dataset {dataset_type} not found on the Hub at hf.co/datasets/{dataset_type}")
 
     try:
         model_info(model_id)
-    except requests.exceptions.HTTPError:
+    except HfHubHTTPError:
         raise ValueError(f"Model {model_id} not found on the Hub at hf.co/{model_id}")
 
     result = {
