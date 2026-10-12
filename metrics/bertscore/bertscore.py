@@ -22,6 +22,31 @@ from packaging import version
 
 import evaluate
 
+try:
+    from transformers.tokenization_utils_base import VERY_LARGE_INTEGER
+except ImportError:
+    VERY_LARGE_INTEGER = 10**30
+
+
+def _resolve_tokenizer_max_length(tokenizer, max_length=None):
+    """Pick a truncation limit that won't overflow the Rust tokenizers backend."""
+    if max_length is not None:
+        return max_length
+
+    current = getattr(tokenizer, "model_max_length", None)
+    if current is None or current >= VERY_LARGE_INTEGER:
+        sizes = getattr(tokenizer, "max_model_input_sizes", None) or {}
+        if sizes:
+            return min(sizes.values())
+        return 512
+    return current
+
+
+def _apply_tokenizer_max_length(scorer, max_length=None):
+    resolved = _resolve_tokenizer_max_length(scorer._tokenizer, max_length=max_length)
+    scorer._tokenizer.model_max_length = resolved
+    return resolved
+
 
 @contextmanager
 def filter_logging_context():
@@ -79,6 +104,9 @@ Args:
     rescale_with_baseline (bool): Rescale bertscore with pre-computed baseline.
     baseline_path (str): Customized baseline file.
     use_fast_tokenizer (bool): `use_fast` parameter passed to HF tokenizer. New in version 0.3.10.
+    max_length (int, optional): Maximum sequence length passed to the underlying tokenizer. Useful when a model
+        does not define `model_max_length` in its tokenizer config (common with transformers>=5), which otherwise
+        can trigger an `OverflowError` during truncation.
 
 Returns:
     precision: Precision.
@@ -142,6 +170,7 @@ class BERTScore(evaluate.Metric):
         rescale_with_baseline=False,
         baseline_path=None,
         use_fast_tokenizer=False,
+        max_length=None,
     ):
 
         if isinstance(references[0], str):
@@ -199,6 +228,9 @@ class BERTScore(evaluate.Metric):
                     rescale_with_baseline=rescale_with_baseline,
                     baseline_path=baseline_path,
                 )
+                _apply_tokenizer_max_length(self.cached_bertscorer, max_length=max_length)
+            elif max_length is not None:
+                _apply_tokenizer_max_length(self.cached_bertscorer, max_length=max_length)
 
         (P, R, F) = self.cached_bertscorer.score(
             cands=predictions,
