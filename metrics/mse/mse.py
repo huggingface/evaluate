@@ -14,7 +14,12 @@
 """MSE - Mean Squared Error Metric"""
 
 import datasets
-from sklearn.metrics import mean_squared_error, root_mean_squared_error
+from sklearn.metrics import mean_squared_error
+
+try:
+    from sklearn.metrics import root_mean_squared_error
+except ImportError:  # sklearn < 1.4
+    root_mean_squared_error = None
 
 import evaluate
 
@@ -112,10 +117,21 @@ class Mse(evaluate.Metric):
 
     def _compute(self, predictions, references, sample_weight=None, multioutput="uniform_average", squared=True):
 
-        mse = (
-            mean_squared_error(references, predictions, sample_weight=sample_weight, multioutput=multioutput)
-            if squared
-            else root_mean_squared_error(references, predictions, sample_weight=sample_weight, multioutput=multioutput)
-        )
+        if squared:
+            mse = mean_squared_error(
+                references, predictions, sample_weight=sample_weight, multioutput=multioutput
+            )
+        elif root_mean_squared_error is not None:
+            mse = root_mean_squared_error(
+                references, predictions, sample_weight=sample_weight, multioutput=multioutput
+            )
+        else:
+            mse = mean_squared_error(
+                references,
+                predictions,
+                sample_weight=sample_weight,
+                multioutput=multioutput,
+                squared=False,
+            )
 
         return {"mse": mse}
