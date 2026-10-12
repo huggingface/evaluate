@@ -1,8 +1,8 @@
 ---
 title: {{ cookiecutter.module_name }}
-datasets:
-- {{ cookiecutter.dataset_name }} 
-tags:
+{% if cookiecutter.dataset_name %}datasets:
+- {{ cookiecutter.dataset_name }}
+{% endif %}tags:
 - evaluate
 - {{ cookiecutter.module_type }}
 description: "TODO: add a description here"
