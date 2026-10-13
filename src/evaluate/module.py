@@ -41,6 +41,16 @@ from .utils.logging import get_logger
 logger = get_logger(__name__)
 
 
+class EvaluationModuleError(Exception):
+    """Base error raised when an evaluation module fails to compute its result.
+
+    Failures coming from the underlying ``_compute`` implementation (for example a
+    ``ValueError`` or ``KeyError`` raised by scikit-learn) are wrapped in this error so
+    that callers can catch evaluate-specific failures without catching a bare
+    ``Exception``. The original exception is preserved on ``__cause__``.
+    """
+
+
 class FileFreeLock(BaseFileLock):
     """Thread lock until a file **cannot** be locked"""
 
@@ -464,7 +474,12 @@ class EvaluationModule(EvaluationModuleInfoMixin):
 
             inputs = {input_name: self.data[input_name][:] for input_name in self._feature_names()}
             with temp_seed(self.seed):
-                output = self._compute(**inputs, **compute_kwargs)
+                try:
+                    output = self._compute(**inputs, **compute_kwargs)
+                except EvaluationModuleError:
+                    raise
+                except Exception as e:
+                    raise EvaluationModuleError(f"Error computing {self.name} metric: {type(e).__name__}: {e}") from e
 
             if self.buf_writer is not None:
                 self.buf_writer = None

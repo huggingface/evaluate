@@ -8,7 +8,8 @@ from unittest import TestCase, mock
 import pytest
 from datasets.features import Features, Sequence, Value
 
-from evaluate.module import EvaluationModule, EvaluationModuleInfo, combine
+import evaluate
+from evaluate.module import EvaluationModule, EvaluationModuleError, EvaluationModuleInfo, combine
 
 from .utils import require_tf, require_torch
 
@@ -757,3 +758,35 @@ class TestEvaluationcombined_evaluation(TestCase):
         self.assertDictEqual(
             expected_result, combined_evaluation.compute(predictions=predictions, references=references, pos_label=0)
         )
+
+
+class RaisingMetric(EvaluationModule):
+    """Dummy metric whose ``_compute`` raises a bare ``ValueError``, as scikit-learn does."""
+
+    def _info(self):
+        return EvaluationModuleInfo(
+            description="dummy metric that raises in _compute",
+            citation="insert citation here",
+            features=Features({"predictions": Value("int64"), "references": Value("int64")}),
+        )
+
+    def _compute(self, predictions, references):
+        raise ValueError("Found input variables with inconsistent numbers of samples")
+
+
+class TestEvaluationModuleError(TestCase):
+    def test_error_is_exported_from_public_api(self):
+        self.assertTrue(hasattr(evaluate, "EvaluationModuleError"))
+        self.assertIs(evaluate.EvaluationModuleError, EvaluationModuleError)
+
+    def test_compute_wraps_underlying_error(self):
+        metric = RaisingMetric(experiment_id="test_compute_wraps_underlying_error")
+        with self.assertRaises(EvaluationModuleError) as ctx:
+            metric.compute(predictions=[1], references=[1])
+        # The original exception is preserved for debugging.
+        self.assertIsInstance(ctx.exception.__cause__, ValueError)
+
+    def test_compute_catchable_via_public_api(self):
+        metric = RaisingMetric(experiment_id="test_compute_catchable_via_public_api")
+        with self.assertRaises(evaluate.EvaluationModuleError):
+            metric.compute(predictions=[1], references=[1])
