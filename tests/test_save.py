@@ -42,3 +42,12 @@ class TestSave(TestCase):
         for key in SAVE_EXTRA_KEYS:
             _ = loaded_result_dict.pop(key)
         self.assertDictEqual(result_dict, loaded_result_dict)
+
+
+def test_save_to_existing_directory_with_suffix(tmp_path):
+    directory = tmp_path / "experiment.v1"
+    directory.mkdir()
+    path = evaluate.save(directory, accuracy=0.75)
+    assert path.parent == directory
+    assert path.name.startswith("result-")
+    assert json.loads(path.read_text())["accuracy"] == 0.75
