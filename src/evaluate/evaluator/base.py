@@ -471,7 +471,7 @@ class Evaluator(ABC):
                 pipe = model_or_pipeline
             if tokenizer is not None and feature_extractor is not None:
                 logger.warning("Ignoring the value of the preprocessor argument (`tokenizer` or `feature_extractor`).")
-        if (pipe.task != self.task) and not (self.task == "translation" and pipe.task.startswith("translation")):
+        if (pipe.task != self.task):
             raise ValueError(
                 f"Incompatible `model_or_pipeline`. Please specify `model_or_pipeline` compatible with the `{self.task}` task."
             )
