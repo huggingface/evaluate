@@ -982,6 +982,10 @@ class CombinedEvaluations:
 
     def _merge_results(self, results):
         merged_results = {}
+        results = [
+            result if isinstance(result, dict) else {module_name: result}
+            for module_name, result in zip(self.evaluation_module_names, results)
+        ]
         results_keys = list(itertools.chain.from_iterable([r.keys() for r in results]))
         duplicate_keys = {item for item, count in collections.Counter(results_keys).items() if count > 1}
 

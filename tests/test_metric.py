@@ -757,3 +757,14 @@ class TestEvaluationcombined_evaluation(TestCase):
         self.assertDictEqual(
             expected_result, combined_evaluation.compute(predictions=predictions, references=references, pos_label=0)
         )
+
+    def test_combined_evaluation_with_scalar_results(self):
+        predictions = ["this is the prediction", "there is an other sample"]
+        references = ["this is the reference", "there is another one"]
+        expected_result = {"wer": 0.5, "cer": 0.34146341463414637}
+
+        combined_evaluation = combine(["wer", "cer"])
+
+        self.assertDictEqual(
+            expected_result, combined_evaluation.compute(predictions=predictions, references=references)
+        )
