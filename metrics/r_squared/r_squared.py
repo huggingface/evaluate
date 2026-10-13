@@ -15,7 +15,10 @@
 """R squared metric."""
 
 
+import warnings
+
 import datasets
+
 import numpy as np
 
 import evaluate
@@ -83,33 +86,47 @@ class r_squared(evaluate.Metric):
             ],
         )
 
-    def _compute(self, predictions=None, references=None):
+    def _compute(self, predictions=None, references=None, zero_division="warn"):
         """
         Computes the coefficient of determination (R-squared) of predictions with respect to references.
 
         Parameters:
-            predictions (List or np.ndarray): The predicted values.
-            references (List or np.ndarray): The true/reference values.
+        predictions (List or np.ndarray): The predicted values.
+        references (List or np.ndarray): The true/reference values.
+        zero_division (int or str): Which value to substitute as a metric value when encountering
+            zero division (i.e. all reference values are identical, so R^2 is undefined).
+            Should be one of 0, 1, "warn". "warn" acts as 0, but a warning is raised.
 
         Returns:
-            float: The R-squared value, rounded to 3 decimal places.
+        float: The R-squared value, rounded to 3 decimal places.
         """
+        if zero_division not in (0, 1, "warn"):
+            raise ValueError(f"zero_division must be one of 0, 1, 'warn'; got {zero_division!r}.")
+
         predictions = np.array(predictions)
         references = np.array(references)
 
-        # Calculate mean of the references
         mean_references = np.mean(references)
 
-        # Calculate sum of squared residuals
         ssr = np.sum((predictions - references) ** 2)
 
-        # Calculate sum of squared total
         sst = np.sum((references - mean_references) ** 2)
 
-        # Calculate R Squared
+        if sst == 0:
+            # All references are identical: there is no variance to explain, so R^2 is undefined.
+            if zero_division == "warn":
+                warnings.warn(
+                    "The R^2 score is undefined because all reference values are identical "
+                    "(zero variance). Returning 0.0. Pass zero_division=1 to return 1.0 "
+                    "instead, or zero_division=0 to silence this warning.",
+                    UserWarning,
+                    stacklevel=2,
+                )
+                return 0.0
+            return float(zero_division)
+
         r_squared = 1 - (ssr / sst)
 
-        # Round off to 3 decimal places
         rounded_r_squared = round(r_squared, 3)
 
         return rounded_r_squared
