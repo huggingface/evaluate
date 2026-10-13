@@ -40,6 +40,22 @@ from .utils.logging import get_logger
 
 logger = get_logger(__name__)
 
+class EvaluationModuleError(Exception):
+    """Exception raised when an :class:`EvaluationModule` computation fails.
+
+    Wraps internal errors (e.g. from sklearn or numpy) so callers can catch
+    evaluate-specific failures without catching broad :exc:`Exception`.
+
+    Example::
+
+        import evaluate
+        acc = evaluate.load("accuracy")
+        try:
+            acc.compute(predictions=[], references=[])
+        except evaluate.EvaluationModuleError as e:
+            print(f"Metric computation failed: {e}")
+    """
+
 
 class FileFreeLock(BaseFileLock):
     """Thread lock until a file **cannot** be locked"""
@@ -464,7 +480,14 @@ class EvaluationModule(EvaluationModuleInfoMixin):
 
             inputs = {input_name: self.data[input_name][:] for input_name in self._feature_names()}
             with temp_seed(self.seed):
-                output = self._compute(**inputs, **compute_kwargs)
+                try:
+                    output = self._compute(**inputs, **compute_kwargs)
+                except EvaluationModuleError:
+                    raise
+                except Exception as e:
+                    raise EvaluationModuleError(
+                        f"Metric computation failed for '{self.name}': {e}"
+                    ) from e
 
             if self.buf_writer is not None:
                 self.buf_writer = None
