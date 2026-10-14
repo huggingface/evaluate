@@ -5,12 +5,13 @@ The goal of the 🤗 Evaluate library is to support different types of evaluatio
 Here are the types of evaluations that are currently supported with a few examples for each:
 
 ## Metrics
+
 A metric measures the performance of a model on a given dataset. This is often based on an existing ground truth (i.e. a set of references), but there are also *referenceless metrics* which allow evaluating generated text by leveraging a pretrained model such as [GPT-2](https://huggingface.co/gpt2).
 
 Examples of metrics include:
-- [Accuracy](https://huggingface.co/metrics/accuracy) : the proportion of correct predictions among the total number of cases processed.
+- [Accuracy](https://huggingface.co/metrics/accuracy): the proportion of correct predictions among the total number of cases processed.
 - [Exact Match](https://huggingface.co/metrics/exact_match): the rate at which the input predicted strings exactly match their references.
-- [Mean Intersection over union (IoUO)](https://huggingface.co/metrics/mean_iou): the area of overlap between the predicted segmentation of an image and the ground truth divided by the area of union between the predicted segmentation and the ground truth.
+- [Mean Intersection over union (IoU)](https://huggingface.co/metrics/mean_iou): the area of overlap between the predicted segmentation of an image and the ground truth divided by the area of union between the predicted segmentation and the ground truth.
 
 Metrics are often used to track model performance on benchmark datasets, and to report progress on tasks such as [machine translation](https://huggingface.co/tasks/translation) and [image classification](https://huggingface.co/tasks/image-classification).
 
