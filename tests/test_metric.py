@@ -757,3 +757,45 @@ class TestEvaluationcombined_evaluation(TestCase):
         self.assertDictEqual(
             expected_result, combined_evaluation.compute(predictions=predictions, references=references, pos_label=0)
         )
+
+
+class FixedScoreMetric(DummyMetric):
+    def __init__(self, score_name, score, **kwargs):
+        self.score_name = score_name
+        self.score = score
+        super().__init__(**kwargs)
+
+    def _compute(self, predictions, references):
+        return {self.score_name: self.score}
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize("force_prefix", [False, True])
+def test_combined_result_key_collision(tmp_path, reverse, force_prefix):
+    if force_prefix:
+        names = ["a_b", "a"]
+        keys = ["c", "b_c"]
+        collision = "a_b_c"
+    else:
+        names = ["model", "baseline", "custom"]
+        keys = ["score", "score", "model_score"]
+        collision = "model_score"
+    modules = {
+        name: FixedScoreMetric(key, i, cache_dir=str(tmp_path), keep_in_memory=True)
+        for i, (name, key) in enumerate(zip(names, keys))
+    }
+    if reverse:
+        modules = dict(reversed(list(modules.items())))
+    combined = combine(modules, force_prefix=force_prefix)
+
+    with pytest.raises(ValueError, match=collision):
+        combined.compute(predictions=[1], references=[1])
+
+
+def test_combined_duplicate_names_result_key_collision(tmp_path):
+    metrics = [
+        FixedScoreMetric(key, i, cache_dir=str(tmp_path), keep_in_memory=True)
+        for i, key in enumerate(["score", "score", "fixed_score_metric_0_score"])
+    ]
+    with pytest.raises(ValueError, match="fixed_score_metric_0_score"):
+        combine(metrics).compute(predictions=[1], references=[1])
