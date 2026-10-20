@@ -993,11 +993,17 @@ class CombinedEvaluations:
         for module_name, result in zip(self.evaluation_module_names, results):
             for k, v in result.items():
                 if k not in duplicate_keys and not self.force_prefix:
-                    merged_results[f"{k}"] = v
+                    result_key = f"{k}"
                 elif module_name in duplicate_counter:
-                    merged_results[f"{module_name}_{duplicate_counter[module_name]}_{k}"] = v
+                    result_key = f"{module_name}_{duplicate_counter[module_name]}_{k}"
                 else:
-                    merged_results[f"{module_name}_{k}"] = v
+                    result_key = f"{module_name}_{k}"
+                if result_key in merged_results:
+                    raise ValueError(
+                        f"Multiple evaluation results resolve to the same key '{result_key}'. "
+                        "Use distinct module names or score keys to avoid this collision."
+                    )
+                merged_results[result_key] = v
 
             if module_name in duplicate_counter:
                 duplicate_counter[module_name] += 1

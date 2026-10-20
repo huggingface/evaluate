@@ -21,7 +21,6 @@ build/
 dist/
 
 # Environments
-.env
 .venv
 env/
 venv/
@@ -40,7 +39,6 @@ venv.bak/
 
 # PyCharm/vscode
 .idea
-.vscode
 
 # keep only the empty datasets and metrics directory with it's __init__.py file
 /src/*/datasets/*
@@ -62,3 +60,5 @@ docs/source/_build/
 # Benchmark results
 report.json
 report.md
+config.bat
+node_modules
