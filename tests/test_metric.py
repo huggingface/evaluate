@@ -2,7 +2,7 @@ import os
 import pickle
 import tempfile
 import time
-from multiprocessing import Pool
+from multiprocessing import Pool, get_context
 from unittest import TestCase, mock
 
 import pytest
@@ -150,6 +150,27 @@ def metric_add_and_compute(arg):
         return results
     finally:
         properly_del_metric(metric)
+
+
+def combined_metric_compute(arg):
+    process_id, preds, refs, cache_dir, mode, force_prefix = arg
+    metrics = {
+        "first": DummyMetric(num_process=2, process_id=process_id, cache_dir=cache_dir, timeout=30),
+        "second": AnotherDummyMetric(num_process=2, process_id=process_id, cache_dir=cache_dir, timeout=30),
+    }
+    try:
+        combined = combine(metrics, force_prefix=force_prefix)
+        if mode == "add":
+            for pred, ref in zip(preds, refs):
+                combined.add(prediction=pred, reference=ref)
+        elif mode == "add_batch":
+            combined.add_batch(predictions=preds, references=refs)
+        else:
+            return combined.compute(predictions=preds, references=refs)
+        return combined.compute()
+    finally:
+        for metric in metrics.values():
+            properly_del_metric(metric)
 
 
 class TestMetric(TestCase):
@@ -670,6 +691,9 @@ def test_metric_with_non_standard_feature_names_compute(tmp_path):
 
 
 class TestEvaluationcombined_evaluation(TestCase):
+    def test_empty_modules(self):
+        self.assertEqual(combine([]).compute(), {})
+
     def test_single_module(self):
         preds, refs = DummyMetric.predictions_and_references()
         expected_results = DummyMetric.expected_results()
@@ -757,3 +781,22 @@ class TestEvaluationcombined_evaluation(TestCase):
         self.assertDictEqual(
             expected_result, combined_evaluation.compute(predictions=predictions, references=references, pos_label=0)
         )
+
+
+@pytest.mark.parametrize("mode", ["compute", "add", "add_batch"])
+@pytest.mark.parametrize("force_prefix", [False, True])
+def test_distributed_combined_metrics(mode, force_prefix):
+    inputs = DummyMetric.distributed_predictions_and_references()
+    expected = {
+        "first_accuracy" if force_prefix else "accuracy": 0.75,
+        "first_set_equality": False,
+        "second_set_equality": False,
+    }
+    with tempfile.TemporaryDirectory() as cache_dir:
+        with get_context("spawn").Pool(2) as pool:
+            results = pool.map_async(
+                combined_metric_compute,
+                [(process_id, *data, cache_dir, mode, force_prefix) for process_id, data in enumerate(inputs)],
+            ).get(timeout=90)
+        assert results == [expected, None]
+        assert not any(name.endswith(".arrow") for _, _, files in os.walk(cache_dir) for name in files)

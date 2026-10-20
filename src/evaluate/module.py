@@ -981,6 +981,9 @@ class CombinedEvaluations:
         return self._merge_results(results)
 
     def _merge_results(self, results):
+        if results and all(result is None for result in results):
+            return None
+
         merged_results = {}
         results_keys = list(itertools.chain.from_iterable([r.keys() for r in results]))
         duplicate_keys = {item for item, count in collections.Counter(results_keys).items() if count > 1}
