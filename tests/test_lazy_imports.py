@@ -49,3 +49,71 @@ def test_wildcard_import():
         "print('OK')"
     )
     assert output == "OK"
+
+
+def test_legacy_public_exports():
+    import evaluate
+
+    legacy_names = {
+        "AudioClassificationEvaluator",
+        "AutomaticSpeechRecognitionEvaluator",
+        "CombinedEvaluations",
+        "Comparison",
+        "ComparisonInfo",
+        "EvaluationModule",
+        "EvaluationModuleInfo",
+        "EvaluationSuite",
+        "Evaluator",
+        "ImageClassificationEvaluator",
+        "Measurement",
+        "MeasurementInfo",
+        "Metric",
+        "MetricInfo",
+        "QuestionAnsweringEvaluator",
+        "SummarizationEvaluator",
+        "Text2TextGenerationEvaluator",
+        "TextClassificationEvaluator",
+        "TextGenerationEvaluator",
+        "TokenClassificationEvaluator",
+        "TranslationEvaluator",
+        "combine",
+        "config",
+        "disable_progress_bar",
+        "enable_progress_bar",
+        "evaluation_suite",
+        "evaluator",
+        "gradio",
+        "hub",
+        "infer_gradio_input_types",
+        "info",
+        "inspect",
+        "inspect_evaluation_module",
+        "is_progress_bar_enabled",
+        "json_to_string_type",
+        "launch_gradio_widget",
+        "list_evaluation_modules",
+        "load",
+        "loading",
+        "logging",
+        "module",
+        "naming",
+        "parse_gradio_data",
+        "parse_readme",
+        "parse_test_cases",
+        "push_to_hub",
+        "save",
+        "saving",
+        "utils",
+    }
+
+    assert all(hasattr(evaluate, name) for name in legacy_names)
+
+
+def test_wildcard_exports_match_all():
+    import evaluate
+
+    namespace = {}
+    exec("from evaluate import *", namespace)
+
+    exported = set(namespace) - {"__builtins__"}
+    assert exported == set(evaluate.__all__)
