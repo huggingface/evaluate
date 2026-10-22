@@ -62,4 +62,4 @@ class ExactMatch(evaluate.Comparison):
 
     def _compute(self, predictions1, predictions2):
         score_list = [p1 == p2 for p1, p2 in zip(predictions1, predictions2)]
-        return {"exact_match": np.mean(score_list)}
+        return {"exact_match": float(np.mean(score_list))}

@@ -14,6 +14,8 @@
 """Exact Match metric."""
 import re
 import string
+import sys
+import unicodedata
 
 import datasets
 import numpy as np
@@ -37,7 +39,7 @@ Args:
         to lowercase so that capitalization differences are ignored.
     ignore_punctuation: Boolean, defaults to False. If true, removes all punctuation before
         comparing predictions and references.
-    ignore_numbers: Boolean, defaults to False. If true, removes all punctuation before
+    ignore_numbers: Boolean, defaults to False. If true, removes all numbers before
         comparing predictions and references.
 Returns:
     exact_match: Dictionary containing exact_match rate. Possible values are between 0.0 and 1.0, inclusive.
@@ -82,6 +84,18 @@ Examples:
 _CITATION = """
 """
 
+_PUNCTUATION_TRANSLATION_TABLE = None
+
+
+def _get_punctuation_translation_table():
+    global _PUNCTUATION_TRANSLATION_TABLE
+    if _PUNCTUATION_TRANSLATION_TABLE is None:
+        _PUNCTUATION_TRANSLATION_TABLE = dict.fromkeys(
+            [ord(c) for c in string.punctuation]
+            + [i for i in range(sys.maxunicode + 1) if unicodedata.category(chr(i)).startswith("P")]
+        )
+    return _PUNCTUATION_TRANSLATION_TABLE
+
 
 @evaluate.utils.file_utils.add_start_docstrings(_DESCRIPTION, _KWARGS_DESCRIPTION)
 class ExactMatch(evaluate.Metric):
@@ -122,7 +136,7 @@ class ExactMatch(evaluate.Metric):
             references = np.char.lower(references)
 
         if ignore_punctuation:
-            repl_table = string.punctuation.maketrans("", "", string.punctuation)
+            repl_table = _get_punctuation_translation_table()
             predictions = np.char.translate(predictions, table=repl_table)
             references = np.char.translate(references, table=repl_table)
 
@@ -133,4 +147,4 @@ class ExactMatch(evaluate.Metric):
 
         score_list = predictions == references
 
-        return {"exact_match": np.mean(score_list)}
+        return {"exact_match": float(np.mean(score_list))}
