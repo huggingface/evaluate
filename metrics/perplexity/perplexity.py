@@ -115,6 +115,8 @@ class Perplexity(evaluate.Metric):
         model = model.to(device)
 
         tokenizer = AutoTokenizer.from_pretrained(model_id)
+        # Right-pad so teacher-forced sequence and BOS positions match unpadded scoring.
+        tokenizer.padding_side = "right"
 
         # if batch_size > 1 (which generally leads to padding being required), and
         # if there is not an already assigned pad_token, assign an existing
