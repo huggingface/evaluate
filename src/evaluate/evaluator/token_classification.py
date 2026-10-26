@@ -12,8 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from numbers import Number
 from typing import TYPE_CHECKING, Any, Callable, Dict, List, Optional, Tuple, Union
 
+import numpy as np
 from datasets import ClassLabel, Dataset, Sequence
 from typing_extensions import Literal
 
@@ -21,6 +23,12 @@ from ..module import EvaluationModule
 from ..utils.file_utils import add_end_docstrings, add_start_docstrings
 from .base import EVALUATOR_COMPUTE_RETURN_DOCSTRING, EVALUTOR_COMPUTE_START_DOCSTRING, Evaluator
 from .utils import DatasetColumn
+
+
+try:
+    from scipy.stats import bootstrap
+except ImportError:
+    bootstrap = None
 
 
 if TYPE_CHECKING:
@@ -78,6 +86,14 @@ TASK_DOCUMENTATION = r"""
     >     }),
     > )
     > ```
+
+    > [!TIP]
+    > With `strategy="bootstrap"`, this evaluator resamples complete dataset examples (sentences), not tokens.
+    > Scalar metric keys keep `{"score", "confidence_interval", "standard_error"}`. Seqeval entity keys use that same
+    > top-level record: `score` is the original entity dictionary, including support `number`; `confidence_interval`
+    > and `standard_error` map precision, recall, and F1 only. If a resample omits an entity that was present on the
+    > full data, that entity's rate statistic is treated as undefined (`NaN`). This missing-entity convention is a
+    > proposed evaluator policy, not a seqeval guarantee.
 """
 
 
@@ -89,9 +105,26 @@ class TokenClassificationEvaluator(Evaluator):
     `token-classification`.
 
     Methods in this class assume a data format compatible with the [`~transformers.TokenClassificationPipeline`].
+
+    Bootstrap (`strategy="bootstrap"`) resamples complete dataset examples (sentences) rather than tokens. Each
+    bootstrap draw and SciPy BCa leave-one-out jackknife call reconstructs the original prediction and reference
+    sequences, and any other aligned metric-input columns, for the sampled example indices. Ragged and equal-length
+    rows are preserved; sequences are not flattened, padded, or coerced into a rectangular token array.
+
+    Ordinary (`strategy="simple"`) scores are unchanged. Scalar bootstrap outputs keep
+    `{"score": scalar, "confidence_interval": (low, high), "standard_error": scalar}`. A seqeval entity keeps that
+    same top-level record shape: `score` is the complete original entity dictionary (`precision`, `recall`, `f1`,
+    and support `number`); `confidence_interval` maps precision/recall/f1 to tuples and `standard_error` maps those
+    rates to scalars. Support is not given an interval. The full-data entity set is frozen. If a resample omits a
+    known entity entirely, that entity's rate statistic is `NaN` and SciPy may return undefined intervals, undefined
+    standard errors, and meaningful warnings. This missing-entity convention is a proposed evaluator policy, not a
+    claim that seqeval emits NaN entries. Unexpected missing aggregate keys, incompatible types, and unsupported
+    changing custom nested schemas raise rather than being rewritten. Constant `METRIC_KWARGS` are forwarded to every
+    metric call.
     """
 
     PIPELINE_KWARGS = {"ignore_labels": []}
+    _TOKEN_ENTITY_RATE_KEYS = ("precision", "recall", "f1")
 
     def __init__(self, task="token-classification", default_metric_name=None):
         super().__init__(task, default_metric_name=default_metric_name)
@@ -208,6 +241,124 @@ class TokenClassificationEvaluator(Evaluator):
             )
 
         return pipe
+
+    def _select_token_metric_inputs(self, metric_inputs: Dict, indices) -> Dict:
+        selected_indices = [int(index) for index in indices]
+        return {column: [rows[index] for index in selected_indices] for column, rows in metric_inputs.items()}
+
+    def _extract_token_bootstrap_statistic(self, metric_output: Dict, path: Tuple[str, ...], known_entities) -> Any:
+        current = metric_output
+        for depth, key in enumerate(path):
+            if not isinstance(current, dict):
+                raise TypeError(
+                    "Token classification bootstrap expected a mapping while resolving metric key path "
+                    f"{path[:depth]!r}, but got {type(current).__name__}."
+                )
+            if key not in current:
+                if depth == 0 and key in known_entities:
+                    return float("nan")
+                raise KeyError(key)
+            current = current[key]
+        return current
+
+    def _bootstrap_token_statistic(
+        self,
+        metric,
+        metric_inputs: Dict,
+        path: Tuple[str, ...],
+        known_entities,
+        n_observations: int,
+        confidence_level: float,
+        n_resamples: int,
+        random_state,
+    ):
+        def statistic(indices):
+            sampled = self._select_token_metric_inputs(metric_inputs, indices)
+            metric_output = metric.compute(**sampled, **self.METRIC_KWARGS)
+            return self._extract_token_bootstrap_statistic(metric_output, path, known_entities)
+
+        return bootstrap(
+            data=(np.arange(n_observations),),
+            statistic=statistic,
+            paired=True,
+            vectorized=False,
+            confidence_level=confidence_level,
+            n_resamples=n_resamples,
+            random_state=random_state,
+        )
+
+    def compute_metric(
+        self,
+        metric: EvaluationModule,
+        metric_inputs: Dict,
+        strategy: Literal["simple", "bootstrap"] = "simple",
+        confidence_level: float = 0.95,
+        n_resamples: int = 9999,
+        random_state: Optional[int] = None,
+    ):
+        if strategy != "bootstrap":
+            return super().compute_metric(
+                metric=metric,
+                metric_inputs=metric_inputs,
+                strategy=strategy,
+                confidence_level=confidence_level,
+                n_resamples=n_resamples,
+                random_state=random_state,
+            )
+
+        result = metric.compute(**metric_inputs, **self.METRIC_KWARGS)
+        n_observations = len(next(iter(metric_inputs.values())))
+        known_entities = {key for key, value in result.items() if isinstance(value, dict)}
+        bootstrap_dict = {}
+        for key, value in result.items():
+            if isinstance(value, Number) and not isinstance(value, bool):
+                sampled = self._bootstrap_token_statistic(
+                    metric,
+                    metric_inputs,
+                    (key,),
+                    known_entities,
+                    n_observations,
+                    confidence_level,
+                    n_resamples,
+                    random_state,
+                )
+                bootstrap_dict[key] = {
+                    "score": value,
+                    "confidence_interval": (sampled.confidence_interval.low, sampled.confidence_interval.high),
+                    "standard_error": sampled.standard_error,
+                }
+            elif isinstance(value, dict):
+                confidence_interval = {}
+                standard_error = {}
+                for rate_key in self._TOKEN_ENTITY_RATE_KEYS:
+                    if rate_key not in value:
+                        raise TypeError(
+                            "Token classification bootstrap supports seqeval-style entity dictionaries with "
+                            f"precision, recall, and f1; {key!r} is missing {rate_key!r}."
+                        )
+                    sampled = self._bootstrap_token_statistic(
+                        metric,
+                        metric_inputs,
+                        (key, rate_key),
+                        known_entities,
+                        n_observations,
+                        confidence_level,
+                        n_resamples,
+                        random_state,
+                    )
+                    confidence_interval[rate_key] = (sampled.confidence_interval.low, sampled.confidence_interval.high)
+                    standard_error[rate_key] = sampled.standard_error
+                bootstrap_dict[key] = {
+                    "score": value,
+                    "confidence_interval": confidence_interval,
+                    "standard_error": standard_error,
+                }
+            else:
+                raise TypeError(
+                    "Token classification bootstrap supports scalar metric outputs and seqeval-style entity "
+                    f"dictionaries; got {type(value).__name__} for {key!r}."
+                )
+        return bootstrap_dict
 
     @add_start_docstrings(EVALUTOR_COMPUTE_START_DOCSTRING)
     @add_end_docstrings(EVALUATOR_COMPUTE_RETURN_DOCSTRING, TASK_DOCUMENTATION)

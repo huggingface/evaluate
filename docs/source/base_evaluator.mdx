@@ -127,6 +127,8 @@ With the token classification evaluator one can evaluate models for tasks such a
 - `label_mapping=None`: the label mapping aligns the labels in the pipeline output with the labels need for evaluation. E.g. the labels in `label_column` can be integers (`0`/`1`) whereas the pipeline can produce label names such as `"positive"`/`"negative"`. With that dictionary the pipeline outputs are mapped to the labels.
 - `join_by=" "`: While most datasets are already tokenized the pipeline expects a string. Thus the tokens need to be joined before passing to the pipeline. By default they are joined with a whitespace.
 
+With `strategy="bootstrap"`, resampling is done over complete dataset examples (sentences), not tokens. Scalar metric keys keep the usual `score` / `confidence_interval` / `standard_error` record. Seqeval entity scores keep that same top-level shape: `score` is the original entity dictionary (including support `number`), while `confidence_interval` and `standard_error` cover precision, recall, and F1. If a resample omits an entity that was present in the full data, that entity's rate statistic is treated as undefined (`NaN`) so SciPy can propagate unavailable intervals. This missing-entity convention is a proposed evaluator policy, not a seqeval guarantee.
+
 Let's have a look how we can use the evaluator to benchmark several models.
 
 ### Benchmarking several models
