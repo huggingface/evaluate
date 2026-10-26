@@ -14,12 +14,18 @@
 
 # Lint as: python3
 
+import importlib
+import os
+import tempfile
+import warnings
+from numbers import Number
 from time import sleep
 from unittest import TestCase, mock
 
 import numpy as np
 from datasets import ClassLabel, Dataset, Features, Sequence, Value
 from PIL import Image
+from scipy.stats import bootstrap
 from transformers import (
     AutoConfig,
     AutoFeatureExtractor,
@@ -120,6 +126,14 @@ class DummyTokenClassificationPipeline:
         ]
 
         return [result]
+
+
+class BatchedDummyTokenClassificationPipeline(DummyTokenClassificationPipeline):
+    """Repeat the existing dummy output once per input example."""
+
+    def __call__(self, inputs, **kwargs):
+        parent_call = super().__call__
+        return [parent_call([text], **kwargs)[0] for text in inputs]
 
 
 class DummyAutomaticSpeechRecognitionPipeline:
@@ -860,6 +874,659 @@ class TestTokenClassificationEvaluator(TestCase):
         ]
         predictions = task_evaluator.predictions_processor(predictions, words, join_by)
         self.assertListEqual(predictions["predictions"][0], ["B-LOC", "O", "O", "O", "B-LOC", "O"])
+
+
+class TestTokenClassificationBootstrap(TestCase):
+    """Regression coverage for sentence-level token-classification bootstrap (#546)."""
+
+    RAGGED_METRIC_INPUTS = {
+        "references": [
+            ["O"],
+            ["B-X", "O"],
+            ["O", "B-X", "I-X"],
+            ["B-X"],
+            ["O", "O"],
+            ["B-X", "I-X", "O"],
+            ["O"],
+            ["O", "B-X"],
+        ],
+        "predictions": [
+            ["O"],
+            ["O", "O"],
+            ["O", "B-X", "I-X"],
+            ["O"],
+            ["O", "O"],
+            ["B-X", "O", "O"],
+            ["O"],
+            ["O", "O"],
+        ],
+    }
+    EQUAL_METRIC_INPUTS = {
+        "references": [
+            ["O", "O", "O"],
+            ["B-X", "O", "O"],
+            ["O", "B-X", "I-X"],
+            ["B-X", "O", "O"],
+            ["O", "O", "O"],
+            ["B-X", "I-X", "O"],
+            ["O", "O", "O"],
+            ["O", "B-X", "O"],
+        ],
+        "predictions": [
+            ["O", "O", "O"],
+            ["O", "O", "O"],
+            ["O", "B-X", "I-X"],
+            ["O", "O", "O"],
+            ["O", "O", "O"],
+            ["B-X", "O", "O"],
+            ["O", "O", "O"],
+            ["O", "O", "O"],
+        ],
+    }
+    VARIABLE_LENGTH_TOKENS = [
+        ["New", "York", "a", "nice", "City", "."],
+        ["New", "York"],
+        ["New", "York", "a"],
+        ["New", "York", "a", "nice"],
+        ["New", "York", "a", "nice", "City", "."],
+        ["New", "York"],
+        ["New", "York", "a"],
+        ["New", "York", "a", "nice", "City"],
+    ]
+    VARIABLE_LENGTH_REFERENCES = [
+        ["B-LOC", "I-LOC", "O", "O", "B-LOC", "O"],
+        ["O", "O"],
+        ["B-LOC", "I-LOC", "O"],
+        ["O", "O", "O", "O"],
+        ["O", "O", "O", "O", "B-LOC", "O"],
+        ["B-LOC", "I-LOC"],
+        ["O", "O", "O"],
+        ["B-LOC", "I-LOC", "O", "O", "O"],
+    ]
+    EQUAL_LENGTH_TOKENS = [["New", "York", "a"]] * 8
+    EQUAL_LENGTH_REFERENCES = [
+        ["B-LOC", "I-LOC", "O"],
+        ["O", "O", "O"],
+        ["B-LOC", "I-LOC", "O"],
+        ["O", "O", "O"],
+        ["O", "B-LOC", "O"],
+        ["B-LOC", "I-LOC", "O"],
+        ["O", "O", "O"],
+        ["O", "O", "B-LOC"],
+    ]
+    PERFORMANCE_KEYS = ("total_time_in_seconds", "samples_per_second", "latency_in_seconds")
+    ENTITY_RATE_KEYS = ("precision", "recall", "f1")
+
+    def setUp(self):
+        self._metric_cache = tempfile.TemporaryDirectory()
+        self.addCleanup(self._metric_cache.cleanup)
+        self._seqeval_counter = 0
+        self.evaluator = TokenClassificationEvaluator()
+        self.pipe = DummyTokenClassificationPipeline()
+        self.batched_pipe = BatchedDummyTokenClassificationPipeline()
+        features = Features(
+            {
+                "tokens": Sequence(feature=Value(dtype="string")),
+                "ner_tags": Sequence(feature=ClassLabel(names=["O", "B-LOC", "I-LOC"])),
+            }
+        )
+        self.single_example_data = Dataset.from_dict(
+            {
+                "tokens": [["New", "York", "a", "nice", "City", "."]],
+                "ner_tags": [[1, 2, 0, 0, 1, 0]],
+            },
+            features=features,
+        )
+
+    def _load_local_seqeval(self):
+        self._seqeval_counter += 1
+        metric_path = os.path.join(os.path.dirname(__file__), "..", "metrics", "seqeval")
+        return load(
+            metric_path,
+            cache_dir=self._metric_cache.name,
+            keep_in_memory=True,
+            experiment_id="token-bootstrap-{0}".format(self._seqeval_counter),
+        )
+
+    def _string_tag_dataset(self, tokens, references):
+        features = Features(
+            {
+                "tokens": Sequence(feature=Value(dtype="string")),
+                "ner_tags": Sequence(feature=Value(dtype="string")),
+            }
+        )
+        return Dataset.from_dict({"tokens": tokens, "ner_tags": references}, features=features)
+
+    def _independent_sentence_bootstrap(
+        self, metric, metric_inputs, path, confidence_level, n_resamples, random_state, metric_kwargs=None
+    ):
+        metric_kwargs = {} if metric_kwargs is None else metric_kwargs
+        n_observations = len(next(iter(metric_inputs.values())))
+
+        def statistic(indices):
+            sampled = {column: [rows[int(index)] for index in indices] for column, rows in metric_inputs.items()}
+            output = metric.compute(**sampled, **metric_kwargs)
+            current = output
+            for key in path:
+                if key not in current:
+                    return float("nan")
+                current = current[key]
+            return current
+
+        return bootstrap(
+            (np.arange(n_observations),),
+            statistic,
+            paired=True,
+            vectorized=False,
+            confidence_level=confidence_level,
+            n_resamples=n_resamples,
+            random_state=random_state,
+        )
+
+    def _assert_scalar_bootstrap_record(self, record, score):
+        self.assertIsInstance(record, dict)
+        self.assertEqual(set(record), {"score", "confidence_interval", "standard_error"})
+        self.assertEqual(record["score"], score)
+        self.assertEqual(len(record["confidence_interval"]), 2)
+        self.assertIsInstance(record["standard_error"], Number)
+
+    def _assert_entity_bootstrap_record(self, record, ordinary_entity):
+        self.assertIsInstance(record, dict)
+        self.assertEqual(set(record), {"score", "confidence_interval", "standard_error"})
+        self.assertEqual(record["score"], ordinary_entity)
+        self.assertEqual(set(record["confidence_interval"]), set(self.ENTITY_RATE_KEYS))
+        self.assertEqual(set(record["standard_error"]), set(self.ENTITY_RATE_KEYS))
+        self.assertIn("number", record["score"])
+        self.assertNotIn("number", record["confidence_interval"])
+        self.assertNotIn("number", record["standard_error"])
+        for rate_key in self.ENTITY_RATE_KEYS:
+            self.assertEqual(len(record["confidence_interval"][rate_key]), 2)
+            self.assertIsInstance(record["standard_error"][rate_key], Number)
+
+    def _assert_bootstrap_result_matches_ordinary(self, bootstrap_result, ordinary):
+        self.assertEqual(set(bootstrap_result), set(ordinary))
+        for key, value in ordinary.items():
+            if isinstance(value, dict):
+                self._assert_entity_bootstrap_record(bootstrap_result[key], value)
+            else:
+                self._assert_scalar_bootstrap_record(bootstrap_result[key], value)
+
+    def _assert_finite_record_interval(self, record):
+        interval = record["confidence_interval"]
+        if isinstance(interval, dict):
+            for rate_key in self.ENTITY_RATE_KEYS:
+                self.assertTrue(np.all(np.isfinite(interval[rate_key])))
+                self.assertTrue(np.isfinite(record["standard_error"][rate_key]))
+        else:
+            self.assertTrue(np.all(np.isfinite(interval)))
+            self.assertTrue(np.isfinite(record["standard_error"]))
+
+    def _assert_matches_independent_bootstrap(
+        self, record, metric, metric_inputs, path, confidence_level, n_resamples, random_state, metric_kwargs=None
+    ):
+        reference = self._independent_sentence_bootstrap(
+            metric,
+            metric_inputs,
+            path,
+            confidence_level,
+            n_resamples,
+            random_state,
+            metric_kwargs=metric_kwargs,
+        )
+        np.testing.assert_allclose(
+            record["confidence_interval"],
+            (reference.confidence_interval.low, reference.confidence_interval.high),
+            rtol=1e-12,
+            atol=1e-12,
+            equal_nan=True,
+        )
+        np.testing.assert_allclose(
+            record["standard_error"], reference.standard_error, rtol=1e-12, atol=1e-12, equal_nan=True
+        )
+
+    def _assert_performance_keys(self, result):
+        for key in self.PERFORMANCE_KEYS:
+            self.assertIn(key, result)
+            self.assertIsInstance(result[key], Number)
+            self.assertNotIsInstance(result[key], dict)
+
+    def test_simple_scoring_unchanged_on_existing_fixture(self):
+        metric = self._load_local_seqeval()
+        results = self.evaluator.compute(
+            model_or_pipeline=self.pipe, data=self.single_example_data, metric=metric, device=-1
+        )
+        self.assertEqual(results["overall_accuracy"], 1.0)
+        self.assertEqual(results["overall_f1"], 1.0)
+        self.assertEqual(results["LOC"]["number"], 2)
+        self.assertIsInstance(results["LOC"], dict)
+        self.assertIsInstance(results["overall_accuracy"], Number)
+        self.assertNotIsInstance(results["overall_accuracy"], dict)
+        self._assert_performance_keys(results)
+
+    def test_bootstrap_rejects_fewer_than_two_examples(self):
+        metric = self._load_local_seqeval()
+        with self.assertRaises(ValueError) as context:
+            self.evaluator.compute(
+                model_or_pipeline=self.pipe,
+                data=self.single_example_data,
+                metric=metric,
+                device=-1,
+                strategy="bootstrap",
+                n_resamples=9,
+                random_state=42,
+            )
+        self.assertIn("two or more observations", str(context.exception))
+
+    def test_bootstrap_variable_length_full_evaluator(self):
+        metric = self._load_local_seqeval()
+        data = self._string_tag_dataset(self.VARIABLE_LENGTH_TOKENS, self.VARIABLE_LENGTH_REFERENCES)
+        simple = self.evaluator.compute(model_or_pipeline=self.batched_pipe, data=data, metric=metric, device=-1)
+        self.assertAlmostEqual(simple["overall_f1"], 0.7058823529411764)
+        bootstrap_result = self.evaluator.compute(
+            model_or_pipeline=self.batched_pipe,
+            data=data,
+            metric=metric,
+            device=-1,
+            strategy="bootstrap",
+            n_resamples=99,
+            random_state=42,
+        )
+        ordinary_keys = {key: simple[key] for key in simple if key not in self.PERFORMANCE_KEYS}
+        self._assert_bootstrap_result_matches_ordinary(
+            {key: bootstrap_result[key] for key in ordinary_keys}, ordinary_keys
+        )
+        self._assert_performance_keys(bootstrap_result)
+        self._assert_finite_record_interval(bootstrap_result["overall_f1"])
+        self._assert_finite_record_interval(bootstrap_result["overall_accuracy"])
+        # Dummy alignments can make the LOC rate statistic degenerate; overall rates stay finite.
+
+        metric_inputs, pipe_inputs = self.evaluator.prepare_data(data, "tokens", "ner_tags", " ")
+        predictions, _ = self.evaluator.call_pipeline(self.batched_pipe, pipe_inputs)
+        metric_inputs.update(self.evaluator.predictions_processor(predictions, data["tokens"], " "))
+        oracle_metric = self._load_local_seqeval()
+        self._assert_matches_independent_bootstrap(
+            bootstrap_result["overall_f1"], oracle_metric, metric_inputs, ("overall_f1",), 0.95, 99, 42
+        )
+        self._assert_matches_independent_bootstrap(
+            bootstrap_result["overall_accuracy"], oracle_metric, metric_inputs, ("overall_accuracy",), 0.95, 99, 42
+        )
+        self._assert_matches_independent_bootstrap(
+            {
+                "confidence_interval": bootstrap_result["LOC"]["confidence_interval"]["f1"],
+                "standard_error": bootstrap_result["LOC"]["standard_error"]["f1"],
+            },
+            oracle_metric,
+            metric_inputs,
+            ("LOC", "f1"),
+            0.95,
+            99,
+            42,
+        )
+
+    def test_bootstrap_equal_length_full_evaluator(self):
+        metric = self._load_local_seqeval()
+        data = self._string_tag_dataset(self.EQUAL_LENGTH_TOKENS, self.EQUAL_LENGTH_REFERENCES)
+        simple = self.evaluator.compute(model_or_pipeline=self.batched_pipe, data=data, metric=metric, device=-1)
+        bootstrap_result = self.evaluator.compute(
+            model_or_pipeline=self.batched_pipe,
+            data=data,
+            metric=metric,
+            device=-1,
+            strategy="bootstrap",
+            n_resamples=99,
+            random_state=42,
+        )
+        ordinary_keys = {key: simple[key] for key in simple if key not in self.PERFORMANCE_KEYS}
+        self._assert_bootstrap_result_matches_ordinary(
+            {key: bootstrap_result[key] for key in ordinary_keys}, ordinary_keys
+        )
+        self._assert_performance_keys(bootstrap_result)
+        self._assert_finite_record_interval(bootstrap_result["overall_f1"])
+        self._assert_finite_record_interval(bootstrap_result["LOC"])
+        self.assertGreater(simple["LOC"]["number"], 0)
+
+        metric_inputs, pipe_inputs = self.evaluator.prepare_data(data, "tokens", "ner_tags", " ")
+        predictions, _ = self.evaluator.call_pipeline(self.batched_pipe, pipe_inputs)
+        metric_inputs.update(self.evaluator.predictions_processor(predictions, data["tokens"], " "))
+        oracle_metric = self._load_local_seqeval()
+        self._assert_matches_independent_bootstrap(
+            bootstrap_result["overall_f1"], oracle_metric, metric_inputs, ("overall_f1",), 0.95, 99, 42
+        )
+
+    def test_bootstrap_metric_stage_matches_sentence_index_oracle(self):
+        for fixture in (self.RAGGED_METRIC_INPUTS, self.EQUAL_METRIC_INPUTS):
+            metric = self._load_local_seqeval()
+            ordinary = metric.compute(**fixture)
+            result = self.evaluator.compute_metric(
+                metric, fixture, strategy="bootstrap", n_resamples=99, random_state=42
+            )
+            self._assert_bootstrap_result_matches_ordinary(result, ordinary)
+            self._assert_finite_record_interval(result["overall_f1"])
+            self._assert_finite_record_interval(result["overall_accuracy"])
+            self._assert_finite_record_interval(result["X"])
+            oracle_metric = self._load_local_seqeval()
+            self._assert_matches_independent_bootstrap(
+                result["overall_f1"], oracle_metric, fixture, ("overall_f1",), 0.95, 99, 42
+            )
+            self._assert_matches_independent_bootstrap(
+                result["overall_accuracy"], oracle_metric, fixture, ("overall_accuracy",), 0.95, 99, 42
+            )
+            self._assert_matches_independent_bootstrap(
+                {
+                    "confidence_interval": result["X"]["confidence_interval"]["f1"],
+                    "standard_error": result["X"]["standard_error"]["f1"],
+                },
+                oracle_metric,
+                fixture,
+                ("X", "f1"),
+                0.95,
+                99,
+                42,
+            )
+            self._assert_matches_independent_bootstrap(
+                {
+                    "confidence_interval": result["X"]["confidence_interval"]["precision"],
+                    "standard_error": result["X"]["standard_error"]["precision"],
+                },
+                oracle_metric,
+                fixture,
+                ("X", "precision"),
+                0.95,
+                99,
+                42,
+            )
+
+    def test_recording_metric_preserves_rows_and_jackknife(self):
+        original = {
+            "predictions": [["O", "B-X"], ["B-X", "O"], ["O", "O"], ["B-X", "I-X"]],
+            "references": [["O", "O"], ["B-X", "O"], ["O", "B-X"], ["B-X", "I-X"]],
+        }
+        n_observations = len(original["predictions"])
+        calls = []
+        test_case = self
+
+        class RecordingMetric:
+            def compute(self, predictions, references, **kwargs):
+                if predictions and isinstance(predictions[0], str):
+                    raise TypeError("received token slices instead of sentence rows")
+                reconstructed = {"predictions": list(predictions), "references": list(references)}
+                calls.append(reconstructed)
+                for prediction, reference in zip(reconstructed["predictions"], reconstructed["references"]):
+                    test_case.assertIsInstance(prediction, list)
+                    test_case.assertIsInstance(reference, list)
+                    test_case.assertEqual(len(prediction), len(reference))
+                    test_case.assertEqual(len(prediction), 2)
+                return {"accuracy": 0.5}
+
+        self.evaluator.compute_metric(
+            RecordingMetric(), original, strategy="bootstrap", n_resamples=9, random_state=42
+        )
+        self.assertGreater(len(calls), n_observations)
+        call_lengths = [len(call["predictions"]) for call in calls]
+        self.assertIn(n_observations, call_lengths)
+        self.assertIn(n_observations - 1, call_lengths)
+
+        def sampled_indices(call):
+            return [
+                next(index for index, row in enumerate(original["predictions"]) if prediction is row)
+                for prediction in call["predictions"]
+            ]
+
+        leave_one_out = set()
+        for call in calls:
+            indices = sampled_indices(call)
+            self.assertEqual(len(call["predictions"]), len(call["references"]))
+            for prediction, reference, index in zip(call["predictions"], call["references"], indices):
+                self.assertIs(prediction, original["predictions"][index])
+                self.assertIs(reference, original["references"][index])
+            if len(indices) == n_observations - 1:
+                excluded = tuple(index for index in range(n_observations) if index not in indices)
+                self.assertEqual(len(excluded), 1)
+                leave_one_out.add(excluded[0])
+        self.assertEqual(leave_one_out, set(range(n_observations)))
+        self.assertTrue(
+            any(
+                len(set(map(id, call["predictions"]))) < len(call["predictions"])
+                for call in calls
+                if len(call["predictions"]) == n_observations
+            )
+        )
+
+    def test_rare_and_one_sided_entities(self):
+        rare = {key: [list(row) for row in rows] for key, rows in self.RAGGED_METRIC_INPUTS.items()}
+        rare["references"][0] = ["B-Y"]
+        rare["predictions"][0] = ["B-Y"]
+        rare["predictions"][1] = ["B-Z", "O"]
+        rare["references"][2] = ["O", "B-W", "I-W"]
+        metric = self._load_local_seqeval()
+        ordinary = metric.compute(**rare)
+        self.assertIn("Y", ordinary)
+        self.assertIn("Z", ordinary)
+        self.assertIn("W", ordinary)
+        with warnings.catch_warnings(record=True):
+            warnings.simplefilter("always")
+            result = self.evaluator.compute_metric(metric, rare, strategy="bootstrap", n_resamples=99, random_state=42)
+        self._assert_entity_bootstrap_record(result["Y"], ordinary["Y"])
+        self._assert_entity_bootstrap_record(result["Z"], ordinary["Z"])
+        self._assert_entity_bootstrap_record(result["W"], ordinary["W"])
+        self.assertEqual(result["Y"]["score"]["number"], ordinary["Y"]["number"])
+        self.assertTrue(np.isnan(result["Y"]["confidence_interval"]["f1"]).all())
+        self.assertTrue(np.isnan(result["Y"]["standard_error"]["f1"]))
+        self.assertFalse(np.isnan(result["overall_f1"]["score"]))
+        self._assert_finite_record_interval(result["overall_f1"])
+
+    def test_all_o_and_constant_metric(self):
+        all_o = {"predictions": [["O"]] * 4, "references": [["O"]] * 4}
+        metric = self._load_local_seqeval()
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            result = self.evaluator.compute_metric(metric, all_o, strategy="bootstrap", n_resamples=9, random_state=42)
+        self.assertEqual(result["overall_accuracy"]["score"], 1.0)
+        self.assertTrue(np.isnan(result["overall_accuracy"]["confidence_interval"]).any())
+        self.assertEqual(result["overall_accuracy"]["standard_error"], 0.0)
+        warning_names = {warning.category.__name__ for warning in caught}
+        self.assertTrue(warning_names)
+
+        class ConstantMetric:
+            def compute(self, predictions, references, **kwargs):
+                return {"accuracy": 1.0}
+
+        with warnings.catch_warnings(record=True) as caught:
+            warnings.simplefilter("always")
+            constant = self.evaluator.compute_metric(
+                ConstantMetric(),
+                {"predictions": [0, 1, 0, 1], "references": [0, 1, 0, 1]},
+                strategy="bootstrap",
+                n_resamples=9,
+                random_state=42,
+            )
+        self.assertEqual(constant["accuracy"]["score"], 1.0)
+        self.assertTrue(np.isnan(constant["accuracy"]["confidence_interval"]).any())
+        self.assertEqual(constant["accuracy"]["standard_error"], 0.0)
+        self.assertTrue(any(warning.category.__name__ == "DegenerateDataWarning" for warning in caught))
+
+    def test_seed_repeatability_and_nondefault_parameters(self):
+        metric = self._load_local_seqeval()
+        first = self.evaluator.compute_metric(
+            metric, self.RAGGED_METRIC_INPUTS, strategy="bootstrap", n_resamples=99, random_state=42
+        )
+        second = self.evaluator.compute_metric(
+            metric, self.RAGGED_METRIC_INPUTS, strategy="bootstrap", n_resamples=99, random_state=42
+        )
+        np.testing.assert_allclose(
+            first["overall_f1"]["confidence_interval"], second["overall_f1"]["confidence_interval"]
+        )
+        np.testing.assert_allclose(first["overall_f1"]["standard_error"], second["overall_f1"]["standard_error"])
+
+        nondefault = self.evaluator.compute_metric(
+            metric,
+            self.RAGGED_METRIC_INPUTS,
+            strategy="bootstrap",
+            confidence_level=0.8,
+            n_resamples=20,
+            random_state=42,
+        )
+        self.assertEqual(nondefault["overall_f1"]["score"], first["overall_f1"]["score"])
+        self.assertFalse(
+            np.allclose(nondefault["overall_f1"]["confidence_interval"], first["overall_f1"]["confidence_interval"])
+        )
+        oracle_metric = self._load_local_seqeval()
+        self._assert_matches_independent_bootstrap(
+            nondefault["overall_f1"], oracle_metric, self.RAGGED_METRIC_INPUTS, ("overall_f1",), 0.8, 20, 42
+        )
+
+    def test_random_state_objects_and_none_forwarding(self):
+        metric = self._load_local_seqeval()
+        for factory in (lambda: np.random.RandomState(42), lambda: np.random.default_rng(42)):
+            first = self.evaluator.compute_metric(
+                metric, self.RAGGED_METRIC_INPUTS, strategy="bootstrap", n_resamples=9, random_state=factory()
+            )
+            second = self.evaluator.compute_metric(
+                metric, self.RAGGED_METRIC_INPUTS, strategy="bootstrap", n_resamples=9, random_state=factory()
+            )
+            np.testing.assert_allclose(
+                first["overall_f1"]["confidence_interval"], second["overall_f1"]["confidence_interval"], equal_nan=True
+            )
+            np.testing.assert_allclose(
+                first["overall_f1"]["standard_error"], second["overall_f1"]["standard_error"], equal_nan=True
+            )
+
+        token_module = importlib.import_module("evaluate.evaluator.token_classification")
+        with mock.patch.object(token_module, "bootstrap", wraps=bootstrap) as mocked:
+            self.evaluator.compute_metric(
+                metric, self.RAGGED_METRIC_INPUTS, strategy="bootstrap", n_resamples=9, random_state=None
+            )
+        kwargs = mocked.call_args.kwargs
+        self.assertIsNone(kwargs.get("random_state"))
+        self.assertNotIn("rng", kwargs)
+        self.assertTrue(kwargs["paired"])
+        self.assertFalse(kwargs["vectorized"])
+        np.testing.assert_array_equal(kwargs["data"][0], np.arange(len(self.RAGGED_METRIC_INPUTS["references"])))
+
+        with mock.patch.object(token_module, "bootstrap", wraps=bootstrap) as mocked:
+            self.evaluator.compute_metric(
+                metric, self.RAGGED_METRIC_INPUTS, strategy="bootstrap", n_resamples=9, random_state=42
+            )
+        self.assertEqual(mocked.call_args.kwargs["random_state"], 42)
+        self.assertNotIn("rng", mocked.call_args.kwargs)
+
+    def test_flat_scalar_custom_metric(self):
+        class FlatAccuracy:
+            def compute(self, predictions, references, **kwargs):
+                return {
+                    "accuracy": sum(prediction == reference for prediction, reference in zip(predictions, references))
+                    / len(references)
+                }
+
+        metric_inputs = {"predictions": [0, 1, 0, 1, 1, 1, 0, 0], "references": [0, 1, 1, 1, 0, 1, 0, 1]}
+        ordinary = FlatAccuracy().compute(**metric_inputs)
+        result = self.evaluator.compute_metric(
+            FlatAccuracy(), metric_inputs, strategy="bootstrap", n_resamples=99, random_state=42
+        )
+        self._assert_scalar_bootstrap_record(result["accuracy"], ordinary["accuracy"])
+        self._assert_matches_independent_bootstrap(
+            result["accuracy"], FlatAccuracy(), metric_inputs, ("accuracy",), 0.95, 99, 42
+        )
+
+    def test_metric_kwargs_reach_every_call(self):
+        class KeywordMetric:
+            def __init__(self):
+                self.calls = []
+
+            def compute(self, predictions, references, **kwargs):
+                self.calls.append(dict(kwargs))
+                return {"accuracy": 0.5}
+
+        configured = TokenClassificationEvaluator()
+        configured.METRIC_KWARGS = {"scale": 2, "suffix": True}
+        metric = KeywordMetric()
+        configured.compute_metric(
+            metric,
+            {"predictions": [1, 0, 0, 1], "references": [1, 1, 0, 1]},
+            strategy="bootstrap",
+            n_resamples=9,
+            random_state=42,
+        )
+        self.assertGreater(len(metric.calls), 1)
+        self.assertTrue(all(call == {"scale": 2, "suffix": True} for call in metric.calls))
+
+    def test_seqeval_suffix_strict_and_zero_division(self):
+        suffix_inputs = {
+            key: [[label if label == "O" else label[2:] + "-" + label[0] for label in row] for row in rows]
+            for key, rows in self.RAGGED_METRIC_INPUTS.items()
+        }
+        configured = TokenClassificationEvaluator()
+        configured.METRIC_KWARGS = {"suffix": True, "zero_division": 0}
+        metric = self._load_local_seqeval()
+        ordinary = metric.compute(**suffix_inputs, **configured.METRIC_KWARGS)
+        result = configured.compute_metric(
+            metric, suffix_inputs, strategy="bootstrap", n_resamples=99, random_state=42
+        )
+        self._assert_bootstrap_result_matches_ordinary(result, ordinary)
+        oracle_metric = self._load_local_seqeval()
+        self._assert_matches_independent_bootstrap(
+            {
+                "confidence_interval": result["X"]["confidence_interval"]["f1"],
+                "standard_error": result["X"]["standard_error"]["f1"],
+            },
+            oracle_metric,
+            suffix_inputs,
+            ("X", "f1"),
+            0.95,
+            99,
+            42,
+            metric_kwargs=configured.METRIC_KWARGS,
+        )
+
+        strict = TokenClassificationEvaluator()
+        strict.METRIC_KWARGS = {"scheme": "IOB2", "mode": "strict", "zero_division": 0}
+        strict_metric = self._load_local_seqeval()
+        strict_ordinary = strict_metric.compute(**self.RAGGED_METRIC_INPUTS, **strict.METRIC_KWARGS)
+        strict_result = strict.compute_metric(
+            strict_metric, self.RAGGED_METRIC_INPUTS, strategy="bootstrap", n_resamples=9, random_state=42
+        )
+        self._assert_bootstrap_result_matches_ordinary(strict_result, strict_ordinary)
+
+        zero = TokenClassificationEvaluator()
+        zero.METRIC_KWARGS = {"zero_division": 1}
+        zero_metric = self._load_local_seqeval()
+        all_o = {"predictions": [["O"]] * 4, "references": [["O"]] * 4}
+        zero_ordinary = zero_metric.compute(**all_o, **zero.METRIC_KWARGS)
+        zero_result = zero.compute_metric(zero_metric, all_o, strategy="bootstrap", n_resamples=9, random_state=42)
+        self.assertEqual(zero_result["overall_f1"]["score"], zero_ordinary["overall_f1"])
+
+    def test_unsupported_nested_schema_and_missing_aggregate_fail(self):
+        class UnsupportedNested:
+            def compute(self, predictions, references, **kwargs):
+                return {"entity": {"not_seqeval": 1.0}}
+
+        with self.assertRaises(TypeError):
+            self.evaluator.compute_metric(
+                UnsupportedNested(),
+                {"predictions": [["O"], ["B-X"]], "references": [["O"], ["B-X"]]},
+                strategy="bootstrap",
+                n_resamples=9,
+                random_state=42,
+            )
+
+        class MissingAggregate:
+            def __init__(self):
+                self.calls = 0
+
+            def compute(self, predictions, references, **kwargs):
+                self.calls += 1
+                if self.calls == 1:
+                    return {"overall_f1": 1.0}
+                return {}
+
+        with self.assertRaises(KeyError):
+            self.evaluator.compute_metric(
+                MissingAggregate(),
+                {"predictions": [0, 1, 0, 1], "references": [0, 1, 0, 1]},
+                strategy="bootstrap",
+                n_resamples=9,
+                random_state=42,
+            )
 
 
 class TestTextGenerationEvaluator(TestCase):
