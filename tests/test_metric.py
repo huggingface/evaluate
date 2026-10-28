@@ -7,6 +7,7 @@ from unittest import TestCase, mock
 
 import pytest
 from datasets.features import Features, Sequence, Value
+from datasets.utils.filelock import FileLock
 
 from evaluate.module import EvaluationModule, EvaluationModuleInfo, combine
 
@@ -84,6 +85,63 @@ class AnotherDummyMetric(EvaluationModule):
     @classmethod
     def expected_results(cls):
         return {"set_equality": False}
+
+
+class DummyMetricWithError(DummyMetric):
+    def _compute(self, predictions, references, error=None):
+        if error is not None:
+            raise error
+        return super()._compute(predictions, references)
+
+
+@pytest.mark.parametrize("keep_in_memory", [False, True])
+@pytest.mark.parametrize("input_method", ["compute", "add_batch", "add"])
+def test_compute_error_cleans_up_inputs_and_allows_reuse(tmp_path, keep_in_memory, input_method):
+    metric = DummyMetricWithError(cache_dir=tmp_path, keep_in_memory=keep_in_memory)
+    predictions, references = DummyMetric.predictions_and_references()
+    inputs = {"predictions": predictions, "references": references}
+    if input_method == "add_batch":
+        metric.add_batch(**inputs)
+    elif input_method == "add":
+        for prediction, reference in zip(predictions, references):
+            metric.add(prediction=prediction, reference=reference)
+
+    error = ValueError("scoring failed")
+    with pytest.raises(ValueError) as exc_info:
+        metric.compute(**(inputs if input_method == "compute" else {}), error=error)
+    assert exc_info.value is error
+
+    if not keep_in_memory:
+        for file_path in metric.file_paths:
+            assert not os.path.exists(file_path)
+            with FileLock(file_path + ".lock").acquire(timeout=0):
+                pass
+    assert metric.data is None
+    assert metric.buf_writer is None
+
+    predictions, references = DummyMetric.other_predictions_and_references()
+    assert metric.compute(predictions=predictions, references=references) == DummyMetric.other_expected_results()
+    other_metric = DummyMetricWithError(cache_dir=tmp_path, keep_in_memory=keep_in_memory)
+    predictions, references = DummyMetric.predictions_and_references()
+    assert other_metric.compute(predictions=predictions, references=references) == DummyMetric.expected_results()
+
+
+@pytest.mark.parametrize("scoring_fails", [False, True])
+def test_compute_cleanup_error_releases_lock_and_preserves_scoring_error(tmp_path, monkeypatch, scoring_fails):
+    metric = DummyMetricWithError(cache_dir=tmp_path)
+    error = ValueError("scoring failed") if scoring_fails else None
+    cleanup_error = OSError("cannot remove cache")
+    predictions, references = DummyMetric.predictions_and_references()
+    with monkeypatch.context() as patch:
+        patch.setattr("evaluate.module.os.remove", mock.Mock(side_effect=cleanup_error))
+        with pytest.raises(ValueError if scoring_fails else OSError) as exc_info:
+            metric.compute(predictions=predictions, references=references, error=error)
+    assert exc_info.value is (error if scoring_fails else cleanup_error)
+    assert metric.data is None
+    for file_path in metric.file_paths:
+        with FileLock(file_path + ".lock").acquire(timeout=0):
+            pass
+        os.remove(file_path)
 
 
 def properly_del_metric(metric):
