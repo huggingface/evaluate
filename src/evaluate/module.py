@@ -19,6 +19,7 @@ import itertools
 import os
 import types
 import uuid
+from contextlib import ExitStack
 from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
@@ -412,10 +413,23 @@ class EvaluationModule(EvaluationModuleInfoMixin):
             self.file_paths = file_paths
             self.filelocks = filelocks
 
+    def _cleanup_cache_files(self):
+        self.data = None
+        self.buf_writer = None
+        if not self.keep_in_memory:
+            with ExitStack() as stack:
+                # Release every lock even if removing a cache file fails. Process 0 is released last.
+                for filelock in self.filelocks:
+                    stack.callback(filelock.release)
+                for file_path in reversed(self.file_paths):
+                    logger.info(f"Removing {file_path}")
+                    os.remove(file_path)
+
     def compute(self, *, predictions=None, references=None, **kwargs) -> Optional[dict]:
         """Compute the evaluation module.
 
         Usage of positional arguments is not allowed to prevent mistakes.
+        The inputs are discarded after the scoring step, including when scoring raises an exception.
 
         Args:
             predictions (`list/array/tensor`, *optional*):
@@ -460,27 +474,18 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         self.selected_feature_format = None
 
         if self.process_id == 0:
-            self.data.set_format(type=self.info.format)
-
-            inputs = {input_name: self.data[input_name][:] for input_name in self._feature_names()}
-            with temp_seed(self.seed):
-                output = self._compute(**inputs, **compute_kwargs)
-
-            if self.buf_writer is not None:
-                self.buf_writer = None
-                del self.data
-                self.data = None
-            else:
-                # Release locks and delete all the cache files. Process 0 is released last.
-                for filelock, file_path in reversed(list(zip(self.filelocks, self.file_paths))):
-                    logger.info(f"Removing {file_path}")
-                    del self.data
-                    self.data = None
-                    del self.writer
-                    self.writer = None
-                    os.remove(file_path)
-                    filelock.release()
-
+            try:
+                self.data.set_format(type=self.info.format)
+                inputs = {input_name: self.data[input_name][:] for input_name in self._feature_names()}
+                with temp_seed(self.seed):
+                    output = self._compute(**inputs, **compute_kwargs)
+            except BaseException:
+                try:
+                    self._cleanup_cache_files()
+                except OSError:
+                    logger.warning("Failed to remove evaluation cache files after a scoring error.", exc_info=True)
+                raise
+            self._cleanup_cache_files()
             return output
         else:
             return None
