@@ -166,7 +166,11 @@ def compute_score(dataset, predictions):
                 precisions.append(precision)
                 recalls.append(recall)
 
-                if precision == 0 and recall == 0:
+                # A 0/0 sample (e.g. no gold answer and no prediction, or gold
+                # present but no prediction for it) yields NaN precision/recall.
+                # NaN would propagate through the sum below and turn the whole
+                # corpus F1 into NaN, so it has to contribute 0 instead.
+                if np.isnan(precision) or np.isnan(recall) or (precision == 0 and recall == 0):
                     f1 += 0
                 else:
                     f1 += 2 * (precision * recall) / (precision + recall)
