@@ -138,7 +138,8 @@ class Evaluator(ABC):
         # bootstrap only works with functions that use args and no kwargs
         def build_args_metric(metric, key, **kwargs):
             def args_metric(*args):
-                return metric.compute(**{k: v for k, v in zip(kwargs.keys(), args)})[key]
+                score = metric.compute(**{k: v for k, v in zip(kwargs.keys(), args)})
+                return score if isinstance(score, Number) else score[key]
 
             return args_metric
 
@@ -527,6 +528,8 @@ class Evaluator(ABC):
         result = metric.compute(**metric_inputs, **self.METRIC_KWARGS)
 
         if strategy == "bootstrap":
+            if isinstance(result, Number):
+                result = {metric.name: result}
             metric_keys = result.keys()
             bootstrap_dict = self._compute_confidence_interval(
                 metric,

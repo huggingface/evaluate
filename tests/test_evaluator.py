@@ -14,6 +14,7 @@
 
 # Lint as: python3
 
+from pathlib import Path
 from time import sleep
 from unittest import TestCase, mock
 
@@ -1007,6 +1008,16 @@ class TestAutomaticSpeechRecognitionEvaluator(TestCase):
         )
         print(results)
         self.assertEqual(results["wer"], 1.0)
+
+    def test_bootstrap_word_error_rate(self):
+        metric = load(str(Path(__file__).resolve().parents[1] / "metrics" / "wer"))
+        data = Dataset.from_dict({"path": ["a", "b"], "sentence": ["Lorem ipsum", "other words"]})
+        result = self.evaluator.compute(
+            model_or_pipeline=self.pipe, data=data, metric=metric, strategy="bootstrap", n_resamples=50, random_state=0
+        )
+        self.assertEqual(result["wer"]["score"], 0.5)
+        self.assertEqual(result["wer"]["confidence_interval"], (0.0, 1.0))
+        self.assertGreater(result["wer"]["standard_error"], 0.0)
 
     def test_class_init(self):
         evaluator = AutomaticSpeechRecognitionEvaluator()
