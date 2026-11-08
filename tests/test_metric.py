@@ -566,6 +566,32 @@ class TestMetric(TestCase):
 
         del metric
 
+    def test_multiple_features_empty_first_batch(self):
+        # Regression test: with alternative feature schemas, a completely empty
+        # first add_batch must not raise IndexError; schema selection is deferred
+        # until the first nonempty batch arrives.
+        metric = DummyMetric(keep_in_memory=True)
+        metric.info.features = [
+            Features({"predictions": Value("int64"), "references": Value("int64")}),
+            Features({"predictions": Value("string"), "references": Value("string")}),
+        ]
+        metric.add_batch(predictions=[], references=[])
+        preds, refs = DummyMetric.predictions_and_references()
+        metric.add_batch(predictions=preds, references=refs)
+        self.assertDictEqual(DummyMetric.expected_results(), metric.compute())
+        del metric
+
+        metric = DummyMetric(keep_in_memory=True)
+        metric.info.features = [
+            Features({"predictions": Value("int64"), "references": Value("int64")}),
+            Features({"predictions": Value("string"), "references": Value("string")}),
+        ]
+        metric.add_batch(predictions=[], references=[])
+        preds, refs = DummyMetric.predictions_and_references_strings()
+        metric.add_batch(predictions=preds, references=refs)
+        self.assertDictEqual(DummyMetric.expected_results(), metric.compute())
+        del metric
+
 
 class MetricWithMultiLabel(EvaluationModule):
     def _info(self):
