@@ -123,10 +123,10 @@ class TokenClassificationEvaluator(Evaluator):
             token_index = 0
             for word_offset in words_offsets:
                 # for each word, we may keep only the predicted label for the first token, discard the others
-                while prediction[token_index]["start"] < word_offset[0]:
+                while token_index < len(prediction) and prediction[token_index]["start"] < word_offset[0]:
                     token_index += 1
 
-                if prediction[token_index]["start"] > word_offset[0]:  # bad indexing
+                if token_index == len(prediction) or prediction[token_index]["start"] > word_offset[0]:  # bad indexing
                     pred_processed.append("O")
                 elif prediction[token_index]["start"] == word_offset[0]:
                     pred_processed.append(prediction[token_index]["entity"])
