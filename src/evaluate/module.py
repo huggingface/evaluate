@@ -993,11 +993,17 @@ class CombinedEvaluations:
         for module_name, result in zip(self.evaluation_module_names, results):
             for k, v in result.items():
                 if k not in duplicate_keys and not self.force_prefix:
-                    merged_results[f"{k}"] = v
+                    merged_key = f"{k}"
                 elif module_name in duplicate_counter:
-                    merged_results[f"{module_name}_{duplicate_counter[module_name]}_{k}"] = v
+                    merged_key = f"{module_name}_{duplicate_counter[module_name]}_{k}"
                 else:
-                    merged_results[f"{module_name}_{k}"] = v
+                    merged_key = f"{module_name}_{k}"
+                if merged_key in merged_results:
+                    raise ValueError(
+                        f"Multiple evaluation results resolve to the key {merged_key!r}. "
+                        "Choose distinct module names or score keys."
+                    )
+                merged_results[merged_key] = v
 
             if module_name in duplicate_counter:
                 duplicate_counter[module_name] += 1
@@ -1020,6 +1026,9 @@ def combine(evaluations, force_prefix=False):
         force_prefix (`bool`, *optional*, defaults to `False`):
             If `True` all scores from the modules are prefixed with their name. If
             a dictionary is passed the keys are used as name otherwise the module's name.
+
+    Raises:
+        ValueError: If result keys collide after applying the selected prefixes.
 
     Examples:
 

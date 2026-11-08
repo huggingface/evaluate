@@ -669,6 +669,58 @@ def test_metric_with_non_standard_feature_names_compute(tmp_path):
     assert results == AccuracyWithNonStandardFeatureNames.expected_results()
 
 
+class NamedScoreMetric(DummyMetric):
+    def __init__(self, key, score, **kwargs):
+        self.key, self.score = key, score
+        super().__init__(**kwargs)
+
+    def _compute(self, predictions, references):
+        return {self.key: self.score}
+
+
+@pytest.mark.parametrize("reverse", [False, True])
+@pytest.mark.parametrize(
+    "force_prefix, definitions, conflicting_key",
+    [
+        (False, [("model", "score", 0.1), ("baseline", "score", 0.2), ("custom", "model_score", 0.9)], "model_score"),
+        (True, [("a_b", "c", 0.1), ("a", "b_c", 0.9)], "a_b_c"),
+    ],
+)
+def test_combined_evaluation_rejects_final_key_collision(
+    tmp_path, reverse, force_prefix, definitions, conflicting_key
+):
+    modules = {
+        name: NamedScoreMetric(key, score, cache_dir=tmp_path, keep_in_memory=True)
+        for name, key, score in (reversed(definitions) if reverse else definitions)
+    }
+    with pytest.raises(ValueError, match=conflicting_key):
+        combine(modules, force_prefix=force_prefix).compute(predictions=[1], references=[1])
+
+
+def test_combined_evaluation_rejects_numbered_key_collision(tmp_path):
+    first = NamedScoreMetric("score", 0.1, cache_dir=tmp_path, keep_in_memory=True)
+    conflicting_key = f"{first.name}_0_score"
+    modules = [
+        first,
+        NamedScoreMetric("score", 0.2, cache_dir=tmp_path, keep_in_memory=True),
+        NamedScoreMetric(conflicting_key, 0.9, cache_dir=tmp_path, keep_in_memory=True),
+    ]
+    with pytest.raises(ValueError, match=conflicting_key):
+        combine(modules).compute(predictions=[1], references=[1])
+
+
+def test_combined_evaluation_preserves_distinct_final_keys(tmp_path):
+    modules = {
+        name: NamedScoreMetric(key, score, cache_dir=tmp_path, keep_in_memory=True)
+        for name, key, score in [("model", "score", 0.1), ("baseline", "score", 0.2), ("custom", "other_score", 0.9)]
+    }
+    assert combine(modules).compute(predictions=[1], references=[1]) == {
+        "model_score": 0.1,
+        "baseline_score": 0.2,
+        "other_score": 0.9,
+    }
+
+
 class TestEvaluationcombined_evaluation(TestCase):
     def test_single_module(self):
         preds, refs = DummyMetric.predictions_and_references()
