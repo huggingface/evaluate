@@ -84,7 +84,7 @@ for txt, res in zip(texts, results):
     print(f"{text} | Polarity: {res._.blob.polarity}")
 ```
 
-Now we can wrap it in a simple wrapper class like in the Scikit-Learn example before. It just has to return a list of dictionaries with the predicted lables. If the polarity is larger than 0 we'll predict positive sentiment and negative otherwise:
+Now we can wrap it in a simple wrapper class like in the Scikit-Learn example before. It just has to return a list of dictionaries with the predicted labels. If the polarity is larger than 0 we'll predict positive sentiment and negative otherwise:
 
 ```py
 class SpacyEvalPipeline:
@@ -104,7 +104,7 @@ class SpacyEvalPipeline:
 pipe = SpacyEvalPipeline(nlp)
 ```
 
-That class is compatible with the `evaluator` and we can use the same instance from the previous examlpe along with the IMDb test set:
+That class is compatible with the `evaluator` and we can use the same instance from the previous example along with the IMDb test set:
 
 ```py
 eval.compute(pipe, ds["test"], "accuracy")

@@ -32,13 +32,13 @@ The evaluation module script (the file with suffix `*.py`) is the core of the ne
 
 ### Attributes
 
-Start by adding some information about your evalution module in [`EvaluationModule._info`]. The most important attributes you should specify are:
+Start by adding some information about your evaluation module in [`EvaluationModule._info`]. The most important attributes you should specify are:
 
-1. [`EvaluationModuleInfo.description`] provides a brief description about your evalution module.
+1. [`EvaluationModuleInfo.description`] provides a brief description about your evaluation module.
 
-2. [`EvaluationModuleInfo.citation`] contains a BibTex citation for the evalution module.
+2. [`EvaluationModuleInfo.citation`] contains a BibTex citation for the evaluation module.
 
-3. [`EvaluationModuleInfo.inputs_description`] describes the expected inputs and outputs. It may also provide an example usage of the evalution module.
+3. [`EvaluationModuleInfo.inputs_description`] describes the expected inputs and outputs. It may also provide an example usage of the evaluation module.
 
 4. [`EvaluationModuleInfo.features`] defines the name and type of the predictions and references. This has to be either a single `datasets.Features` object or a list of `datasets.Features` objects if multiple input types are allowed.
 
@@ -79,7 +79,7 @@ This method is used when you call `.compute()` later on.
 
 ## Readme
 
-When you use the `evalute-cli` to setup the evaluation module the Readme structure and instructions are automatically created. It should include a general description of the metric, information about its input/output format, examples as well as information about its limiations or biases and references.
+When you use the `evaluate-cli` to setup the evaluation module the Readme structure and instructions are automatically created. It should include a general description of the metric, information about its input/output format, examples as well as information about its limitations or biases and references.
 
 ## Requirements
 
