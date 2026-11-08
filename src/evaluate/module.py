@@ -511,6 +511,11 @@ class EvaluationModule(EvaluationModuleInfoMixin):
         batch = {"predictions": predictions, "references": references, **kwargs}
         batch = {input_name: batch[input_name] for input_name in self._feature_names()}
         if self.writer is None:
+            if not isinstance(self.features, Features) and all(len(column) == 0 for column in batch.values()):
+                # An empty first batch carries no rows to infer the schema from (and
+                # contributes no data): defer schema selection until a nonempty batch
+                # arrives, matching the single-schema path and later empty batches.
+                return
             self.selected_feature_format = self._infer_feature_from_batch(batch)
             self._init_writer()
         try:
