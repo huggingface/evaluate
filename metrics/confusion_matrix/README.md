@@ -34,7 +34,7 @@ What information does this confusion matrix provide?
 * All setosa instances were properly predicted as such (true positives).
 * The model always correctly classifies the setosa class (there are no false positives).
 * 10 versicolor instances were properly classified, but 6 instances were misclassified as virginica.
-* All virginica insances were properly classified as such.
+* All virginica instances were properly classified as such.
 
 
 ## How to Use
