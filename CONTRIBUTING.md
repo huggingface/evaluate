@@ -115,9 +115,23 @@ unsure, it is always a good idea to open an issue to get some feedback.
 
 4. Set up a development environment by running the following command in a virtual environment:
 
+   Use Python 3.9 to match the test environment in CI. The `[dev]` and `[tests]` extras
+   currently require TensorFlow 2.10 or earlier, which has no wheels for Python 3.11
+   or newer. Installing these extras on those Python versions fails during dependency
+   resolution, even though the base package declares Python 3.8 or newer.
+
    ```bash
    $ pip install -e ".[dev]"
    ```
+
+   For documentation or formatting work that does not require the test suite, you can
+   install only the quality tools:
+
+   ```bash
+   $ pip install -e ".[quality]"
+   ```
+
+   This does not install the full test dependencies.
 
 5. Develop the features on your branch.
 

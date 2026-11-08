@@ -1,6 +1,6 @@
 # Installation
 
-Before you start, you will need to setup your environment and install the appropriate packages. 🤗 Evaluate is tested on **Python 3.7+**.
+Before you start, you will need to setup your environment and install the appropriate packages. 🤗 Evaluate requires **Python 3.8+**.
 
 ## Virtual environment
 
@@ -60,6 +60,13 @@ git clone https://github.com/huggingface/evaluate.git
 cd evaluate
 pip install -e .
 ```
+
+If you plan to run the full test suite, use Python 3.9 to match CI before installing
+the `[dev]` or `[tests]` extras described in the
+[contribution guide](https://github.com/huggingface/evaluate/blob/main/CONTRIBUTING.md).
+These extras currently require TensorFlow 2.10 or earlier, which has no wheels for
+Python 3.11 or newer. This test-dependency restriction does not apply to the base
+installation commands above.
 
 Again, you can check if 🤗 Evaluate has been properly installed with:
 
