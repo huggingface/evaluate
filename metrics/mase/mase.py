@@ -16,6 +16,7 @@
 import datasets
 import numpy as np
 from sklearn.metrics import mean_absolute_error
+from sklearn.utils.validation import check_array
 
 import evaluate
 
@@ -61,7 +62,8 @@ Args:
 
 Returns:
     mase : mean absolute scaled error.
-        If multioutput is "raw_values", then mean absolute percentage error is returned for each output separately. If multioutput is "uniform_average" or an ndarray of weights, then the weighted average of all output errors is returned.
+        Each output's forecast error is scaled by its own naive forecast error before aggregation.
+        If multioutput is "raw_values", return each output's scaled error. Otherwise return their uniform or weighted average.
         MASE output is non-negative floating point. The best value is 0.0.
 Examples:
 
@@ -70,8 +72,8 @@ Examples:
     >>> references = [3, -0.5, 2, 7, 2]
     >>> training = [5, 0.5, 4, 6, 3, 5, 2]
     >>> results = mase_metric.compute(predictions=predictions, references=references, training=training)
-    >>> print(results)
-    {'mase': 0.18333333333333335}
+    >>> round(results["mase"], 6)
+    0.183333
 
     If you're using multi-dimensional lists, then set the config as follows :
 
@@ -80,14 +82,14 @@ Examples:
     >>> references = [[0.5, 1], [-1, 1], [7, -6]]
     >>> training = [[0.5, 1], [-1, 1], [7, -6]]
     >>> results = mase_metric.compute(predictions=predictions, references=references, training=training)
-    >>> print(results)
-    {'mase': 0.18181818181818182}
+    >>> round(results["mase"], 6)
+    0.195489
     >>> results = mase_metric.compute(predictions=predictions, references=references, training=training, multioutput='raw_values')
     >>> print(results)
     {'mase': array([0.10526316, 0.28571429])}
     >>> results = mase_metric.compute(predictions=predictions, references=references, training=training, multioutput=[0.3, 0.7])
-    >>> print(results)
-    {'mase': 0.21935483870967742}
+    >>> round(results["mase"], 6)
+    0.231579
 """
 
 
@@ -125,16 +127,31 @@ class Mase(evaluate.Metric):
     ):
 
         y_pred_naive = training[:-periodicity]
-        mae_naive = mean_absolute_error(training[periodicity:], y_pred_naive, multioutput=multioutput)
+        mae_naive = mean_absolute_error(training[periodicity:], y_pred_naive, multioutput="raw_values")
 
         mae_score = mean_absolute_error(
             references,
             predictions,
             sample_weight=sample_weight,
-            multioutput=multioutput,
+            multioutput="raw_values",
         )
+
+        if mae_score.shape != mae_naive.shape:
+            raise ValueError("`training` and `references` must have the same number of outputs.")
 
         epsilon = np.finfo(np.float64).eps
         mase_score = mae_score / np.maximum(mae_naive, epsilon)
 
-        return {"mase": mase_score}
+        if isinstance(multioutput, str):
+            if multioutput == "raw_values":
+                return {"mase": mase_score}
+            if multioutput == "uniform_average":
+                return {"mase": float(np.mean(mase_score))}
+            raise ValueError('`multioutput` must be "raw_values", "uniform_average", or an array of weights.')
+
+        weights = check_array(multioutput, ensure_2d=False)
+        if mase_score.size == 1:
+            raise ValueError("Custom weights are useful only in multi-output cases.")
+        if weights.shape != mase_score.shape:
+            raise ValueError("`multioutput` must provide one weight per output.")
+        return {"mase": float(np.average(mase_score, weights=weights))}

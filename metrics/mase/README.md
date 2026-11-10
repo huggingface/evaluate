@@ -51,7 +51,7 @@ Mandatory inputs:
 Optional arguments:
 - `periodicity`: the seasonal periodicity of training data. The default is 1.
 - `sample_weight`: numeric array-like of shape (`n_samples,`) representing sample weights. The default is `None`.
-- `multioutput`: `raw_values`, `uniform_average` or numeric array-like of shape (`n_outputs,`), which defines the aggregation of multiple output values. The default value is `uniform_average`.
+- `multioutput`: `raw_values`, `uniform_average` or numeric array-like of shape (`n_outputs,`). Each output's forecast error is scaled by its own naive forecast error before aggregation. The default is `uniform_average`.
   - `raw_values` returns a full set of errors in case of multioutput input.
   - `uniform_average` means that the errors of all outputs are averaged with uniform weight. 
   - the array-like value defines weights used to average errors.
@@ -97,7 +97,7 @@ Example with multi-dimensional lists, and the `raw_values` config:
 >>> training = [[0.5, 1], [-1, 1], [7, -6]]
 >>> results = mase_metric.compute(predictions=predictions, references=references, training=training)
 >>> print(results)
-{'mase': 0.1818...}
+{'mase': 0.1954...}
 >>> results = mase_metric.compute(predictions=predictions, references=references, training=training, multioutput='raw_values')
 >>> print(results)
 {'mase': array([0.1052..., 0.2857...])}
