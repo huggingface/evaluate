@@ -224,7 +224,7 @@ def radar_plot(data, model_names, invert_range=[], config=None, fig=None):
         show_scales=True,
         format_cfg=format_cfg,
     )
-    for g in zip(data.index):
+    for g in data.index:
         radar.plot(data.loc[g].values, label=g, marker=format_cfg["marker"], markersize=format_cfg["markersize"])
         radar.use_legend(**{"loc": format_cfg["legend_loc"], "bbox_to_anchor": format_cfg["bbox_to_anchor"]})
     return fig
