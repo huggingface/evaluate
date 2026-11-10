@@ -20,6 +20,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 from datasets import Dataset, load_dataset
 
 from evaluate.evaluator.utils import choose_split
+from tqdm import tqdm
 
 
 try:
@@ -510,9 +511,21 @@ class Evaluator(ABC):
 
     def call_pipeline(self, pipe, *args, **kwargs):
         start_time = perf_counter()
-        pipe_output = pipe(*args, **kwargs, **self.PIPELINE_KWARGS)
+        # FIXME: Hopefully we can get the progress bar to work with more tasks
+        if self.task in ("text-classification", "token-classification", "text2text-generation"):
+            num_rows = len(args[0])
+            pipe_output = [_ for _ in tqdm(pipe(iter(args[0]), *args[1:], **kwargs, **self.PIPELINE_KWARGS), total=num_rows)]
+
+            # I think text2text-generation outputs a list-of-lists when the
+            # input is an iterator, but the evaluation metrics are expecting a
+            # flat list.
+            if self.task == "text2text-generation":
+                pipe_output = [sub_list[0] for sub_list in pipe_output]
+        else:
+            pipe_output = pipe(*args, **kwargs, **self.PIPELINE_KWARGS)
+            num_rows = len(pipe_output)
         end_time = perf_counter()
-        return pipe_output, self._compute_time_perf(start_time, end_time, len(pipe_output))
+        return pipe_output, self._compute_time_perf(start_time, end_time, num_rows)
 
     def compute_metric(
         self,
