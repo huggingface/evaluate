@@ -664,7 +664,8 @@ def evaluation_module_factory(
         except Exception as e1:  # noqa: all the attempts failed, before raising the error we should check if the module is already cached.
             # if it's a canonical module we need to check if it's any of the types
             if path.count("/") == 0:
-                for current_type in ["metric", "comparison", "measurement"]:
+                module_types = [module_type] if module_type is not None else ["metric", "comparison", "measurement"]
+                for current_type in module_types:
                     try:
                         return CachedEvaluationModuleFactory(
                             f"evaluate-{current_type}--{path}", dynamic_modules_path=dynamic_modules_path
