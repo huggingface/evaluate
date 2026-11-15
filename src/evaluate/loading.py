@@ -34,7 +34,7 @@ from datasets.utils.filelock import FileLock
 from datasets.utils.version import Version
 
 from . import SCRIPTS_VERSION, config
-from .module import EvaluationModule
+from .module import Comparison, EvaluationModule, Measurement, Metric
 from .utils.file_utils import (
     cached_path,
     head_hf_s3,
@@ -80,7 +80,7 @@ def import_main_class(module_path) -> Optional[Union[Type[DatasetBuilder], Type[
     module_main_cls = None
     for name, obj in module.__dict__.items():
         if isinstance(obj, type) and issubclass(obj, main_cls_type):
-            if inspect.isabstract(obj):
+            if obj in (EvaluationModule, Metric, Comparison, Measurement) or inspect.isabstract(obj):
                 continue
             module_main_cls = obj
             break
