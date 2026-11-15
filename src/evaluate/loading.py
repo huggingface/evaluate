@@ -15,6 +15,7 @@
 # Lint as: python3
 """Access datasets."""
 import filecmp
+import hashlib
 import importlib
 import inspect
 import json
@@ -29,7 +30,7 @@ from urllib.parse import urlparse
 
 from datasets import DownloadConfig, DownloadMode
 from datasets.builder import DatasetBuilder
-from datasets.packaged_modules import _EXTENSION_TO_MODULE, _hash_python_lines
+from datasets.packaged_modules import _EXTENSION_TO_MODULE
 from datasets.utils.filelock import FileLock
 from datasets.utils.version import Version
 
@@ -101,11 +102,12 @@ def files_to_hash(file_paths: List[str]) -> str:
             to_use_files.append(file_path)
 
     # Get the code from all these files
-    lines = []
+    hasher = hashlib.sha256()
     for file_path in to_use_files:
-        with open(file_path, encoding="utf-8") as f:
-            lines.extend(f.readlines())
-    return _hash_python_lines(lines)
+        with open(file_path, "rb") as f:
+            hasher.update(f.read())
+        hasher.update(b"\0")
+    return hasher.hexdigest()
 
 
 def convert_github_url(url_path: str) -> Tuple[str, Optional[str]]:
