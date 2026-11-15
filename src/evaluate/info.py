@@ -115,7 +115,18 @@ class EvaluationModuleInfo:
     @classmethod
     def from_dict(cls, metric_info_dict: dict) -> "EvaluationModuleInfo":
         field_names = {f.name for f in dataclasses.fields(cls)}
-        return cls(**{k: v for k, v in metric_info_dict.items() if k in field_names})
+        info_dict = {k: v for k, v in metric_info_dict.items() if k in field_names}
+        features = info_dict.get("features")
+        if isinstance(features, list):
+            info_dict["features"] = [
+                Features.from_dict(feature.to_dict() if isinstance(feature, Features) else feature)
+                for feature in features
+            ]
+        elif features is not None:
+            info_dict["features"] = Features.from_dict(
+                features.to_dict() if isinstance(features, Features) else features
+            )
+        return cls(**info_dict)
 
 
 @dataclass
