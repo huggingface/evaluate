@@ -1,6 +1,5 @@
 import json
 
-import numpy as np
 import pytest
 
 import evaluate
@@ -13,7 +12,7 @@ def test_save_serialization_error_preserves_destination(tmp_path, existing, nest
     if existing:
         evaluate.save(destination, accuracy=0.75)
         original = destination.read_bytes()
-    result = {"accuracy": 1.0, "details": {"scores": np.array([1, 2])}} if nested else {"score": np.int64(1)}
+    result = {"accuracy": 1.0, "details": {"scores": {1, 2}}} if nested else {"score": object()}
 
     with pytest.raises(TypeError, match="JSON serializable"):
         evaluate.save(destination, **result)
