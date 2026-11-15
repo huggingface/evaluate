@@ -42,7 +42,7 @@ Mandatory inputs:
 
 Optional arguments:
 - `sample_weight`: numeric array-like of shape (`n_samples,`) representing sample weights. The default is `None`.
-- `pos_label`: the label of the positive class. The default is `1`.
+- `pos_label`: the label of the positive class. The default is `None`: infer `1` for labels in `{0, 1}` or `{-1, 1}`, otherwise use the greater numeric label. String labels require an explicit `pos_label`.
         
 
 ### Output Values
