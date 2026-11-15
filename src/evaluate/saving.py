@@ -38,9 +38,10 @@ def save(path_or_file, **data):
     data["_python_version"] = sys.version
     data["_interpreter_path"] = sys.executable
 
+    serialized = json.dumps(data)
     with FileLock(str(file_path) + ".lock"):
         with open(file_path, "w") as f:
-            json.dump(data, f)
+            f.write(serialized)
 
     # cleanup lock file
     try:
