@@ -109,15 +109,17 @@ class EvaluationSuite:
         for task in self.suite:
 
             task_name = task.data
+            data = task.data
 
             if task.data_preprocessor:  # task requires extra preprocessing
-                ds = load_dataset(task.data, name=task.subset, split=task.split)
-                task.data = ds.map(task.data_preprocessor)
+                if isinstance(data, str):
+                    data = load_dataset(data, name=task.subset, split=task.split)
+                data = data.map(task.data_preprocessor)
 
             task_evaluator = evaluator(task.task_type)
             args_for_task = task.args_for_task
             args_for_task["model_or_pipeline"] = model_or_pipeline
-            args_for_task["data"] = task.data
+            args_for_task["data"] = data
             args_for_task["subset"] = task.subset
             args_for_task["split"] = task.split
             results = task_evaluator.compute(**args_for_task)
