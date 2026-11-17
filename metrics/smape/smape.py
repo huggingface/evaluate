@@ -15,8 +15,7 @@
 
 import datasets
 import numpy as np
-from sklearn.metrics._regression import _check_reg_targets
-from sklearn.utils.validation import check_consistent_length
+from sklearn.utils.validation import check_array, check_consistent_length
 
 import evaluate
 
@@ -108,8 +107,26 @@ def symmetric_mean_absolute_percentage_error(y_true, y_pred, *, sample_weight=No
         weighted average of all output errors is returned.
         sMAPE output is non-negative floating point. The best value is 0.0.
     """
-    y_type, y_true, y_pred, multioutput = _check_reg_targets(y_true, y_pred, multioutput)
     check_consistent_length(y_true, y_pred, sample_weight)
+    y_true = check_array(y_true, ensure_2d=False, dtype="numeric")
+    y_pred = check_array(y_pred, ensure_2d=False, dtype="numeric")
+    if y_true.ndim == 1:
+        y_true = y_true.reshape(-1, 1)
+    if y_pred.ndim == 1:
+        y_pred = y_pred.reshape(-1, 1)
+    if y_true.shape[1] != y_pred.shape[1]:
+        raise ValueError("y_true and y_pred have different numbers of outputs.")
+
+    if isinstance(multioutput, str):
+        if multioutput not in ("raw_values", "uniform_average"):
+            raise ValueError("multioutput must be 'raw_values', 'uniform_average', or an array of output weights.")
+    elif multioutput is not None:
+        multioutput = check_array(multioutput, ensure_2d=False)
+        if y_true.shape[1] == 1:
+            raise ValueError("Custom weights are useful only in multi-output cases.")
+        if len(multioutput) != y_true.shape[1]:
+            raise ValueError("There must be equally many custom weights as outputs.")
+
     epsilon = np.finfo(np.float64).eps
     smape = 2 * np.abs(y_pred - y_true) / (np.maximum(np.abs(y_true), epsilon) + np.maximum(np.abs(y_pred), epsilon))
     output_errors = np.average(smape, weights=sample_weight, axis=0)
