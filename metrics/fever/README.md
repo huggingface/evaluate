@@ -27,7 +27,7 @@ The FEVER (Fact Extraction and VERification) metric evaluates the performance of
 FEVER consists of three main evaluation components:
 
 1. **Label accuracy**: measures how often the predicted claim label (SUPPORTED, REFUTED, or NOT ENOUGH INFO) matches the gold label
-2. **FEVER score**: considers a prediction correct only if the label is correct _and_ at least one complete gold evidence set is retrieved
+2. **FEVER score**: considers a prediction correct only if the label is correct _and_ at least one complete gold evidence set is retrieved. As in the official FEVER scorer, NOT ENOUGH INFO claims have no gold evidence, so for them a correct label is enough
 3. **Evidence F1**: computes the micro-averaged precision, recall, and F1 between predicted and gold evidence sentences
 
 ## How to use

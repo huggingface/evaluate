@@ -129,6 +129,33 @@ class TestFEVER(unittest.TestCase):
         for k in result:
             self.assertEqual(result[k], 0.0)
 
+    def test_not_enough_info_correct_label(self):
+        preds = [{"label": "NOT ENOUGH INFO", "evidence": []}]
+        refs = [{"label": "NOT ENOUGH INFO", "evidence_sets": []}]
+        result = fever.compute(predictions=preds, references=refs)
+        self.assertAlmostEqual(result["label_accuracy"], 1.0)
+        self.assertAlmostEqual(result["fever_score"], 1.0)
+
+    def test_not_enough_info_mixed_with_supported(self):
+        preds = [
+            {"label": "SUPPORTED", "evidence": ["E1"]},
+            {"label": "NOT ENOUGH INFO", "evidence": []},
+        ]
+        refs = [
+            {"label": "SUPPORTED", "evidence_sets": [["E1"]]},
+            {"label": "NOT ENOUGH INFO", "evidence_sets": []},
+        ]
+        result = fever.compute(predictions=preds, references=refs)
+        self.assertAlmostEqual(result["label_accuracy"], 1.0)
+        self.assertAlmostEqual(result["fever_score"], 1.0)
+
+    def test_not_enough_info_wrong_label(self):
+        preds = [{"label": "SUPPORTED", "evidence": ["E1"]}]
+        refs = [{"label": "NOT ENOUGH INFO", "evidence_sets": []}]
+        result = fever.compute(predictions=preds, references=refs)
+        self.assertAlmostEqual(result["label_accuracy"], 0.0)
+        self.assertAlmostEqual(result["fever_score"], 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()
