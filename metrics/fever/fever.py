@@ -33,7 +33,7 @@ The FEVER (Fact Extraction and VERification) metric evaluates the performance of
 
 It consists of three main components:
 - **Label accuracy**: measures how often the predicted claim label (SUPPORTED, REFUTED, or NOT ENOUGH INFO) matches the gold label.
-- **FEVER score**: considers a prediction correct only if the label is correct *and* at least one complete gold evidence set is retrieved.
+- **FEVER score**: considers a prediction correct only if the label is correct *and* at least one complete gold evidence set is retrieved. NOT ENOUGH INFO claims have no gold evidence, so for them a correct label is enough.
 - **Evidence F1**: computes the micro-averaged precision, recall, and F1 between predicted and gold evidence sentences.
 
 The FEVER score is the official leaderboard metric used in the FEVER shared tasks.
@@ -121,10 +121,15 @@ class FEVER(evaluate.Metric):
 
             if pred_label == gold_label:
                 label_correct += 1
-                for g_set in gold_sets:
-                    if set(g_set).issubset(pred_evidence):
-                        fever_correct += 1
-                        break
+                # As in the official FEVER scorer, NOT ENOUGH INFO claims have no evidence to retrieve,
+                # so the correct label alone counts for the FEVER score.
+                if gold_label.upper() == "NOT ENOUGH INFO":
+                    fever_correct += 1
+                else:
+                    for g_set in gold_sets:
+                        if set(g_set).issubset(pred_evidence):
+                            fever_correct += 1
+                            break
 
             gold_evidence = set().union(*gold_sets) if gold_sets else set()
             overlap = len(gold_evidence.intersection(pred_evidence))
