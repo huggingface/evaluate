@@ -42,10 +42,10 @@ def json_to_string_type(input_types):
 
 
 def parse_readme(filepath):
-    """Parses a repositories README and removes"""
+    """Read a UTF-8 repository README and remove its YAML metadata block."""
     if not os.path.exists(filepath):
         return "No README.md found."
-    with open(filepath, "r") as f:
+    with open(filepath, "r", encoding="utf-8") as f:
         text = f.read()
         match = REGEX_YAML_BLOCK.search(text)
         if match:
