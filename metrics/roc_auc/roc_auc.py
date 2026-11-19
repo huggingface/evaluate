@@ -63,6 +63,11 @@ Examples:
         >>> print(round(results['roc_auc'], 2))
         0.78
 
+        Close prediction scores still represent distinct ranks:
+        >>> results = roc_auc_score.compute(references=[0, 1], prediction_scores=[0.5, 0.50000001])
+        >>> print(results['roc_auc'])
+        1.0
+
     Example 2:
         >>> roc_auc_score = evaluate.load("roc_auc", "multiclass")
         >>> refs = [1, 0, 1, 2, 2, 0]
@@ -91,7 +96,7 @@ Examples:
         ...                 [0.1, 0.1, 0.8],
         ...                 [0.1, 0.7, 0.2]]
         >>> results = roc_auc_score.compute(references=refs, prediction_scores=pred_scores, average=None)
-        >>> print([round(res, 2) for res in results['roc_auc']])
+        >>> print(results['roc_auc'].round(2).tolist())
         [0.83, 0.38, 0.94]
 """
 
@@ -151,18 +156,18 @@ class ROCAUC(evaluate.Metric):
             inputs_description=_KWARGS_DESCRIPTION,
             features=datasets.Features(
                 {
-                    "prediction_scores": datasets.Sequence(datasets.Value("float")),
+                    "prediction_scores": datasets.Sequence(datasets.Value("float64")),
                     "references": datasets.Value("int32"),
                 }
                 if self.config_name == "multiclass"
                 else {
                     "references": datasets.Sequence(datasets.Value("int32")),
-                    "prediction_scores": datasets.Sequence(datasets.Value("float")),
+                    "prediction_scores": datasets.Sequence(datasets.Value("float64")),
                 }
                 if self.config_name == "multilabel"
                 else {
                     "references": datasets.Value("int32"),
-                    "prediction_scores": datasets.Value("float"),
+                    "prediction_scores": datasets.Value("float64"),
                 }
             ),
             reference_urls=["https://scikit-learn.org/stable/modules/generated/sklearn.metrics.roc_auc_score.html"],
