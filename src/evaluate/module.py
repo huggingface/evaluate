@@ -15,6 +15,7 @@
 # Lint as: python3
 """ EvaluationModule base class."""
 import collections
+import inspect
 import itertools
 import os
 import types
@@ -973,9 +974,30 @@ class CombinedEvaluations:
         ```
         """
         results = []
-
+        module_compute_kwargs = []
         for evaluation_module in self.evaluation_modules:
+            parameters = inspect.signature(evaluation_module._compute).parameters
+            accepts_kwargs = any(parameter.kind == parameter.VAR_KEYWORD for parameter in parameters.values())
+            accepted_kwargs = set(evaluation_module._feature_names()) | {
+                name
+                for name, parameter in parameters.items()
+                if parameter.kind in (parameter.POSITIONAL_OR_KEYWORD, parameter.KEYWORD_ONLY)
+            }
+            module_compute_kwargs.append((accepted_kwargs, accepts_kwargs))
+
+        if not any(accepts_kwargs for _, accepts_kwargs in module_compute_kwargs):
+            unexpected_kwargs = set(kwargs).difference(*(names for names, _ in module_compute_kwargs))
+            if unexpected_kwargs:
+                raise TypeError(
+                    f"CombinedEvaluations.compute() got unexpected keyword arguments: {sorted(unexpected_kwargs)}"
+                )
+
+        for evaluation_module, (accepted_kwargs, accepts_kwargs) in zip(
+            self.evaluation_modules, module_compute_kwargs
+        ):
             batch = {"predictions": predictions, "references": references, **kwargs}
+            if not accepts_kwargs:
+                batch = {name: value for name, value in batch.items() if name in accepted_kwargs}
             results.append(evaluation_module.compute(**batch))
 
         return self._merge_results(results)

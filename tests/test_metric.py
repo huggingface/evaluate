@@ -669,6 +669,97 @@ def test_metric_with_non_standard_feature_names_compute(tmp_path):
     assert results == AccuracyWithNonStandardFeatureNames.expected_results()
 
 
+class DummyMetricWithComputeKwargs(DummyMetric):
+    def _compute(self, predictions, references, *, scale=1):
+        return {"scaled_accuracy": super()._compute(predictions, references)["accuracy"] * scale}
+
+
+class DummyMetricWithVariadicComputeKwargs(DummyMetric):
+    def _compute(self, predictions, references, **kwargs):
+        return {"variadic_accuracy": super()._compute(predictions, references)["accuracy"] * kwargs.get("scale", 1)}
+
+
+@pytest.mark.parametrize("mode", ["compute", "add", "add_batch"])
+@pytest.mark.parametrize("reverse", [False, True])
+def test_combined_metric_specific_compute_kwargs(mode, reverse, tmp_path):
+    predictions, references = DummyMetric.predictions_and_references()
+    metrics = [DummyMetric(cache_dir=tmp_path), DummyMetricWithComputeKwargs(cache_dir=tmp_path)]
+    if reverse:
+        metrics.reverse()
+    combined = combine(metrics)
+
+    if mode == "compute":
+        result = combined.compute(predictions=predictions, references=references, scale=2)
+    else:
+        if mode == "add":
+            for prediction, reference in zip(predictions, references):
+                combined.add(prediction=prediction, reference=reference)
+        else:
+            combined.add_batch(predictions=predictions, references=references)
+        result = combined.compute(scale=2)
+
+    assert result == {"accuracy": 0.5, "set_equality": True, "scaled_accuracy": 1.0}
+
+
+@pytest.mark.parametrize("mode", ["compute", "add", "add_batch"])
+def test_combined_non_standard_feature_names(mode, tmp_path):
+    predictions, references = DummyMetric.predictions_and_references()
+    combined = combine(
+        {
+            "standard": DummyMetric(cache_dir=tmp_path),
+            "custom": AccuracyWithNonStandardFeatureNames(cache_dir=tmp_path),
+        }
+    )
+    if mode == "compute":
+        result = combined.compute(
+            predictions=predictions, references=references, inputs=predictions, targets=references
+        )
+    else:
+        if mode == "add":
+            for prediction, reference in zip(predictions, references):
+                combined.add(prediction=prediction, reference=reference, inputs=prediction, targets=reference)
+        else:
+            combined.add_batch(predictions=predictions, references=references, inputs=predictions, targets=references)
+        result = combined.compute()
+
+    assert result == {"standard_accuracy": 0.5, "set_equality": True, "custom_accuracy": 0.5}
+
+
+def test_combined_variadic_compute_kwargs(tmp_path):
+    predictions, references = DummyMetric.predictions_and_references()
+    combined = combine([DummyMetric(cache_dir=tmp_path), DummyMetricWithVariadicComputeKwargs(cache_dir=tmp_path)])
+    assert combined.compute(predictions=predictions, references=references, scale=2) == {
+        "accuracy": 0.5,
+        "set_equality": True,
+        "variadic_accuracy": 1.0,
+    }
+
+
+def test_combined_shared_compute_kwargs(tmp_path):
+    combined = combine(
+        {
+            "first": DummyMetricWithComputeKwargs(cache_dir=tmp_path),
+            "second": DummyMetricWithComputeKwargs(cache_dir=tmp_path),
+        }
+    )
+    assert combined.compute(predictions=[1, 0], references=[1, 1], scale=2) == {
+        "first_scaled_accuracy": 1.0,
+        "second_scaled_accuracy": 1.0,
+    }
+
+
+def test_combined_unexpected_compute_kwargs(tmp_path):
+    combined = combine([DummyMetric(cache_dir=tmp_path), DummyMetricWithComputeKwargs(cache_dir=tmp_path)])
+    with pytest.raises(TypeError, match="unexpected keyword argument.*scle"):
+        combined.compute(predictions=[1], references=[1], scle=2)
+
+
+def test_combined_compute_errors_are_not_swallowed(tmp_path):
+    combined = combine([DummyMetricWithComputeKwargs(cache_dir=tmp_path)])
+    with pytest.raises(TypeError, match="can't multiply sequence"):
+        combined.compute(predictions=[1], references=[1], scale="invalid")
+
+
 class TestEvaluationcombined_evaluation(TestCase):
     def test_single_module(self):
         preds, refs = DummyMetric.predictions_and_references()
