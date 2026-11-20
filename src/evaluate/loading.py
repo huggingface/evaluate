@@ -118,12 +118,22 @@ def convert_github_url(url_path: str) -> Tuple[str, Optional[str]]:
                 raise ValueError(f"External import from github at {url_path} should point to a file ending with '.py'")
             url_path = url_path.replace("blob", "raw")  # Point to the raw file
         else:
-            # Parse github url to point to zip
-            github_path = parsed.path[1:]
-            repo_info, branch = github_path.split("/tree/") if "/tree/" in github_path else (github_path, "master")
-            repo_owner, repo_name = repo_info.split("/")
+            # Parse github url to point to zip. A tree URL may include a
+            # subdirectory after the branch, and a trailing slash is common.
+            github_path = parsed.path.strip("/")
+            if "/tree/" in github_path:
+                repo_info, ref_and_path = github_path.split("/tree/", 1)
+                branch, _, extra = ref_and_path.partition("/")
+            else:
+                repo_info, branch, extra = github_path, "master", ""
+            parts = [part for part in repo_info.split("/") if part]
+            if len(parts) != 2 or not branch:
+                raise ValueError(f"Invalid github url {url_path}")
+            repo_owner, repo_name = parts
             url_path = f"https://github.com/{repo_owner}/{repo_name}/archive/{branch}.zip"
             sub_directory = f"{repo_name}-{branch}"
+            if extra:
+                sub_directory = f"{sub_directory}/{extra}"
     return url_path, sub_directory
 
 
