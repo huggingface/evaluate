@@ -210,13 +210,8 @@ class QuestionAnsweringEvaluator(Evaluator):
                 "The dataset has SQuAD v1 format but you are using the SQuAD v2 metric. Consider passing the 'squad' metric."
             )
 
-        if squad_v2_format:
-            self.PIPELINE_KWARGS["handle_impossible_answer"] = True
-        else:
-            self.PIPELINE_KWARGS["handle_impossible_answer"] = False
-
-        # Compute predictions
-        predictions, perf_results = self.call_pipeline(pipe, **pipe_inputs)
+        # Pass the format-specific option with this invocation.
+        predictions, perf_results = self.call_pipeline(pipe, **pipe_inputs, handle_impossible_answer=squad_v2_format)
         predictions = self.predictions_processor(predictions, squad_v2_format=squad_v2_format, ids=data[id_column])
         metric_inputs.update(predictions)
 
