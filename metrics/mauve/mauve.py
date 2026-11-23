@@ -26,6 +26,13 @@ import evaluate
 
 
 _CITATION = """\
+        @article{pillutla-etal:mauve:jmlr2023,
+  title={{MAUVE Scores for Generative Models: Theory and Practice}},
+  author={Pillutla, Krishna and Liu, Lang and Thickstun, John and Welleck, Sean and Swayamdipta, Swabha and Zellers, Rowan and Oh, Sewoong and Choi, Yejin and Harchaoui, Zaid},
+  journal={JMLR},
+  year={2023}
+}
+
 @inproceedings{pillutla-etal:mauve:neurips2021,
   title={{MAUVE: Measuring the Gap Between Neural Text and Human Text using Divergence Frontiers}},
   author={Pillutla, Krishna and Swayamdipta, Swabha and Zellers, Rowan and Thickstun, John and Welleck, Sean and Choi, Yejin and Harchaoui, Zaid},
@@ -33,11 +40,11 @@ _CITATION = """\
   year      = {2021}
 }
 
-@article{pillutla-etal:mauve:arxiv2022,
-  title={{MAUVE Scores for Generative Models: Theory and Practice}},
-  author={Pillutla, Krishna and Liu, Lang and Thickstun, John and Welleck, Sean and Swayamdipta, Swabha and Zellers, Rowan and Oh, Sewoong and Choi, Yejin and Harchaoui, Zaid},
-  journal={arXiv Preprint},
-  year={2022}
+@inproceedings{liu-etal:mauve-theory:neurips2021,
+  title={{Divergence Frontiers for Generative Models: Sample Complexity, Quantization Effects, and Frontier Integrals}},
+  author={Liu, Lang and Pillutla, Krishna and Welleck, Sean and Oh, Sewoong and Choi, Yejin and Harchaoui, Zaid},
+  booktitle={NeurIPS},
+  year={2021}
 }
 """
 
@@ -75,6 +82,8 @@ Optional Args:
 Returns:
     mauve: MAUVE score, a number between 0 and 1. Larger values indicate that P and Q are closer,
     frontier_integral: Frontier Integral, a number between 0 and 1. Smaller values indicate that P and Q are closer,
+    mauve_star: MAUVE score computed with Krichevsky-Trofimov smoothing, as advocated in [this paper](https://arxiv.org/pdf/2212.14578),
+    frontier_integral_star: Frontier Interal score computed with Krichevsky-Trofimov smoothing, as advocated in [this paper](https://arxiv.org/pdf/2212.14578),
     divergence_curve: a numpy.ndarray of shape (m, 2); plot it with matplotlib to view the divergence curve,
     p_hist: a discrete distribution, which is a quantized version of the text distribution p_text,
     q_hist: same as above, but with q_text.
