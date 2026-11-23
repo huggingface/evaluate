@@ -44,6 +44,7 @@ results = perplexity.compute(predictions=predictions, model_id='gpt2')
 ### Inputs
 - **model_id** (str): model used for calculating Perplexity. NOTE: Perplexity can only be calculated for causal language models.
     - This includes models such as gpt2, causal variations of bert, causal versions of t5, and more (the full list can be found in the AutoModelForCausalLM documentation here: https://huggingface.co/docs/transformers/master/en/model_doc/auto#transformers.AutoModelForCausalLM )
+- **tokenizer_id** (str): tokenizer used for calculating Perplexity.
 - **predictions** (list of str): input text, where each separate text snippet is one list entry.
 - **batch_size** (int): the batch size to run texts through the model. Defaults to 16.
 - **add_start_token** (bool): whether to add the start token to the texts, so the perplexity can include the probability of the first word. Defaults to True.

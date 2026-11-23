@@ -43,6 +43,7 @@ Args:
                     in the AutoModelForCausalLM documentation here:
                     https://huggingface.co/docs/transformers/master/en/model_doc/auto#transformers.AutoModelForCausalLM )
 
+    tokenizer_id (str): tokenizer used for calculating Perplexity.
     predictions (list of str): input text, each separate text snippet
         is one list entry.
     batch_size (int): the batch size to run texts through the model. Defaults to 16.
@@ -101,7 +102,14 @@ class Perplexity(evaluate.Metric):
         )
 
     def _compute(
-        self, predictions, model_id, batch_size: int = 16, add_start_token: bool = True, device=None, max_length=None
+        self,
+        predictions,
+        model_id,
+        tokenizer_id,
+        batch_size: int = 16,
+        add_start_token: bool = True,
+        device=None,
+        max_length=None,
     ):
 
         if device is not None:
@@ -114,7 +122,10 @@ class Perplexity(evaluate.Metric):
         model = AutoModelForCausalLM.from_pretrained(model_id)
         model = model.to(device)
 
-        tokenizer = AutoTokenizer.from_pretrained(model_id)
+        if tokenizer_id is None:
+            tokenizer_id = model_id
+
+        tokenizer = AutoTokenizer.from_pretrained(tokenizer_id)
 
         # if batch_size > 1 (which generally leads to padding being required), and
         # if there is not an already assigned pad_token, assign an existing
