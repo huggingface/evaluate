@@ -117,15 +117,22 @@ class Meteor(evaluate.Metric):
         )
 
     def _download_and_prepare(self, dl_manager):
+        import io
+        from contextlib import redirect_stdout
+
         import nltk
 
-        nltk.download("wordnet")
+        def _silent_download(pkg: str) -> None:
+            with redirect_stdout(io.StringIO()):
+                nltk.download(pkg, quiet=True)
+
+        _silent_download("wordnet")
         if NLTK_VERSION >= version.Version("3.9.0"):
-            nltk.download("punkt_tab")
+            _silent_download("punkt_tab")
         elif NLTK_VERSION >= version.Version("3.6.5"):
-            nltk.download("punkt")
+            _silent_download("punkt")
         if NLTK_VERSION >= version.Version("3.6.6"):
-            nltk.download("omw-1.4")
+            _silent_download("omw-1.4")
 
     def _compute(self, predictions, references, alpha=0.9, beta=3, gamma=0.5):
         multiple_refs = isinstance(references[0], list)

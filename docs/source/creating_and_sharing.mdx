@@ -58,8 +58,12 @@ Or if you need to download the NLTK `"punkt_tab"` resources:
 
 ```py
 def _download_and_prepare(self, dl_manager):
+    import io
+    from contextlib import redirect_stdout
     import nltk
-    nltk.download("punkt_tab")
+
+    with redirect_stdout(io.StringIO()):
+        nltk.download("punkt_tab", quiet=True)
 ```
 
 Next, we need to define how the computation of the evaluation module works.
