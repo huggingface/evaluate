@@ -99,8 +99,19 @@ class Accuracy(evaluate.Metric):
         )
 
     def _compute(self, predictions, references, normalize=True, sample_weight=None):
+        if len(predictions) != len(references):
+            raise ValueError(
+                "The length of `predictions` and `references` must be the same to compute accuracy."
+        )
+
         return {
-            "accuracy": float(
-                accuracy_score(references, predictions, normalize=normalize, sample_weight=sample_weight)
+        "accuracy": float(
+            accuracy_score(
+                references,
+                predictions,
+                normalize=normalize,
+                sample_weight=sample_weight
             )
-        }
+        )
+    }
+
