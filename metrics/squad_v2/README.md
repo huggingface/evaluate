@@ -43,7 +43,7 @@ The metric takes two files or two lists - one representing model predictions and
 
 *References*: List of question-answers dictionaries with the following key-value pairs:
 * `'id'`: id of the question-answer pair (see above),
-* `'answers'`: a list of Dict {'text': text of the answer as a string}
+* `'answers'`: a Dict {'text': list of string answers}
 *  `'no_answer_threshold'`: the probability threshold to decide that a question has no answer.
 
 ```python
@@ -54,19 +54,19 @@ results = squad_metric.compute(predictions=predictions, references=references)
 ## Output values
 
 This metric outputs a dictionary with 13 values: 
-* `'exact'`: Exact match (the normalized answer exactly match the gold answer) (see the `exact_match` metric (forthcoming))
+* `'exact'`: Exact match (the normalized answer exactly matches the gold answer) (see the `exact_match` metric (forthcoming))
 * `'f1'`: The average F1-score of predicted tokens versus the gold answer (see the [F1 score](https://huggingface.co/metrics/f1) metric)
 * `'total'`: Number of scores considered
-* `'HasAns_exact'`: Exact match (the normalized answer exactly match the gold answer)
+* `'HasAns_exact'`: Exact match (the normalized answer exactly matches the gold answer)
 * `'HasAns_f1'`:  The F-score of predicted tokens versus the gold answer
 * `'HasAns_total'`: How many of the questions have answers
-* `'NoAns_exact'`: Exact match (the normalized answer exactly match the gold answer)
+* `'NoAns_exact'`: Exact match (the normalized answer exactly matches the gold answer)
 * `'NoAns_f1'`: The F-score of predicted tokens versus the gold answer
 * `'NoAns_total'`: How many of the questions have no answers
 * `'best_exact'` : Best exact match (with varying threshold)
-* `'best_exact_thresh'`: No-answer probability threshold associated to the best exact match
+* `'best_exact_thresh'`: No-answer probability threshold associated with the best exact match
 * `'best_f1'`: Best F1 score (with varying threshold)
-* `'best_f1_thresh'`: No-answer probability threshold associated to the best F1
+* `'best_f1_thresh'`: No-answer probability threshold associated with the best F1
 
 
 The range of `exact_match` is 0-100, where 0.0 means no answers were matched and 100.0 means all answers were matched. 
