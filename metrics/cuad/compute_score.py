@@ -176,8 +176,8 @@ def compute_score(dataset, predictions):
     precisions = [x for _, x in sorted(zip(recalls, precisions))]
     recalls.sort()
 
-    f1 = 100.0 * f1 / total
-    exact_match = 100.0 * exact_match / total
+    f1 = f1 / total
+    exact_match = exact_match / total
     aupr = get_aupr(precisions, recalls)
 
     prec_at_90_recall = get_prec_at_recall(precisions, recalls, recall_thresh=0.9)
