@@ -54,7 +54,7 @@ It can also take several optional arguments:
 
 ## Output values
 
-This metric returns a a classification report as a dictionary with a summary of scores for overall and per type:
+This metric returns a classification report as a dictionary with a summary of scores for overall and per type:
 
 Overall (weighted and macro avg):
 
