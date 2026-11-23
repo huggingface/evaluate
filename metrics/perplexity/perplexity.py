@@ -105,9 +105,12 @@ class Perplexity(evaluate.Metric):
     ):
 
         if device is not None:
-            assert device in ["gpu", "cpu", "cuda"], "device should be either gpu or cpu."
             if device == "gpu":
                 device = "cuda"
+            try:
+                device = torch.device(device)
+            except Exception as e:
+                raise e
         else:
             device = "cuda" if torch.cuda.is_available() else "cpu"
 
