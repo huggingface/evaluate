@@ -72,7 +72,6 @@ _CITATION = """\
 class LabelDistribution(evaluate.Measurement):
     def _info(self):
         return evaluate.MeasurementInfo(
-            module_type="measurement",
             description=_DESCRIPTION,
             citation=_CITATION,
             inputs_description=_KWARGS_DESCRIPTION,
