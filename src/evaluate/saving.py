@@ -4,10 +4,24 @@ import subprocess
 import sys
 from datetime import datetime
 from pathlib import Path
+import numpy as np
 
 from datasets.utils.filelock import FileLock
 
 from . import __version__
+
+
+class NpEncoder(json.JSONEncoder):
+    """Numpy aware JSON encoder."""
+
+    def default(self, o):
+        if isinstance(o, np.floating):
+            return float(o)
+        if isinstance(o, np.integer):
+            return int(o)
+        if isinstance(o, np.ndarray):
+            return o.tolist()
+        return super().default(o)
 
 
 def save(path_or_file, **data):
@@ -40,7 +54,7 @@ def save(path_or_file, **data):
 
     with FileLock(str(file_path) + ".lock"):
         with open(file_path, "w") as f:
-            json.dump(data, f)
+            json.dump(data, f, cls=NpEncoder)
 
     # cleanup lock file
     try:
@@ -65,9 +79,13 @@ def _setup_path(path_or_file, current_time):
 
 
 def _git_commit_hash():
-    res = subprocess.run("git rev-parse --is-inside-work-tree".split(), cwd="./", stdout=subprocess.PIPE)
+    res = subprocess.run(
+        "git rev-parse --is-inside-work-tree".split(), cwd="./", stdout=subprocess.PIPE
+    )
     if res.stdout.decode().strip() == "true":
-        res = subprocess.run("git rev-parse HEAD".split(), cwd=os.getcwd(), stdout=subprocess.PIPE)
+        res = subprocess.run(
+            "git rev-parse HEAD".split(), cwd=os.getcwd(), stdout=subprocess.PIPE
+        )
         return res.stdout.decode().strip()
     else:
         return None
