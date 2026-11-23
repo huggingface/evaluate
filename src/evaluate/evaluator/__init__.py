@@ -103,10 +103,12 @@ def check_task(task: str) -> Dict:
     """
     if task in TASK_ALIASES:
         task = TASK_ALIASES[task]
-    if not check_pipeline_task(task):
-        raise KeyError(f"Unknown task {task}, available tasks are: {get_supported_tasks()}.")
-    if task in SUPPORTED_EVALUATOR_TASKS.keys() and task in SUPPORTED_PIPELINE_TASKS.keys():
+    if task in SUPPORTED_EVALUATOR_TASKS:
         return SUPPORTED_EVALUATOR_TASKS[task]
+    try:
+        check_pipeline_task(task)
+    except KeyError as e:
+        raise KeyError(f"Unknown task {task}, available tasks are: {get_supported_tasks()}.") from e
     raise KeyError(f"Unknown task {task}, available tasks are: {get_supported_tasks()}.")
 
 
