@@ -99,6 +99,15 @@ class Accuracy(evaluate.Metric):
         )
 
     def _compute(self, predictions, references, normalize=True, sample_weight=None):
+        if len(predictions) != len(references):
+            raise ValueError(
+                f"Predictions and references must have the same length, "
+                f"got {len(predictions)} and {len(references)}."
+            )
+
+        if len(predictions) == 0:
+            raise ValueError("Predictions and references must not be empty.")
+
         return {
             "accuracy": float(
                 accuracy_score(references, predictions, normalize=normalize, sample_weight=sample_weight)
