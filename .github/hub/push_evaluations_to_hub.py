@@ -1,5 +1,5 @@
 from pathlib import Path
-from huggingface_hub import create_repo, repo_exists, Repository
+from huggingface_hub import create_repo, repo_exists, HfApi
 import tempfile
 import subprocess
 import os
@@ -63,48 +63,38 @@ def update_evaluate_dependency(requirements_path, commit_hash):
 def push_module_to_hub(module_path, type, token, commit_hash, tag=None):
     module_name = module_path.stem
     org = f"evaluate-{type}"
+    repo_id = f"{org}/{module_name}"
     
-    if not repo_exists(org + "/" + module_name, repo_type="space", token=token):
-        create_repo(org + "/" + module_name, repo_type="space", space_sdk="gradio", exist_ok=True, token=token)    
-    repo_path = Path(tempfile.mkdtemp())
+    if not repo_exists(repo_id, repo_type="space", token=token):
+        create_repo(repo_id, repo_type="space", space_sdk="gradio", exist_ok=True, token=token)    
 
-    repo_url = f"https://user:{token}@huggingface.co/spaces/" + org + "/" + module_name
-    clean_repo_url = re.sub(r"(https?)://.*@", r"\1://", repo_url)
-    
-    try:
-        subprocess.run(
-            f"git clone {repo_url}".split(),
-            stderr=subprocess.PIPE,
-            stdout=subprocess.PIPE,
-            check=True,
-            encoding="utf-8",
-            cwd=repo_path,
-            env=os.environ.copy(),
-        )
-    except OSError:
-        # make sure we don't accidentally expose token
-        raise OSError(f"Could not clone from '{clean_repo_url}'")
+    api = HfApi(token=token)
 
-    repo = Repository(local_dir=repo_path / module_name, token=token, git_user=GIT_USER, git_email=GIT_EMAIL)
-    
-    copy_recursive(module_path, repo_path / module_name)
-    update_evaluate_dependency(repo_path / module_name / "requirements.txt", commit_hash)
-    
-    repo.git_add()
-    try:
-        repo.git_commit(f"Update Space (evaluate main: {commit_hash[:8]})")
-        repo.git_push()
-        logger.info(f"Module '{module_name}' pushed to the hub")
-    except OSError as error:
-        if str(error) == GIT_UP_TO_DATE:
-            logger.info(f"Module '{module_name}' is already up to date.")
-        else:
-            raise error
+    with tempfile.TemporaryDirectory() as tmp_dir:
+        tmp_repo_path = Path(tmp_dir) / module_name
+        tmp_repo_path.mkdir()
+        
+        copy_recursive(module_path, tmp_repo_path)
+        update_evaluate_dependency(tmp_repo_path / "requirements.txt", commit_hash)
+        
+        try:
+            api.upload_folder(
+                repo_id=repo_id,
+                folder_path=tmp_repo_path,
+                repo_type="space",
+                commit_message=f"Update Space (evaluate main: {commit_hash[:8]})",
+            )
+            logger.info(f"Module '{module_name}' pushed to the hub")
+        except Exception as e:
+            # We catch generic exception here to log it, similar to how Repository had some error handling
+            logger.error(f"Failed to push module '{module_name}': {e}")
+            raise e
 
-    if tag is not None:
-        repo.add_tag(tag, message="add evaluate tag", remote="origin")
-    
-    shutil.rmtree(repo_path)
+        if tag is not None:
+            try:
+                api.create_tag(repo_id=repo_id, tag=tag, repo_type="space")
+            except Exception as e:
+                logger.warning(f"Failed to add tag '{tag}' to module '{module_name}': {e}")
 
 
 if __name__ == "__main__":
