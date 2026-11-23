@@ -50,6 +50,17 @@ It also has several optional arguments:
 
 More information about model characteristics can be found on the [COMET website](https://unbabel.github.io/COMET/html/index.html).
 
+### Using a local model
+
+use cases:
+- using your custom trained comet model
+- evaluation speedup (re-downloading the model takes a few minutes)
+
+```python
+from evaluate import load
+comet_metrics = load("comet", "/home/wmt20-comet-da/checkpoints/model.ckpt")
+```
+
 ## Output values
 
 The COMET metric outputs two lists:

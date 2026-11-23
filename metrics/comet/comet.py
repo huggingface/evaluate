@@ -156,7 +156,10 @@ class COMET(evaluate.Metric):
             else:
                 self.scorer = comet.load_from_checkpoint(comet.download_model("wmt20-comet-da"))
         else:
-            self.scorer = comet.load_from_checkpoint(comet.download_model(self.config_name))
+            try:
+                self.scorer = comet.load_from_checkpoint(self.config_name)
+            except FileNotFoundError:
+                self.scorer = comet.load_from_checkpoint(comet.download_model(self.config_name))
 
     def _compute(self, sources, predictions, references, gpus=None, progress_bar=False):
         if gpus is None:
