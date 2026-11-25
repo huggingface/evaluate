@@ -95,6 +95,7 @@ class Mahalanobis(evaluate.Metric):
         except np.linalg.LinAlgError:
             inv_covmat = np.linalg.pinv(cov)
         left_term = np.dot(X_minus_mu, inv_covmat)
-        mahal_dist = np.dot(left_term, X_minus_mu.T).diagonal()
+        # Only the diagonal is needed, so contract each row with its own deviation.
+        mahal_dist = np.einsum("ij,ij->i", left_term, X_minus_mu)
 
         return {"mahalanobis": mahal_dist}
