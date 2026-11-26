@@ -1,7 +1,9 @@
 import importlib
 import os
 import tempfile
+from pathlib import Path
 from unittest import TestCase
+from unittest.mock import patch
 
 import pytest
 from datasets import DownloadConfig
@@ -138,3 +140,53 @@ class ModuleFactoryTest(TestCase):
                 evaluation_module_factory(
                     metric, download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
                 )
+
+
+class OfflineCanonicalCacheModuleTypeTest(TestCase):
+    def setUp(self):
+        self.hf_modules_cache = tempfile.mkdtemp()
+        self.dynamic_modules_path = evaluate.loading.init_dynamic_modules(
+            name="test_offline_canonical_type_" + os.path.basename(self.hf_modules_cache),
+            hf_modules_cache=self.hf_modules_cache,
+        )
+        self.repo_root = Path(__file__).resolve().parents[1]
+
+    def _seed_canonical_cache(self, kind: str, folder: str, name: str = "exact_match"):
+        factory = HubEvaluationModuleFactory(
+            f"evaluate-{kind}/{name}",
+            dynamic_modules_path=self.dynamic_modules_path,
+        )
+        script = self.repo_root / folder / name / f"{name}.py"
+        with patch.object(factory, "download_loading_script", return_value=str(script)):
+            factory.get_module()
+
+    def test_offline_lookup_honors_explicit_module_type(self):
+        self._seed_canonical_cache("metric", "metrics")
+        self._seed_canonical_cache("comparison", "comparisons")
+
+        with patch("evaluate.loading.init_dynamic_modules", return_value=self.dynamic_modules_path):
+            with offline(OfflineSimulationMode.HF_EVALUATE_OFFLINE_SET_TO_1):
+                comparison = evaluate.load("exact_match", module_type="comparison", keep_in_memory=True)
+                metric = evaluate.load("exact_match", module_type="metric", keep_in_memory=True)
+
+        self.assertEqual(comparison.module_type, "comparison")
+        self.assertEqual(metric.module_type, "metric")
+
+    def test_offline_lookup_does_not_return_wrong_cached_type(self):
+        self._seed_canonical_cache("metric", "metrics")
+
+        with patch("evaluate.loading.init_dynamic_modules", return_value=self.dynamic_modules_path):
+            with offline(OfflineSimulationMode.HF_EVALUATE_OFFLINE_SET_TO_1):
+                with self.assertRaises((FileNotFoundError, ConnectionError)) as ctx:
+                    evaluate.load("exact_match", module_type="comparison", keep_in_memory=True)
+                self.assertNotIsInstance(ctx.exception, TypeError)
+
+    def test_offline_lookup_preserves_discovery_order_when_module_type_is_none(self):
+        self._seed_canonical_cache("metric", "metrics")
+        self._seed_canonical_cache("comparison", "comparisons")
+
+        with patch("evaluate.loading.init_dynamic_modules", return_value=self.dynamic_modules_path):
+            with offline(OfflineSimulationMode.HF_EVALUATE_OFFLINE_SET_TO_1):
+                loaded = evaluate.load("exact_match", keep_in_memory=True)
+
+        self.assertEqual(loaded.module_type, "metric")
