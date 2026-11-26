@@ -13,8 +13,7 @@
 # limitations under the License.
 
 # Lint as: python3
-""" EvaluationModuleInfo records information we know about a dataset and a metric.
-"""
+"""EvaluationModuleInfo records information we know about a dataset and a metric."""
 
 import dataclasses
 import json
@@ -29,6 +28,16 @@ from .utils.logging import get_logger
 
 
 logger = get_logger(__name__)
+
+
+def _restore_features(raw_features):
+    if isinstance(raw_features, Features):
+        return raw_features
+    if isinstance(raw_features, dict):
+        return Features.from_dict(raw_features)
+    if isinstance(raw_features, list):
+        return [_restore_features(item) for item in raw_features]
+    return raw_features
 
 
 @dataclass
@@ -115,7 +124,10 @@ class EvaluationModuleInfo:
     @classmethod
     def from_dict(cls, metric_info_dict: dict) -> "EvaluationModuleInfo":
         field_names = {f.name for f in dataclasses.fields(cls)}
-        return cls(**{k: v for k, v in metric_info_dict.items() if k in field_names})
+        kwargs = {k: v for k, v in metric_info_dict.items() if k in field_names}
+        if "features" in kwargs and kwargs["features"] is not None:
+            kwargs["features"] = _restore_features(kwargs["features"])
+        return cls(**kwargs)
 
 
 @dataclass

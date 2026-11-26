@@ -757,3 +757,55 @@ class TestEvaluationcombined_evaluation(TestCase):
         self.assertDictEqual(
             expected_result, combined_evaluation.compute(predictions=predictions, references=references, pos_label=0)
         )
+
+
+class EvaluationModuleInfoRoundTripTest(TestCase):
+    def test_metric_info_restores_single_features_schema(self):
+        from evaluate import MetricInfo
+
+        info = MetricInfo(
+            description="Example",
+            citation="",
+            features=Features({"predictions": Value("int64"), "references": Value("int64")}),
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            info.write_to_directory(directory)
+            restored = MetricInfo.from_directory(directory)
+
+        self.assertIsInstance(restored.features, Features)
+        self.assertEqual(info, restored)
+
+    def test_metric_info_restores_alternative_features_list(self):
+        from evaluate import MetricInfo
+
+        info = MetricInfo(
+            description="Alternative schemas",
+            citation="",
+            features=[
+                Features({"predictions": Value("int64"), "references": Value("int64")}),
+                Features({"predictions": Sequence(Value("string")), "references": Sequence(Value("string"))}),
+            ],
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            info.write_to_directory(directory)
+            restored = MetricInfo.from_directory(directory)
+
+        self.assertIsInstance(restored.features, list)
+        self.assertTrue(all(isinstance(schema, Features) for schema in restored.features))
+        self.assertEqual(info, restored)
+
+    def test_comparison_info_with_numpy_format_roundtrip(self):
+        from evaluate import ComparisonInfo
+
+        info = ComparisonInfo(
+            description="Numpy format",
+            citation="",
+            features=Features({"predictions": Value("float32")}),
+            format="numpy",
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            info.write_to_directory(directory)
+            restored = ComparisonInfo.from_directory(directory)
+
+        self.assertIsInstance(restored.features, Features)
+        self.assertEqual(info, restored)
