@@ -15,6 +15,7 @@
 # Lint as: python3
 """Access datasets."""
 import filecmp
+import hashlib
 import importlib
 import inspect
 import json
@@ -29,7 +30,7 @@ from urllib.parse import urlparse
 
 from datasets import DownloadConfig, DownloadMode
 from datasets.builder import DatasetBuilder
-from datasets.packaged_modules import _EXTENSION_TO_MODULE, _hash_python_lines
+from datasets.packaged_modules import _EXTENSION_TO_MODULE
 from datasets.utils.filelock import FileLock
 from datasets.utils.version import Version
 
@@ -105,7 +106,7 @@ def files_to_hash(file_paths: List[str]) -> str:
     for file_path in to_use_files:
         with open(file_path, encoding="utf-8") as f:
             lines.extend(f.readlines())
-    return _hash_python_lines(lines)
+    return hashlib.sha256("\n".join(lines).encode("utf-8")).hexdigest()
 
 
 def convert_github_url(url_path: str) -> Tuple[str, Optional[str]]:
@@ -661,7 +662,9 @@ def evaluation_module_factory(
                     download_mode=download_mode,
                     dynamic_modules_path=dynamic_modules_path,
                 ).get_module()
-        except Exception as e1:  # noqa: all the attempts failed, before raising the error we should check if the module is already cached.
+        except (
+            Exception
+        ) as e1:  # noqa: all the attempts failed, before raising the error we should check if the module is already cached.
             # if it's a canonical module we need to check if it's any of the types
             if path.count("/") == 0:
                 for current_type in ["metric", "comparison", "measurement"]:

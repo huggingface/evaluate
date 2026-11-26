@@ -1,7 +1,9 @@
 import importlib
 import os
 import tempfile
+from pathlib import Path
 from unittest import TestCase
+from unittest.mock import patch
 
 import pytest
 from datasets import DownloadConfig
@@ -138,3 +140,51 @@ class ModuleFactoryTest(TestCase):
                 evaluation_module_factory(
                     metric, download_config=self.download_config, dynamic_modules_path=self.dynamic_modules_path
                 )
+
+
+class FilesToHashTest(TestCase):
+    _HASHTAG_METRIC_TEMPLATE = """import evaluate
+from datasets import Features, Value
+
+class HashtagCount(evaluate.Metric):
+    def _info(self):
+        return evaluate.MetricInfo(
+            description="Count a hashtag",
+            citation="",
+            features=Features({"predictions": Value("string")}),
+        )
+
+    def _compute(self, predictions):
+        return {"count": sum(text.count("HASHTAG") for text in predictions)}
+"""
+
+    def test_files_to_hash_distinguishes_hashtag_string_literals(self):
+        with tempfile.TemporaryDirectory() as tmpdir:
+            first = Path(tmpdir) / "first.py"
+            second = Path(tmpdir) / "second.py"
+            first.write_text(self._HASHTAG_METRIC_TEMPLATE.replace("HASHTAG", "#positive"), encoding="utf-8")
+            second.write_text(self._HASHTAG_METRIC_TEMPLATE.replace("HASHTAG", "#negative"), encoding="utf-8")
+
+            self.assertNotEqual(
+                evaluate.loading.files_to_hash([str(first)]),
+                evaluate.loading.files_to_hash([str(second)]),
+            )
+
+    def test_local_metric_load_invalidates_cache_when_hashtag_literal_changes(self):
+        with tempfile.TemporaryDirectory() as tmpdir, tempfile.TemporaryDirectory() as cache_dir:
+            dynamic_modules_path = evaluate.loading.init_dynamic_modules(
+                name="test_hashtag_hash_" + os.path.basename(cache_dir),
+                hf_modules_cache=cache_dir,
+            )
+            script = Path(tmpdir) / "hashtag_count.py"
+            predictions = ["#positive", "#positive", "#negative"]
+
+            with patch("evaluate.loading.init_dynamic_modules", return_value=dynamic_modules_path):
+                script.write_text(self._HASHTAG_METRIC_TEMPLATE.replace("HASHTAG", "#positive"), encoding="utf-8")
+                first = evaluate.load(str(script), keep_in_memory=True).compute(predictions=predictions)
+
+                script.write_text(self._HASHTAG_METRIC_TEMPLATE.replace("HASHTAG", "#negative"), encoding="utf-8")
+                second = evaluate.load(str(script), keep_in_memory=True).compute(predictions=predictions)
+
+            self.assertEqual(first, {"count": 2})
+            self.assertEqual(second, {"count": 1})
