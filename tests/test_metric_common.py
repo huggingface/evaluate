@@ -225,3 +225,34 @@ def test_seqeval_raises_when_incorrect_scheme():
     error_message = f"Scheme should be one of [IOB1, IOB2, IOE1, IOE2, IOBES, BILOU], got {wrong_scheme}"
     with pytest.raises(ValueError, match=re.escape(error_message)):
         metric.compute(predictions=[], references=[], scheme=wrong_scheme)
+
+
+def test_brier_score_pos_label_inference():
+    metric = load(os.path.join("metrics", "brier_score"))
+
+    # Binary numeric labels {0, 2} infer the greater label (2) when pos_label=None
+    result = metric.compute(references=[0, 0, 2, 2], predictions=[0.1, 0.2, 0.8, 0.9])
+    assert np.isclose(result["brier_score"], 0.025)
+
+    # Binary numeric labels {1, 2} infer pos_label=2 instead of scoring 1 as positive
+    result_12 = metric.compute(references=[1, 1, 2, 2], predictions=[0.1, 0.2, 0.8, 0.9])
+    assert np.isclose(result_12["brier_score"], 0.025)
+
+    # Standard {0, 1} labels still default to pos_label=1
+    result_01 = metric.compute(references=[0, 0, 1, 1], predictions=[0.1, 0.9, 0.8, 0.3])
+    assert np.isclose(result_01["brier_score"], 0.3375)
+
+    # Explicit pos_label overrides inference
+    result_explicit = metric.compute(references=[0, 0, 1, 1], predictions=[0.9, 0.9, 0.1, 0.1], pos_label=0)
+    assert np.isclose(result_explicit["brier_score"], 0.01)
+
+    # String labels raise ValueError unless pos_label is explicitly provided
+    with pytest.raises(ValueError, match="pos_label"):
+        metric.compute(references=["ham", "spam", "spam", "ham"], predictions=[0.1, 0.9, 0.8, 0.3])
+
+    result_str = metric.compute(
+        references=["spam", "ham", "ham", "spam"],
+        predictions=[0.1, 0.9, 0.8, 0.3],
+        pos_label="ham",
+    )
+    assert np.isclose(result_str["brier_score"], 0.0375)
