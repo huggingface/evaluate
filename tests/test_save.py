@@ -42,3 +42,30 @@ class TestSave(TestCase):
         for key in SAVE_EXTRA_KEYS:
             _ = loaded_result_dict.pop(key)
         self.assertDictEqual(result_dict, loaded_result_dict)
+
+    def test_save_preserves_existing_file_on_serialization_error(self):
+        target = self.save_path / "results.json"
+        evaluate.save(target, **result_dict)
+        previous_bytes = target.read_bytes()
+
+        with self.assertRaises(TypeError):
+            evaluate.save(target, accuracy=1.0, details={"scores": {1, 2}})
+
+        self.assertEqual(target.read_bytes(), previous_bytes)
+
+    def test_save_does_not_create_file_on_serialization_error(self):
+        target = self.save_path / "nested" / "new_results.json"
+
+        with self.assertRaises(TypeError):
+            evaluate.save(target, bad=object())
+
+        self.assertFalse(target.exists())
+
+    def test_save_overwrites_existing_file_when_valid(self):
+        target = self.save_path / "results.json"
+        evaluate.save(target, accuracy=0.5)
+        evaluate.save(target, accuracy=0.9)
+
+        with open(target, "r") as f:
+            loaded_result_dict = json.load(f)
+        self.assertEqual(loaded_result_dict["accuracy"], 0.9)

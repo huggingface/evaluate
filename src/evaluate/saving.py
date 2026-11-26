@@ -30,17 +30,18 @@ def save(path_or_file, **data):
     """
     current_time = datetime.now()
 
-    file_path = _setup_path(path_or_file, current_time)
-
     data["_timestamp"] = current_time.isoformat()
     data["_git_commit_hash"] = _git_commit_hash()
     data["_evaluate_version"] = __version__
     data["_python_version"] = sys.version
     data["_interpreter_path"] = sys.executable
 
+    serialized_data = json.dumps(data)
+    file_path = _setup_path(path_or_file, current_time)
+
     with FileLock(str(file_path) + ".lock"):
         with open(file_path, "w") as f:
-            json.dump(data, f)
+            f.write(serialized_data)
 
     # cleanup lock file
     try:
