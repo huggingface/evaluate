@@ -127,7 +127,7 @@ class BrierScore(evaluate.Metric):
                 ),
             ]
 
-    def _compute(self, references, predictions, sample_weight=None, pos_label=1):
+    def _compute(self, references, predictions, sample_weight=None, pos_label=None):
 
         brier_score = brier_score_loss(references, predictions, sample_weight=sample_weight, pos_label=pos_label)
 
