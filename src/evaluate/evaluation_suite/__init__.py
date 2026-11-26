@@ -108,21 +108,26 @@ class EvaluationSuite:
         results_all = []
         for task in self.suite:
 
+            task_data = task.data
             task_name = task.data
 
             if task.data_preprocessor:  # task requires extra preprocessing
-                ds = load_dataset(task.data, name=task.subset, split=task.split)
-                task.data = ds.map(task.data_preprocessor)
+                ds = (
+                    task_data
+                    if isinstance(task_data, Dataset)
+                    else load_dataset(task_data, name=task.subset, split=task.split)
+                )
+                task_data = ds.map(task.data_preprocessor)
 
             task_evaluator = evaluator(task.task_type)
-            args_for_task = task.args_for_task
+            args_for_task = dict(task.args_for_task) if task.args_for_task is not None else {}
             args_for_task["model_or_pipeline"] = model_or_pipeline
-            args_for_task["data"] = task.data
+            args_for_task["data"] = task_data
             args_for_task["subset"] = task.subset
             args_for_task["split"] = task.split
             results = task_evaluator.compute(**args_for_task)
 
-            results["task_name"] = task_name + "/" + task.subset if task.subset else task_name
+            results["task_name"] = f"{task_name}/{task.subset}" if task.subset else task_name
             results["data_preprocessor"] = str(task.data_preprocessor) if task.data_preprocessor is not None else None
             results_all.append(results)
         return results_all
