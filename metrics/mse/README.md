@@ -37,6 +37,10 @@ At minimum, this metric requires predictions and references as inputs.
 
 ### Inputs
 
+The default configuration accepts one-dimensional inputs. For multiple targets
+per sample, load `evaluate.load("mse", "multilist")` and pass two-dimensional
+inputs of shape `(n_samples, n_outputs)` for both predictions and references.
+
 Mandatory inputs: 
 - `predictions`: numeric array-like of shape (`n_samples,`) or (`n_samples`, `n_outputs`), representing the estimated target values.
 - `references`: numeric array-like of shape (`n_samples,`) or (`n_samples`, `n_outputs`), representing the ground truth (correct) target values.
@@ -55,7 +59,8 @@ This metric outputs a dictionary, containing the mean squared error score, which
 - `float`: if multioutput is `uniform_average` or an ndarray of weights, then the weighted average of all output errors is returned.
 - numeric array-like of shape (`n_outputs,`): if multioutput is `raw_values`, then the score is returned for each output separately. 
 
-Each MSE `float` value ranges from `0.0` to `1.0`, with the best value being `0.0`.
+MSE is non-negative and has no fixed upper bound. For unweighted MSE, a score
+of `0.0` means all predictions match their reference values.
 
 Output Example(s):
 ```python
@@ -72,7 +77,7 @@ If `multioutput="raw_values"`:
 
 ### Examples
 
-Example with the `uniform_average` config:
+Example with the default configuration:
 ```python
 >>> mse_metric = evaluate.load("mse")
 >>> predictions = [2.5, 0.0, 2, 8]
@@ -82,7 +87,7 @@ Example with the `uniform_average` config:
 {'mse': 0.375}
 ```
 
-Example with `squared = True`, which returns the RMSE:
+Example with `squared=False`, which returns the RMSE:
 ```python
 >>> mse_metric = evaluate.load("mse")
 >>> predictions = [2.5, 0.0, 2, 8]
@@ -92,7 +97,7 @@ Example with `squared = True`, which returns the RMSE:
 {'mse': 0.6123724356957945}
 ```
 
-Example with multi-dimensional lists, and the `raw_values` config:
+Example with the `multilist` configuration and `multioutput="raw_values"`:
 ```python
 >>> mse_metric = evaluate.load("mse", "multilist")
 >>> predictions = [[0.5, 1], [-1, 1], [7, -6]]
@@ -100,7 +105,6 @@ Example with multi-dimensional lists, and the `raw_values` config:
 >>> results = mse_metric.compute(predictions=predictions, references=references, multioutput='raw_values')
 >>> print(results) 
 {'mse': array([0.41666667, 1. ])}
-"""
 ```
 
 ## Limitations and Bias

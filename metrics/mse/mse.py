@@ -40,6 +40,9 @@ and actual values.
 
 
 _KWARGS_DESCRIPTION = """
+The default configuration accepts one-dimensional inputs. Use
+`evaluate.load("mse", "multilist")` for inputs of shape (n_samples, n_outputs).
+
 Args:
     predictions: array-like of shape (n_samples,) or (n_samples, n_outputs)
         Estimated target values.
