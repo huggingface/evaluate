@@ -44,7 +44,7 @@ This metric takes as input a list of predicted sentences and a list of lists of 
 >>> bleu = evaluate.load("bleu")
 >>> results = bleu.compute(predictions=predictions, references=references)
 >>> print(results)
-{'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.1666666666666667, 'translation_length': 7, 'reference_length': 6}
+{'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.0, 'translation_length': 7, 'reference_length': 7}
 ```
 
 ### Inputs
@@ -68,7 +68,7 @@ The default tokenizer is based on whitespace and regexes. It can be replaced by 
 
 Output Example:
 ```python
-{'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.1666666666666667, 'translation_length': 7, 'reference_length': 6}
+{'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.0, 'translation_length': 7, 'reference_length': 7}
 ```
 
 BLEU's output is always a number between 0 and 1. This value indicates how similar the candidate text is to the reference texts, with values closer to 1 representing more similar texts. Few human translations will attain a score of 1, since this would indicate that the candidate is identical to one of the reference translations. For this reason, it is not necessary to attain a score of 1. Because there are more opportunities to match, adding additional reference translations will increase the BLEU score.
@@ -106,7 +106,7 @@ Example where the first prediction has 2 references:
 >>> bleu = evaluate.load("bleu")
 >>> results = bleu.compute(predictions=predictions, references=references)
 >>> print(results)
-{'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.1666666666666667, 'translation_length': 7, 'reference_length': 6}
+{'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.0, 'translation_length': 7, 'reference_length': 7}
 ```
 
 Example with the word tokenizer from NLTK:
@@ -123,7 +123,7 @@ Example with the word tokenizer from NLTK:
 ... ]
 >>> results = bleu.compute(predictions=predictions, references=references, tokenizer=word_tokenize)
 >>> print(results)
-{'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.1666666666666667, 'translation_length': 7, 'reference_length': 6}
+{'bleu': 1.0, 'precisions': [1.0, 1.0, 1.0, 1.0], 'brevity_penalty': 1.0, 'length_ratio': 1.0, 'translation_length': 7, 'reference_length': 7}
 ```
 
 ## Limitations and Bias
