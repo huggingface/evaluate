@@ -129,24 +129,29 @@ class Evaluator(ABC):
         confidence_level: float = 0.95,
         n_resamples: int = 9999,
         random_state: Optional[int] = None,
+        metric_kwargs: Optional[Dict[str, Any]] = None,
     ) -> Dict[str, Any]:
         """
         A utility function enabling the confidence interval calculation for metrics computed
         by the evaluator based on `scipy`'s `bootstrap` method.
         """
+        fixed_kwargs = dict(metric_kwargs) if metric_kwargs else {}
+        data_inputs = dict(metric_inputs)
+        if "sample_weight" in fixed_kwargs and fixed_kwargs["sample_weight"] is not None:
+            data_inputs["sample_weight"] = fixed_kwargs.pop("sample_weight")
 
         # bootstrap only works with functions that use args and no kwargs
-        def build_args_metric(metric, key, **kwargs):
+        def build_args_metric(metric, key, fixed_kwargs, **kwargs):
             def args_metric(*args):
-                return metric.compute(**{k: v for k, v in zip(kwargs.keys(), args)})[key]
+                return metric.compute(**{k: v for k, v in zip(kwargs.keys(), args)}, **fixed_kwargs)[key]
 
             return args_metric
 
         bootstrap_dict = {}
         for key in metric_keys:
             bs = bootstrap(
-                data=list(metric_inputs.values()),
-                statistic=build_args_metric(metric, key, **metric_inputs),
+                data=list(data_inputs.values()),
+                statistic=build_args_metric(metric, key, fixed_kwargs, **data_inputs),
                 paired=True,
                 vectorized=False,
                 confidence_level=confidence_level,
@@ -535,6 +540,7 @@ class Evaluator(ABC):
                 confidence_level,
                 n_resamples,
                 random_state,
+                metric_kwargs=self.METRIC_KWARGS,
             )
             for key in metric_keys:
                 bootstrap_dict[key]["score"] = result[key]
