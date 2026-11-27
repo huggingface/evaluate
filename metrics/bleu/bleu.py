@@ -13,6 +13,8 @@
 # limitations under the License.
 """ BLEU metric. """
 
+import math
+
 import datasets
 
 import evaluate
@@ -81,6 +83,14 @@ Examples:
     >>> results = bleu.compute(predictions=predictions, references=references)
     >>> print(results["bleu"])
     1.0
+
+    With several references, the brevity penalty uses the reference closest in length to the prediction:
+
+    >>> predictions = ["the cat sat on the mat today"]
+    >>> references = [["the cat sat on the mat today in the sun", "the cat sat"]]
+    >>> results = bleu.compute(predictions=predictions, references=references)
+    >>> print(results["reference_length"], round(results["brevity_penalty"], 4))
+    10 0.6514
 """
 
 
@@ -122,7 +132,17 @@ class Bleu(evaluate.Metric):
         score = compute_bleu(
             reference_corpus=references, translation_corpus=predictions, max_order=max_order, smooth=smooth
         )
-        (bleu, precisions, bp, ratio, translation_length, reference_length) = score
+        (_, precisions, _, _, translation_length, _) = score
+        # compute_bleu uses the *shortest* reference for the brevity penalty. Papineni et al. (2002),
+        # multi-bleu.perl, sacrebleu and NLTK use the reference whose length is closest to the
+        # prediction (ties go to the shorter one), so recompute the brevity penalty that way.
+        reference_length = sum(
+            min((abs(len(r) - len(p)), len(r)) for r in refs)[1] for refs, p in zip(references, predictions)
+        )
+        geo_mean = math.exp(sum(math.log(p) for p in precisions) / max_order) if min(precisions) > 0 else 0.0
+        ratio = translation_length / reference_length
+        bp = 1.0 if ratio > 1.0 else math.exp(1 - 1.0 / ratio)
+        bleu = geo_mean * bp
         return {
             "bleu": bleu,
             "precisions": precisions,
