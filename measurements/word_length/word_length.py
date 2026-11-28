@@ -84,10 +84,11 @@ class WordLength(evaluate.Measurement):
     def _download_and_prepare(self, dl_manager):
         import nltk
 
-        if NLTK_VERSION >= version.Version("3.9.0"):
-            nltk.download("punkt_tab")
-        else:
-            nltk.download("punkt")
+        # Try the tokenizer itself because some NLTK versions require extracted Punkt data.
+        try:
+            nltk.word_tokenize("")
+        except (LookupError, OSError):
+            nltk.download("punkt_tab" if NLTK_VERSION >= version.Version("3.9.0") else "punkt")
 
     def _compute(self, data, tokenizer=word_tokenize):
         """Returns the average word length of the input data"""

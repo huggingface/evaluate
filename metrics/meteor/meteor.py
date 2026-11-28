@@ -119,13 +119,21 @@ class Meteor(evaluate.Metric):
     def _download_and_prepare(self, dl_manager):
         import nltk
 
-        nltk.download("wordnet")
-        if NLTK_VERSION >= version.Version("3.9.0"):
-            nltk.download("punkt_tab")
-        elif NLTK_VERSION >= version.Version("3.6.5"):
-            nltk.download("punkt")
+        try:
+            nltk.data.find("corpora/wordnet/index.noun")
+        except LookupError:
+            nltk.download("wordnet")
+        if NLTK_VERSION >= version.Version("3.6.5"):
+            # Try the tokenizer itself because some NLTK versions require extracted Punkt data.
+            try:
+                nltk.word_tokenize("")
+            except (LookupError, OSError):
+                nltk.download("punkt_tab" if NLTK_VERSION >= version.Version("3.9.0") else "punkt")
         if NLTK_VERSION >= version.Version("3.6.6"):
-            nltk.download("omw-1.4")
+            try:
+                nltk.data.find("corpora/omw-1.4/")
+            except LookupError:
+                nltk.download("omw-1.4")
 
     def _compute(self, predictions, references, alpha=0.9, beta=3, gamma=0.5):
         multiple_refs = isinstance(references[0], list)
