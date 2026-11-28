@@ -14,6 +14,7 @@
 """ SARI metric."""
 
 from collections import Counter
+from functools import lru_cache
 
 import datasets
 import sacrebleu
@@ -227,6 +228,13 @@ def SARIsent(ssent, csent, rsents):
     return finalscore
 
 
+@lru_cache(maxsize=2)
+def _get_sacrebleu_tokenizer(tokenizer):
+    if version.parse(sacrebleu.__version__).major >= 2:
+        return sacrebleu.metrics.bleu._get_tokenizer(tokenizer)()
+    return sacrebleu.TOKENIZERS[tokenizer]()
+
+
 def normalize(sentence, lowercase: bool = True, tokenizer: str = "13a", return_str: bool = True):
 
     # Normalization is requried for the ASSET dataset (one of the primary
@@ -240,10 +248,7 @@ def normalize(sentence, lowercase: bool = True, tokenizer: str = "13a", return_s
         sentence = sentence.lower()
 
     if tokenizer in ["13a", "intl"]:
-        if version.parse(sacrebleu.__version__).major >= 2:
-            normalized_sent = sacrebleu.metrics.bleu._get_tokenizer(tokenizer)()(sentence)
-        else:
-            normalized_sent = sacrebleu.TOKENIZERS[tokenizer]()(sentence)
+        normalized_sent = _get_sacrebleu_tokenizer(tokenizer)(sentence)
     elif tokenizer == "moses":
         normalized_sent = sacremoses.MosesTokenizer().tokenize(sentence, return_str=True, escape=False)
     elif tokenizer == "penn":
