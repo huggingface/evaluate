@@ -14,10 +14,12 @@
 """ BERTScore metric. """
 
 import functools
+import warnings
 from contextlib import contextmanager
 
 import bert_score
 import datasets
+from datasets.fingerprint import Hasher
 from packaging import version
 
 import evaluate
@@ -149,8 +151,10 @@ class BERTScore(evaluate.Metric):
 
         if idf:
             idf_sents = [r for ref in references for r in ref]
+            idf_fingerprint = Hasher.hash(idf_sents)
         else:
             idf_sents = None
+            idf_fingerprint = None
 
         get_hash = bert_score.utils.get_hash
         scorer = bert_score.BERTScorer
@@ -199,6 +203,11 @@ class BERTScore(evaluate.Metric):
                     rescale_with_baseline=rescale_with_baseline,
                     baseline_path=baseline_path,
                 )
+            elif idf_sents is not None and self._cached_idf_fingerprint != idf_fingerprint:
+                with warnings.catch_warnings():
+                    warnings.filterwarnings("ignore", message=r"^Overwriting the previous importance weights\.$")
+                    self.cached_bertscorer.compute_idf(idf_sents)
+            self._cached_idf_fingerprint = idf_fingerprint
 
         (P, R, F) = self.cached_bertscorer.score(
             cands=predictions,
