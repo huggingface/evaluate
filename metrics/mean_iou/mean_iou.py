@@ -93,6 +93,13 @@ year = {2020}
 }"""
 
 
+def _count_labels(values, num_labels):
+    if num_labels > 0 and np.issubdtype(values.dtype, np.integer):
+        valid = (values >= 0) & (values < num_labels)
+        return np.bincount(values[valid].astype(np.intp, copy=False), minlength=num_labels)
+    return np.histogram(values, bins=num_labels, range=(0, num_labels - 1))[0]
+
+
 def intersect_and_union(
     pred_label,
     label,
@@ -141,16 +148,15 @@ def intersect_and_union(
         label = label - 1
         label[label == 254] = 255
 
-    mask = label != ignore_index
     mask = np.not_equal(label, ignore_index)
     pred_label = pred_label[mask]
-    label = np.array(label)[mask]
+    label = label[mask]
 
     intersect = pred_label[pred_label == label]
 
-    area_intersect = np.histogram(intersect, bins=num_labels, range=(0, num_labels - 1))[0]
-    area_pred_label = np.histogram(pred_label, bins=num_labels, range=(0, num_labels - 1))[0]
-    area_label = np.histogram(label, bins=num_labels, range=(0, num_labels - 1))[0]
+    area_intersect = _count_labels(intersect, num_labels)
+    area_pred_label = _count_labels(pred_label, num_labels)
+    area_label = _count_labels(label, num_labels)
 
     area_union = area_pred_label + area_label - area_intersect
 
