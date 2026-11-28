@@ -69,16 +69,11 @@ class DatasetColumnPair(list):
         return len(self.dataset)
 
     def __getitem__(self, i):
+        row = self.dataset[i]
         return {
-            self.first_key: self.dataset[i][self.first_col],
-            self.second_key: self.dataset[i][self.second_col] if self.second_col else None,
+            self.first_key: row[self.first_col],
+            self.second_key: row[self.second_col] if self.second_col else None,
         }
 
     def __iter__(self):
-        return (
-            {
-                self.first_key: self.dataset[i][self.first_col],
-                self.second_key: self.dataset[i][self.second_col] if self.second_col else None,
-            }
-            for i in range(len(self))
-        )
+        return (self[i] for i in range(len(self)))
