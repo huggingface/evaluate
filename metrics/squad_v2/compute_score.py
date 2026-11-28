@@ -17,6 +17,7 @@ import numpy as np
 
 
 ARTICLES_REGEX = re.compile(r"\b(a|an|the)\b", re.UNICODE)
+PUNCTUATION_TABLE = str.maketrans("", "", string.punctuation)
 
 OPTS = None
 
@@ -59,21 +60,8 @@ def make_qid_to_has_ans(dataset):
 
 def normalize_answer(s):
     """Lower text and remove punctuation, articles and extra whitespace."""
-
-    def remove_articles(text):
-        return ARTICLES_REGEX.sub(" ", text)
-
-    def white_space_fix(text):
-        return " ".join(text.split())
-
-    def remove_punc(text):
-        exclude = set(string.punctuation)
-        return "".join(ch for ch in text if ch not in exclude)
-
-    def lower(text):
-        return text.lower()
-
-    return white_space_fix(remove_articles(remove_punc(lower(s))))
+    text = s.lower().translate(PUNCTUATION_TABLE)
+    return " ".join(ARTICLES_REGEX.sub(" ", text).split())
 
 
 def get_tokens(s):
@@ -89,11 +77,15 @@ def compute_exact(a_gold, a_pred):
 def compute_f1(a_gold, a_pred):
     gold_toks = get_tokens(a_gold)
     pred_toks = get_tokens(a_pred)
-    common = collections.Counter(gold_toks) & collections.Counter(pred_toks)
-    num_same = sum(common.values())
+    return _token_f1(gold_toks, pred_toks, collections.Counter(pred_toks))
+
+
+def _token_f1(gold_toks, pred_toks, pred_counts):
     if len(gold_toks) == 0 or len(pred_toks) == 0:
         # If either is no-answer, then F1 is 1 if they agree, 0 otherwise
         return int(gold_toks == pred_toks)
+    common = collections.Counter(gold_toks) & pred_counts
+    num_same = sum(common.values())
     if num_same == 0:
         return 0
     precision = 1.0 * num_same / len(pred_toks)
@@ -109,17 +101,18 @@ def get_raw_scores(dataset, preds):
         for p in article["paragraphs"]:
             for qa in p["qas"]:
                 qid = qa["id"]
-                gold_answers = [t for t in qa["answers"]["text"] if normalize_answer(t)]
-                if not gold_answers:
-                    # For unanswerable questions, only correct answer is empty string
-                    gold_answers = [""]
                 if qid not in preds:
                     print(f"Missing prediction for {qid}")
                     continue
-                a_pred = preds[qid]
+                gold_answers = (normalize_answer(text) for text in qa["answers"]["text"])
+                # An empty answer is correct only when there are no valid gold answers.
+                gold_answers = [answer for answer in gold_answers if answer] or [""]
+                a_pred = normalize_answer(preds[qid])
+                pred_toks = a_pred.split()
+                pred_counts = collections.Counter(pred_toks)
                 # Take max over all gold answers
-                exact_scores[qid] = max(compute_exact(a, a_pred) for a in gold_answers)
-                f1_scores[qid] = max(compute_f1(a, a_pred) for a in gold_answers)
+                exact_scores[qid] = int(a_pred in gold_answers)
+                f1_scores[qid] = max(_token_f1(answer.split(), pred_toks, pred_counts) for answer in gold_answers)
     return exact_scores, f1_scores
 
 
