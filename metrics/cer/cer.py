@@ -177,4 +177,5 @@ class CER(evaluate.Metric):
                 incorrect += measures.substitutions + measures.deletions + measures.insertions
                 total += measures.substitutions + measures.deletions + measures.hits
 
-            return incorrect / total
+            # With no reference characters, JiWER counts only insertions.
+            return incorrect / total if total else incorrect

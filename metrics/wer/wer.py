@@ -115,4 +115,5 @@ class WER(evaluate.Metric):
                     measures = jiwer.process_words(reference, prediction)
                     incorrect += measures.substitutions + measures.deletions + measures.insertions
                     total += measures.substitutions + measures.deletions + measures.hits
-                return incorrect / total
+                # With no reference words, JiWER counts only insertions.
+                return incorrect / total if total else incorrect
