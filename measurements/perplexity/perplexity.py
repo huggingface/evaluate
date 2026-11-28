@@ -138,34 +138,41 @@ class Perplexity(evaluate.Measurement):
         else:
             max_tokenized_len = max_length
 
-        encodings = tokenizer(
-            data,
-            add_special_tokens=False,
-            padding=True,
-            truncation=True if max_tokenized_len else False,
-            max_length=max_tokenized_len,
-            return_tensors="pt",
-            return_attention_mask=True,
-        ).to(device)
-
-        encoded_texts = encodings["input_ids"]
-        attn_masks = encodings["attention_mask"]
-
-        # check that each input is long enough:
-        if add_start_token:
-            assert torch.all(torch.ge(attn_masks.sum(1), 1)), "Each input text must be at least one token long."
-        else:
-            assert torch.all(
-                torch.ge(attn_masks.sum(1), 2)
-            ), "When add_start_token=False, each input text must be at least two tokens long. Run with add_start_token=True if inputting strings of only one token, and remove all empty input strings."
+        tokenizer_kwargs = {
+            "add_special_tokens": False,
+            "padding": True,
+            "truncation": bool(max_tokenized_len),
+            "max_length": max_tokenized_len,
+            "return_tensors": "pt",
+            "return_attention_mask": True,
+        }
+        # Preserve the original token positions for left padding. Keep the full
+        # encoding on the CPU and move only the current batch to the device.
+        left_padded = tokenizer(data, **tokenizer_kwargs) if tokenizer.padding_side == "left" else None
 
         ppls = []
         loss_fct = CrossEntropyLoss(reduction="none")
 
-        for start_index in logging.tqdm(range(0, len(encoded_texts), batch_size)):
-            end_index = min(start_index + batch_size, len(encoded_texts))
-            encoded_batch = encoded_texts[start_index:end_index]
-            attn_mask = attn_masks[start_index:end_index]
+        for start_index in logging.tqdm(range(0, len(data), batch_size)):
+            batch_slice = slice(start_index, start_index + batch_size)
+            if left_padded is None:
+                encodings = tokenizer(data[batch_slice], **tokenizer_kwargs)
+                encoded_batch = encodings["input_ids"]
+                attn_mask = encodings["attention_mask"]
+            else:
+                encoded_batch = left_padded["input_ids"][batch_slice]
+                attn_mask = left_padded["attention_mask"][batch_slice]
+
+            token_counts = attn_mask.sum(1)
+            if add_start_token:
+                assert torch.all(token_counts >= 1), "Each input text must be at least one token long."
+            else:
+                assert torch.all(
+                    token_counts >= 2
+                ), "When add_start_token=False, each input text must be at least two tokens long. Run with add_start_token=True if inputting strings of only one token, and remove all empty input strings."
+
+            encoded_batch = encoded_batch.to(device)
+            attn_mask = attn_mask.to(device)
 
             if add_start_token:
                 bos_tokens_tensor = torch.tensor([[tokenizer.bos_token_id]] * encoded_batch.size(dim=0)).to(device)
