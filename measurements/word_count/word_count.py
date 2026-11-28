@@ -63,6 +63,19 @@ class WordCount(evaluate.Measurement):
     def _compute(self, data, max_vocab=None):
         """Returns the number of unique words in the input data"""
         count_vectorizer = CountVectorizer(max_features=max_vocab)
+        if max_vocab is None:
+            analyze = count_vectorizer.build_analyzer()
+            vocabulary = set()
+            word_count = 0
+            for document in data:
+                words = analyze(document)
+                word_count += len(words)
+                vocabulary.update(words)
+
+            if not vocabulary:
+                raise ValueError("empty vocabulary; perhaps the documents only contain stop words")
+            return {"total_word_count": count_vectorizer.dtype(word_count), "unique_words": len(vocabulary)}
+
         document_matrix = count_vectorizer.fit_transform(data)
         word_count = document_matrix.sum()
         unique_words = document_matrix.shape[1]
