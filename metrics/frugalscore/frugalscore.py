@@ -15,7 +15,13 @@
 
 import datasets
 import torch
-from transformers import AutoModelForSequenceClassification, AutoTokenizer, Trainer, TrainingArguments
+from transformers import (
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+    DataCollatorWithPadding,
+    Trainer,
+    TrainingArguments,
+)
 
 import evaluate
 
@@ -94,13 +100,14 @@ class FRUGALSCORE(evaluate.Metric):
             assert device in ["gpu", "cpu"], "device should be either gpu or cpu."
         else:
             device = "gpu" if torch.cuda.is_available() else "cpu"
+        cpu_flag = "use_cpu" if hasattr(TrainingArguments, "use_cpu") else "no_cuda"
         training_args = TrainingArguments(
             "trainer",
             fp16=(device == "gpu"),
             per_device_eval_batch_size=batch_size,
             report_to="all",
-            no_cuda=(device == "cpu"),
             log_level="warning",
+            **{cpu_flag: device == "cpu"},
         )
         dataset = {"sentence1": predictions, "sentence2": references}
         raw_datasets = datasets.Dataset.from_dict(dataset)
@@ -112,6 +119,6 @@ class FRUGALSCORE(evaluate.Metric):
 
         tokenized_datasets = raw_datasets.map(tokenize_function, batched=True)
         tokenized_datasets.remove_columns(["sentence1", "sentence2"])
-        trainer = Trainer(self.model, training_args, tokenizer=self.tokenizer)
+        trainer = Trainer(self.model, training_args, data_collator=DataCollatorWithPadding(self.tokenizer))
         predictions = trainer.predict(tokenized_datasets)
         return {"scores": list(predictions.predictions.squeeze(-1))}

@@ -1,3 +1,4 @@
 git+https://github.com/huggingface/evaluate@{COMMIT_PLACEHOLDER}
 torch
 transformers
+accelerate
